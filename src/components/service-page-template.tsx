@@ -1,0 +1,297 @@
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, Check, HelpCircle } from "lucide-react";
+import { PageHero } from "./page-hero";
+import { CTASection } from "./cta-section";
+import { allServices } from "@/lib/site-data";
+import type { ComponentType } from "react";
+
+export type ServicePageData = {
+  slug: string;
+  name: string;
+  heroTitle: { prefix: string; accent?: string; suffix?: string };
+  heroIntro: string;
+  valueProp: string;
+  problems: string[];
+  capabilities: { title: string; body: string }[];
+  workflow: string[];
+  process: { n: string; title: string; body: string }[];
+  technologies: string[];
+  faqs: { q: string; a: string }[];
+  related: string[];
+  icon?: ComponentType<{ className?: string }>;
+};
+
+export function ServicePageTemplate({ data }: { data: ServicePageData }) {
+  return (
+    <>
+      <PageHero
+        eyebrow="Service"
+        breadcrumbs={[
+          { label: "Home", to: "/" },
+          { label: "Services", to: "/services" },
+          { label: data.name },
+        ]}
+        title={
+          <>
+            {data.heroTitle.prefix}
+            {data.heroTitle.accent ? (
+              <span className="text-gradient">{data.heroTitle.accent}</span>
+            ) : null}
+            {data.heroTitle.suffix}
+          </>
+        }
+        intro={data.heroIntro}
+        primaryCta={{ label: "Start a Project", to: "/contact" }}
+        secondaryCta={{ label: "Book a Strategy Call", to: "/book-a-call" }}
+        visual={<ServiceHeroVisual name={data.name} />}
+      />
+
+      {/* Value prop */}
+      <section className="py-20 md:py-28">
+        <div className="container-page grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-5">
+            <p className="eyebrow mb-4">What you get</p>
+            <h2 className="fluid-h2">Clear value, delivered end to end.</h2>
+          </div>
+          <div className="lg:col-span-7">
+            <p className="text-lg text-ink-soft leading-relaxed">{data.valueProp}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Problems solved */}
+      <section className="py-20 md:py-28 bg-cream">
+        <div className="container-page">
+          <div className="max-w-2xl mb-12">
+            <p className="eyebrow mb-4">Problems we solve</p>
+            <h2 className="fluid-h2">If any of this sounds familiar…</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data.problems.map((p) => (
+              <div key={p} data-reveal className="rounded-2xl bg-white border border-black/5 p-6">
+                <div className="h-8 w-8 rounded-full bg-gradient-brand text-white flex items-center justify-center text-sm font-bold mb-3">
+                  !
+                </div>
+                <p className="text-ink leading-relaxed">{p}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Capabilities */}
+      <section className="py-20 md:py-28">
+        <div className="container-page">
+          <div className="max-w-2xl mb-12">
+            <p className="eyebrow mb-4">Capabilities included</p>
+            <h2 className="fluid-h2">Everything covered under one engagement.</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {data.capabilities.map((c) => (
+              <div
+                key={c.title}
+                data-reveal
+                className="group rounded-2xl border border-black/10 p-6 md:p-8 bg-white hover:shadow-[0_20px_50px_-20px_rgba(25,10,47,0.2)] transition-all"
+              >
+                <div className="flex items-start gap-4">
+                  <Check className="w-5 h-5 text-brand-red mt-1 shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">{c.title}</h3>
+                    <p className="text-ink-soft text-sm leading-relaxed">{c.body}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Visual workflow */}
+      <section className="py-20 md:py-28 section-dark grid-noise">
+        <div className="container-page">
+          <div className="max-w-2xl mb-12">
+            <p className="eyebrow text-white/60 mb-4">How it flows</p>
+            <h2 className="fluid-h2 text-white">A clear, connected workflow.</h2>
+          </div>
+          <div className="grid md:grid-cols-6 gap-4 relative">
+            <div className="hidden md:block absolute top-6 left-6 right-6 h-px bg-gradient-brand opacity-40" />
+            {data.workflow.map((step, i) => (
+              <div
+                key={i}
+                data-reveal
+                style={{ ["--reveal-delay" as string]: `${i * 100}ms` }}
+                className="relative"
+              >
+                <div className="h-12 w-12 rounded-full bg-ink border border-white/20 text-white flex items-center justify-center font-semibold relative z-10 mx-auto md:mx-0">
+                  <span
+                    className="absolute inset-0 rounded-full bg-gradient-brand opacity-40 blur animate-pulse-glow"
+                    style={{ animationDelay: `${i * 0.25}s` }}
+                  />
+                  <span className="relative">{i + 1}</span>
+                </div>
+                <p className="mt-4 text-sm text-white/85 font-semibold text-center md:text-left">
+                  {step}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section className="py-20 md:py-28">
+        <div className="container-page">
+          <div className="max-w-2xl mb-12">
+            <p className="eyebrow mb-4">Delivery process</p>
+            <h2 className="fluid-h2">How we deliver, step by step.</h2>
+          </div>
+          <div className="grid md:grid-cols-5 gap-4">
+            {data.process.map((s) => (
+              <div key={s.n} className="rounded-2xl bg-white border border-black/10 p-6">
+                <div className="text-sm font-bold text-gradient mb-3">{s.n}</div>
+                <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
+                <p className="text-sm text-ink-soft leading-relaxed">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Technologies */}
+      <section className="py-20 md:py-28 bg-lavender">
+        <div className="container-page">
+          <div className="max-w-2xl mb-10">
+            <p className="eyebrow mb-4">Technologies</p>
+            <h2 className="fluid-h2">Tools we reach for.</h2>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            {data.technologies.map((t) => (
+              <span
+                key={t}
+                className="px-4 py-2 rounded-full bg-white border border-black/10 text-sm font-medium text-ink"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Logicsify */}
+      <section className="py-20 md:py-28">
+        <div className="container-page grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-5">
+            <p className="eyebrow mb-4">Why Logicsify</p>
+            <h2 className="fluid-h2">Senior teams. Real outcomes.</h2>
+          </div>
+          <ul className="lg:col-span-7 space-y-4">
+            {[
+              "Strategy, design, engineering, and growth in one team.",
+              "Fixed-scope discovery so you always know what's next.",
+              "Clean, documented code owned by you from day one.",
+              "Analytics and reporting baked into every deliverable.",
+            ].map((r) => (
+              <li key={r} className="flex items-start gap-3 text-ink leading-relaxed">
+                <Check className="w-5 h-5 text-brand-red mt-0.5 shrink-0" />
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* FAQs */}
+      <section className="py-20 md:py-28 bg-cream">
+        <div className="container-page grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4">
+            <p className="eyebrow mb-4">FAQs</p>
+            <h2 className="fluid-h2">Answers, upfront.</h2>
+          </div>
+          <div className="lg:col-span-8 space-y-3">
+            {data.faqs.map((f, i) => (
+              <details
+                key={i}
+                className="group rounded-2xl bg-white border border-black/10 p-5 open:shadow-[0_10px_30px_-15px_rgba(25,10,47,0.2)]"
+              >
+                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none">
+                  <span className="text-lg font-semibold text-ink">{f.q}</span>
+                  <span className="h-8 w-8 rounded-full bg-lavender flex items-center justify-center shrink-0 group-open:bg-gradient-brand group-open:text-white transition">
+                    <HelpCircle className="w-4 h-4" />
+                  </span>
+                </summary>
+                <p className="mt-4 text-ink-soft leading-relaxed">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Related services */}
+      <section className="py-20 md:py-28">
+        <div className="container-page">
+          <div className="max-w-2xl mb-10">
+            <p className="eyebrow mb-4">Related services</p>
+            <h2 className="fluid-h2">Often paired with…</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data.related.map((slug) => {
+              const s = allServices.find((x) => x.slug === slug);
+              if (!s) return null;
+              return (
+                <Link
+                  to={s.route}
+                  key={slug}
+                  className="group rounded-2xl border border-black/10 p-6 bg-white hover:-translate-y-1 transition-all"
+                >
+                  <h3 className="font-semibold text-lg mb-1 group-hover:text-gradient transition">
+                    {s.name}
+                  </h3>
+                  <p className="text-sm text-ink-soft">{s.short}</p>
+                  <div className="mt-4 inline-flex items-center gap-1 text-sm text-ink font-semibold">
+                    Learn more <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <CTASection />
+    </>
+  );
+}
+
+function ServiceHeroVisual({ name }: { name: string }) {
+  return (
+    <div className="relative aspect-square max-w-[440px] mx-auto">
+      <div className="absolute inset-0 rounded-3xl border border-white/10 rotate-6" />
+      <div className="absolute inset-0 rounded-3xl border border-white/10 -rotate-3" />
+      <div className="absolute inset-0 rounded-3xl glass-card p-6 flex flex-col justify-between overflow-hidden">
+        <div className="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-gradient-brand opacity-25 blur-3xl animate-pulse-glow" />
+        <div className="relative">
+          <div className="flex gap-1.5">
+            <div className="h-2 w-2 rounded-full bg-white/30" />
+            <div className="h-2 w-2 rounded-full bg-white/30" />
+            <div className="h-2 w-2 rounded-full bg-white/30" />
+          </div>
+          <p className="mt-6 text-xs text-white/60 uppercase tracking-widest">
+            Currently deploying
+          </p>
+          <p className="text-white text-2xl font-semibold mt-2 leading-tight">{name}</p>
+        </div>
+        <div className="relative space-y-2">
+          <div className="h-1.5 rounded bg-white/10 overflow-hidden">
+            <div className="h-full w-4/5 bg-gradient-brand" />
+          </div>
+          <div className="h-1.5 rounded bg-white/10 overflow-hidden">
+            <div className="h-full w-3/5 bg-gradient-brand opacity-70" />
+          </div>
+          <div className="h-1.5 rounded bg-white/10 overflow-hidden">
+            <div className="h-full w-11/12 bg-gradient-brand opacity-50" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

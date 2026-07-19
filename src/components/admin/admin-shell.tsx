@@ -1,0 +1,340 @@
+import { Link, useLocation } from "@tanstack/react-router";
+import {
+  ArchiveRestore,
+  BookOpen,
+  BriefcaseBusiness,
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Gauge,
+  Globe2,
+  Images,
+  Layers3,
+  LogOut,
+  Menu as MenuIcon,
+  MessageSquareText,
+  Newspaper,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  UserCog,
+  Workflow,
+  ScrollText,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  adminLogout,
+  clearAdminToken,
+  getAdminToken,
+  getCurrentAdmin,
+  type Administrator,
+} from "@/lib/admin-api";
+import { AdminLoading } from "@/components/admin/admin-ui";
+import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
+
+const navigation = [
+  {
+    label: "Overview",
+    items: [{ label: "Dashboard", to: "/admin/dashboard", icon: Gauge }],
+  },
+  {
+    label: "Content",
+    items: [
+      { label: "Pages", to: "/admin/pages", icon: FileText },
+      { label: "Services", to: "/admin/services", icon: Sparkles },
+      { label: "Industries", to: "/admin/industries", icon: Globe2 },
+      { label: "Case Studies", to: "/admin/case-studies", icon: BriefcaseBusiness },
+      { label: "Insights", to: "/admin/insights", icon: Newspaper },
+      { label: "Careers", to: "/admin/careers", icon: BookOpen },
+      { label: "Testimonials", to: "/admin/testimonials", icon: MessageSquareText },
+      { label: "Team", to: "/admin/team", icon: Users },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { label: "Leads", to: "/admin/leads", icon: Layers3 },
+      { label: "Bookings", to: "/admin/bookings", icon: CalendarDays },
+      { label: "Media", to: "/admin/media", icon: Images },
+      { label: "Menus", to: "/admin/menus", icon: Workflow },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { label: "Settings", to: "/admin/settings", icon: Settings },
+      { label: "Administrators", to: "/admin/administrators", icon: ShieldCheck },
+      { label: "Recycle Bin", to: "/admin/trash", icon: ArchiveRestore },
+      { label: "Audit Logs", to: "/admin/audit-logs", icon: ScrollText },
+      { label: "My Account", to: "/admin/account", icon: UserCog },
+    ],
+  },
+];
+
+export function AdminShell({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  const [admin, setAdmin] = useState<Administrator | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<PublicSiteSettings>({});
+
+  useEffect(() => {
+    let alive = true;
+    if (!getAdminToken()) {
+      if (typeof window !== "undefined") window.location.replace("/admin/login");
+      return;
+    }
+    getCurrentAdmin()
+      .then((result) => {
+        if (alive) setAdmin(result);
+      })
+      .catch(() => {
+        clearAdminToken();
+        if (typeof window !== "undefined") window.location.replace("/admin/login");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => setMobileOpen(false), [location.pathname]);
+
+  useEffect(() => {
+    const onProfileUpdated = (event: Event) => {
+      const nextAdmin = (event as CustomEvent<Administrator>).detail;
+      if (nextAdmin) setAdmin(nextAdmin);
+    };
+    window.addEventListener("logicsify:admin-profile-updated", onProfileUpdated);
+    return () => window.removeEventListener("logicsify:admin-profile-updated", onProfileUpdated);
+  }, []);
+
+  useEffect(() => {
+    getPublicSiteSettings().then(setSiteSettings);
+  }, []);
+
+  const pageTitle = useMemo(() => {
+    for (const group of navigation) {
+      const match = group.items.find((item) => item.to === location.pathname);
+      if (match) return match.label;
+    }
+    return "Admin";
+  }, [location.pathname]);
+
+  async function logout() {
+    try {
+      await adminLogout();
+    } catch {
+      // Clear locally even when the API is unreachable.
+    }
+    clearAdminToken();
+    if (typeof window !== "undefined") window.location.replace("/admin/login");
+  }
+
+  if (loading || !admin) {
+    return (
+      <div className="min-h-dvh bg-slate-50">
+        <AdminLoading label={`Opening ${siteSettings.site_name || "Logicsify"} Admin…`} />
+      </div>
+    );
+  }
+
+  const sidebar = (
+    <aside
+      className={`flex h-full flex-col border-r border-white/10 bg-[#190A2F] text-white transition-all duration-300 ${collapsed ? "w-[88px]" : "w-[274px]"}`}
+    >
+      <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
+        <Link to="/admin/dashboard" className="flex items-center gap-3 overflow-hidden">
+          <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-brand font-display text-sm font-black text-white shadow-lg">
+            {siteSettings.admin_logo ? (
+              <img
+                src={siteSettings.admin_logo}
+                alt=""
+                className="h-full w-full object-contain p-1.5"
+              />
+            ) : (
+              (siteSettings.site_name || "Logicsify").charAt(0).toUpperCase()
+            )}
+          </span>
+          {!collapsed ? (
+            <div className="min-w-0">
+              <p className="truncate font-display text-base font-semibold">
+                {siteSettings.site_name || "Logicsify"}
+              </p>
+              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                Content Studio
+              </p>
+            </div>
+          ) : null}
+        </Link>
+        <button
+          className="hidden rounded-lg p-2 text-white/50 transition hover:bg-white/10 hover:text-white lg:block"
+          onClick={() => setCollapsed((value) => !value)}
+          aria-label="Toggle sidebar"
+        >
+          {collapsed ? (
+            <PanelLeftOpen className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
+        </button>
+        <button
+          className="rounded-lg p-2 text-white/60 hover:bg-white/10 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto px-3 py-5">
+        {navigation.map((group) => (
+          <div key={group.label} className="mb-6">
+            {!collapsed ? (
+              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                {group.label}
+              </p>
+            ) : null}
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const active = location.pathname === item.to;
+                const Icon = item.icon;
+                const hiddenForRole =
+                  (item.to === "/admin/administrators" && admin.role !== "super_admin") ||
+                  ((item.to === "/admin/settings" || item.to === "/admin/audit-logs") &&
+                    admin.role === "editor");
+                if (hiddenForRole) return null;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    title={collapsed ? item.label : undefined}
+                    className={`group flex h-11 items-center rounded-xl px-3 text-sm font-medium transition ${
+                      active
+                        ? "bg-white text-[#190A2F] shadow-lg"
+                        : "text-white/65 hover:bg-white/10 hover:text-white"
+                    } ${collapsed ? "justify-center" : "gap-3"}`}
+                  >
+                    <Icon
+                      className={`h-[18px] w-[18px] shrink-0 ${active ? "text-[#FE3434]" : ""}`}
+                    />
+                    {!collapsed ? <span>{item.label}</span> : null}
+                    {!collapsed && active ? (
+                      <ChevronRight className="ml-auto h-4 w-4 text-[#FE3434]" />
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      <div className="border-t border-white/10 p-3">
+        <a
+          href={siteSettings.site_url || "/"}
+          target="_blank"
+          rel="noreferrer"
+          className={`flex h-11 items-center rounded-xl px-3 text-sm text-white/60 transition hover:bg-white/10 hover:text-white ${collapsed ? "justify-center" : "gap-3"}`}
+        >
+          <Globe2 className="h-[18px] w-[18px]" />
+          {!collapsed ? "View website" : null}
+        </a>
+      </div>
+    </aside>
+  );
+
+  return (
+    <div className="min-h-dvh bg-[#f5f6fa] text-slate-900">
+      <div className="fixed inset-y-0 left-0 z-50 hidden lg:block">{sidebar}</div>
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            className="absolute inset-0 bg-[#190A2F]/55"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="relative h-full w-[274px]">{sidebar}</div>
+        </div>
+      ) : null}
+
+      <div
+        className={`min-h-dvh transition-all duration-300 ${collapsed ? "lg:pl-[88px]" : "lg:pl-[274px]"}`}
+      >
+        <header className="sticky top-0 z-40 flex h-20 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl md:px-7">
+          <div className="flex items-center gap-3">
+            <button
+              className="rounded-xl border border-slate-200 p-2.5 text-slate-600 lg:hidden"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+            >
+              <MenuIcon className="h-5 w-5" />
+            </button>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                Admin Panel
+              </p>
+              <p className="font-display text-lg font-semibold text-[#190A2F]">{pageTitle}</p>
+            </div>
+          </div>
+
+          <div className="relative">
+            <button
+              onClick={() => setProfileOpen((value) => !value)}
+              className="flex items-center gap-3 rounded-2xl border border-transparent px-2 py-1.5 transition hover:border-slate-200 hover:bg-slate-50"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-sm font-bold text-white">
+                {admin.name
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </span>
+              <span className="hidden text-left sm:block">
+                <span className="block text-sm font-semibold text-[#190A2F]">{admin.name}</span>
+                <span className="block text-[11px] capitalize text-slate-400">
+                  {admin.role.replaceAll("_", " ")}
+                </span>
+              </span>
+              <ChevronDown className="hidden h-4 w-4 text-slate-400 sm:block" />
+            </button>
+            {profileOpen ? (
+              <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                <div className="border-b border-slate-100 px-3 py-2.5">
+                  <p className="truncate text-sm font-semibold text-[#190A2F]">{admin.email}</p>
+                  <p className="mt-0.5 text-xs capitalize text-slate-400">
+                    {admin.role.replaceAll("_", " ")}
+                  </p>
+                </div>
+                <Link
+                  to="/admin/account"
+                  onClick={() => setProfileOpen(false)}
+                  className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#190A2F] hover:bg-slate-50"
+                >
+                  <UserCog className="h-4 w-4" /> My account
+                </Link>
+                <button
+                  onClick={logout}
+                  className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" /> Sign out
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </header>
+
+        <main className="p-4 md:p-7 xl:p-9">{children}</main>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,1283 @@
+import {
+  Archive,
+  CheckSquare2,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Copy,
+  Edit3,
+  Eye,
+  FilePlus2,
+  History,
+  Image as ImageIcon,
+  Monitor,
+  Redo2,
+  Undo2,
+  Loader2,
+  Plus,
+  RotateCcw,
+  Search,
+  Star,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import {
+  bulkContent,
+  createContent,
+  deleteContent,
+  duplicateContent,
+  getContentRevisions,
+  listContent,
+  listMedia,
+  restoreContentRevision,
+  updateContent,
+  type ContentItem,
+  type ContentSection,
+  type MediaItem,
+} from "@/lib/admin-api";
+import {
+  AdminButton,
+  AdminCard,
+  AdminLoading,
+  AdminModal,
+  AdminPageHeader,
+  EmptyState,
+  FieldLabel,
+  StatusBadge,
+  adminInputClass,
+  adminTextareaClass,
+} from "@/components/admin/admin-ui";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { NativePageVisualEditor } from "@/components/cms/native-page-visual-editor";
+import type { CmsNativeContent, VisualAdminPage } from "@/lib/cms-visual";
+import { useUndoHistory } from "@/lib/use-undo-history";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { contentPublicPath, isVisualEditableType, visualEditorPath } from "@/lib/content-routes";
+
+const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => ({
+  content_type: type,
+  title: "",
+  slug: "",
+  status: "draft",
+  featured: false,
+  excerpt: "",
+  featured_image: "",
+  content_json: { body: "", sections: [], category: "", tags: [] },
+  seo_json: { title: "", description: "", canonical: "", noindex: false, og_image: "" },
+  published_at: "",
+  sort_order: 0,
+});
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function ContentManagerPage({
+  type,
+  title,
+  singular,
+  description,
+}: {
+  type: ContentItem["content_type"];
+  title: string;
+  singular: string;
+  description: string;
+}) {
+  const [items, setItems] = useState<ContentItem[]>([]);
+  const [meta, setMeta] = useState<{
+    page: number;
+    pages: number;
+    total: number;
+    counters: Record<string, number>;
+  }>({
+    page: 1,
+    pages: 1,
+    total: 0,
+    counters: {},
+  });
+  const [status, setStatus] = useState("all");
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editing, setEditing] = useState<Partial<ContentItem>>(emptyItem(type));
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await listContent({ type, status, search, page, perPage: 25 });
+      setItems(result.data);
+      setMeta({
+        page: result.meta.page || 1,
+        pages: result.meta.pages || 1,
+        total: result.meta.total || 0,
+        counters: result.meta.counters || {},
+      });
+      setSelected([]);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : `Could not load ${title.toLowerCase()}.`,
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, status, title, type]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  function openNew() {
+    setEditing(emptyItem(type));
+    setEditorOpen(true);
+  }
+
+  function openEdit(item: ContentItem) {
+    setEditing({
+      ...item,
+      featured: Boolean(item.featured),
+      content_json: {
+        body: "",
+        sections: [],
+        category: "",
+        tags: [],
+        ...(item.content_json || {}),
+      },
+      seo_json: {
+        title: "",
+        description: "",
+        canonical: "",
+        noindex: false,
+        og_image: "",
+        ...(item.seo_json || {}),
+      },
+    });
+    setEditorOpen(true);
+  }
+
+  async function remove(id: number) {
+    if (!window.confirm(`Move this ${singular.toLowerCase()} to the recycle bin?`)) return;
+    try {
+      await deleteContent(id);
+      toast.success(`${singular} moved to the recycle bin.`);
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete the item.");
+    }
+  }
+
+  async function duplicate(id: number) {
+    try {
+      await duplicateContent(id);
+      toast.success(`${singular} duplicated as a draft.`);
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not duplicate the item.");
+    }
+  }
+
+  async function runBulk(action: string) {
+    if (!selected.length) return;
+    if (
+      action === "delete" &&
+      !window.confirm(`Move ${selected.length} selected items to the recycle bin?`)
+    )
+      return;
+    try {
+      await bulkContent(selected, action);
+      toast.success(`${selected.length} item${selected.length === 1 ? "" : "s"} updated.`);
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Bulk action failed.");
+    }
+  }
+
+  const allChecked = items.length > 0 && items.every((item) => selected.includes(item.id));
+  const counters = meta.counters || {};
+
+  return (
+    <AdminShell>
+      <AdminPageHeader
+        eyebrow="Content Management"
+        title={title}
+        description={description}
+        actions={
+          <AdminButton onClick={openNew}>
+            <FilePlus2 className="h-4 w-4" /> Add {singular}
+          </AdminButton>
+        }
+      />
+
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        {[
+          ["all", "All", meta.total],
+          ["published", "Published", counters.published || 0],
+          ["draft", "Draft", counters.draft || 0],
+          ["scheduled", "Scheduled", counters.scheduled || 0],
+          ["archived", "Archived", counters.archived || 0],
+        ].map(([value, label, count]) => (
+          <button
+            key={String(value)}
+            onClick={() => {
+              setStatus(String(value));
+              setPage(1);
+            }}
+            className={`rounded-2xl border p-4 text-left transition ${
+              status === value
+                ? "border-[#FE3434]/30 bg-white shadow-[0_15px_40px_-30px_rgba(254,52,52,0.7)]"
+                : "border-slate-200 bg-white hover:border-slate-300"
+            }`}
+          >
+            <p className="text-2xl font-semibold text-[#190A2F]">{Number(count)}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+              {String(label)}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      <AdminCard>
+        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSearch(searchInput.trim());
+              setPage(1);
+            }}
+            className="flex w-full max-w-lg gap-2"
+          >
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder={`Search ${title.toLowerCase()}…`}
+                className={`${adminInputClass} pl-10`}
+              />
+            </div>
+            <AdminButton type="submit" variant="secondary">
+              Search
+            </AdminButton>
+            {search ? (
+              <AdminButton
+                variant="ghost"
+                onClick={() => {
+                  setSearch("");
+                  setSearchInput("");
+                  setPage(1);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </AdminButton>
+            ) : null}
+          </form>
+
+          {selected.length ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 p-2">
+              <span className="px-2 text-xs font-semibold text-slate-500">
+                {selected.length} selected
+              </span>
+              <select
+                defaultValue=""
+                onChange={(event) => {
+                  if (event.target.value) void runBulk(event.target.value);
+                  event.currentTarget.value = "";
+                }}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold outline-none"
+              >
+                <option value="">Bulk actions</option>
+                <option value="published">Publish</option>
+                <option value="draft">Move to draft</option>
+                <option value="archived">Archive</option>
+                <option value="featured">Mark featured</option>
+                <option value="unfeatured">Remove featured</option>
+                <option value="delete">Move to recycle bin</option>
+              </select>
+            </div>
+          ) : null}
+        </div>
+
+        {loading ? (
+          <AdminLoading label={`Loading ${title.toLowerCase()}…`} />
+        ) : !items.length ? (
+          <EmptyState
+            title={`${title} are coming soon`}
+            description={`No ${title.toLowerCase()} match the current filters.`}
+            action={
+              <AdminButton onClick={openNew}>
+                <Plus className="h-4 w-4" /> Add {singular}
+              </AdminButton>
+            }
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[920px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="w-14 px-5 py-4">
+                    <input
+                      type="checkbox"
+                      checked={allChecked}
+                      onChange={(event) =>
+                        setSelected(event.target.checked ? items.map((item) => item.id) : [])
+                      }
+                      className="h-4 w-4 cursor-pointer accent-[#FE3434]"
+                      aria-label="Select all"
+                    />
+                  </th>
+                  <th className="px-4 py-4">{singular}</th>
+                  <th className="px-4 py-4">Status</th>
+                  <th className="px-4 py-4">Featured</th>
+                  <th className="px-4 py-4">Updated</th>
+                  <th className="px-5 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => {
+                  const checked = selected.includes(item.id);
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`border-b border-slate-100 transition hover:bg-slate-50/70 ${checked ? "bg-[#FE3434]/[0.035]" : ""}`}
+                    >
+                      <td className="px-5 py-4">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(event) =>
+                            setSelected((current) =>
+                              event.target.checked
+                                ? Array.from(new Set([...current, item.id]))
+                                : current.filter((id) => id !== item.id),
+                            )
+                          }
+                          className="h-4 w-4 cursor-pointer accent-[#FE3434]"
+                          aria-label={`Select ${item.title}`}
+                        />
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-12 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                            {item.featured_image ? (
+                              <img
+                                src={item.featured_image}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="h-4 w-4 text-slate-300" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <button
+                              onClick={() => openEdit(item)}
+                              className="block max-w-[420px] truncate text-left text-sm font-semibold text-[#190A2F] hover:text-[#FE3434]"
+                            >
+                              {item.title}
+                            </button>
+                            <p className="mt-1 max-w-[420px] truncate text-xs text-slate-400">
+                              /{item.slug}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <StatusBadge status={item.status} />
+                      </td>
+                      <td className="px-4 py-4">
+                        {item.featured ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+                            <Star className="h-4 w-4 fill-current" /> Featured
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-300">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-xs text-slate-500">
+                        {item.updated_at
+                          ? new Date(item.updated_at.replace(" ", "T")).toLocaleString()
+                          : "—"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() => openEdit(item)}
+                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#190A2F]"
+                            title="Edit"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </button>
+                          {contentPublicPath(item.content_type, item.slug) ? (
+                            <a
+                              href={contentPublicPath(item.content_type, item.slug) || "/"}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#190A2F]"
+                              title="Preview"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </a>
+                          ) : null}
+                          <button
+                            onClick={() => void duplicate(item.id)}
+                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#190A2F]"
+                            title="Duplicate"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => void remove(item.id)}
+                            className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between border-t border-slate-200 px-5 py-4">
+          <p className="text-xs text-slate-400">
+            Showing {items.length} of {meta.total} {title.toLowerCase()}
+          </p>
+          <div className="flex items-center gap-2">
+            <AdminButton
+              variant="secondary"
+              disabled={page <= 1}
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+            >
+              <ChevronLeft className="h-4 w-4" /> Previous
+            </AdminButton>
+            <span className="px-2 text-xs font-semibold text-slate-500">
+              Page {meta.page} of {meta.pages}
+            </span>
+            <AdminButton
+              variant="secondary"
+              disabled={page >= meta.pages}
+              onClick={() => setPage((value) => value + 1)}
+            >
+              Next <ChevronRight className="h-4 w-4" />
+            </AdminButton>
+          </div>
+        </div>
+      </AdminCard>
+
+      <ContentEditor
+        open={editorOpen}
+        item={editing}
+        singular={singular}
+        onClose={() => setEditorOpen(false)}
+        onSaved={async (saved) => {
+          setEditing(saved);
+          await load();
+        }}
+      />
+    </AdminShell>
+  );
+}
+
+function ContentEditor({
+  open,
+  item,
+  singular,
+  onClose,
+  onSaved,
+}: {
+  open: boolean;
+  item: Partial<ContentItem>;
+  singular: string;
+  onClose: () => void;
+  onSaved: (saved: ContentItem) => Promise<void>;
+}) {
+  const {
+    value: historyValue,
+    change: changeHistory,
+    reset: resetHistory,
+    undo: undoHistory,
+    redo: redoHistory,
+    canUndo,
+    canRedo,
+  } = useUndoHistory<Partial<ContentItem>>(20);
+  const form = historyValue || item;
+  const formRef = useRef<Partial<ContentItem>>(form);
+  formRef.current = form;
+  const setForm = useCallback(
+    (next: Partial<ContentItem> | ((current: Partial<ContentItem>) => Partial<ContentItem>)) => {
+      const resolved = typeof next === "function" ? next(formRef.current) : next;
+      formRef.current = resolved;
+      changeHistory(resolved);
+    },
+    [changeHistory],
+  );
+  const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState<"visual" | "content" | "seo" | "history">(
+    isVisualEditableType(item.content_type) ? "visual" : "content",
+  );
+  const [revisions, setRevisions] = useState<
+    Array<{ id: number; snapshot: ContentItem; created_at: string }>
+  >([]);
+  const [loadingRevisions, setLoadingRevisions] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
+
+  useEffect(() => {
+    formRef.current = item;
+    resetHistory(item);
+    setTab(isVisualEditableType(item.content_type) ? "visual" : "content");
+    setRevisions([]);
+  }, [item, open, resetHistory]);
+
+  const contentJson = (form.content_json || {}) as NonNullable<ContentItem["content_json"]>;
+  const seoJson = (form.seo_json || {}) as NonNullable<ContentItem["seo_json"]>;
+  const sections = (contentJson.sections || []) as ContentSection[];
+
+  function setField<K extends keyof ContentItem>(key: K, value: ContentItem[K]) {
+    setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateContentJson(key: string, value: unknown) {
+    setForm((current) => ({
+      ...current,
+      content_json: { ...(current.content_json || {}), [key]: value },
+    }));
+  }
+
+  function updateSeo(key: string, value: unknown) {
+    setForm((current) => ({
+      ...current,
+      seo_json: { ...(current.seo_json || {}), [key]: value },
+    }));
+  }
+
+  async function save() {
+    if (!form.title?.trim()) {
+      toast.error("Title is required.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        slug: form.slug || slugify(form.title),
+        featured: Boolean(form.featured),
+        sort_order: Number(form.sort_order || 0),
+      };
+      const saved = form.id ? await updateContent(form.id, payload) : await createContent(payload);
+      formRef.current = saved;
+      resetHistory(saved);
+      toast.success(`${singular} saved successfully. You can continue editing.`);
+      await onSaved(saved);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : `Could not save ${singular.toLowerCase()}.`,
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const loadRevisions = useCallback(async () => {
+    if (!form.id) return;
+    setLoadingRevisions(true);
+    try {
+      setRevisions(await getContentRevisions(form.id));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load revisions.");
+    } finally {
+      setLoadingRevisions(false);
+    }
+  }, [form.id]);
+
+  useEffect(() => {
+    if (tab === "history" && form.id && !revisions.length) void loadRevisions();
+  }, [tab, form.id, revisions.length, loadRevisions]);
+
+  async function restore(revisionId: number) {
+    if (
+      !form.id ||
+      !window.confirm("Restore this revision? The current version will be saved in history.")
+    )
+      return;
+    try {
+      const restored = await restoreContentRevision(form.id, revisionId);
+      formRef.current = restored;
+      resetHistory(restored);
+      toast.success("Revision restored.");
+      await loadRevisions();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not restore revision.");
+    }
+  }
+
+  return (
+    <>
+      <AdminModal
+        open={open}
+        onClose={onClose}
+        title={form.id ? `Edit ${singular}` : `Add ${singular}`}
+        description="Save stays on the same screen, so you can continue editing after updates."
+        width={isVisualEditableType(form.content_type) ? "max-w-[96vw]" : "max-w-6xl"}
+      >
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+          {[
+            ...(isVisualEditableType(form.content_type)
+              ? [["visual", "Visual Page Editor", Monitor] as const]
+              : []),
+            ["content", "Content & Page Settings", Edit3] as const,
+            ["seo", "SEO & Sharing", Search] as const,
+            ["history", "Revision History", History] as const,
+          ].map(([value, label, Icon]) => (
+            <button
+              key={String(value)}
+              onClick={() => setTab(value as typeof tab)}
+              disabled={value === "history" && !form.id}
+              className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:opacity-40 ${tab === value ? "bg-[#190A2F] text-white" : "bg-slate-100 text-slate-500 hover:text-[#190A2F]"}`}
+            >
+              <Icon className="h-4 w-4" /> {String(label)}
+            </button>
+          ))}
+          <span className="mx-1 h-10 w-px bg-slate-200" />
+          <button
+            type="button"
+            onClick={undoHistory}
+            disabled={!canUndo}
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-sm font-semibold text-slate-500 transition hover:text-[#190A2F] disabled:cursor-not-allowed disabled:opacity-35"
+            title="Undo"
+          >
+            <Undo2 className="h-4 w-4" /> Undo
+          </button>
+          <button
+            type="button"
+            onClick={redoHistory}
+            disabled={!canRedo}
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-sm font-semibold text-slate-500 transition hover:text-[#190A2F] disabled:cursor-not-allowed disabled:opacity-35"
+            title="Redo"
+          >
+            <Redo2 className="h-4 w-4" /> Redo
+          </button>
+        </div>
+
+        {tab === "visual" ? (
+          form.id ? (
+            <NativePageVisualEditor
+              page={
+                {
+                  id: form.id,
+                  title: form.title || "Untitled page",
+                  slug: form.slug || "",
+                  full_path:
+                    visualEditorPath(form.content_type || "page", form.slug || "")?.replace(
+                      /^\//,
+                      "",
+                    ) || "",
+                  status: form.status,
+                  updated_at: form.updated_at,
+                  native_content:
+                    (form.content_json?.native_content as CmsNativeContent | undefined) || {},
+                } satisfies VisualAdminPage
+              }
+              onChange={(page) => {
+                setForm((current) => ({
+                  ...current,
+                  content_json: {
+                    ...(current.content_json || {}),
+                    native_content: page.native_content || {},
+                  },
+                }));
+              }}
+              setNotice={(notice) => {
+                if (!notice) return;
+                if (notice.type === "success") toast.success(notice.text);
+                else toast.error(notice.text);
+              }}
+            />
+          ) : (
+            <AdminCard className="p-10 text-center">
+              <Monitor className="mx-auto h-10 w-10 text-slate-300" />
+              <h3 className="mt-4 text-lg font-semibold text-[#190A2F]">Save the page first</h3>
+              <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
+                Create the page once, then reopen it to edit the real Logicsify design visually.
+              </p>
+            </AdminCard>
+          )
+        ) : null}
+
+        {tab === "content" ? (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="space-y-5">
+              <div>
+                <FieldLabel>Title</FieldLabel>
+                <input
+                  value={form.title || ""}
+                  onChange={(event) => {
+                    const title = event.target.value;
+                    setForm((current) => ({
+                      ...current,
+                      title,
+                      slug: current.id || current.slug ? current.slug : slugify(title),
+                    }));
+                  }}
+                  className={`${adminInputClass} h-14 text-lg font-semibold`}
+                  placeholder={`${singular} title`}
+                />
+              </div>
+              <div>
+                <FieldLabel>Slug</FieldLabel>
+                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 pl-3 text-sm text-slate-400 focus-within:border-[#FE3434] focus-within:ring-4 focus-within:ring-[#FE3434]/10">
+                  <span>/</span>
+                  <input
+                    value={form.slug || ""}
+                    onChange={(event) => setField("slug", slugify(event.target.value))}
+                    className="h-11 flex-1 bg-transparent px-1.5 text-[#190A2F] outline-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <FieldLabel>Excerpt / Summary</FieldLabel>
+                <textarea
+                  rows={3}
+                  value={form.excerpt || ""}
+                  onChange={(event) => setField("excerpt", event.target.value)}
+                  className={adminTextareaClass}
+                  placeholder="A concise summary used on cards and search listings."
+                />
+              </div>
+              <div>
+                <FieldLabel>Main Body</FieldLabel>
+                <RichTextEditor
+                  value={String(contentJson.body || "")}
+                  onChange={(value) => updateContentJson("body", value)}
+                />
+              </div>
+
+              <SectionBuilder
+                sections={sections}
+                onChange={(next) => updateContentJson("sections", next)}
+                onPickMedia={() => setMediaOpen(true)}
+              />
+            </div>
+
+            <div className="space-y-5">
+              <AdminCard className="p-5">
+                <h3 className="mb-4 text-sm font-semibold text-[#190A2F]">Publishing</h3>
+                <div className="space-y-4">
+                  <div>
+                    <FieldLabel>Status</FieldLabel>
+                    <select
+                      value={form.status || "draft"}
+                      onChange={(event) =>
+                        setField("status", event.target.value as ContentItem["status"])
+                      }
+                      className={adminInputClass}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                      <option value="scheduled">Scheduled</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+                  {form.status === "scheduled" ? (
+                    <div>
+                      <FieldLabel>Publish date and time</FieldLabel>
+                      <input
+                        type="datetime-local"
+                        value={
+                          form.published_at ? form.published_at.replace(" ", "T").slice(0, 16) : ""
+                        }
+                        onChange={(event) =>
+                          setField("published_at", event.target.value.replace("T", " "))
+                        }
+                        className={adminInputClass}
+                      />
+                    </div>
+                  ) : null}
+                  <div>
+                    <FieldLabel>Sort order</FieldLabel>
+                    <input
+                      type="number"
+                      value={Number(form.sort_order || 0)}
+                      onChange={(event) => setField("sort_order", Number(event.target.value))}
+                      className={adminInputClass}
+                    />
+                  </div>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(form.featured)}
+                      onChange={(event) => setField("featured", event.target.checked)}
+                      className="h-4 w-4 accent-[#FE3434]"
+                    />
+                    <span>
+                      <span className="block text-sm font-semibold text-[#190A2F]">Featured</span>
+                      <span className="block text-xs text-slate-400">
+                        Prioritize this item in website listings.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </AdminCard>
+
+              <AdminCard className="p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-[#190A2F]">Featured image</h3>
+                  <button
+                    onClick={() => setMediaOpen(true)}
+                    className="text-xs font-semibold text-[#FE3434]"
+                  >
+                    Media library
+                  </button>
+                </div>
+                <div className="mb-3 aspect-[16/9] overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50">
+                  {form.featured_image ? (
+                    <img
+                      src={form.featured_image}
+                      alt=""
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center text-slate-300">
+                      <ImageIcon className="h-7 w-7" />
+                    </div>
+                  )}
+                </div>
+                <input
+                  value={form.featured_image || ""}
+                  onChange={(event) => setField("featured_image", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="https://…"
+                />
+                <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                  Recommended website ratio: 1672 × 941. The frontend uses contain/crop rules
+                  appropriate to each placement.
+                </p>
+              </AdminCard>
+
+              <AdminCard className="p-5">
+                <h3 className="mb-4 text-sm font-semibold text-[#190A2F]">Classification</h3>
+                <div className="space-y-4">
+                  <div>
+                    <FieldLabel>Category</FieldLabel>
+                    <input
+                      value={String(contentJson.category || "")}
+                      onChange={(event) => updateContentJson("category", event.target.value)}
+                      className={adminInputClass}
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Tags</FieldLabel>
+                    <input
+                      value={Array.isArray(contentJson.tags) ? contentJson.tags.join(", ") : ""}
+                      onChange={(event) =>
+                        updateContentJson(
+                          "tags",
+                          event.target.value
+                            .split(",")
+                            .map((tag) => tag.trim())
+                            .filter(Boolean),
+                        )
+                      }
+                      className={adminInputClass}
+                      placeholder="AI, Automation, SaaS"
+                    />
+                  </div>
+                </div>
+              </AdminCard>
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "seo" ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <AdminCard className="space-y-5 p-5">
+              <h3 className="text-base font-semibold text-[#190A2F]">Search metadata</h3>
+              <div>
+                <FieldLabel>SEO title</FieldLabel>
+                <input
+                  value={seoJson.title || ""}
+                  onChange={(event) => updateSeo("title", event.target.value)}
+                  className={adminInputClass}
+                  placeholder={form.title || "Page title"}
+                />
+              </div>
+              <div>
+                <FieldLabel>Meta description</FieldLabel>
+                <textarea
+                  rows={5}
+                  value={seoJson.description || ""}
+                  onChange={(event) => updateSeo("description", event.target.value)}
+                  className={adminTextareaClass}
+                  placeholder={form.excerpt || "Describe this page for search engines."}
+                />
+              </div>
+              <div>
+                <FieldLabel>Canonical URL</FieldLabel>
+                <input
+                  value={seoJson.canonical || ""}
+                  onChange={(event) => updateSeo("canonical", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="https://logicsify.com/…"
+                />
+              </div>
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3">
+                <input
+                  type="checkbox"
+                  checked={Boolean(seoJson.noindex)}
+                  onChange={(event) => updateSeo("noindex", event.target.checked)}
+                  className="h-4 w-4 accent-[#FE3434]"
+                />
+                <span>
+                  <span className="block text-sm font-semibold text-[#190A2F]">
+                    Hide from search engines
+                  </span>
+                  <span className="block text-xs text-slate-400">
+                    Adds a noindex directive to this item.
+                  </span>
+                </span>
+              </label>
+            </AdminCard>
+            <AdminCard className="space-y-5 p-5">
+              <h3 className="text-base font-semibold text-[#190A2F]">Social sharing</h3>
+              <div>
+                <FieldLabel>Open Graph image</FieldLabel>
+                <input
+                  value={seoJson.og_image || ""}
+                  onChange={(event) => updateSeo("og_image", event.target.value)}
+                  className={adminInputClass}
+                  placeholder={form.featured_image || "https://…"}
+                />
+              </div>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                {seoJson.og_image || form.featured_image ? (
+                  <img
+                    src={seoJson.og_image || form.featured_image || ""}
+                    alt=""
+                    className="aspect-[1.91/1] w-full object-cover"
+                  />
+                ) : (
+                  <div className="grid aspect-[1.91/1] place-items-center text-slate-300">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="p-4">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                    logicsify.com
+                  </p>
+                  <p className="mt-1 font-semibold text-[#190A2F]">
+                    {seoJson.title || form.title || "Page title"}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                    {seoJson.description || form.excerpt || "Page description will appear here."}
+                  </p>
+                </div>
+              </div>
+            </AdminCard>
+          </div>
+        ) : null}
+
+        {tab === "history" ? (
+          <AdminCard>
+            {loadingRevisions ? (
+              <AdminLoading label="Loading revisions…" />
+            ) : !revisions.length ? (
+              <EmptyState
+                title="No revisions yet"
+                description="A revision is stored whenever an existing item is updated."
+              />
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {revisions.map((revision) => (
+                  <div key={revision.id} className="flex items-center justify-between gap-4 p-5">
+                    <div>
+                      <p className="font-semibold text-[#190A2F]">
+                        {revision.snapshot.title || singular}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        Saved {new Date(revision.created_at.replace(" ", "T")).toLocaleString()}
+                      </p>
+                    </div>
+                    <AdminButton variant="secondary" onClick={() => void restore(revision.id)}>
+                      <RotateCcw className="h-4 w-4" /> Restore
+                    </AdminButton>
+                  </div>
+                ))}
+              </div>
+            )}
+          </AdminCard>
+        ) : null}
+
+        <div className="sticky bottom-0 mt-6 flex flex-wrap justify-between gap-3 border-t border-slate-200 bg-white/95 pt-5 backdrop-blur">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            {form.id ? (
+              <>
+                <Clock3 className="h-4 w-4" /> Existing content item #{form.id}
+              </>
+            ) : (
+              <>
+                <CheckSquare2 className="h-4 w-4" /> New content item
+              </>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <AdminButton variant="secondary" onClick={onClose}>
+              Cancel
+            </AdminButton>
+            <AdminButton onClick={() => void save()} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save {singular}
+            </AdminButton>
+          </div>
+        </div>
+      </AdminModal>
+
+      <MediaPicker
+        open={mediaOpen}
+        onClose={() => setMediaOpen(false)}
+        onSelect={(url) => {
+          setField("featured_image", url);
+          setMediaOpen(false);
+        }}
+      />
+    </>
+  );
+}
+
+function SectionBuilder({
+  sections,
+  onChange,
+  onPickMedia,
+}: {
+  sections: ContentSection[];
+  onChange: (sections: ContentSection[]) => void;
+  onPickMedia: () => void;
+}) {
+  function update(index: number, key: keyof ContentSection, value: string) {
+    onChange(
+      sections.map((section, sectionIndex) =>
+        sectionIndex === index ? { ...section, [key]: value } : section,
+      ),
+    );
+  }
+
+  function move(index: number, direction: -1 | 1) {
+    const next = [...sections];
+    const target = index + direction;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  }
+
+  return (
+    <AdminCard className="p-5">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-[#190A2F]">Page sections</h3>
+          <p className="mt-1 text-xs text-slate-400">
+            Create reusable visual sections below the main body.
+          </p>
+        </div>
+        <AdminButton
+          variant="secondary"
+          onClick={() =>
+            onChange([
+              ...sections,
+              {
+                id: crypto.randomUUID?.() || String(Date.now()),
+                type: "content",
+                heading: "",
+                body: "",
+                alignment: "left",
+              },
+            ])
+          }
+        >
+          <Plus className="h-4 w-4" /> Add section
+        </AdminButton>
+      </div>
+      {!sections.length ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400">
+          No custom sections yet.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {sections.map((section, index) => (
+            <div
+              key={section.id || index}
+              className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#190A2F] text-xs font-bold text-white">
+                    {index + 1}
+                  </span>
+                  <select
+                    value={section.type || "content"}
+                    onChange={(event) => update(index, "type", event.target.value)}
+                    className="h-9 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold outline-none"
+                  >
+                    <option value="content">Content</option>
+                    <option value="image_text">Image + Text</option>
+                    <option value="cta">CTA</option>
+                    <option value="stats">Stats</option>
+                    <option value="faq">FAQ</option>
+                  </select>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => move(index, -1)}
+                    className="rounded-lg px-2 py-1 text-xs text-slate-400 hover:bg-white"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => move(index, 1)}
+                    className="rounded-lg px-2 py-1 text-xs text-slate-400 hover:bg-white"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    onClick={() =>
+                      onChange(sections.filter((_, sectionIndex) => sectionIndex !== index))
+                    }
+                    className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <input
+                  value={section.eyebrow || ""}
+                  onChange={(event) => update(index, "eyebrow", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="Eyebrow"
+                />
+                <input
+                  value={section.heading || ""}
+                  onChange={(event) => update(index, "heading", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="Heading"
+                />
+              </div>
+              <div className="mt-3">
+                <RichTextEditor
+                  compact
+                  value={section.body || ""}
+                  onChange={(value) => update(index, "body", value)}
+                />
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+                <input
+                  value={section.image || ""}
+                  onChange={(event) => update(index, "image", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="Image URL"
+                />
+                <AdminButton variant="secondary" onClick={onPickMedia}>
+                  <ImageIcon className="h-4 w-4" /> Browse
+                </AdminButton>
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
+                <input
+                  value={section.button_label || ""}
+                  onChange={(event) => update(index, "button_label", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="Button label"
+                />
+                <input
+                  value={section.button_url || ""}
+                  onChange={(event) => update(index, "button_url", event.target.value)}
+                  className={adminInputClass}
+                  placeholder="Button URL"
+                />
+                <select
+                  value={section.alignment || "left"}
+                  onChange={(event) => update(index, "alignment", event.target.value)}
+                  className={adminInputClass}
+                >
+                  <option value="left">Left aligned</option>
+                  <option value="center">Centered</option>
+                  <option value="right">Right aligned</option>
+                </select>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </AdminCard>
+  );
+}
+
+function MediaPicker({
+  open,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (url: string) => void;
+}) {
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    listMedia()
+      .then(setItems)
+      .catch((error) =>
+        toast.error(error instanceof Error ? error.message : "Could not load media."),
+      )
+      .finally(() => setLoading(false));
+  }, [open]);
+
+  return (
+    <AdminModal
+      open={open}
+      onClose={onClose}
+      title="Choose media"
+      description="Select an uploaded image for this content item."
+      width="max-w-5xl"
+    >
+      {loading ? (
+        <AdminLoading label="Loading media…" />
+      ) : !items.length ? (
+        <EmptyState
+          title="Media library is empty"
+          description="Upload files from the Media section first."
+        />
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {items
+            .filter((item) => item.mime_type.startsWith("image/"))
+            .map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onSelect(item.url)}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:border-[#FE3434] hover:shadow-lg"
+              >
+                <img
+                  src={item.url}
+                  alt={item.alt_text || item.original_name}
+                  className="aspect-[4/3] w-full object-cover"
+                />
+                <span className="block truncate p-3 text-xs font-semibold text-[#190A2F]">
+                  {item.original_name}
+                </span>
+              </button>
+            ))}
+        </div>
+      )}
+    </AdminModal>
+  );
+}

@@ -1,0 +1,677 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
+import darkLogo from "@/assets/logicsify-dark.png.asset.json";
+import lightLogo from "@/assets/logicsify-light.png.asset.json";
+import { megaMenu } from "@/lib/site-data";
+import { cn } from "@/lib/utils";
+import { normalizePublicHref } from "@/lib/content-routes";
+import {
+  getPublicMenu,
+  getPublicSiteSettings,
+  type PublicMenuItem,
+  type PublicSiteSettings,
+} from "@/lib/logicsify-api";
+
+type NavItem = {
+  id: number;
+  parentId: number | null;
+  label: string;
+  to: string;
+  comingSoon: boolean;
+  external: boolean;
+  targetBlank: boolean;
+  description?: string | null;
+  badgeText?: string | null;
+  menuStyle: "link" | "dropdown" | "mega";
+  columnNumber: number;
+  isHeading: boolean;
+  hideDesktop: boolean;
+  hideMobile: boolean;
+  megaPromoEnabled: boolean;
+  megaPromoEyebrow?: string | null;
+  megaPromoTitle?: string | null;
+  megaPromoDescription?: string | null;
+  megaPromoButtonLabel?: string | null;
+  megaPromoButtonUrl?: string | null;
+  megaPromoNewTab: boolean;
+  children: NavItem[];
+};
+
+const fallbackNavigation = buildFallbackNavigation();
+
+export function SiteHeader() {
+  const { location } = useRouterState();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [megaOpenId, setMegaOpenId] = useState<number | null>(null);
+  const [primaryNav, setPrimaryNav] = useState<NavItem[]>(fallbackNavigation);
+  const [siteSettings, setSiteSettings] = useState<PublicSiteSettings>({});
+
+  const isHome = location.pathname === "/";
+  const stickyHeader = boolSetting(siteSettings.sticky_header, true);
+  const transparentHeaderHome = boolSetting(siteSettings.transparent_header_home, true);
+  const showHeaderCta = boolSetting(siteSettings.show_header_cta, true);
+  const headerCtaLabel = siteSettings.header_cta_label || "Book a Strategy Call";
+  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/book-a-call");
+  const headerCtaNewTab = boolSetting(siteSettings.header_cta_new_tab);
+  const desktopLogoHeight = numberSetting(siteSettings.header_logo_height_desktop, 36, 20, 80);
+  const mobileLogoHeight = numberSetting(siteSettings.header_logo_height_mobile, 28, 20, 64);
+  const announcementEnabled =
+    boolSetting(siteSettings.announcement_enabled) &&
+    Boolean(siteSettings.announcement_text?.trim());
+  const onDark = isHome && !scrolled && transparentHeaderHome;
+
+  const activeMega = useMemo(
+    () => primaryNav.find((item) => item.id === megaOpenId) || null,
+    [megaOpenId, primaryNav],
+  );
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([getPublicMenu("header"), getPublicSiteSettings()])
+      .then(([menu, settings]) => {
+        if (!active) return;
+        setSiteSettings(settings);
+        if (menu.items.length) {
+          const tree = ensureDefaultMegaMenu(buildMenuTree(menu.items));
+          if (tree.length) setPrimaryNav(tree);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setMegaOpenId(null);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  const logo = onDark
+    ? siteSettings.logo_light || lightLogo.url
+    : siteSettings.logo_dark || darkLogo.url;
+  const logoStyle = {
+    "--header-logo-mobile": `${mobileLogoHeight}px`,
+    "--header-logo-desktop": `${desktopLogoHeight}px`,
+  } as CSSProperties;
+
+  return (
+    <>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-white focus:text-ink focus:px-3 focus:py-2 focus:rounded"
+      >
+        Skip to content
+      </a>
+      <header
+        data-cms-ignore="true"
+        onMouseLeave={() => setMegaOpenId(null)}
+        className={cn(
+          stickyHeader ? "fixed top-0" : "absolute top-0",
+          "left-0 right-0 z-50 transition-all duration-500",
+          scrolled || !isHome || !transparentHeaderHome
+            ? "bg-white/85 backdrop-blur-xl border-b border-black/5"
+            : "bg-transparent",
+        )}
+      >
+        {announcementEnabled ? (
+          <div className="bg-ink px-4 py-2 text-center text-xs font-medium text-white">
+            <span>{siteSettings.announcement_text}</span>
+            {siteSettings.announcement_url ? (
+              <a
+                href={siteSettings.announcement_url}
+                target={boolSetting(siteSettings.announcement_new_tab) ? "_blank" : undefined}
+                rel={boolSetting(siteSettings.announcement_new_tab) ? "noreferrer" : undefined}
+                className="ml-2 font-semibold text-brand-gold hover:underline"
+              >
+                {siteSettings.announcement_link_label || "Learn more"}
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="container-page flex items-center justify-between h-16 md:h-20">
+          <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Logicsify home">
+            <img
+              src={logo}
+              alt={siteSettings.site_name || "Logicsify"}
+              style={logoStyle}
+              className="h-[var(--header-logo-mobile)] md:h-[var(--header-logo-desktop)] w-auto"
+            />
+          </Link>
+
+          <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">
+            {primaryNav
+              .filter((item) => !item.hideDesktop)
+              .map((item) => {
+                const visibleChildren = item.children.filter((child) => !child.hideDesktop);
+                const hasMega = item.menuStyle === "mega" && visibleChildren.length > 0;
+                const hasDropdown = item.menuStyle === "dropdown" && visibleChildren.length > 0;
+                return (
+                  <div
+                    key={item.id}
+                    className="relative group"
+                    onMouseEnter={() => hasMega && setMegaOpenId(item.id)}
+                  >
+                    {item.comingSoon ? (
+                      <span
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 cursor-default opacity-60",
+                          onDark ? "text-white/85" : "text-ink/80",
+                        )}
+                        title="Coming soon"
+                      >
+                        {item.label}
+                      </span>
+                    ) : item.external ? (
+                      <a
+                        href={item.to}
+                        target={item.targetBlank ? "_blank" : undefined}
+                        rel={item.targetBlank ? "noreferrer" : undefined}
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
+                          onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
+                        )}
+                      >
+                        {item.label}
+                        {(hasMega || hasDropdown) && <ChevronDown className="w-3.5 h-3.5" />}
+                      </a>
+                    ) : (
+                      <Link
+                        to={item.to}
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
+                          onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
+                        )}
+                        activeProps={{
+                          className: cn(
+                            "px-4 py-2 rounded-full text-sm font-semibold inline-flex items-center gap-1",
+                            onDark ? "text-white" : "text-ink",
+                          ),
+                        }}
+                      >
+                        {item.label}
+                        {(hasMega || hasDropdown) && <ChevronDown className="w-3.5 h-3.5" />}
+                      </Link>
+                    )}
+                    {hasDropdown ? <CompactDropdown items={visibleChildren} /> : null}
+                  </div>
+                );
+              })}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            {showHeaderCta ? (
+              <a
+                href={headerCtaUrl}
+                target={headerCtaNewTab ? "_blank" : undefined}
+                rel={headerCtaNewTab ? "noreferrer" : undefined}
+                className="hidden md:inline-flex btn-primary text-sm"
+              >
+                {headerCtaLabel} <ArrowRight className="w-4 h-4" />
+              </a>
+            ) : null}
+            <button
+              className={cn(
+                "lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border transition-colors",
+                onDark
+                  ? "border-white/20 text-white hover:bg-white/10"
+                  : "border-black/10 text-ink hover:bg-black/5",
+              )}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {activeMega ? (
+          <DefaultMegaMenu
+            item={activeMega}
+            fallbackCta={{
+              enabled: showHeaderCta,
+              label: headerCtaLabel,
+              url: headerCtaUrl,
+              newTab: headerCtaNewTab,
+            }}
+            onEnter={() => setMegaOpenId(activeMega.id)}
+            onLeave={() => setMegaOpenId(null)}
+          />
+        ) : null}
+      </header>
+
+      <div
+        className={cn(
+          "fixed inset-0 z-[60] lg:hidden transition-all duration-300",
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+        )}
+        aria-hidden={!mobileOpen}
+      >
+        <div
+          className="absolute inset-0 bg-ink/60 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
+        <div
+          className={cn(
+            "absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-2xl overflow-y-auto transition-transform duration-300",
+            mobileOpen ? "translate-x-0" : "translate-x-full",
+          )}
+        >
+          <div className="flex items-center justify-between p-5 border-b border-black/5">
+            <img
+              src={siteSettings.mobile_logo || siteSettings.logo_dark || darkLogo.url}
+              alt={siteSettings.site_name || "Logicsify"}
+              style={logoStyle}
+              className="h-[var(--header-logo-mobile)] w-auto"
+            />
+            <button
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close menu"
+              className="h-10 w-10 rounded-full border border-black/10 inline-flex items-center justify-center"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <nav className="p-5 space-y-1">
+            {primaryNav
+              .filter((item) => !item.hideMobile)
+              .map((item) => (
+                <MobileMenuItem key={item.id} item={item} />
+              ))}
+            {showHeaderCta ? (
+              <a
+                href={headerCtaUrl}
+                target={headerCtaNewTab ? "_blank" : undefined}
+                rel={headerCtaNewTab ? "noreferrer" : undefined}
+                className="btn-primary w-full justify-center mt-6"
+              >
+                {headerCtaLabel}
+              </a>
+            ) : null}
+          </nav>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function DefaultMegaMenu({
+  item,
+  fallbackCta,
+  onEnter,
+  onLeave,
+}: {
+  item: NavItem;
+  fallbackCta: { enabled: boolean; label: string; url: string; newTab: boolean };
+  onEnter: () => void;
+  onLeave: () => void;
+}) {
+  const groups = normalizeMegaGroups(item);
+  const promoEnabled = item.megaPromoEnabled !== false;
+  const promoLabel = item.megaPromoButtonLabel || fallbackCta.label;
+  const promoUrl = item.megaPromoButtonUrl || fallbackCta.url;
+  const promoNewTab = item.megaPromoButtonUrl ? item.megaPromoNewTab : fallbackCta.newTab;
+
+  return (
+    <div
+      className="hidden lg:block absolute inset-x-0 top-full origin-top transition-all duration-300 opacity-100 pointer-events-auto translate-y-0"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <div className="container-page pt-2">
+        <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(25,10,47,0.35)] border border-black/5 overflow-hidden">
+          <div className="grid grid-cols-12">
+            <div
+              className={cn(
+                promoEnabled ? "col-span-9" : "col-span-12",
+                "grid grid-cols-3 gap-8 p-8",
+              )}
+            >
+              {groups.slice(0, 3).map((group) => (
+                <div key={group.id}>
+                  <p className="eyebrow mb-4">{group.label}</p>
+                  <ul className="space-y-3">
+                    {group.children
+                      .filter((child) => !child.hideDesktop)
+                      .map((child) => (
+                        <li key={child.id}>
+                          {child.comingSoon ? (
+                            <span
+                              className="group block cursor-default opacity-50"
+                              title="Coming soon"
+                            >
+                              <span className="text-sm font-semibold text-ink">{child.label}</span>
+                              <span className="block text-xs text-ink-soft mt-0.5">
+                                {child.description || "Coming soon"}
+                              </span>
+                            </span>
+                          ) : (
+                            <a
+                              href={child.to}
+                              target={child.targetBlank ? "_blank" : undefined}
+                              rel={child.targetBlank ? "noreferrer" : undefined}
+                              className="group block"
+                            >
+                              <span className="text-sm font-semibold text-ink group-hover:text-gradient transition-colors">
+                                {child.label}
+                              </span>
+                              {child.description ? (
+                                <span className="block text-xs text-ink-soft mt-0.5">
+                                  {child.description}
+                                </span>
+                              ) : null}
+                            </a>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            {promoEnabled ? (
+              <div className="col-span-3 p-8 bg-ink text-white relative overflow-hidden">
+                <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_20%,rgba(254,52,52,0.35),transparent_60%),radial-gradient(circle_at_80%_80%,rgba(253,190,2,0.25),transparent_60%)]" />
+                <div className="relative">
+                  <p className="eyebrow text-white/60 mb-3">
+                    {item.megaPromoEyebrow || "Featured"}
+                  </p>
+                  <h3 className="text-xl font-semibold leading-tight mb-2">
+                    {item.megaPromoTitle || "Start a project with our senior team"}
+                  </h3>
+                  <p className="text-sm text-white/70 mb-6">
+                    {item.megaPromoDescription ||
+                      "Book a free 30-minute strategy call. We'll map the fastest path from idea to launch."}
+                  </p>
+                  {promoUrl && (item.megaPromoButtonUrl || fallbackCta.enabled) ? (
+                    <a
+                      href={promoUrl}
+                      target={promoNewTab ? "_blank" : undefined}
+                      rel={promoNewTab ? "noreferrer" : undefined}
+                      className="btn-primary text-sm"
+                    >
+                      {promoLabel} <ArrowRight className="w-4 h-4" />
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CompactDropdown({ items }: { items: NavItem[] }) {
+  return (
+    <div className="absolute left-0 top-full hidden min-w-64 pt-2 group-hover:block">
+      <div className="rounded-2xl border border-black/5 bg-white p-2 shadow-xl">
+        {items.map((item) =>
+          item.comingSoon || item.isHeading ? (
+            <span key={item.id} className="block rounded-xl px-3 py-2.5 text-sm text-ink/45">
+              {item.label}
+            </span>
+          ) : (
+            <a
+              key={item.id}
+              href={item.to}
+              target={item.targetBlank ? "_blank" : undefined}
+              rel={item.targetBlank ? "noreferrer" : undefined}
+              className="block rounded-xl px-3 py-2.5 text-sm text-ink/75 hover:bg-lavender hover:text-ink"
+            >
+              <span className="font-medium">{item.label}</span>
+              {item.description ? (
+                <span className="mt-0.5 block text-xs text-ink-soft">{item.description}</span>
+              ) : null}
+            </a>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MobileMenuItem({ item }: { item: NavItem }) {
+  const children = item.children.filter((child) => !child.hideMobile);
+  if (item.comingSoon) {
+    return (
+      <span
+        className="block px-3 py-3 rounded-xl text-lg font-semibold text-ink/45"
+        title="Coming soon"
+      >
+        {item.label}
+      </span>
+    );
+  }
+  if (children.length) {
+    return (
+      <details className="group">
+        <summary className="flex items-center justify-between px-3 py-3 cursor-pointer text-lg font-semibold text-ink rounded-xl hover:bg-lavender">
+          {item.label}
+          <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+        </summary>
+        <div className="pl-3 pb-2">
+          {!item.isHeading ? (
+            <a href={item.to} className="block px-3 py-2 text-sm font-semibold text-brand-red">
+              View all {item.label}
+            </a>
+          ) : null}
+          {normalizeMegaGroups(item).map((group) => (
+            <div key={group.id} className="mt-2">
+              <p className="px-3 py-2 text-xs uppercase tracking-widest text-ink-soft font-semibold">
+                {group.label}
+              </p>
+              {group.children
+                .filter((child) => !child.hideMobile)
+                .map((child) =>
+                  child.comingSoon ? (
+                    <span key={child.id} className="block px-3 py-2 text-sm text-ink/40">
+                      {child.label}
+                    </span>
+                  ) : (
+                    <a
+                      key={child.id}
+                      href={child.to}
+                      target={child.targetBlank ? "_blank" : undefined}
+                      rel={child.targetBlank ? "noreferrer" : undefined}
+                      className="block px-3 py-2 text-sm text-ink hover:text-brand-red"
+                    >
+                      {child.label}
+                    </a>
+                  ),
+                )}
+            </div>
+          ))}
+        </div>
+      </details>
+    );
+  }
+  return (
+    <a
+      href={item.to}
+      target={item.targetBlank ? "_blank" : undefined}
+      rel={item.targetBlank ? "noreferrer" : undefined}
+      className="block px-3 py-3 rounded-xl text-lg font-semibold text-ink hover:bg-lavender"
+    >
+      {item.label}
+    </a>
+  );
+}
+
+function normalizeMegaGroups(item: NavItem): NavItem[] {
+  const visible = item.children.filter((child) => !child.hideDesktop);
+  const explicitGroups = visible.filter((child) => child.isHeading || child.children.length > 0);
+  if (explicitGroups.length) return explicitGroups;
+
+  const columns = [1, 2, 3].map((column) =>
+    visible.filter((child) => Math.min(3, Math.max(1, child.columnNumber || 1)) === column),
+  );
+  return columns.map((children, index) => ({
+    ...fallbackGroup(-9000 - index, `Column ${index + 1}`, index + 1),
+    children,
+  }));
+}
+
+function ensureDefaultMegaMenu(items: NavItem[]): NavItem[] {
+  const fallbackServices = fallbackNavigation[0];
+  return items.map((item) => {
+    const isServices =
+      item.to.replace(/\/$/, "") === "/services" || item.label.toLowerCase() === "services";
+    if (!isServices) return item;
+    return {
+      ...item,
+      menuStyle: "mega",
+      megaPromoEnabled: item.megaPromoEnabled ?? true,
+      megaPromoEyebrow: item.megaPromoEyebrow || fallbackServices.megaPromoEyebrow,
+      megaPromoTitle: item.megaPromoTitle || fallbackServices.megaPromoTitle,
+      megaPromoDescription: item.megaPromoDescription || fallbackServices.megaPromoDescription,
+      megaPromoButtonLabel: item.megaPromoButtonLabel || fallbackServices.megaPromoButtonLabel,
+      megaPromoButtonUrl: item.megaPromoButtonUrl || fallbackServices.megaPromoButtonUrl,
+      children: item.children.length ? item.children : fallbackServices.children,
+    };
+  });
+}
+
+function buildMenuTree(items: PublicMenuItem[]): NavItem[] {
+  const normalized = items.map(mapPublicMenuItem);
+  const byId = new Map(normalized.map((item) => [item.id, item]));
+  const roots: NavItem[] = [];
+  normalized.forEach((item) => {
+    if (item.parentId && byId.has(item.parentId) && item.parentId !== item.id) {
+      byId.get(item.parentId)?.children.push(item);
+    } else {
+      roots.push(item);
+    }
+  });
+  return roots;
+}
+
+function mapPublicMenuItem(item: PublicMenuItem): NavItem {
+  return {
+    id: Number(item.id),
+    parentId: item.parent_id ? Number(item.parent_id) : null,
+    label: item.label,
+    to: normalizePublicHref(item.url || "#"),
+    comingSoon: boolSetting(item.coming_soon),
+    external: boolSetting(item.is_external),
+    targetBlank: boolSetting(item.target_blank),
+    description: item.description,
+    badgeText: item.badge_text,
+    menuStyle:
+      item.menu_style === "mega" || item.menu_style === "dropdown" ? item.menu_style : "link",
+    columnNumber: numberSetting(item.column_number, 1, 1, 3),
+    isHeading: boolSetting(item.is_heading),
+    hideDesktop: boolSetting(item.hide_desktop),
+    hideMobile: boolSetting(item.hide_mobile),
+    megaPromoEnabled:
+      item.mega_promo_enabled === undefined ? true : boolSetting(item.mega_promo_enabled),
+    megaPromoEyebrow: item.mega_promo_eyebrow,
+    megaPromoTitle: item.mega_promo_title,
+    megaPromoDescription: item.mega_promo_description,
+    megaPromoButtonLabel: item.mega_promo_button_label,
+    megaPromoButtonUrl: item.mega_promo_button_url
+      ? normalizePublicHref(item.mega_promo_button_url)
+      : item.mega_promo_button_url,
+    megaPromoNewTab: boolSetting(item.mega_promo_new_tab),
+    children: [],
+  };
+}
+
+function buildFallbackNavigation(): NavItem[] {
+  let nextId = -1;
+  const groups = megaMenu.slice(0, 3).map((group, groupIndex) => {
+    const groupId = nextId--;
+    return {
+      ...fallbackGroup(groupId, group.title, groupIndex + 1),
+      parentId: -100,
+      children: group.items.map((service) => ({
+        ...fallbackLink(nextId--, service.name, service.route),
+        parentId: groupId,
+        description: service.short,
+        columnNumber: groupIndex + 1,
+      })),
+    };
+  });
+
+  return [
+    {
+      ...fallbackLink(-100, "Services", "/services"),
+      menuStyle: "mega",
+      megaPromoEnabled: true,
+      megaPromoEyebrow: "Featured",
+      megaPromoTitle: "Start a project with our senior team",
+      megaPromoDescription:
+        "Book a free 30-minute strategy call. We'll map the fastest path from idea to launch.",
+      megaPromoButtonLabel: "Book a call",
+      megaPromoButtonUrl: "/book-a-call",
+      children: groups,
+    },
+    fallbackLink(-200, "Industries", "/industries"),
+    fallbackLink(-201, "Work", "/work"),
+    fallbackLink(-202, "About", "/about"),
+    fallbackLink(-203, "Insights", "/insights"),
+  ];
+}
+
+function fallbackGroup(id: number, label: string, columnNumber: number): NavItem {
+  return {
+    ...fallbackLink(id, label, "#"),
+    isHeading: true,
+    columnNumber,
+  };
+}
+
+function fallbackLink(id: number, label: string, to: string): NavItem {
+  return {
+    id,
+    parentId: null,
+    label,
+    to,
+    comingSoon: false,
+    external: false,
+    targetBlank: false,
+    description: null,
+    badgeText: null,
+    menuStyle: "link",
+    columnNumber: 1,
+    isHeading: false,
+    hideDesktop: false,
+    hideMobile: false,
+    megaPromoEnabled: true,
+    megaPromoEyebrow: null,
+    megaPromoTitle: null,
+    megaPromoDescription: null,
+    megaPromoButtonLabel: null,
+    megaPromoButtonUrl: null,
+    megaPromoNewTab: false,
+    children: [],
+  };
+}
+
+function boolSetting(value: unknown, fallback = false) {
+  if (value === undefined || value === null || value === "") return fallback;
+  return value === true || value === 1 || value === "1" || value === "true";
+}
+
+function numberSetting(value: unknown, fallback: number, min: number, max: number) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
