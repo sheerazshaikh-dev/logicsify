@@ -1,4 +1,0 @@
-[install]
-# Keep installs deterministic and avoid packages published only moments ago.
-minimumReleaseAge = 259200
-minimumReleaseAgeExcludes = ["@tanstack/react-router", "@tanstack/router-plugin", "vite"]

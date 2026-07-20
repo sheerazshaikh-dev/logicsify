@@ -1,6 +1,8 @@
-# Logicsify Vite deployment
+# Logicsify npm + Vite deployment
 
 ## 1. Local test
+
+Install Node.js 22 and npm 10 or later.
 
 Create `.env.local`:
 
@@ -11,37 +13,43 @@ VITE_API_URL=https://backend.logicsify.com/api
 Run:
 
 ```bash
-bun install
-bun run qa
-bun run dev
+npm ci
+npm run qa
+npm run dev
 ```
 
 Open `http://localhost:8080` and `http://localhost:8080/admin/login`.
 
 ## 2. Push to GitHub
 
+For a new local Git connection to the existing repository:
+
 ```bash
 git init
 git branch -M main
-git add .
-git commit -m "Initial Logicsify Vite website and admin"
-git remote add origin https://github.com/YOUR-USERNAME/logicsify.git
+git remote add origin https://github.com/sheerazshaikh-dev/logicsify.git
+git fetch origin
+git reset --mixed origin/main
+git add -A
+git commit -m "Convert Logicsify from Bun to npm"
 git push -u origin main
 ```
 
 Do not commit `.env.local`, `node_modules`, or `dist`.
+Commit `package-lock.json` because Vercel uses it with `npm ci`.
 
 ## 3. Deploy to Vercel
 
-Import the GitHub repository. The included `vercel.json` already sets:
+Import `sheerazshaikh-dev/logicsify`. The included `vercel.json` sets:
 
 ```text
-Install command: bun install --frozen-lockfile
-Build command: bun run build
+Framework: Vite
+Install command: npm ci --no-audit --no-fund
+Build command: npm run build
 Output directory: dist
 ```
 
-Add the environment variable:
+Add:
 
 ```env
 VITE_API_URL=https://backend.logicsify.com/api
@@ -69,10 +77,10 @@ After deployment, directly open and refresh:
 - `/admin/pages`
 - `/admin/settings`
 
-The `vercel.json` SPA rewrite ensures all routes load through `index.html`.
+The `vercel.json` SPA rewrite sends these routes through `index.html`.
 
 ## Visual editor animation behavior
 
 The public website keeps its animations unchanged. Inside visual-editor preview
 mode only, reveal animations are forced visible and moving animations are paused,
-so headings, text, cards, rings, nodes and floating objects remain selectable.
+so headings, text, cards, rings, nodes, and floating objects remain selectable.
