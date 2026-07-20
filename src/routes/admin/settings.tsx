@@ -41,14 +41,7 @@ import {
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
 type Tab =
-  | "site"
-  | "header"
-  | "footer"
-  | "seo"
-  | "email"
-  | "integrations"
-  | "calendar"
-  | "administrators";
+  "site" | "header" | "footer" | "seo" | "email" | "integrations" | "calendar" | "administrators";
 
 type SettingGroup = "site" | "email" | "integrations" | "calendar";
 

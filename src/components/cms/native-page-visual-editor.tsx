@@ -84,11 +84,7 @@ type NoticeMessage = {
 };
 
 type EditorMessage =
-  | InventoryMessage
-  | SelectMessage
-  | StructureChangedMessage
-  | SectionExportMessage
-  | NoticeMessage;
+  InventoryMessage | SelectMessage | StructureChangedMessage | SectionExportMessage | NoticeMessage;
 
 type SectionExport = Pick<SectionExportMessage, "section_key" | "label" | "html">;
 

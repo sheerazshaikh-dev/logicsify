@@ -609,14 +609,30 @@ function applyNativeContent(
   applyElementLinks(pageRoot, nativeContent);
 }
 
+function forceEditorVisibility(pageRoot: HTMLElement): void {
+  pageRoot.querySelectorAll<HTMLElement>("[data-reveal]").forEach((element) => {
+    element.setAttribute("data-visible", "true");
+    element.style.removeProperty("opacity");
+    element.style.removeProperty("visibility");
+  });
+
+  pageRoot
+    .querySelectorAll<HTMLElement>("[hidden], [aria-hidden='true'][data-reveal]")
+    .forEach((element) => {
+      if (element.hasAttribute("data-reveal")) element.removeAttribute("hidden");
+    });
+}
+
 function refreshRuntime(
   pageRoot: HTMLElement,
   nativeContent: CmsNativeContent,
   editMode = false,
 ): CmsDomInventory {
   applyStructuralContent(pageRoot, nativeContent, editMode);
+  if (editMode) forceEditorVisibility(pageRoot);
   const inventory = buildInventory(pageRoot, nativeContent);
   applyNativeContent(pageRoot, inventory, nativeContent, editMode);
+  if (editMode) forceEditorVisibility(pageRoot);
   return inventory;
 }
 

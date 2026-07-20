@@ -1,21 +1,8 @@
 # Routes
 
-TanStack Start uses **file-based routing**. Every `.tsx` file in this directory
-defines a route. Do **not** create `src/pages/`, `src/routes/_app/index.tsx`, or
-`app/layout.tsx` — those are Next.js / Remix conventions. The only root layout
-is `src/routes/__root.tsx`.
+This is a Vite single-page application using TanStack Router file-based routes.
+The `@tanstack/router-plugin` Vite plugin generates `src/routeTree.gen.ts` from
+this directory during development and production builds.
 
-## Conventions
-
-| File | URL |
-| --- | --- |
-| `index.tsx` | `/` |
-| `about.tsx` | `/about` |
-| `users/index.tsx` | `/users` |
-| `users/$id.tsx` | `/users/:id` (dynamic — bare `$`, no curly braces) |
-| `posts/{-$category}.tsx` | `/posts/:category?` (optional segment) |
-| `files/$.tsx` | `/files/*` (splat — read via `_splat` param, never `*`) |
-| `_layout.tsx` | layout route (renders children via `<Outlet />`) |
-| `__root.tsx` | app shell — wraps every page; preserve `<Outlet />` |
-
-`routeTree.gen.ts` is auto-generated. Don't edit it by hand.
+Vercel rewrites browser requests to `index.html`, so deep links such as
+`/services/ai-automations` and `/admin/settings` load correctly on refresh.

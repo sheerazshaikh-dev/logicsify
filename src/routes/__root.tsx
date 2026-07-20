@@ -5,11 +5,9 @@ import {
   createRootRouteWithContext,
   useRouter,
   HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
-import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { RuntimeIntegrations } from "@/components/runtime-integrations";
 import { RuntimeSiteSettings } from "@/components/runtime-site-settings";
@@ -99,16 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#190A2F" },
     ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap",
-      },
-    ],
+    links: [{ rel: "icon", href: "/favicon.ico", type: "image/x-icon" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -123,30 +112,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
   }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <HeadContent />
       <RuntimeSiteSettings />
       <RuntimeIntegrations />
       <Outlet />

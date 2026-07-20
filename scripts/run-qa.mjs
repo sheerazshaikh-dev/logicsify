@@ -9,8 +9,8 @@ const checks = [
     "ESLint",
   ],
   [path.resolve("scripts/qa-source-links.mjs"), [], "Source-link audit"],
-  [path.resolve("scripts/build-qa.mjs"), [], "Vercel QA build"],
-  [path.resolve("scripts/qa-routes.mjs"), [], "Route audit"],
+  [path.resolve("scripts/build-qa.mjs"), [], "Vite production build"],
+  [path.resolve("scripts/qa-routes.mjs"), [], "Vite SPA route audit"],
 ];
 
 for (const [script, args, label] of checks) {
@@ -23,4 +23,4 @@ for (const [script, args, label] of checks) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-console.log("\nAll production QA checks passed.");
+console.log("\nAll Vite/Vercel production QA checks passed.");

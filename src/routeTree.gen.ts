@@ -9,89 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as TechnologyRouteImport } from './routes/technology'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ProcessRouteImport } from './routes/process'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CareersRouteImport } from './routes/careers'
-import { Route as BookACallRouteImport } from './routes/book-a-call'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as WorkIndexRouteImport } from './routes/work/index'
-import { Route as ServicesIndexRouteImport } from './routes/services/index'
-import { Route as InsightsIndexRouteImport } from './routes/insights/index'
-import { Route as IndustriesIndexRouteImport } from './routes/industries/index'
+import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as BookACallRouteImport } from './routes/book-a-call'
+import { Route as CareersRouteImport } from './routes/careers'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProcessRouteImport } from './routes/process'
+import { Route as TechnologyRouteImport } from './routes/technology'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as WorkSlugRouteImport } from './routes/work/$slug'
-import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
-import { Route as InsightsSlugRouteImport } from './routes/insights/$slug'
-import { Route as IndustriesSlugRouteImport } from './routes/industries/$slug'
-import { Route as AdminTrashRouteImport } from './routes/admin/trash'
-import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
-import { Route as AdminTeamRouteImport } from './routes/admin/team'
-import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
-import { Route as AdminServicesRouteImport } from './routes/admin/services'
-import { Route as AdminPagesRouteImport } from './routes/admin/pages'
-import { Route as AdminMenusRouteImport } from './routes/admin/menus'
-import { Route as AdminMediaRouteImport } from './routes/admin/media'
-import { Route as AdminLoginRouteImport } from './routes/admin/login'
-import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
-import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
-import { Route as AdminIndustriesRouteImport } from './routes/admin/industries'
-import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
-import { Route as AdminCaseStudiesRouteImport } from './routes/admin/case-studies'
-import { Route as AdminCareersRouteImport } from './routes/admin/careers'
-import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
-import { Route as AdminAuditLogsRouteImport } from './routes/admin/audit-logs'
-import { Route as AdminAdministratorsRouteImport } from './routes/admin/administrators'
 import { Route as AdminAccountRouteImport } from './routes/admin/account'
+import { Route as AdminAdministratorsRouteImport } from './routes/admin/administrators'
+import { Route as AdminAuditLogsRouteImport } from './routes/admin/audit-logs'
+import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
+import { Route as AdminCareersRouteImport } from './routes/admin/careers'
+import { Route as AdminCaseStudiesRouteImport } from './routes/admin/case-studies'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminIndustriesRouteImport } from './routes/admin/industries'
+import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminMediaRouteImport } from './routes/admin/media'
+import { Route as AdminMenusRouteImport } from './routes/admin/menus'
+import { Route as AdminPagesRouteImport } from './routes/admin/pages'
+import { Route as AdminServicesRouteImport } from './routes/admin/services'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
+import { Route as AdminTrashRouteImport } from './routes/admin/trash'
+import { Route as IndustriesIndexRouteImport } from './routes/industries/index'
+import { Route as IndustriesSlugRouteImport } from './routes/industries/$slug'
+import { Route as InsightsIndexRouteImport } from './routes/insights/index'
+import { Route as InsightsSlugRouteImport } from './routes/insights/$slug'
+import { Route as ServicesIndexRouteImport } from './routes/services/index'
+import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
+import { Route as WorkIndexRouteImport } from './routes/work/index'
+import { Route as WorkSlugRouteImport } from './routes/work/$slug'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TechnologyRoute = TechnologyRouteImport.update({
-  id: '/technology',
-  path: '/technology',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProcessRoute = ProcessRouteImport.update({
-  id: '/process',
-  path: '/process',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CareersRoute = CareersRouteImport.update({
-  id: '/careers',
-  path: '/careers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookACallRoute = BookACallRouteImport.update({
-  id: '/book-a-call',
-  path: '/book-a-call',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugRoute = SlugRouteImport.update({
@@ -99,29 +58,44 @@ const SlugRoute = SlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkIndexRoute = WorkIndexRouteImport.update({
-  id: '/work/',
-  path: '/work/',
+const BookACallRoute = BookACallRouteImport.update({
+  id: '/book-a-call',
+  path: '/book-a-call',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ServicesIndexRoute = ServicesIndexRouteImport.update({
-  id: '/services/',
-  path: '/services/',
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InsightsIndexRoute = InsightsIndexRouteImport.update({
-  id: '/insights/',
-  path: '/insights/',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndustriesIndexRoute = IndustriesIndexRouteImport.update({
-  id: '/industries/',
-  path: '/industries/',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessRoute = ProcessRouteImport.update({
+  id: '/process',
+  path: '/process',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TechnologyRoute = TechnologyRouteImport.update({
+  id: '/technology',
+  path: '/technology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -129,109 +103,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkSlugRoute = WorkSlugRouteImport.update({
-  id: '/work/$slug',
-  path: '/work/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesSlugRoute = ServicesSlugRouteImport.update({
-  id: '/services/$slug',
-  path: '/services/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InsightsSlugRoute = InsightsSlugRouteImport.update({
-  id: '/insights/$slug',
-  path: '/insights/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndustriesSlugRoute = IndustriesSlugRouteImport.update({
-  id: '/industries/$slug',
-  path: '/industries/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTrashRoute = AdminTrashRouteImport.update({
-  id: '/admin/trash',
-  path: '/admin/trash',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
-  id: '/admin/testimonials',
-  path: '/admin/testimonials',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTeamRoute = AdminTeamRouteImport.update({
-  id: '/admin/team',
-  path: '/admin/team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/admin/settings',
-  path: '/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminServicesRoute = AdminServicesRouteImport.update({
-  id: '/admin/services',
-  path: '/admin/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPagesRoute = AdminPagesRouteImport.update({
-  id: '/admin/pages',
-  path: '/admin/pages',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminMenusRoute = AdminMenusRouteImport.update({
-  id: '/admin/menus',
-  path: '/admin/menus',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminMediaRoute = AdminMediaRouteImport.update({
-  id: '/admin/media',
-  path: '/admin/media',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLeadsRoute = AdminLeadsRouteImport.update({
-  id: '/admin/leads',
-  path: '/admin/leads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminInsightsRoute = AdminInsightsRouteImport.update({
-  id: '/admin/insights',
-  path: '/admin/insights',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminIndustriesRoute = AdminIndustriesRouteImport.update({
-  id: '/admin/industries',
-  path: '/admin/industries',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/admin/dashboard',
-  path: '/admin/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCaseStudiesRoute = AdminCaseStudiesRouteImport.update({
-  id: '/admin/case-studies',
-  path: '/admin/case-studies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCareersRoute = AdminCareersRouteImport.update({
-  id: '/admin/careers',
-  path: '/admin/careers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminBookingsRoute = AdminBookingsRouteImport.update({
-  id: '/admin/bookings',
-  path: '/admin/bookings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
-  id: '/admin/audit-logs',
-  path: '/admin/audit-logs',
+const AdminAccountRoute = AdminAccountRouteImport.update({
+  id: '/admin/account',
+  path: '/admin/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAdministratorsRoute = AdminAdministratorsRouteImport.update({
@@ -239,9 +113,129 @@ const AdminAdministratorsRoute = AdminAdministratorsRouteImport.update({
   path: '/admin/administrators',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAccountRoute = AdminAccountRouteImport.update({
-  id: '/admin/account',
-  path: '/admin/account',
+const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
+  id: '/admin/audit-logs',
+  path: '/admin/audit-logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/admin/bookings',
+  path: '/admin/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCareersRoute = AdminCareersRouteImport.update({
+  id: '/admin/careers',
+  path: '/admin/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCaseStudiesRoute = AdminCaseStudiesRouteImport.update({
+  id: '/admin/case-studies',
+  path: '/admin/case-studies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndustriesRoute = AdminIndustriesRouteImport.update({
+  id: '/admin/industries',
+  path: '/admin/industries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInsightsRoute = AdminInsightsRouteImport.update({
+  id: '/admin/insights',
+  path: '/admin/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/admin/leads',
+  path: '/admin/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMediaRoute = AdminMediaRouteImport.update({
+  id: '/admin/media',
+  path: '/admin/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMenusRoute = AdminMenusRouteImport.update({
+  id: '/admin/menus',
+  path: '/admin/menus',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPagesRoute = AdminPagesRouteImport.update({
+  id: '/admin/pages',
+  path: '/admin/pages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/admin/services',
+  path: '/admin/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/admin/team',
+  path: '/admin/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
+  id: '/admin/testimonials',
+  path: '/admin/testimonials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTrashRoute = AdminTrashRouteImport.update({
+  id: '/admin/trash',
+  path: '/admin/trash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndustriesIndexRoute = IndustriesIndexRouteImport.update({
+  id: '/industries/',
+  path: '/industries/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndustriesSlugRoute = IndustriesSlugRouteImport.update({
+  id: '/industries/$slug',
+  path: '/industries/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsIndexRoute = InsightsIndexRouteImport.update({
+  id: '/insights/',
+  path: '/insights/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsSlugRoute = InsightsSlugRouteImport.update({
+  id: '/insights/$slug',
+  path: '/insights/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/services/$slug',
+  path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkIndexRoute = WorkIndexRouteImport.update({
+  id: '/work/',
+  path: '/work/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkSlugRoute = WorkSlugRouteImport.update({
+  id: '/work/$slug',
+  path: '/work/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -254,7 +248,6 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
   '/admin/account': typeof AdminAccountRoute
@@ -295,7 +288,6 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
   '/admin/account': typeof AdminAccountRoute
@@ -337,7 +329,6 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
   '/admin/account': typeof AdminAccountRoute
@@ -380,7 +371,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/process'
-    | '/sitemap.xml'
     | '/technology'
     | '/terms'
     | '/admin/account'
@@ -421,7 +411,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/process'
-    | '/sitemap.xml'
     | '/technology'
     | '/terms'
     | '/admin/account'
@@ -462,7 +451,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/process'
-    | '/sitemap.xml'
     | '/technology'
     | '/terms'
     | '/admin/account'
@@ -504,7 +492,6 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TechnologyRoute: typeof TechnologyRoute
   TermsRoute: typeof TermsRoute
   AdminAccountRoute: typeof AdminAccountRoute
@@ -539,67 +526,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/technology': {
-      id: '/technology'
-      path: '/technology'
-      fullPath: '/technology'
-      preLoaderRoute: typeof TechnologyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/process': {
-      id: '/process'
-      path: '/process'
-      fullPath: '/process'
-      preLoaderRoute: typeof ProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/careers': {
-      id: '/careers'
-      path: '/careers'
-      fullPath: '/careers'
-      preLoaderRoute: typeof CareersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/book-a-call': {
-      id: '/book-a-call'
-      path: '/book-a-call'
-      fullPath: '/book-a-call'
-      preLoaderRoute: typeof BookACallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug': {
@@ -609,39 +540,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/work/': {
-      id: '/work/'
-      path: '/work'
-      fullPath: '/work/'
-      preLoaderRoute: typeof WorkIndexRouteImport
+    '/book-a-call': {
+      id: '/book-a-call'
+      path: '/book-a-call'
+      fullPath: '/book-a-call'
+      preLoaderRoute: typeof BookACallRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/services/': {
-      id: '/services/'
-      path: '/services'
-      fullPath: '/services/'
-      preLoaderRoute: typeof ServicesIndexRouteImport
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/insights/': {
-      id: '/insights/'
-      path: '/insights'
-      fullPath: '/insights/'
-      preLoaderRoute: typeof InsightsIndexRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/industries/': {
-      id: '/industries/'
-      path: '/industries'
-      fullPath: '/industries/'
-      preLoaderRoute: typeof IndustriesIndexRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/process': {
+      id: '/process'
+      path: '/process'
+      fullPath: '/process'
+      preLoaderRoute: typeof ProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/technology': {
+      id: '/technology'
+      path: '/technology'
+      fullPath: '/technology'
+      preLoaderRoute: typeof TechnologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -651,151 +603,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/work/$slug': {
-      id: '/work/$slug'
-      path: '/work/$slug'
-      fullPath: '/work/$slug'
-      preLoaderRoute: typeof WorkSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services/$slug': {
-      id: '/services/$slug'
-      path: '/services/$slug'
-      fullPath: '/services/$slug'
-      preLoaderRoute: typeof ServicesSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/insights/$slug': {
-      id: '/insights/$slug'
-      path: '/insights/$slug'
-      fullPath: '/insights/$slug'
-      preLoaderRoute: typeof InsightsSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/industries/$slug': {
-      id: '/industries/$slug'
-      path: '/industries/$slug'
-      fullPath: '/industries/$slug'
-      preLoaderRoute: typeof IndustriesSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/trash': {
-      id: '/admin/trash'
-      path: '/admin/trash'
-      fullPath: '/admin/trash'
-      preLoaderRoute: typeof AdminTrashRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/testimonials': {
-      id: '/admin/testimonials'
-      path: '/admin/testimonials'
-      fullPath: '/admin/testimonials'
-      preLoaderRoute: typeof AdminTestimonialsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/team': {
-      id: '/admin/team'
-      path: '/admin/team'
-      fullPath: '/admin/team'
-      preLoaderRoute: typeof AdminTeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/admin/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/services': {
-      id: '/admin/services'
-      path: '/admin/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AdminServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/pages': {
-      id: '/admin/pages'
-      path: '/admin/pages'
-      fullPath: '/admin/pages'
-      preLoaderRoute: typeof AdminPagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/menus': {
-      id: '/admin/menus'
-      path: '/admin/menus'
-      fullPath: '/admin/menus'
-      preLoaderRoute: typeof AdminMenusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/media': {
-      id: '/admin/media'
-      path: '/admin/media'
-      fullPath: '/admin/media'
-      preLoaderRoute: typeof AdminMediaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/leads': {
-      id: '/admin/leads'
-      path: '/admin/leads'
-      fullPath: '/admin/leads'
-      preLoaderRoute: typeof AdminLeadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/insights': {
-      id: '/admin/insights'
-      path: '/admin/insights'
-      fullPath: '/admin/insights'
-      preLoaderRoute: typeof AdminInsightsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/industries': {
-      id: '/admin/industries'
-      path: '/admin/industries'
-      fullPath: '/admin/industries'
-      preLoaderRoute: typeof AdminIndustriesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/dashboard': {
-      id: '/admin/dashboard'
-      path: '/admin/dashboard'
-      fullPath: '/admin/dashboard'
-      preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/case-studies': {
-      id: '/admin/case-studies'
-      path: '/admin/case-studies'
-      fullPath: '/admin/case-studies'
-      preLoaderRoute: typeof AdminCaseStudiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/careers': {
-      id: '/admin/careers'
-      path: '/admin/careers'
-      fullPath: '/admin/careers'
-      preLoaderRoute: typeof AdminCareersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/bookings': {
-      id: '/admin/bookings'
-      path: '/admin/bookings'
-      fullPath: '/admin/bookings'
-      preLoaderRoute: typeof AdminBookingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/audit-logs': {
-      id: '/admin/audit-logs'
-      path: '/admin/audit-logs'
-      fullPath: '/admin/audit-logs'
-      preLoaderRoute: typeof AdminAuditLogsRouteImport
+    '/admin/account': {
+      id: '/admin/account'
+      path: '/admin/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/administrators': {
@@ -805,11 +617,179 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdministratorsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/account': {
-      id: '/admin/account'
-      path: '/admin/account'
-      fullPath: '/admin/account'
-      preLoaderRoute: typeof AdminAccountRouteImport
+    '/admin/audit-logs': {
+      id: '/admin/audit-logs'
+      path: '/admin/audit-logs'
+      fullPath: '/admin/audit-logs'
+      preLoaderRoute: typeof AdminAuditLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/admin/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/careers': {
+      id: '/admin/careers'
+      path: '/admin/careers'
+      fullPath: '/admin/careers'
+      preLoaderRoute: typeof AdminCareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/case-studies': {
+      id: '/admin/case-studies'
+      path: '/admin/case-studies'
+      fullPath: '/admin/case-studies'
+      preLoaderRoute: typeof AdminCaseStudiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/industries': {
+      id: '/admin/industries'
+      path: '/admin/industries'
+      fullPath: '/admin/industries'
+      preLoaderRoute: typeof AdminIndustriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/insights': {
+      id: '/admin/insights'
+      path: '/admin/insights'
+      fullPath: '/admin/insights'
+      preLoaderRoute: typeof AdminInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/admin/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/media': {
+      id: '/admin/media'
+      path: '/admin/media'
+      fullPath: '/admin/media'
+      preLoaderRoute: typeof AdminMediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/menus': {
+      id: '/admin/menus'
+      path: '/admin/menus'
+      fullPath: '/admin/menus'
+      preLoaderRoute: typeof AdminMenusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pages': {
+      id: '/admin/pages'
+      path: '/admin/pages'
+      fullPath: '/admin/pages'
+      preLoaderRoute: typeof AdminPagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/admin/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/admin/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/testimonials': {
+      id: '/admin/testimonials'
+      path: '/admin/testimonials'
+      fullPath: '/admin/testimonials'
+      preLoaderRoute: typeof AdminTestimonialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/trash': {
+      id: '/admin/trash'
+      path: '/admin/trash'
+      fullPath: '/admin/trash'
+      preLoaderRoute: typeof AdminTrashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/industries/': {
+      id: '/industries/'
+      path: '/industries'
+      fullPath: '/industries/'
+      preLoaderRoute: typeof IndustriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/industries/$slug': {
+      id: '/industries/$slug'
+      path: '/industries/$slug'
+      fullPath: '/industries/$slug'
+      preLoaderRoute: typeof IndustriesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights/': {
+      id: '/insights/'
+      path: '/insights'
+      fullPath: '/insights/'
+      preLoaderRoute: typeof InsightsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights/$slug': {
+      id: '/insights/$slug'
+      path: '/insights/$slug'
+      fullPath: '/insights/$slug'
+      preLoaderRoute: typeof InsightsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/': {
+      id: '/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/services/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work/': {
+      id: '/work/'
+      path: '/work'
+      fullPath: '/work/'
+      preLoaderRoute: typeof WorkIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work/$slug': {
+      id: '/work/$slug'
+      path: '/work/$slug'
+      fullPath: '/work/$slug'
+      preLoaderRoute: typeof WorkSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -824,7 +804,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   PrivacyRoute: PrivacyRoute,
   ProcessRoute: ProcessRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TechnologyRoute: TechnologyRoute,
   TermsRoute: TermsRoute,
   AdminAccountRoute: AdminAccountRoute,
@@ -859,13 +838,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

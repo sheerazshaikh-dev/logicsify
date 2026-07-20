@@ -1,47 +1,37 @@
-# Logicsify Production QA Report
+# Logicsify Vite QA report
 
-## Issues corrected
+## Conversion checks
 
-- Collection content used incorrect root URLs, causing service pages such as `/web-design-development` to return 404.
-- The visual editor always previewed the homepage instead of the selected content route.
-- Old homepage visual snapshots could be attached to service records and blank or replace unrelated pages.
-- Some services had no static fallback page when the API was unavailable.
-- Service loader data contained React elements, which could not be serialized safely during server rendering.
-- The default build target was not the correct Vercel server output.
-- Menu saves could fail with HTTP 500 when the production database had an older menu schema.
-- Legacy boolean values such as string `"0"` caused Coming Soon controls to persist incorrectly.
-- Legacy service and industry menu URLs were not normalized.
-- API exceptions could leak non-JSON server responses.
-- The original Services mega menu needed a safe, non-destructive fallback and restore path.
+- Removed TanStack Start and Nitro runtime dependencies
+- Added standard Vite `index.html` and `src/main.tsx`
+- Added Vite React, Tailwind and TanStack Router plugins
+- Removed server entry files and server-only sitemap route
+- Added static `public/sitemap.xml`
+- Added Vercel SPA rewrites and `dist` output configuration
+- Confirmed direct deep links return the Vite SPA entry
 
-## Automated validation completed
+## Visual editor checks
 
-- TypeScript check: passed.
-- ESLint: zero errors; six existing Fast Refresh warnings in shared UI files.
-- Source-link audit: all 17 service URLs use `/services/{slug}`.
-- Vercel production build: passed using Node.js 22 output.
-- Server-rendered route QA: 64 pages passed.
-- Legacy redirect QA: two representative old service URLs passed.
-- All 17 service detail pages passed with the content API unavailable.
-- All seven industry pages passed with the content API unavailable.
-- All coded case studies and insights passed with the content API unavailable.
-- Admin route server rendering passed.
-- PHP syntax validation passed for all backend PHP files.
+- Reveal-on-scroll elements are immediately visible in editor mode
+- `.animate-reveal` cannot remain at opacity zero in the editor
+- Floating, marquee, rotating, gradient and glow animations are paused in the editor
+- Live-site animation CSS and behavior are unchanged
+- Runtime reapplies editor visibility after DOM structure and field updates
 
-## Public route coverage
+## Automated validation
 
-The automated route suite covers:
+Run:
 
-- Main static pages.
-- Services index and all 17 service pages.
-- Industries index and all coded industry pages.
-- Work index and all coded case studies.
-- Insights index and all coded insight pages.
-- Contact and booking pages.
-- Privacy and terms.
-- Admin login and every admin route.
-- Legacy service redirects.
+```bash
+bun run qa
+```
 
-## Live-environment checks still required
+The suite validates:
 
-Automated QA cannot modify the production database or send real SMTP messages. After deployment, run the post-deployment checks in `LOGICSIFY_PRODUCTION_DEPLOYMENT.md`, especially menu saving, media upload, visual-editor save/restore, contact submission, booking creation, and SMTP delivery.
+- TypeScript
+- ESLint
+- All 17 service URL mappings
+- Vite production build
+- 64 public/admin deep routes
+- `robots.txt`, `sitemap.xml`, and favicon availability
+- Vercel SPA rewrite configuration

@@ -1,6 +1,9 @@
-# Logicsify Website, React Admin, and Headless CMS
+# Logicsify Vite Website + React Admin
 
-Production-ready TanStack Start/React project for `logicsify.com`, with the Brand & Brains-style admin panel under `/admin` and an API-only PHP/MySQL backend for `backend.logicsify.com`.
+Production-ready Vite/React single-page application for `logicsify.com`.
+The public website and Brand & Brains-style React admin panel live in the same
+project. The PHP/MySQL backend remains separately hosted at
+`https://backend.logicsify.com/api`.
 
 ## Local development
 
@@ -9,29 +12,41 @@ bun install
 bun run dev
 ```
 
-Open `http://localhost:8080` and `http://localhost:8080/admin/login`.
+Open:
 
-Create `.env.local` when needed:
+- Website: `http://localhost:8080`
+- Admin: `http://localhost:8080/admin/login`
+
+Create `.env.local` from `.env.example`:
 
 ```env
 VITE_API_URL=https://backend.logicsify.com/api
 ```
 
-## Validation
+## Quality checks
 
 ```bash
 bun run qa
+```
+
+This runs TypeScript, ESLint, source-link validation, the Vite production build,
+and deep-route fallback checks.
+
+## Production build
+
+```bash
 bun run build
 ```
 
-`bun run qa` performs TypeScript, ESLint, source-link, Vercel build, public-route, admin-route, fallback, and legacy-redirect checks.
+Vite outputs the deployable site to `dist/`.
 
-## Deployment
+## Vercel
 
-Read:
+The included `vercel.json` configures:
 
-- `LOGICSIFY_PRODUCTION_DEPLOYMENT.md`
-- `LOGICSIFY_QA_REPORT.md`
-- `backend-logicsify/DEPLOYMENT.md`
+- Bun installation
+- Vite production build
+- `dist` output
+- SPA rewrites for all public and admin routes
 
-The live backend secret file `backend-logicsify/private/config.php` is intentionally excluded.
+Add `VITE_API_URL=https://backend.logicsify.com/api` in Vercel Environment Variables.

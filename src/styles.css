@@ -231,6 +231,30 @@
   transform: translateY(0);
 }
 
+/* The visual editor must show every editable element immediately. The live site
+   keeps all original reveal, marquee, floating, rotating and glow animations. */
+body.cms-edit-mode [data-reveal],
+body.cms-edit-mode [data-reveal][data-visible="false"],
+body.cms-edit-mode .animate-reveal {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+body.cms-edit-mode .animate-marquee,
+body.cms-edit-mode .animate-float,
+body.cms-edit-mode .animate-spin-slow,
+body.cms-edit-mode .animate-gradient,
+body.cms-edit-mode .animate-pulse-glow {
+  animation-play-state: paused !important;
+}
+
+body.cms-edit-mode [data-cms-field-keys] {
+  scroll-margin-block: 120px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

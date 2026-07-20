@@ -1,17 +1,19 @@
 import fs from "node:fs";
-import http from "node:http";
+import net from "node:net";
 import path from "node:path";
-import { Readable } from "node:stream";
+import { spawn } from "node:child_process";
 
 const root = process.cwd();
-const entryPath = path.join(root, ".vercel/output/functions/__server.func/index.mjs");
-if (!fs.existsSync(entryPath)) {
-  console.error("Missing Vercel build output. Run the production build first.");
-  process.exit(1);
+const distIndex = path.join(root, "dist/index.html");
+const vercelPath = path.join(root, "vercel.json");
+const routeTreePath = path.join(root, "src/routeTree.gen.ts");
+
+for (const required of [distIndex, vercelPath, routeTreePath]) {
+  if (!fs.existsSync(required)) {
+    console.error(`Missing required production file: ${path.relative(root, required)}`);
+    process.exit(1);
+  }
 }
-const { default: handler } = await import(
-  `${new URL(`file://${entryPath}`).href}?qa=${Date.now()}`
-);
 
 const source = fs.readFileSync(path.join(root, "src/lib/site-data.ts"), "utf8");
 const serviceBlock = source.split("export const industries")[0];
@@ -73,73 +75,91 @@ const routes = [
   ]),
 ];
 
-const server = http.createServer(async (req, res) => {
-  try {
-    const origin = `http://${req.headers.host || "127.0.0.1"}`;
-    const body = req.method === "GET" || req.method === "HEAD" ? undefined : Readable.toWeb(req);
-    const request = new Request(new URL(req.url || "/", origin), {
-      method: req.method,
-      headers: req.headers,
-      body,
-      duplex: body ? "half" : undefined,
-    });
-    const response = await handler.fetch(request, { waitUntil() {} });
-    res.statusCode = response.status;
-    response.headers.forEach((value, key) => res.setHeader(key, value));
-    if (!response.body) return res.end();
-    Readable.fromWeb(response.body).pipe(res);
-  } catch (error) {
-    console.error(error);
-    res.statusCode = 500;
-    res.end(String(error?.stack || error));
-  }
+const vercel = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
+const hasSpaRewrite =
+  Array.isArray(vercel.rewrites) &&
+  vercel.rewrites.some((rule) => rule?.source === "/(.*)" && rule?.destination === "/index.html");
+if (!hasSpaRewrite) {
+  console.error("vercel.json is missing the SPA fallback rewrite to /index.html.");
+  process.exit(1);
+}
+
+const indexHtml = fs.readFileSync(distIndex, "utf8");
+if (!indexHtml.includes('<div id="root"></div>') || !indexHtml.includes("/assets/")) {
+  console.error("dist/index.html is not a valid Vite SPA entry.");
+  process.exit(1);
+}
+
+const port = await new Promise((resolve, reject) => {
+  const server = net.createServer();
+  server.once("error", reject);
+  server.listen(0, "127.0.0.1", () => {
+    const address = server.address();
+    const value = typeof address === "object" && address ? address.port : 4173;
+    server.close(() => resolve(value));
+  });
 });
 
-await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-const address = server.address();
-const base = `http://127.0.0.1:${address.port}`;
+const viteBin = path.resolve("node_modules/vite/bin/vite.js");
+const preview = spawn(
+  process.execPath,
+  [viteBin, "preview", "--host", "127.0.0.1", "--port", String(port)],
+  {
+    cwd: root,
+    stdio: ["ignore", "pipe", "pipe"],
+  },
+);
+let previewOutput = "";
+preview.stdout.on("data", (chunk) => {
+  previewOutput += chunk;
+});
+preview.stderr.on("data", (chunk) => {
+  previewOutput += chunk;
+});
+
+const base = `http://127.0.0.1:${port}`;
+let ready = false;
+for (let attempt = 0; attempt < 50; attempt += 1) {
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  try {
+    const response = await fetch(base, { signal: AbortSignal.timeout(1000) });
+    if (response.ok) {
+      ready = true;
+      break;
+    }
+  } catch {
+    // Keep waiting for Vite preview.
+  }
+}
+if (!ready) {
+  preview.kill("SIGTERM");
+  console.error(`Vite preview did not start.\n${previewOutput}`);
+  process.exit(1);
+}
+
 const failures = [];
 try {
   for (const route of routes) {
     const response = await fetch(`${base}${route}`, {
       redirect: "manual",
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(10_000),
     });
     const body = await response.text();
     if (response.status !== 200) failures.push(`${route}: HTTP ${response.status}`);
-    else if (body.length < 3000)
-      failures.push(`${route}: response unexpectedly small (${body.length} bytes)`);
-    else if (!body.includes("</html>")) failures.push(`${route}: incomplete HTML response`);
-    else if (body.includes("This page didn't load") || body.includes("<title>Error</title>"))
-      failures.push(`${route}: rendered an error boundary`);
+    else if (!body.includes('<div id="root"></div>')) failures.push(`${route}: SPA entry missing`);
   }
 
-  for (const { legacy, expected } of [
-    { legacy: "/web-design-development", expected: "/services/web-design-development" },
-    { legacy: "/ai-automations", expected: "/services/ai-automations" },
-  ]) {
-    const response = await fetch(`${base}${legacy}`, {
-      redirect: "manual",
-      signal: AbortSignal.timeout(20_000),
-    });
-    const location = response.headers.get("location");
-    if (![301, 302, 307, 308].includes(response.status) || location !== expected) {
-      failures.push(
-        `${legacy}: expected redirect to ${expected}, got HTTP ${response.status} location=${location}`,
-      );
-    }
+  for (const asset of ["/robots.txt", "/sitemap.xml", "/favicon.ico"]) {
+    const response = await fetch(`${base}${asset}`, { signal: AbortSignal.timeout(10_000) });
+    if (response.status !== 200) failures.push(`${asset}: HTTP ${response.status}`);
   }
 } finally {
-  server.closeIdleConnections?.();
-  server.closeAllConnections?.();
-  server.closeIdleConnections?.();
-  server.closeAllConnections?.();
-  await new Promise((resolve) => server.close(resolve));
+  preview.kill("SIGTERM");
 }
 
 if (failures.length) {
-  console.error(`Route QA failed (${failures.length}/${routes.length + 2} checks):`);
+  console.error(`SPA route QA failed (${failures.length}/${routes.length + 3} checks):`);
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`Route QA passed (${routes.length} pages plus 2 legacy redirects).`);
+console.log(`SPA route QA passed (${routes.length} client routes and 3 public assets).`);

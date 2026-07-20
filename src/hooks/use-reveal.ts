@@ -10,7 +10,8 @@ export function useReveal<T extends HTMLElement = HTMLElement>() {
     const root = ref.current;
     if (!root) return;
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
-    if (typeof IntersectionObserver === "undefined") {
+    const editorMode = new URLSearchParams(window.location.search).get("cms_edit") === "1";
+    if (editorMode || typeof IntersectionObserver === "undefined") {
       targets.forEach((el) => el.setAttribute("data-visible", "true"));
       return;
     }
