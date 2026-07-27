@@ -1,4 +1,4 @@
-import { Check, FileText, Image as ImageIcon, Loader2, Search, Upload, X } from "lucide-react";
+import { Check, FileText, Image as ImageIcon, Loader2, Search, Upload, Video, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { listMedia as fetchMediaRaw, uploadMedia, type MediaItem } from "@/lib/admin-api";
 
@@ -6,7 +6,7 @@ async function fetchMedia(_deleted = false) {
   return fetchMediaRaw();
 }
 
-type MediaKind = "images" | "documents" | "all";
+type MediaKind = "images" | "videos" | "documents" | "all";
 
 type Props = {
   open: boolean;
@@ -19,6 +19,10 @@ type Props = {
 
 function isImage(item: MediaItem) {
   return item.mime_type.startsWith("image/");
+}
+
+function isVideo(item: MediaItem) {
+  return item.mime_type.startsWith("video/");
 }
 
 export function MediaPicker({
@@ -67,6 +71,7 @@ export function MediaPicker({
     const needle = search.trim().toLowerCase();
     return items.filter((item) => {
       if (kind === "images" && !isImage(item)) return false;
+      if (kind === "videos" && !isVideo(item)) return false;
       if (kind === "documents" && item.mime_type !== "application/pdf") return false;
       if (!needle) return true;
       return [item.original_name, item.filename, item.mime_type].some((value) =>
@@ -89,6 +94,9 @@ export function MediaPicker({
       if (kind === "images" && !result.mime_type.startsWith("image/")) {
         throw new Error("Please upload an image file.");
       }
+      if (kind === "videos" && !result.mime_type.startsWith("video/")) {
+        throw new Error("Please upload an MP4, WebM, MOV, or OGV video.");
+      }
       await load();
       onSelect(result.url, result);
       onClose();
@@ -101,13 +109,16 @@ export function MediaPicker({
   }
 
   if (!open) return null;
-  const label = kind === "documents" ? "PDF" : kind === "images" ? "image" : "file";
+  const label =
+    kind === "documents" ? "PDF" : kind === "images" ? "image" : kind === "videos" ? "video" : "file";
   const accept =
     kind === "documents"
       ? "application/pdf,.pdf"
       : kind === "images"
         ? "image/*"
-        : "image/*,application/pdf,.pdf";
+        : kind === "videos"
+          ? "video/mp4,video/webm,video/quicktime,video/ogg,.mp4,.webm,.mov,.ogv"
+          : "image/*,video/mp4,video/webm,video/quicktime,video/ogg,application/pdf,.pdf,.mp4,.webm,.mov,.ogv";
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
@@ -174,6 +185,8 @@ export function MediaPicker({
             >
               {kind === "documents" ? (
                 <FileText className="size-8" />
+              ) : kind === "videos" ? (
+                <Video className="size-8" />
               ) : (
                 <ImageIcon className="size-8" />
               )}
@@ -203,6 +216,13 @@ export function MediaPicker({
                           alt={item.original_name}
                           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                         />
+                      ) : isVideo(item) ? (
+                        <div className="relative h-full w-full">
+                          <video src={item.url} className="h-full w-full object-cover" muted preload="metadata" />
+                          <span className="absolute inset-0 grid place-items-center bg-black/25 text-white">
+                            <Video className="size-10" />
+                          </span>
+                        </div>
                       ) : (
                         <div className="text-center">
                           <FileText className="mx-auto size-12 text-red-600" />

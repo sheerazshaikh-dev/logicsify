@@ -140,6 +140,13 @@ export type ContentItem = {
     employment_type?: string;
     quote?: string;
     role?: string;
+    client_name?: string;
+    company?: string;
+    project_type?: string;
+    testimonial_type?: "text" | "video";
+    video_url?: string;
+    video_poster?: string;
+    client_image?: string;
     social_links?: Record<string, string>;
     [key: string]: unknown;
   };

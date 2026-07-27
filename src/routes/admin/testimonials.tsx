@@ -6,7 +6,7 @@ export const Route = createFileRoute("/admin/testimonials")({
       type="testimonial"
       title="Testimonials"
       singular="Testimonial"
-      description="Manage client quotes and featured proof used throughout the website."
+      description="Manage written and video client testimonials used throughout the website."
     />
   ),
 });

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { CTASection } from "@/components/cta-section";
 import {
@@ -15,12 +16,14 @@ import {
   Database,
   Cloud,
   LineChart,
-  MessageSquare,
+  Play,
+  Quote,
   Workflow,
   Search,
   Megaphone,
 } from "lucide-react";
 import { caseStudies, industries, insights, allServices } from "@/lib/site-data";
+import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -142,9 +145,17 @@ function Hero() {
 }
 
 function HeroVisual() {
+  const nodes = [
+    [200, 40],
+    [340, 120],
+    [340, 280],
+    [200, 360],
+    [60, 280],
+    [60, 120],
+  ] as const;
+
   return (
     <div className="relative aspect-square max-w-[520px] mx-auto">
-      {/* Rotating rings */}
       <div className="absolute inset-0 rounded-full border border-white/10 animate-spin-slow" />
       <div
         className="absolute inset-8 rounded-full border border-white/10 animate-spin-slow"
@@ -155,26 +166,14 @@ function HeroVisual() {
         style={{ animationDuration: "18s" }}
       />
 
-      {/* Center orb */}
-      <div className="absolute inset-1/3 rounded-full bg-gradient-brand animate-pulse-glow blur-xl opacity-70" />
-      <div className="absolute inset-[42%] rounded-full bg-white/90" />
-
-      {/* Nodes */}
-      <svg viewBox="0 0 400 400" className="absolute inset-0 w-full h-full" aria-hidden>
+      <svg viewBox="0 0 400 400" className="absolute inset-0 z-10 w-full h-full" aria-hidden>
         <defs>
           <linearGradient id="node-line" x1="0" x2="1">
             <stop offset="0%" stopColor="#FE3434" />
             <stop offset="100%" stopColor="#FDBE02" />
           </linearGradient>
         </defs>
-        {[
-          [200, 40],
-          [340, 130],
-          [340, 270],
-          [200, 360],
-          [60, 270],
-          [60, 130],
-        ].map(([x, y], i) => (
+        {nodes.map(([x, y], i) => (
           <g key={i}>
             <line
               x1="200"
@@ -182,24 +181,28 @@ function HeroVisual() {
               x2={x}
               y2={y}
               stroke="url(#node-line)"
-              strokeWidth="1"
-              opacity="0.4"
-              strokeDasharray="4 6"
-              style={{ animation: "draw-line 3s ease-out forwards", animationDelay: `${i * 0.1}s` }}
+              strokeWidth="1.5"
+              opacity="0.62"
+              strokeDasharray="5 7"
+              style={{ animation: "draw-line 2.2s ease-out forwards", animationDelay: `${i * 0.08}s` }}
             />
-            <circle cx={x} cy={y} r="6" fill="url(#node-line)" opacity="0.9" />
-            <circle cx={x} cy={y} r="12" fill="none" stroke="url(#node-line)" opacity="0.3" />
+            <circle cx={x} cy={y} r="6" fill="url(#node-line)" opacity="0.95" />
+            <circle cx={x} cy={y} r="12" fill="none" stroke="url(#node-line)" opacity="0.45" />
           </g>
         ))}
       </svg>
 
-      {/* Floating UI cards */}
-      <div className="absolute -top-4 -right-4 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float">
+      <div className="absolute inset-1/3 z-20 rounded-full bg-gradient-brand animate-pulse-glow blur-xl opacity-70" />
+      <div className="absolute left-1/2 top-1/2 z-30 grid h-[86px] w-[86px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-[0_0_45px_rgba(253,190,2,0.45)]">
+        <img src="/logicsify-mark.png" alt="" className="h-12 w-12 object-contain" />
+      </div>
+
+      <div className="absolute -top-4 -right-4 z-40 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float">
         <p className="text-white/60 text-[10px] uppercase tracking-widest">Automation</p>
         <p className="mt-1 font-semibold">Lead qualified → CRM</p>
       </div>
       <div
-        className="absolute -bottom-2 -left-4 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float"
+        className="absolute -bottom-2 -left-4 z-40 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float"
         style={{ animationDelay: "1.5s" }}
       >
         <p className="text-white/60 text-[10px] uppercase tracking-widest">Growth</p>
@@ -703,65 +706,52 @@ function WhyLogicsify() {
 }
 
 function ConnectedSystemsVisual() {
+  const nodes = [
+    { x: 200, y: 54, label: "Data" },
+    { x: 326, y: 127, label: "Product" },
+    { x: 326, y: 273, label: "AI" },
+    { x: 200, y: 346, label: "Growth" },
+    { x: 74, y: 273, label: "Ops" },
+    { x: 74, y: 127, label: "Design" },
+  ];
+
   return (
-    <svg viewBox="0 0 400 400" className="w-full h-full">
-      <defs>
-        <linearGradient id="cs-line" x1="0" x2="1">
-          <stop offset="0" stopColor="#FE3434" />
-          <stop offset="1" stopColor="#FDBE02" />
-        </linearGradient>
-      </defs>
-      <circle cx="200" cy="200" r="42" fill="url(#cs-line)" />
-      <circle
-        cx="200"
-        cy="200"
-        r="60"
-        fill="none"
-        stroke="url(#cs-line)"
-        strokeWidth="1"
-        opacity="0.5"
-      />
-      {[
-        [60, 80, "Design"],
-        [340, 80, "Data"],
-        [60, 320, "Growth"],
-        [340, 320, "AI"],
-        [60, 200, "Ops"],
-        [340, 200, "Product"],
-      ].map(([x, y, label], i) => (
-        <g key={i}>
-          <line
-            x1="200"
-            y1="200"
-            x2={x as number}
-            y2={y as number}
-            stroke="url(#cs-line)"
-            strokeWidth="1"
-            opacity="0.35"
-          />
-          <circle cx={x as number} cy={y as number} r="26" fill="#190A2F" />
-          <circle
-            cx={x as number}
-            cy={y as number}
-            r="26"
-            fill="none"
-            stroke="url(#cs-line)"
-            strokeWidth="1"
-            opacity="0.6"
-          />
-          <text
-            x={x as number}
-            y={(y as number) + 4}
-            textAnchor="middle"
-            fontSize="10"
-            fill="#fff"
-            fontFamily="Inter"
-          >
-            {label as string}
-          </text>
-        </g>
-      ))}
-    </svg>
+    <div className="relative h-full w-full">
+      <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden>
+        <defs>
+          <linearGradient id="cs-line" x1="0" x2="1">
+            <stop offset="0" stopColor="#FE3434" />
+            <stop offset="1" stopColor="#FDBE02" />
+          </linearGradient>
+        </defs>
+        <polygon
+          points={nodes.map((node) => `${node.x},${node.y}`).join(" ")}
+          fill="none"
+          stroke="url(#cs-line)"
+          strokeWidth="1"
+          opacity="0.18"
+        />
+        {nodes.map(({ x, y, label }) => (
+          <g key={label}>
+            <line x1="200" y1="200" x2={x} y2={y} stroke="url(#cs-line)" strokeWidth="1.4" opacity="0.48" />
+            <circle cx={x} cy={y} r="27" fill="#190A2F" />
+            <circle cx={x} cy={y} r="27" fill="none" stroke="url(#cs-line)" strokeWidth="1.2" opacity="0.7" />
+            <text x={x} y={y + 4} textAnchor="middle" fontSize="10" fill="#fff" fontFamily="Inter">
+              {label}
+            </text>
+          </g>
+        ))}
+        <circle cx="200" cy="200" r="61" fill="#f1edff" stroke="url(#cs-line)" strokeWidth="1" opacity="0.98" />
+        <circle cx="200" cy="200" r="43" fill="url(#cs-line)" />
+      </svg>
+      <div className="absolute left-1/2 top-1/2 z-10 grid h-[66px] w-[66px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full">
+        <img
+          src="/logicsify-mark.png"
+          alt=""
+          className="h-9 w-9 object-contain brightness-0 invert"
+        />
+      </div>
+    </div>
   );
 }
 
@@ -849,42 +839,49 @@ function IndustriesGrid() {
           <h2 className="fluid-h2">Sectors where we deliver senior-level work.</h2>
         </div>
         <div className="grid md:grid-cols-6 gap-5">
-          {industries.map((ind, i) => (
-            <Link
-              to="/industries/$slug"
-              params={{ slug: ind.slug }}
-              key={ind.slug}
-              data-reveal
-              className={`group relative overflow-hidden rounded-2xl bg-white border border-black/5 p-6 md:p-8 hover:shadow-[0_20px_50px_-20px_rgba(25,10,47,0.25)] transition-all ${
-                i === 0
-                  ? "md:col-span-3 md:row-span-2 md:min-h-[380px] bg-ink text-white"
-                  : i === 1
-                    ? "md:col-span-3"
-                    : i === 3
-                      ? "md:col-span-4"
-                      : "md:col-span-2"
-              }`}
-            >
-              <div
-                className={`inline-block text-[10px] uppercase tracking-widest ${i === 0 ? "text-white/60" : "text-ink-soft"} mb-3`}
+          {industries.map((ind, i) => {
+            const featured = i === 0;
+            return (
+              <Link
+                to="/industries/$slug"
+                params={{ slug: ind.slug }}
+                key={ind.slug}
+                data-reveal
+                className={`group relative overflow-hidden rounded-2xl border border-black/5 p-6 md:p-8 hover:shadow-[0_20px_50px_-20px_rgba(25,10,47,0.25)] transition-all ${
+                  featured
+                    ? "section-dark grid-noise md:col-span-3 md:row-span-2 md:min-h-[380px] text-white"
+                    : i === 1
+                      ? "md:col-span-3 bg-white"
+                      : i === 3
+                        ? "md:col-span-4 bg-white"
+                        : "md:col-span-2 bg-white"
+                }`}
               >
-                {ind.tag}
-              </div>
-              <h3
-                className={`text-2xl md:text-3xl font-semibold ${i === 0 ? "text-white" : "text-ink"} mb-3`}
-              >
-                {ind.name}
-              </h3>
-              <p className={`text-sm ${i === 0 ? "text-white/70" : "text-ink-soft"} max-w-md`}>
-                {ind.desc}
-              </p>
-              <div
-                className={`mt-6 inline-flex items-center gap-1 text-sm font-semibold ${i === 0 ? "text-white" : "text-ink"} group-hover:text-gradient`}
-              >
-                Explore <ArrowRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-          ))}
+                {featured ? (
+                  <>
+                    <div className="absolute -right-20 -top-24 h-80 w-80 rounded-full bg-brand-gold/35 blur-3xl" />
+                    <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-brand-red/25 blur-3xl" />
+                    <div className="absolute right-8 top-8 h-24 w-24 rounded-full border border-white/10" />
+                    <div className="absolute right-16 top-16 h-8 w-8 rounded-full bg-gradient-brand shadow-[0_0_28px_rgba(253,190,2,0.65)]" />
+                  </>
+                ) : null}
+                <div className="relative z-10 flex h-full flex-col justify-end">
+                  <div className={`inline-block text-[10px] uppercase tracking-widest ${featured ? "text-white/60" : "text-ink-soft"} mb-3`}>
+                    {ind.tag}
+                  </div>
+                  <h3 className={`text-2xl md:text-3xl font-semibold ${featured ? "text-white" : "text-ink"} mb-3`}>
+                    {ind.name}
+                  </h3>
+                  <p className={`text-sm ${featured ? "text-white/70" : "text-ink-soft"} max-w-md`}>
+                    {ind.desc}
+                  </p>
+                  <div className={`mt-6 inline-flex items-center gap-1 text-sm font-semibold ${featured ? "text-white" : "text-ink"} group-hover:text-gradient`}>
+                    Explore <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -892,34 +889,125 @@ function IndustriesGrid() {
 }
 
 /* ---------- TESTIMONIAL FRAMEWORK ---------- */
+type TestimonialData = {
+  clientName: string;
+  role: string;
+  company: string;
+  projectType: string;
+  quote: string;
+  type: "text" | "video";
+  videoUrl: string;
+  poster: string;
+  image: string;
+};
+
+function testimonialData(item: CmsContentItem): TestimonialData {
+  const content = item.content_json || {};
+  return {
+    clientName: String(content.client_name || item.title || "Client"),
+    role: String(content.role || ""),
+    company: String(content.company || ""),
+    projectType: String(content.project_type || ""),
+    quote: String(content.quote || item.excerpt || content.body || ""),
+    type: String(content.testimonial_type || "text") === "video" ? "video" : "text",
+    videoUrl: String(content.video_url || ""),
+    poster: String(content.video_poster || item.featured_image || ""),
+    image: String(content.client_image || item.featured_image || ""),
+  };
+}
+
+function videoEmbedUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtube.com")) {
+      const id = parsed.searchParams.get("v");
+      return id ? `https://www.youtube.com/embed/${id}` : url;
+    }
+    if (parsed.hostname === "youtu.be") return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
+    if (parsed.hostname.includes("vimeo.com")) {
+      const id = parsed.pathname.split("/").filter(Boolean).pop();
+      return id ? `https://player.vimeo.com/video/${id}` : url;
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
 function TestimonialSection() {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    void getCmsContentList("testimonial").then((result) => {
+      if (active) setItems(result);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const testimonials = useMemo(() => items.map(testimonialData).filter((item) => item.quote || item.videoUrl), [items]);
+  if (!testimonials.length) return null;
+
   return (
     <section className="py-24 md:py-32">
       <div className="container-page">
         <div className="max-w-3xl mb-16">
           <p className="eyebrow mb-4">Voices</p>
-          <h2 className="fluid-h2">Client stories, coming soon.</h2>
-          <p className="mt-4 text-ink-soft">
-            This carousel is designed to plug into a CMS. Approved client testimonials will appear
-            here.
-          </p>
+          <h2 className="fluid-h2">What clients say after the work ships.</h2>
+          <p className="mt-4 text-ink-soft">Published testimonials are managed from the Logicsify admin panel.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-5">
-          {[1, 2, 3].map((i) => (
-            <blockquote
-              key={i}
-              className="rounded-2xl border border-dashed border-ink/15 p-8 bg-white"
-            >
-              <MessageSquare className="w-5 h-5 text-brand-red mb-4" />
-              <p className="text-lg text-ink/60 italic leading-relaxed">
-                "[ Testimonial placeholder — client-approved quote will appear here. ]"
-              </p>
-              <footer className="mt-6 text-sm">
-                <p className="font-semibold text-ink/70">[ Client Name ]</p>
-                <p className="text-ink-soft">[ Position ], [ Company ] · [ Project Type ]</p>
-              </footer>
-            </blockquote>
-          ))}
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {testimonials.map((testimonial, index) => {
+            const embedUrl = videoEmbedUrl(testimonial.videoUrl);
+            const hostedVideo = testimonial.videoUrl && !embedUrl;
+            return (
+              <article key={`${testimonial.clientName}-${index}`} className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[0_22px_60px_-45px_rgba(25,10,47,0.45)]">
+                {testimonial.type === "video" && testimonial.videoUrl ? (
+                  <div className="relative aspect-video overflow-hidden bg-ink">
+                    {embedUrl ? (
+                      <iframe
+                        src={embedUrl}
+                        title={`${testimonial.clientName} video testimonial`}
+                        className="h-full w-full"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : hostedVideo ? (
+                      <video className="h-full w-full object-cover" controls preload="metadata" poster={testimonial.poster || undefined}>
+                        <source src={testimonial.videoUrl} />
+                      </video>
+                    ) : null}
+                    {!embedUrl && !hostedVideo && testimonial.poster ? <img src={testimonial.poster} alt="" className="h-full w-full object-cover" /> : null}
+                  </div>
+                ) : null}
+                <div className="p-7 md:p-8">
+                  <Quote className="mb-5 h-7 w-7 text-brand-red" />
+                  {testimonial.quote ? <blockquote className="text-lg leading-relaxed text-ink">“{testimonial.quote}”</blockquote> : null}
+                  <footer className="mt-7 flex items-center gap-3">
+                    {testimonial.image ? (
+                      <img src={testimonial.image} alt={testimonial.clientName} className="h-12 w-12 rounded-full object-cover" />
+                    ) : (
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-gradient-brand text-sm font-bold text-white">
+                        {testimonial.clientName.slice(0, 1).toUpperCase()}
+                      </span>
+                    )}
+                    <div>
+                      <p className="font-semibold text-ink">{testimonial.clientName}</p>
+                      <p className="text-sm text-ink-soft">{[testimonial.role, testimonial.company, testimonial.projectType].filter(Boolean).join(" · ")}</p>
+                    </div>
+                  </footer>
+                  {testimonial.type === "video" && testimonial.videoUrl ? (
+                    <div className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-brand-red">
+                      <Play className="h-3.5 w-3.5" /> Video testimonial
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

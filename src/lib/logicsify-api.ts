@@ -157,6 +157,15 @@ export type CmsContentItem = {
     sections?: Array<Record<string, string>>;
     category?: string;
     tags?: string[];
+    quote?: string;
+    role?: string;
+    client_name?: string;
+    company?: string;
+    project_type?: string;
+    testimonial_type?: "text" | "video";
+    video_url?: string;
+    video_poster?: string;
+    client_image?: string;
     [key: string]: unknown;
   };
   seo_json?: {

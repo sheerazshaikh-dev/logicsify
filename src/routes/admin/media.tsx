@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   Copy,
   FileText,
-  Image as ImageIcon,
   Loader2,
   Search,
   Trash2,
   UploadCloud,
+  Video,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -77,7 +77,7 @@ function MediaPage() {
       <AdminPageHeader
         eyebrow="Assets"
         title="Media Library"
-        description="Upload and manage images, PDFs and downloadable documents used across Logicsify content."
+        description="Upload and manage images, testimonial videos, PDFs and downloadable documents used across Logicsify content."
         actions={
           <AdminButton onClick={() => setUploadOpen(true)}>
             <UploadCloud className="h-4 w-4" /> Upload media
@@ -102,7 +102,7 @@ function MediaPage() {
         ) : !filtered.length ? (
           <EmptyState
             title="Media library is empty"
-            description="Upload images, PDFs or documents to start building your website library."
+            description="Upload images, testimonial videos, PDFs or documents to start building your website library."
             action={
               <AdminButton onClick={() => setUploadOpen(true)}>
                 <UploadCloud className="h-4 w-4" /> Upload media
@@ -123,6 +123,13 @@ function MediaPage() {
                       alt={item.alt_text || item.original_name}
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
+                  ) : item.mime_type.startsWith("video/") ? (
+                    <div className="relative h-full w-full">
+                      <video src={item.url} className="h-full w-full object-cover" muted preload="metadata" />
+                      <span className="absolute inset-0 grid place-items-center bg-black/25 text-white">
+                        <Video className="h-10 w-10" />
+                      </span>
+                    </div>
                   ) : (
                     <div className="grid h-full place-items-center text-slate-300">
                       <FileText className="h-10 w-10" />
@@ -214,7 +221,7 @@ function UploadModal({
       open={open}
       onClose={onClose}
       title="Upload media"
-      description="Images up to 12 MB, plus PDF and DOCX documents."
+      description="Images and documents up to 12 MB. Testimonial videos support MP4, WebM, MOV and OGV; hosting limits still apply."
       width="max-w-xl"
     >
       <form onSubmit={submit} className="space-y-5">
@@ -225,6 +232,13 @@ function UploadModal({
               alt="Preview"
               className="mb-4 max-h-36 max-w-full rounded-xl object-contain"
             />
+          ) : file?.type.startsWith("video/") ? (
+            <video
+              src={URL.createObjectURL(file)}
+              className="mb-4 max-h-36 max-w-full rounded-xl object-contain"
+              muted
+              controls
+            />
           ) : (
             <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white text-[#FE3434] shadow-sm">
               <UploadCloud className="h-6 w-6" />
@@ -233,11 +247,11 @@ function UploadModal({
           <span className="text-sm font-semibold text-[#190A2F]">
             {file ? file.name : "Choose a file or drop it here"}
           </span>
-          <span className="mt-2 text-xs text-slate-400">JPG, PNG, WebP, GIF, PDF or DOCX</span>
+          <span className="mt-2 text-xs text-slate-400">JPG, PNG, WebP, GIF, MP4, WebM, MOV, OGV, PDF or DOCX</span>
           <input
             type="file"
             className="hidden"
-            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.docx"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,video/ogg,application/pdf,.docx,.mp4,.webm,.mov,.ogv"
             onChange={(event) => setFile(event.target.files?.[0] || null)}
           />
         </label>
@@ -247,7 +261,7 @@ function UploadModal({
             value={alt}
             onChange={(event) => setAlt(event.target.value)}
             className={adminInputClass}
-            placeholder="Describe the image for accessibility and SEO"
+            placeholder="Describe the image/video for accessibility and internal reference"
           />
         </div>
         <div className="flex justify-end gap-2">

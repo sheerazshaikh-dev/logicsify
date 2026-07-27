@@ -11,6 +11,7 @@ import {
   History,
   Image as ImageIcon,
   Monitor,
+  Video,
   Redo2,
   Undo2,
   Loader2,
@@ -30,12 +31,10 @@ import {
   duplicateContent,
   getContentRevisions,
   listContent,
-  listMedia,
   restoreContentRevision,
   updateContent,
   type ContentItem,
   type ContentSection,
-  type MediaItem,
 } from "@/lib/admin-api";
 import {
   AdminButton,
@@ -54,6 +53,7 @@ import { NativePageVisualEditor } from "@/components/cms/native-page-visual-edit
 import type { CmsNativeContent, VisualAdminPage } from "@/lib/cms-visual";
 import { useUndoHistory } from "@/lib/use-undo-history";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { MediaPicker } from "@/components/cms/media-picker";
 import { contentPublicPath, isVisualEditableType, visualEditorPath } from "@/lib/content-routes";
 
 const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => ({
@@ -64,7 +64,21 @@ const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => (
   featured: false,
   excerpt: "",
   featured_image: "",
-  content_json: { body: "", sections: [], category: "", tags: [] },
+  content_json: {
+    body: "",
+    sections: [],
+    category: "",
+    tags: [],
+    quote: "",
+    role: "",
+    client_name: "",
+    company: "",
+    project_type: "",
+    testimonial_type: "text",
+    video_url: "",
+    video_poster: "",
+    client_image: "",
+  },
   seo_json: { title: "", description: "", canonical: "", noindex: false, og_image: "" },
   published_at: "",
   sort_order: 0,
@@ -149,6 +163,15 @@ export function ContentManagerPage({
         sections: [],
         category: "",
         tags: [],
+        quote: "",
+        role: "",
+        client_name: "",
+        company: "",
+        project_type: "",
+        testimonial_type: "text",
+        video_url: "",
+        video_poster: "",
+        client_image: "",
         ...(item.content_json || {}),
       },
       seo_json: {
@@ -532,6 +555,9 @@ function ContentEditor({
   >([]);
   const [loadingRevisions, setLoadingRevisions] = useState(false);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [mediaTarget, setMediaTarget] = useState<
+    "featured" | "client_image" | "video" | "video_poster"
+  >("featured");
 
   useEffect(() => {
     formRef.current = item;
@@ -560,6 +586,11 @@ function ContentEditor({
       ...current,
       seo_json: { ...(current.seo_json || {}), [key]: value },
     }));
+  }
+
+  function chooseMedia(target: "featured" | "client_image" | "video" | "video_poster") {
+    setMediaTarget(target);
+    setMediaOpen(true);
   }
 
   async function save() {
@@ -719,7 +750,7 @@ function ContentEditor({
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-5">
               <div>
-                <FieldLabel>Title</FieldLabel>
+                <FieldLabel>{form.content_type === "testimonial" ? "Client name" : "Title"}</FieldLabel>
                 <input
                   value={form.title || ""}
                   onChange={(event) => {
@@ -728,10 +759,14 @@ function ContentEditor({
                       ...current,
                       title,
                       slug: current.id || current.slug ? current.slug : slugify(title),
+                      content_json:
+                        current.content_type === "testimonial"
+                          ? { ...(current.content_json || {}), client_name: title }
+                          : current.content_json,
                     }));
                   }}
                   className={`${adminInputClass} h-14 text-lg font-semibold`}
-                  placeholder={`${singular} title`}
+                  placeholder={form.content_type === "testimonial" ? "Client or company name" : `${singular} title`}
                 />
               </div>
               <div>
@@ -745,29 +780,138 @@ function ContentEditor({
                   />
                 </div>
               </div>
-              <div>
-                <FieldLabel>Excerpt / Summary</FieldLabel>
-                <textarea
-                  rows={3}
-                  value={form.excerpt || ""}
-                  onChange={(event) => setField("excerpt", event.target.value)}
-                  className={adminTextareaClass}
-                  placeholder="A concise summary used on cards and search listings."
-                />
-              </div>
-              <div>
-                <FieldLabel>Main Body</FieldLabel>
-                <RichTextEditor
-                  value={String(contentJson.body || "")}
-                  onChange={(value) => updateContentJson("body", value)}
-                />
-              </div>
-
-              <SectionBuilder
-                sections={sections}
-                onChange={(next) => updateContentJson("sections", next)}
-                onPickMedia={() => setMediaOpen(true)}
-              />
+              {form.content_type === "testimonial" ? (
+                <AdminCard className="space-y-5 p-5">
+                  <div>
+                    <h3 className="text-base font-semibold text-[#190A2F]">Testimonial details</h3>
+                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                      Publish a written quote or a hosted/embedded video testimonial.
+                    </p>
+                  </div>
+                  <div>
+                    <FieldLabel>Testimonial type</FieldLabel>
+                    <select
+                      value={String(contentJson.testimonial_type || "text")}
+                      onChange={(event) => updateContentJson("testimonial_type", event.target.value)}
+                      className={adminInputClass}
+                    >
+                      <option value="text">Written testimonial</option>
+                      <option value="video">Video testimonial</option>
+                    </select>
+                  </div>
+                  <div>
+                    <FieldLabel>Client quote</FieldLabel>
+                    <textarea
+                      rows={6}
+                      value={String(contentJson.quote || form.excerpt || "")}
+                      onChange={(event) => {
+                        updateContentJson("quote", event.target.value);
+                        setField("excerpt", event.target.value);
+                      }}
+                      className={adminTextareaClass}
+                      placeholder="What the client said about the project and outcome."
+                    />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <FieldLabel>Role / position</FieldLabel>
+                      <input
+                        value={String(contentJson.role || "")}
+                        onChange={(event) => updateContentJson("role", event.target.value)}
+                        className={adminInputClass}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Company</FieldLabel>
+                      <input
+                        value={String(contentJson.company || "")}
+                        onChange={(event) => updateContentJson("company", event.target.value)}
+                        className={adminInputClass}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Project type</FieldLabel>
+                      <input
+                        value={String(contentJson.project_type || "")}
+                        onChange={(event) => updateContentJson("project_type", event.target.value)}
+                        className={adminInputClass}
+                        placeholder="Website, SaaS, AI automation…"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <FieldLabel>Client image / company logo</FieldLabel>
+                    <div className="flex gap-2">
+                      <input
+                        value={String(contentJson.client_image || "")}
+                        onChange={(event) => updateContentJson("client_image", event.target.value)}
+                        className={adminInputClass}
+                        placeholder="https://…"
+                      />
+                      <AdminButton variant="secondary" onClick={() => chooseMedia("client_image")}>
+                        <ImageIcon className="h-4 w-4" /> Browse
+                      </AdminButton>
+                    </div>
+                  </div>
+                  {String(contentJson.testimonial_type || "text") === "video" ? (
+                    <>
+                      <div>
+                        <FieldLabel>Video URL</FieldLabel>
+                        <div className="flex gap-2">
+                          <input
+                            value={String(contentJson.video_url || "")}
+                            onChange={(event) => updateContentJson("video_url", event.target.value)}
+                            className={adminInputClass}
+                            placeholder="YouTube, Vimeo, or uploaded MP4/WebM URL"
+                          />
+                          <AdminButton variant="secondary" onClick={() => chooseMedia("video")}>
+                            <Video className="h-4 w-4" /> Browse
+                          </AdminButton>
+                        </div>
+                      </div>
+                      <div>
+                        <FieldLabel>Video poster / thumbnail</FieldLabel>
+                        <div className="flex gap-2">
+                          <input
+                            value={String(contentJson.video_poster || "")}
+                            onChange={(event) => updateContentJson("video_poster", event.target.value)}
+                            className={adminInputClass}
+                            placeholder="https://…"
+                          />
+                          <AdminButton variant="secondary" onClick={() => chooseMedia("video_poster")}>
+                            <ImageIcon className="h-4 w-4" /> Browse
+                          </AdminButton>
+                        </div>
+                      </div>
+                    </>
+                  ) : null}
+                </AdminCard>
+              ) : (
+                <>
+                  <div>
+                    <FieldLabel>Excerpt / Summary</FieldLabel>
+                    <textarea
+                      rows={3}
+                      value={form.excerpt || ""}
+                      onChange={(event) => setField("excerpt", event.target.value)}
+                      className={adminTextareaClass}
+                      placeholder="A concise summary used on cards and search listings."
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Main Body</FieldLabel>
+                    <RichTextEditor
+                      value={String(contentJson.body || "")}
+                      onChange={(value) => updateContentJson("body", value)}
+                    />
+                  </div>
+                  <SectionBuilder
+                    sections={sections}
+                    onChange={(next) => updateContentJson("sections", next)}
+                    onPickMedia={() => chooseMedia("featured")}
+                  />
+                </>
+              )}
             </div>
 
             <div className="space-y-5">
@@ -832,9 +976,9 @@ function ContentEditor({
 
               <AdminCard className="p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#190A2F]">Featured image</h3>
+                  <h3 className="text-sm font-semibold text-[#190A2F]">{form.content_type === "testimonial" ? "Fallback image" : "Featured image"}</h3>
                   <button
-                    onClick={() => setMediaOpen(true)}
+                    onClick={() => chooseMedia("featured")}
                     className="text-xs font-semibold text-[#FE3434]"
                   >
                     Media library
@@ -1044,8 +1188,18 @@ function ContentEditor({
       <MediaPicker
         open={mediaOpen}
         onClose={() => setMediaOpen(false)}
+        kind={mediaTarget === "video" ? "videos" : "images"}
+        title={mediaTarget === "video" ? "Choose testimonial video" : "Choose image"}
+        selectedUrl={
+          mediaTarget === "featured"
+            ? form.featured_image || ""
+            : String(contentJson[mediaTarget === "video" ? "video_url" : mediaTarget] || "")
+        }
         onSelect={(url) => {
-          setField("featured_image", url);
+          if (mediaTarget === "featured") setField("featured_image", url);
+          else if (mediaTarget === "video") updateContentJson("video_url", url);
+          else if (mediaTarget === "video_poster") updateContentJson("video_poster", url);
+          else updateContentJson("client_image", url);
           setMediaOpen(false);
         }}
       />
@@ -1216,68 +1370,5 @@ function SectionBuilder({
         </div>
       )}
     </AdminCard>
-  );
-}
-
-function MediaPicker({
-  open,
-  onClose,
-  onSelect,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSelect: (url: string) => void;
-}) {
-  const [items, setItems] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    listMedia()
-      .then(setItems)
-      .catch((error) =>
-        toast.error(error instanceof Error ? error.message : "Could not load media."),
-      )
-      .finally(() => setLoading(false));
-  }, [open]);
-
-  return (
-    <AdminModal
-      open={open}
-      onClose={onClose}
-      title="Choose media"
-      description="Select an uploaded image for this content item."
-      width="max-w-5xl"
-    >
-      {loading ? (
-        <AdminLoading label="Loading media…" />
-      ) : !items.length ? (
-        <EmptyState
-          title="Media library is empty"
-          description="Upload files from the Media section first."
-        />
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {items
-            .filter((item) => item.mime_type.startsWith("image/"))
-            .map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onSelect(item.url)}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:border-[#FE3434] hover:shadow-lg"
-              >
-                <img
-                  src={item.url}
-                  alt={item.alt_text || item.original_name}
-                  className="aspect-[4/3] w-full object-cover"
-                />
-                <span className="block truncate p-3 text-xs font-semibold text-[#190A2F]">
-                  {item.original_name}
-                </span>
-              </button>
-            ))}
-        </div>
-      )}
-    </AdminModal>
   );
 }
