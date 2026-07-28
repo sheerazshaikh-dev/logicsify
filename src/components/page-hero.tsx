@@ -42,9 +42,9 @@ export function PageHero({
           </nav>
         )}
         <div className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7">
+          <div className={visual ? "lg:col-span-7" : "lg:col-span-12"}>
             {eyebrow && <p className="eyebrow text-white/70 mb-6">{eyebrow}</p>}
-            <h1 className="fluid-display text-white">{title}</h1>
+            <div className="hero-heading-wrap"><h1 className="fluid-display text-white">{title}</h1></div>
             {intro && (
               <p className="mt-6 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed">
                 {intro}

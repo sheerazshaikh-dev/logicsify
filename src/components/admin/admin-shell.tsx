@@ -7,6 +7,10 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
+  FileDown,
+  Scale,
+  Handshake,
+  PlugZap,
   Gauge,
   Globe2,
   Images,
@@ -36,6 +40,7 @@ import {
 } from "@/lib/admin-api";
 import { AdminLoading } from "@/components/admin/admin-ui";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
+import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
 
 const navigation = [
   {
@@ -53,6 +58,10 @@ const navigation = [
       { label: "Careers", to: "/admin/careers", icon: BookOpen },
       { label: "Testimonials", to: "/admin/testimonials", icon: MessageSquareText },
       { label: "Team", to: "/admin/team", icon: Users },
+      { label: "Resources", to: "/admin/resources", icon: FileDown },
+      { label: "Comparisons", to: "/admin/comparisons", icon: Scale },
+      { label: "Engagement Models", to: "/admin/engagement-models", icon: Handshake },
+      { label: "Integrations", to: "/admin/integrations", icon: PlugZap },
     ],
   },
   {
@@ -119,7 +128,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    getPublicSiteSettings().then(setSiteSettings);
+    getPublicSiteSettings().then((settings) => setSiteSettings(withDefaultBranding(settings)));
+  }, []);
+
+  useEffect(() => {
+    let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    const created = !robots;
+    if (!robots) {
+      robots = document.createElement("meta");
+      robots.name = "robots";
+      document.head.appendChild(robots);
+    }
+    const previous = robots.content;
+    robots.content = "noindex, nofollow, noarchive";
+    return () => {
+      if (created) robots?.remove();
+      else if (robots) robots.content = previous;
+    };
   }, []);
 
   const pageTitle = useMemo(() => {
@@ -153,28 +178,27 @@ export function AdminShell({ children }: { children: ReactNode }) {
       className={`flex h-full flex-col border-r border-white/10 bg-[#190A2F] text-white transition-all duration-300 ${collapsed ? "w-[88px]" : "w-[274px]"}`}
     >
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-        <Link to="/admin/dashboard" className="flex items-center gap-3 overflow-hidden">
-          <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-brand font-display text-sm font-black text-white shadow-lg">
-            {siteSettings.admin_logo ? (
+        <Link to="/admin/dashboard" className="flex min-w-0 items-center gap-3 overflow-hidden">
+          {collapsed ? (
+            <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl shadow-lg">
               <img
-                src={siteSettings.admin_logo}
-                alt=""
-                className="h-full w-full object-contain p-1.5"
+                src={siteSettings.favicon || DEFAULT_BRAND_ASSETS.favicon}
+                alt="Logicsify"
+                className="h-full w-full object-contain"
               />
-            ) : (
-              (siteSettings.site_name || "Logicsify").charAt(0).toUpperCase()
-            )}
-          </span>
-          {!collapsed ? (
+            </span>
+          ) : (
             <div className="min-w-0">
-              <p className="truncate font-display text-base font-semibold">
-                {siteSettings.site_name || "Logicsify"}
-              </p>
-              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.24em] text-white/45">
+              <img
+                src={siteSettings.admin_logo || DEFAULT_BRAND_ASSETS.adminLogo}
+                alt={siteSettings.site_name || "Logicsify"}
+                className="h-8 w-auto max-w-[164px] object-contain object-left"
+              />
+              <p className="mt-1 truncate text-[9px] font-semibold uppercase tracking-[0.24em] text-white/45">
                 Content Studio
               </p>
             </div>
-          ) : null}
+          )}
         </Link>
         <button
           className="hidden rounded-lg p-2 text-white/50 transition hover:bg-white/10 hover:text-white lg:block"

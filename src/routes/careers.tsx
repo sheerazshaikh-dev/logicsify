@@ -16,9 +16,9 @@ export const Route = createFileRoute("/careers")({
         content:
           "Join a senior, multidisciplinary team building end-to-end technology, AI, and growth systems.",
       },
-      { property: "og:url", content: "/careers" },
+      { property: "og:url", content: "https://logicsify.com/careers" },
     ],
-    links: [{ rel: "canonical", href: "/careers" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/careers" }],
   }),
 });
 

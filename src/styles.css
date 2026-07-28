@@ -325,3 +325,32 @@ body.cms-edit-mode [data-cms-field-keys] {
 .cms-edit-mode [data-cms-runtime="editor"] form {
   pointer-events: auto;
 }
+
+
+/* Global hero measure required across the public website. */
+.hero-heading-wrap { width: 100%; max-width: 1120px; }
+@media (min-width: 768px) { .hero-heading-wrap { width: 88%; } }
+@media (min-width: 1024px) { .hero-heading-wrap { width: 75%; } }
+
+.public-prose { color: var(--ink-soft); line-height: 1.8; }
+.public-prose h2, .public-prose h3 { color: var(--ink); margin-top: 2rem; margin-bottom: .75rem; }
+.public-prose p, .public-prose ul, .public-prose ol, .public-prose blockquote, .public-prose table { margin-block: 1rem; }
+.public-prose ul, .public-prose ol { padding-left: 1.35rem; }
+.public-prose ul { list-style: disc; }
+.public-prose ol { list-style: decimal; }
+.public-prose a { color: #FE3434; text-decoration: underline; text-underline-offset: 3px; }
+.public-prose table { width: 100%; border-collapse: collapse; }
+.public-prose th, .public-prose td { border: 1px solid rgba(25,10,47,.12); padding: .75rem; text-align: left; }
+.public-prose blockquote { border-left: 3px solid #FE3434; padding-left: 1rem; color: var(--ink); }
+
+.form-input {
+  width: 100%;
+  border: 1px solid rgba(25,10,47,.14);
+  border-radius: .9rem;
+  background: white;
+  padding: .8rem .95rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.form-input:focus { border-color: #FE3434; box-shadow: 0 0 0 4px rgba(254,52,52,.1); }

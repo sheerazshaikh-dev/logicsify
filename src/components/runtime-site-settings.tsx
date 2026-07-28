@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { getPublicSiteSettings } from "@/lib/logicsify-api";
+import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
 
 function upsertMeta(selector: string, attributes: Record<string, string>, content?: string) {
   if (!content) return;
@@ -31,12 +32,16 @@ function boolSetting(value: unknown, fallback = false) {
 export function RuntimeSiteSettings() {
   useEffect(() => {
     let active = true;
-    getPublicSiteSettings().then((settings) => {
+    getPublicSiteSettings().then((loadedSettings) => {
       if (!active) return;
+      const settings = withDefaultBranding(loadedSettings);
 
-      upsertLink("icon", settings.favicon);
-      upsertLink("shortcut icon", settings.favicon);
-      upsertLink("apple-touch-icon", settings.apple_touch_icon || settings.favicon);
+      upsertLink("icon", settings.favicon || DEFAULT_BRAND_ASSETS.favicon);
+      upsertLink("shortcut icon", settings.favicon || DEFAULT_BRAND_ASSETS.favicon);
+      upsertLink(
+        "apple-touch-icon",
+        settings.apple_touch_icon || settings.favicon || DEFAULT_BRAND_ASSETS.appleTouchIcon,
+      );
       upsertMeta(
         'meta[name="theme-color"]',
         { name: "theme-color" },

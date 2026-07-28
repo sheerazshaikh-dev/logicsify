@@ -4,6 +4,8 @@ import { PageHero } from "./page-hero";
 import { CTASection } from "./cta-section";
 import { allServices } from "@/lib/site-data";
 import type { ComponentType } from "react";
+import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
+import { engagementModels } from "@/lib/expansion-data";
 
 export type ServicePageData = {
   slug: string;
@@ -41,8 +43,8 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </>
         }
         intro={data.heroIntro}
-        primaryCta={{ label: "Start a Project", to: "/contact" }}
-        secondaryCta={{ label: "Book a Strategy Call", to: "/book-a-call" }}
+        primaryCta={{ label: "Get a Free Technical Roadmap", to: "/technical-roadmap" }}
+        secondaryCta={{ label: "View Our Work", to: "/work" }}
         visual={<ServiceHeroVisual name={data.name} />}
       />
 
@@ -182,14 +184,14 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         <div className="container-page grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-5">
             <p className="eyebrow mb-4">Why Logicsify</p>
-            <h2 className="fluid-h2">Senior teams. Real outcomes.</h2>
+            <h2 className="fluid-h2">Connected delivery. Clear ownership.</h2>
           </div>
           <ul className="lg:col-span-7 space-y-4">
             {[
               "Strategy, design, engineering, and growth in one team.",
-              "Fixed-scope discovery so you always know what's next.",
-              "Clean, documented code owned by you from day one.",
-              "Analytics and reporting baked into every deliverable.",
+              "A defined technical plan so responsibilities and next steps stay visible.",
+              "Documented implementation and ownership terms agreed in the project scope.",
+              "Measurement and reporting included where they are part of the agreed deliverable.",
             ].map((r) => (
               <li key={r} className="flex items-start gap-3 text-ink leading-relaxed">
                 <Check className="w-5 h-5 text-brand-red mt-0.5 shrink-0" />
@@ -197,6 +199,18 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+
+      {(["ai-automations", "crm-automation", "api-integrations"].includes(data.slug)) ? <SystemsWeIntegrate /> : null}
+
+      <section className="py-20 md:py-28">
+        <div className="container-page">
+          <div className="mb-10 max-w-2xl"><p className="eyebrow mb-4">Engagement models</p><h2 className="fluid-h2">A delivery model that fits the scope.</h2></div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {engagementModels.map((model) => <Link key={model.slug} to="/engagement-models" hash={model.slug} className="rounded-2xl border border-black/10 bg-white p-5"><h3 className="font-semibold">{model.title}</h3><p className="mt-2 text-sm leading-6 text-ink-soft">{model.bestFor}</p></Link>)}
+          </div>
         </div>
       </section>
 

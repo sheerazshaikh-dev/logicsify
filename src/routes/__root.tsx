@@ -77,16 +77,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Logicsify | Web Development, AI Automation & Digital Marketing" },
+      { title: "Logicsify | Web Development, AI Automation & Digital Growth" },
       {
         name: "description",
         content:
-          "Logicsify designs websites, web applications, SaaS products, AI automations, and digital marketing systems that help businesses grow.",
+          "Logicsify builds websites, web applications, SaaS products, AI automations, CRM workflows, and digital marketing systems for growing businesses.",
       },
       { name: "author", content: "Logicsify" },
       {
         property: "og:title",
-        content: "Logicsify | Web Development, AI Automation & Digital Marketing",
+        content: "Logicsify | Web Development, AI Automation & Digital Growth",
       },
       {
         property: "og:description",
@@ -97,17 +97,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#190A2F" },
     ],
-    links: [{ rel: "icon", href: "/favicon.ico", type: "image/x-icon" }],
+    links: [
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+    ],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "Logicsify",
-          url: "https://logicsify.com/",
-          description: "Technology, marketing, and automation—logically built for growth.",
-          sameAs: ["https://linkedin.com", "https://instagram.com", "https://facebook.com"],
+          "@graph": [
+            {
+              "@type": ["Organization", "ProfessionalService"],
+              "@id": "https://logicsify.com/#organization",
+              name: "Logicsify",
+              url: "https://logicsify.com/",
+              logo: "https://logicsify.com/logicsify-logo-dark.png",
+              description: "Technology, marketing, and automation—logically built for growth."
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://logicsify.com/#website",
+              name: "Logicsify",
+              url: "https://logicsify.com/",
+              publisher: { "@id": "https://logicsify.com/#organization" }
+            }
+          ]
         }),
       },
     ],

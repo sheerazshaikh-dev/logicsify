@@ -8,10 +8,10 @@ export const Route = createFileRoute("/privacy")({
     meta: [
       { title: "Privacy Policy | Logicsify" },
       { name: "description", content: "How Logicsify collects, uses, and protects information." },
-      { property: "og:url", content: "/privacy" },
+      { property: "og:url", content: "https://logicsify.com/privacy" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: "/privacy" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/privacy" }],
   }),
 });
 

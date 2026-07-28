@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 
 const checks = [
+  [path.resolve("scripts/static-qa.mjs"), [], "Static source audit"],
   [path.resolve("node_modules/typescript/bin/tsc"), ["--noEmit"], "TypeScript"],
   [
     path.resolve("node_modules/eslint/bin/eslint.js"),

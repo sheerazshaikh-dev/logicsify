@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { withDefaultBranding } from "@/lib/brand-assets";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminButton,
@@ -69,7 +70,12 @@ function SettingsPage() {
 
   useEffect(() => {
     getSettings()
-      .then(setSettings)
+      .then((loaded) =>
+        setSettings({
+          ...loaded,
+          site: withDefaultBranding((loaded.site || {}) as Record<string, unknown>),
+        }),
+      )
       .catch((error) =>
         toast.error(error instanceof Error ? error.message : "Could not load settings."),
       )
@@ -215,6 +221,21 @@ function SiteSettings({ values, update }: SettingsProps) {
             onChange={(value) => update("timezone", value)}
             placeholder="Asia/Karachi"
           />
+        </div>
+      </SettingsSection>
+
+      <SettingsSection
+        title="Business and trust settings"
+        description="Verified organization details and editable support expectations used across About, schema, and customer-facing pages."
+      >
+        <div className="grid gap-5 md:grid-cols-2">
+          <SettingInput label="Legal business name" value={values.legal_name} onChange={(value) => update("legal_name", value)} placeholder="Leave empty until verified" />
+          <SettingInput label="Service areas" value={values.service_areas} onChange={(value) => update("service_areas", value)} placeholder="Only add verified service areas" />
+          <SettingInput label="Support working hours" value={values.support_hours} onChange={(value) => update("support_hours", value)} placeholder="For example: Monday–Friday, 9am–5pm" />
+          <SettingInput label="Response expectations" value={values.support_response_expectation} onChange={(value) => update("support_response_expectation", value)} placeholder="Use the expectation your team can consistently meet" />
+          <div className="md:col-span-2"><FieldLabel>Emergency support policy</FieldLabel><textarea rows={3} value={stringValue(values.emergency_support_policy)} onChange={(event) => update("emergency_support_policy", event.target.value)} className={adminTextareaClass} /></div>
+          <div className="md:col-span-2"><FieldLabel>Maintenance exclusions</FieldLabel><textarea rows={3} value={stringValue(values.maintenance_exclusions)} onChange={(event) => update("maintenance_exclusions", event.target.value)} className={adminTextareaClass} /></div>
+          <div className="md:col-span-2"><FieldLabel>Post-launch support or warranty period</FieldLabel><textarea rows={3} value={stringValue(values.post_launch_period)} onChange={(event) => update("post_launch_period", event.target.value)} className={adminTextareaClass} placeholder="Leave empty until the policy is approved." /></div>
         </div>
       </SettingsSection>
 
@@ -408,7 +429,7 @@ function HeaderSettings({ values, update }: SettingsProps) {
             label="Header CTA URL"
             value={values.header_cta_url}
             onChange={(value) => update("header_cta_url", value)}
-            placeholder="/book-a-call"
+            placeholder="/technical-roadmap"
           />
           <SettingInput
             label="Desktop logo height (px)"
@@ -551,13 +572,13 @@ function FooterSettings({ values, update }: SettingsProps) {
             label="Footer CTA label"
             value={values.footer_cta_label}
             onChange={(value) => update("footer_cta_label", value)}
-            placeholder="Book a strategy call"
+            placeholder="Get a Free Technical Roadmap"
           />
           <SettingInput
             label="Footer CTA URL"
             value={values.footer_cta_url}
             onChange={(value) => update("footer_cta_url", value)}
-            placeholder="/book-a-call"
+            placeholder="/technical-roadmap"
           />
           <div className="md:col-span-2">
             <SettingInput

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 8080",
-    "build": "vite build",
+    "routes:generate": "node scripts/generate-route-tree.mjs",
+    "prebuild": "npm run routes:generate",
+    "build": "node scripts/generate-seo-files.mjs && vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --host 0.0.0.0 --port 8080",
     "lint": "eslint src vite.config.ts eslint.config.js",
@@ -13,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "qa:links": "node scripts/qa-source-links.mjs",
     "qa:routes": "node scripts/qa-routes.mjs",
+    "qa:static": "node scripts/static-qa.mjs",
     "qa": "node scripts/run-qa.mjs",
     "qa:build": "node scripts/build-qa.mjs"
   },

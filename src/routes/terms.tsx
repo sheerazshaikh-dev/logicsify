@@ -11,10 +11,10 @@ export const Route = createFileRoute("/terms")({
         name: "description",
         content: "The terms that apply to your use of logicsify.com and our services.",
       },
-      { property: "og:url", content: "/terms" },
+      { property: "og:url", content: "https://logicsify.com/terms" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: "/terms" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/terms" }],
   }),
 });
 

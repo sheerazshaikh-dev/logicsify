@@ -14,9 +14,9 @@ export const Route = createFileRoute("/book-a-call")({
         content:
           "Choose an available date and request a free 30-minute strategy call with Logicsify.",
       },
-      { property: "og:url", content: "/book-a-call" },
+      { property: "og:url", content: "https://logicsify.com/book-a-call" },
     ],
-    links: [{ rel: "canonical", href: "/book-a-call" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/book-a-call" }],
   }),
 });
 

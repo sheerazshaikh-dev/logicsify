@@ -16,9 +16,9 @@ export const Route = createFileRoute("/contact")({
         name: "description",
         content: "Tell us about your project or book a strategy call directly from our calendar.",
       },
-      { property: "og:url", content: "/contact" },
+      { property: "og:url", content: "https://logicsify.com/contact" },
     ],
-    links: [{ rel: "canonical", href: "/contact" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/contact" }],
   }),
 });
 

@@ -12,11 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AutomationLabRouteImport } from './routes/automation-lab'
 import { Route as BookACallRouteImport } from './routes/book-a-call'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as EngagementModelsRouteImport } from './routes/engagement-models'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProcessRouteImport } from './routes/process'
+import { Route as ProjectEstimatorRouteImport } from './routes/project-estimator'
+import { Route as TechnicalRoadmapRouteImport } from './routes/technical-roadmap'
 import { Route as TechnologyRouteImport } from './routes/technology'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -26,23 +30,31 @@ import { Route as AdminAuditLogsRouteImport } from './routes/admin/audit-logs'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminCareersRouteImport } from './routes/admin/careers'
 import { Route as AdminCaseStudiesRouteImport } from './routes/admin/case-studies'
+import { Route as AdminComparisonsRouteImport } from './routes/admin/comparisons'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminEngagementModelsRouteImport } from './routes/admin/engagement-models'
 import { Route as AdminIndustriesRouteImport } from './routes/admin/industries'
 import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
+import { Route as AdminIntegrationsRouteImport } from './routes/admin/integrations'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminMediaRouteImport } from './routes/admin/media'
 import { Route as AdminMenusRouteImport } from './routes/admin/menus'
 import { Route as AdminPagesRouteImport } from './routes/admin/pages'
+import { Route as AdminResourcesRouteImport } from './routes/admin/resources'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
 import { Route as AdminTrashRouteImport } from './routes/admin/trash'
+import { Route as ComparisonsIndexRouteImport } from './routes/comparisons/index'
+import { Route as ComparisonsSlugRouteImport } from './routes/comparisons/$slug'
 import { Route as IndustriesIndexRouteImport } from './routes/industries/index'
 import { Route as IndustriesSlugRouteImport } from './routes/industries/$slug'
 import { Route as InsightsIndexRouteImport } from './routes/insights/index'
 import { Route as InsightsSlugRouteImport } from './routes/insights/$slug'
+import { Route as ResourcesIndexRouteImport } from './routes/resources/index'
+import { Route as ResourcesSlugRouteImport } from './routes/resources/$slug'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as WorkIndexRouteImport } from './routes/work/index'
@@ -63,6 +75,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutomationLabRoute = AutomationLabRouteImport.update({
+  id: '/automation-lab',
+  path: '/automation-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BookACallRoute = BookACallRouteImport.update({
   id: '/book-a-call',
   path: '/book-a-call',
@@ -78,6 +95,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EngagementModelsRoute = EngagementModelsRouteImport.update({
+  id: '/engagement-models',
+  path: '/engagement-models',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -86,6 +108,16 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ProcessRoute = ProcessRouteImport.update({
   id: '/process',
   path: '/process',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectEstimatorRoute = ProjectEstimatorRouteImport.update({
+  id: '/project-estimator',
+  path: '/project-estimator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TechnicalRoadmapRoute = TechnicalRoadmapRouteImport.update({
+  id: '/technical-roadmap',
+  path: '/technical-roadmap',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TechnologyRoute = TechnologyRouteImport.update({
@@ -133,9 +165,19 @@ const AdminCaseStudiesRoute = AdminCaseStudiesRouteImport.update({
   path: '/admin/case-studies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminComparisonsRoute = AdminComparisonsRouteImport.update({
+  id: '/admin/comparisons',
+  path: '/admin/comparisons',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEngagementModelsRoute = AdminEngagementModelsRouteImport.update({
+  id: '/admin/engagement-models',
+  path: '/admin/engagement-models',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndustriesRoute = AdminIndustriesRouteImport.update({
@@ -146,6 +188,11 @@ const AdminIndustriesRoute = AdminIndustriesRouteImport.update({
 const AdminInsightsRoute = AdminInsightsRouteImport.update({
   id: '/admin/insights',
   path: '/admin/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
+  id: '/admin/integrations',
+  path: '/admin/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
@@ -173,6 +220,11 @@ const AdminPagesRoute = AdminPagesRouteImport.update({
   path: '/admin/pages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminResourcesRoute = AdminResourcesRouteImport.update({
+  id: '/admin/resources',
+  path: '/admin/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminServicesRoute = AdminServicesRouteImport.update({
   id: '/admin/services',
   path: '/admin/services',
@@ -198,6 +250,16 @@ const AdminTrashRoute = AdminTrashRouteImport.update({
   path: '/admin/trash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComparisonsIndexRoute = ComparisonsIndexRouteImport.update({
+  id: '/comparisons/',
+  path: '/comparisons/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComparisonsSlugRoute = ComparisonsSlugRouteImport.update({
+  id: '/comparisons/$slug',
+  path: '/comparisons/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndustriesIndexRoute = IndustriesIndexRouteImport.update({
   id: '/industries/',
   path: '/industries/',
@@ -216,6 +278,16 @@ const InsightsIndexRoute = InsightsIndexRouteImport.update({
 const InsightsSlugRoute = InsightsSlugRouteImport.update({
   id: '/insights/$slug',
   path: '/insights/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesIndexRoute = ResourcesIndexRouteImport.update({
+  id: '/resources/',
+  path: '/resources/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesSlugRoute = ResourcesSlugRouteImport.update({
+  id: '/resources/$slug',
+  path: '/resources/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
@@ -243,11 +315,15 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/about': typeof AboutRoute
+  '/automation-lab': typeof AutomationLabRoute
   '/book-a-call': typeof BookACallRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/engagement-models': typeof EngagementModelsRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
+  '/project-estimator': typeof ProjectEstimatorRoute
+  '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
   '/admin/account': typeof AdminAccountRoute
@@ -256,26 +332,34 @@ export interface FileRoutesByFullPath {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/careers': typeof AdminCareersRoute
   '/admin/case-studies': typeof AdminCaseStudiesRoute
+  '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/engagement-models': typeof AdminEngagementModelsRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
+  '/admin/resources': typeof AdminResourcesRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
+  '/comparisons/$slug': typeof ComparisonsSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/comparisons/': typeof ComparisonsIndexRoute
   '/industries/': typeof IndustriesIndexRoute
   '/insights/': typeof InsightsIndexRoute
+  '/resources/': typeof ResourcesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/work/': typeof WorkIndexRoute
 }
@@ -283,11 +367,15 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/about': typeof AboutRoute
+  '/automation-lab': typeof AutomationLabRoute
   '/book-a-call': typeof BookACallRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/engagement-models': typeof EngagementModelsRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
+  '/project-estimator': typeof ProjectEstimatorRoute
+  '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
   '/admin/account': typeof AdminAccountRoute
@@ -296,26 +384,34 @@ export interface FileRoutesByTo {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/careers': typeof AdminCareersRoute
   '/admin/case-studies': typeof AdminCaseStudiesRoute
+  '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/engagement-models': typeof AdminEngagementModelsRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
+  '/admin/resources': typeof AdminResourcesRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
+  '/comparisons/$slug': typeof ComparisonsSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/work/$slug': typeof WorkSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/comparisons': typeof ComparisonsIndexRoute
   '/industries': typeof IndustriesIndexRoute
   '/insights': typeof InsightsIndexRoute
+  '/resources': typeof ResourcesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/work': typeof WorkIndexRoute
 }
@@ -324,11 +420,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRoute
   '/about': typeof AboutRoute
+  '/automation-lab': typeof AutomationLabRoute
   '/book-a-call': typeof BookACallRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/engagement-models': typeof EngagementModelsRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
+  '/project-estimator': typeof ProjectEstimatorRoute
+  '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
   '/admin/account': typeof AdminAccountRoute
@@ -337,26 +437,34 @@ export interface FileRoutesById {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/careers': typeof AdminCareersRoute
   '/admin/case-studies': typeof AdminCaseStudiesRoute
+  '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/engagement-models': typeof AdminEngagementModelsRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
+  '/admin/resources': typeof AdminResourcesRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
+  '/comparisons/$slug': typeof ComparisonsSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
+  '/resources/$slug': typeof ResourcesSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/comparisons/': typeof ComparisonsIndexRoute
   '/industries/': typeof IndustriesIndexRoute
   '/insights/': typeof InsightsIndexRoute
+  '/resources/': typeof ResourcesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/work/': typeof WorkIndexRoute
 }
@@ -366,11 +474,15 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/about'
+    | '/automation-lab'
     | '/book-a-call'
     | '/careers'
     | '/contact'
+    | '/engagement-models'
     | '/privacy'
     | '/process'
+    | '/project-estimator'
+    | '/technical-roadmap'
     | '/technology'
     | '/terms'
     | '/admin/account'
@@ -379,26 +491,34 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/careers'
     | '/admin/case-studies'
+    | '/admin/comparisons'
     | '/admin/dashboard'
+    | '/admin/engagement-models'
     | '/admin/industries'
     | '/admin/insights'
+    | '/admin/integrations'
     | '/admin/leads'
     | '/admin/login'
     | '/admin/media'
     | '/admin/menus'
     | '/admin/pages'
+    | '/admin/resources'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
     | '/admin/testimonials'
     | '/admin/trash'
+    | '/comparisons/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
+    | '/resources/$slug'
     | '/services/$slug'
     | '/work/$slug'
     | '/admin/'
+    | '/comparisons/'
     | '/industries/'
     | '/insights/'
+    | '/resources/'
     | '/services/'
     | '/work/'
   fileRoutesByTo: FileRoutesByTo
@@ -406,11 +526,15 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/about'
+    | '/automation-lab'
     | '/book-a-call'
     | '/careers'
     | '/contact'
+    | '/engagement-models'
     | '/privacy'
     | '/process'
+    | '/project-estimator'
+    | '/technical-roadmap'
     | '/technology'
     | '/terms'
     | '/admin/account'
@@ -419,26 +543,34 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/careers'
     | '/admin/case-studies'
+    | '/admin/comparisons'
     | '/admin/dashboard'
+    | '/admin/engagement-models'
     | '/admin/industries'
     | '/admin/insights'
+    | '/admin/integrations'
     | '/admin/leads'
     | '/admin/login'
     | '/admin/media'
     | '/admin/menus'
     | '/admin/pages'
+    | '/admin/resources'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
     | '/admin/testimonials'
     | '/admin/trash'
+    | '/comparisons/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
+    | '/resources/$slug'
     | '/services/$slug'
     | '/work/$slug'
     | '/admin'
+    | '/comparisons'
     | '/industries'
     | '/insights'
+    | '/resources'
     | '/services'
     | '/work'
   id:
@@ -446,11 +578,15 @@ export interface FileRouteTypes {
     | '/'
     | '/$slug'
     | '/about'
+    | '/automation-lab'
     | '/book-a-call'
     | '/careers'
     | '/contact'
+    | '/engagement-models'
     | '/privacy'
     | '/process'
+    | '/project-estimator'
+    | '/technical-roadmap'
     | '/technology'
     | '/terms'
     | '/admin/account'
@@ -459,26 +595,34 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/careers'
     | '/admin/case-studies'
+    | '/admin/comparisons'
     | '/admin/dashboard'
+    | '/admin/engagement-models'
     | '/admin/industries'
     | '/admin/insights'
+    | '/admin/integrations'
     | '/admin/leads'
     | '/admin/login'
     | '/admin/media'
     | '/admin/menus'
     | '/admin/pages'
+    | '/admin/resources'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
     | '/admin/testimonials'
     | '/admin/trash'
+    | '/comparisons/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
+    | '/resources/$slug'
     | '/services/$slug'
     | '/work/$slug'
     | '/admin/'
+    | '/comparisons/'
     | '/industries/'
     | '/insights/'
+    | '/resources/'
     | '/services/'
     | '/work/'
   fileRoutesById: FileRoutesById
@@ -487,11 +631,15 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRoute: typeof SlugRoute
   AboutRoute: typeof AboutRoute
+  AutomationLabRoute: typeof AutomationLabRoute
   BookACallRoute: typeof BookACallRoute
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
+  EngagementModelsRoute: typeof EngagementModelsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
+  ProjectEstimatorRoute: typeof ProjectEstimatorRoute
+  TechnicalRoadmapRoute: typeof TechnicalRoadmapRoute
   TechnologyRoute: typeof TechnologyRoute
   TermsRoute: typeof TermsRoute
   AdminAccountRoute: typeof AdminAccountRoute
@@ -500,26 +648,34 @@ export interface RootRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminCareersRoute: typeof AdminCareersRoute
   AdminCaseStudiesRoute: typeof AdminCaseStudiesRoute
+  AdminComparisonsRoute: typeof AdminComparisonsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminEngagementModelsRoute: typeof AdminEngagementModelsRoute
   AdminIndustriesRoute: typeof AdminIndustriesRoute
   AdminInsightsRoute: typeof AdminInsightsRoute
+  AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMediaRoute: typeof AdminMediaRoute
   AdminMenusRoute: typeof AdminMenusRoute
   AdminPagesRoute: typeof AdminPagesRoute
+  AdminResourcesRoute: typeof AdminResourcesRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminTrashRoute: typeof AdminTrashRoute
+  ComparisonsSlugRoute: typeof ComparisonsSlugRoute
   IndustriesSlugRoute: typeof IndustriesSlugRoute
   InsightsSlugRoute: typeof InsightsSlugRoute
+  ResourcesSlugRoute: typeof ResourcesSlugRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   WorkSlugRoute: typeof WorkSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ComparisonsIndexRoute: typeof ComparisonsIndexRoute
   IndustriesIndexRoute: typeof IndustriesIndexRoute
   InsightsIndexRoute: typeof InsightsIndexRoute
+  ResourcesIndexRoute: typeof ResourcesIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   WorkIndexRoute: typeof WorkIndexRoute
 }
@@ -547,6 +703,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/automation-lab': {
+      id: '/automation-lab'
+      path: '/automation-lab'
+      fullPath: '/automation-lab'
+      preLoaderRoute: typeof AutomationLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/book-a-call': {
       id: '/book-a-call'
       path: '/book-a-call'
@@ -568,6 +731,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/engagement-models': {
+      id: '/engagement-models'
+      path: '/engagement-models'
+      fullPath: '/engagement-models'
+      preLoaderRoute: typeof EngagementModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -580,6 +750,20 @@ declare module '@tanstack/react-router' {
       path: '/process'
       fullPath: '/process'
       preLoaderRoute: typeof ProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/project-estimator': {
+      id: '/project-estimator'
+      path: '/project-estimator'
+      fullPath: '/project-estimator'
+      preLoaderRoute: typeof ProjectEstimatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/technical-roadmap': {
+      id: '/technical-roadmap'
+      path: '/technical-roadmap'
+      fullPath: '/technical-roadmap'
+      preLoaderRoute: typeof TechnicalRoadmapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/technology': {
@@ -645,11 +829,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCaseStudiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/comparisons': {
+      id: '/admin/comparisons'
+      path: '/admin/comparisons'
+      fullPath: '/admin/comparisons'
+      preLoaderRoute: typeof AdminComparisonsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/engagement-models': {
+      id: '/admin/engagement-models'
+      path: '/admin/engagement-models'
+      fullPath: '/admin/engagement-models'
+      preLoaderRoute: typeof AdminEngagementModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/industries': {
@@ -664,6 +862,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/insights'
       fullPath: '/admin/insights'
       preLoaderRoute: typeof AdminInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/integrations': {
+      id: '/admin/integrations'
+      path: '/admin/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AdminIntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/leads': {
@@ -701,6 +906,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/resources': {
+      id: '/admin/resources'
+      path: '/admin/resources'
+      fullPath: '/admin/resources'
+      preLoaderRoute: typeof AdminResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/services': {
       id: '/admin/services'
       path: '/admin/services'
@@ -736,6 +948,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTrashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/comparisons/': {
+      id: '/comparisons/'
+      path: '/comparisons'
+      fullPath: '/comparisons/'
+      preLoaderRoute: typeof ComparisonsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comparisons/$slug': {
+      id: '/comparisons/$slug'
+      path: '/comparisons/$slug'
+      fullPath: '/comparisons/$slug'
+      preLoaderRoute: typeof ComparisonsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/industries/': {
       id: '/industries/'
       path: '/industries'
@@ -762,6 +988,20 @@ declare module '@tanstack/react-router' {
       path: '/insights/$slug'
       fullPath: '/insights/$slug'
       preLoaderRoute: typeof InsightsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/': {
+      id: '/resources/'
+      path: '/resources'
+      fullPath: '/resources/'
+      preLoaderRoute: typeof ResourcesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/$slug': {
+      id: '/resources/$slug'
+      path: '/resources/$slug'
+      fullPath: '/resources/$slug'
+      preLoaderRoute: typeof ResourcesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/': {
@@ -799,11 +1039,15 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRoute: SlugRoute,
   AboutRoute: AboutRoute,
+  AutomationLabRoute: AutomationLabRoute,
   BookACallRoute: BookACallRoute,
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
+  EngagementModelsRoute: EngagementModelsRoute,
   PrivacyRoute: PrivacyRoute,
   ProcessRoute: ProcessRoute,
+  ProjectEstimatorRoute: ProjectEstimatorRoute,
+  TechnicalRoadmapRoute: TechnicalRoadmapRoute,
   TechnologyRoute: TechnologyRoute,
   TermsRoute: TermsRoute,
   AdminAccountRoute: AdminAccountRoute,
@@ -812,26 +1056,34 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
   AdminCareersRoute: AdminCareersRoute,
   AdminCaseStudiesRoute: AdminCaseStudiesRoute,
+  AdminComparisonsRoute: AdminComparisonsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminEngagementModelsRoute: AdminEngagementModelsRoute,
   AdminIndustriesRoute: AdminIndustriesRoute,
   AdminInsightsRoute: AdminInsightsRoute,
+  AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMediaRoute: AdminMediaRoute,
   AdminMenusRoute: AdminMenusRoute,
   AdminPagesRoute: AdminPagesRoute,
+  AdminResourcesRoute: AdminResourcesRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminTrashRoute: AdminTrashRoute,
+  ComparisonsSlugRoute: ComparisonsSlugRoute,
   IndustriesSlugRoute: IndustriesSlugRoute,
   InsightsSlugRoute: InsightsSlugRoute,
+  ResourcesSlugRoute: ResourcesSlugRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   WorkSlugRoute: WorkSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ComparisonsIndexRoute: ComparisonsIndexRoute,
   IndustriesIndexRoute: IndustriesIndexRoute,
   InsightsIndexRoute: InsightsIndexRoute,
+  ResourcesIndexRoute: ResourcesIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   WorkIndexRoute: WorkIndexRoute,
 }

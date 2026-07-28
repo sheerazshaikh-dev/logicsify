@@ -1,252 +1,33 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { ArrowRight, CheckCircle2, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
-import { CTASection } from "@/components/cta-section";
-import { caseStudies } from "@/lib/site-data";
-import { ArrowRight, Check } from "lucide-react";
+import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
+import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { getCmsContentItem, getCmsContentList } from "@/lib/logicsify-api";
-import { asRecord, asRecordArray } from "@/lib/content-utils";
+import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 
 export const Route = createFileRoute("/work/$slug")({
-  component: CasePage,
-  pendingMs: 150,
-  pendingMinMs: 250,
   pendingComponent: PublicRouteLoading,
-  loader: async ({ params }) => {
-    const [cms, cmsCases] = await Promise.all([
-      getCmsContentItem("case_study", params.slug),
-      getCmsContentList("case_study"),
-    ]);
-    const fallback = caseStudies.find((item) => item.slug === params.slug);
-    if (!cms && !fallback) throw notFound();
-
-    const content = asRecord(cms?.content_json);
-    const services = Array.isArray(content.services)
-      ? content.services.map(String)
-      : Array.isArray(content.tags)
-        ? content.tags.map(String)
-        : fallback?.services || [];
-    const sections = asRecordArray(content.sections);
-    const sectionMap = Object.fromEntries(
-      sections.map((section) => [
-        String(section.title || "").toLowerCase(),
-        String(section.body || ""),
-      ]),
-    );
-
-    const study = {
-      slug: params.slug,
-      name: cms?.title || fallback?.name || "Case Study",
-      client: String(content.client || fallback?.client || "Client"),
-      category: String(content.category || fallback?.category || "Case Study"),
-      services,
-      challenge:
-        cms?.excerpt ||
-        String(content.challenge || sectionMap.challenge || fallback?.challenge || ""),
-      outcome: String(content.outcome || sectionMap.outcome || fallback?.outcome || ""),
-      objectives: String(
-        content.objectives ||
-          sectionMap.objectives ||
-          "Align stakeholders on outcomes, define the shortest path to a validated release, and instrument the system to measure success from day one.",
-      ),
-      strategy: String(
-        content.strategy ||
-          sectionMap.strategy ||
-          content.body ||
-          "A phased engagement aligned design, engineering, automation, and growth around a single roadmap.",
-      ),
-      experience: String(
-        content.user_experience ||
-          sectionMap["user experience"] ||
-          "Research-led information architecture and interaction design, validated before production development.",
-      ),
-      technology: String(
-        content.technology ||
-          sectionMap.technology ||
-          "A modern, supportable stack with clean integrations to the systems the client already relied on.",
-      ),
-      process: String(
-        content.process ||
-          sectionMap.process ||
-          "Visible iterations, regular demos, and a shared backlog kept progress transparent.",
-      ),
-    };
-
-    const ordered = cmsCases.length
-      ? cmsCases
-      : caseStudies.map((item, index) => ({
-          id: index,
-          slug: item.slug,
-          title: item.name,
-          excerpt: item.challenge,
-          content_type: "case_study",
-          status: "published",
-          featured: false,
-          content_json: { category: item.category },
-        }));
-    const currentIndex = Math.max(
-      0,
-      ordered.findIndex((item) => item.slug === params.slug),
-    );
-    const nextItem = ordered[(currentIndex + 1) % ordered.length];
-    const nextFallback = caseStudies.find((item) => item.slug === nextItem?.slug);
-    const next = {
-      slug: nextItem?.slug || caseStudies[0].slug,
-      name: nextItem?.title || nextFallback?.name || caseStudies[0].name,
-      category: String(nextItem?.content_json?.category || nextFallback?.category || "Case Study"),
-    };
-
-    return { study, next };
-  },
-  head: ({ loaderData, params }) => ({
-    meta: [
-      { title: `${loaderData?.study.name || "Case Study"} | Logicsify Case Study` },
-      { name: "description", content: loaderData?.study.challenge ?? "" },
-      { property: "og:title", content: `${loaderData?.study.name || "Case Study"} | Case Study` },
-      { property: "og:type", content: "article" },
-      { property: "og:url", content: `/work/${params.slug}` },
-    ],
-    links: [{ rel: "canonical", href: `/work/${params.slug}` }],
-  }),
-  notFoundComponent: () => (
-    <SiteLayout>
-      <div className="container-page py-40 text-center">
-        <h1 className="fluid-h2">Case study not found</h1>
-      </div>
-    </SiteLayout>
-  ),
+  loader: async ({params}) => {const [study,all]=await Promise.all([getCmsContentItem("case_study",params.slug),getCmsContentList("case_study")]);if(!study)throw notFound();return{study,related:all.filter((item)=>item.slug!==params.slug).slice(0,3)}} ,
+  component: CaseStudyPage,
+  head: ({loaderData,params}) => ({meta:[{title:loaderData?.study.seo_json?.title||`${loaderData?.study.title||"Case Study"} | Logicsify`},{name:"description",content:loaderData?.study.seo_json?.description||loaderData?.study.excerpt||""},{property:"og:title",content:loaderData?.study.seo_json?.title||loaderData?.study.title||""},{property:"og:description",content:loaderData?.study.seo_json?.description||loaderData?.study.excerpt||""},{property:"og:type",content:"article"},{property:"og:url",content:`https://logicsify.com/work/${params.slug}`},...((loaderData?.study.seo_json?.og_image||loaderData?.study.featured_image)?[{property:"og:image",content:loaderData?.study.seo_json?.og_image||loaderData?.study.featured_image},{name:"twitter:image",content:loaderData?.study.seo_json?.og_image||loaderData?.study.featured_image}]:[])],links:[{rel:"canonical",href:loaderData?.study.seo_json?.canonical||`https://logicsify.com/work/${params.slug}`}]})
 });
 
-function CasePage() {
-  const { study, next } = Route.useLoaderData();
-  return (
-    <SiteLayout>
-      <PageHero
-        eyebrow={`${study.category} · ${study.client}`}
-        breadcrumbs={[
-          { label: "Home", to: "/" },
-          { label: "Work", to: "/work" },
-          { label: study.name },
-        ]}
-        title={<>{study.name}</>}
-        intro={study.challenge}
-        primaryCta={{ label: "Start a Project", to: "/contact" }}
-      />
-
-      <section className="py-20">
-        <div className="container-page grid lg:grid-cols-3 gap-10 border-b border-black/10 pb-16">
-          <Meta label="Client" value={study.client} />
-          <Meta label="Services" value={study.services.join(", ")} />
-          <Meta label="Category" value={study.category} />
-        </div>
-
-        <div className="container-page py-16 grid lg:grid-cols-12 gap-12">
-          <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit">
-            <p className="eyebrow mb-4">In this case study</p>
-            <ul className="space-y-2 text-sm text-ink-soft">
-              {[
-                "Challenge",
-                "Objectives",
-                "Strategy",
-                "User Experience",
-                "Technology",
-                "Process",
-                "Outcome",
-              ].map((section) => (
-                <li key={section}>· {section}</li>
-              ))}
-            </ul>
-          </aside>
-          <article className="lg:col-span-8 space-y-14 prose-lg">
-            <Block title="Challenge" body={study.challenge} />
-            <Block title="Objectives" body={study.objectives} />
-            <Block title="Strategy" body={study.strategy} />
-            <Block title="User experience" body={study.experience} />
-            <Block title="Technology & integrations" body={study.technology} />
-            <Block title="Process" body={study.process} />
-            <Block title="Outcome" body={study.outcome} />
-
-            <div className="grid sm:grid-cols-2 gap-4 not-prose">
-              {[1, 2, 3, 4].map((index) => (
-                <div
-                  key={index}
-                  className="aspect-[4/3] rounded-2xl bg-ink text-white p-4 relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 grid-noise opacity-60" />
-                  <div className="relative flex gap-1.5 mb-3">
-                    <div className="h-2 w-2 rounded-full bg-white/30" />
-                    <div className="h-2 w-2 rounded-full bg-white/30" />
-                    <div className="h-2 w-2 rounded-full bg-white/30" />
-                  </div>
-                  <div className="relative space-y-2">
-                    <div className="h-2 rounded bg-gradient-brand w-1/3" />
-                    <div className="h-2 rounded bg-white/10 w-2/3" />
-                    <div className="grid grid-cols-3 gap-1.5 mt-3">
-                      {[...Array(9)].map((_, cell) => (
-                        <div
-                          key={cell}
-                          className={`h-8 rounded ${(cell + index) % 4 === 0 ? "bg-gradient-brand opacity-70" : "bg-white/10"}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="not-prose">
-              <p className="eyebrow mb-4">Related services</p>
-              <div className="flex flex-wrap gap-2">
-                {study.services.map((service) => (
-                  <span
-                    key={service}
-                    className="px-4 py-2 rounded-full bg-lavender text-ink text-sm font-medium"
-                  >
-                    {service}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section className="py-20 bg-cream">
-        <div className="container-page">
-          <p className="eyebrow mb-4">Next case study</p>
-          <Link
-            to="/work/$slug"
-            params={{ slug: next.slug }}
-            className="group flex items-center justify-between gap-6 rounded-3xl bg-ink text-white p-8 md:p-12 hover:scale-[1.005] transition"
-          >
-            <div>
-              <p className="text-white/60 text-sm">{next.category}</p>
-              <h3 className="text-3xl md:text-4xl font-semibold mt-2">{next.name}</h3>
-            </div>
-            <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition" />
-          </Link>
-        </div>
-      </section>
-
-      <CTASection />
-    </SiteLayout>
-  );
-}
-
-function Meta({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="eyebrow mb-2">{label}</p>
-      <p className="text-lg font-semibold text-ink">{value || "—"}</p>
-    </div>
-  );
-}
-function Block({ title, body }: { title: string; body: string }) {
-  return (
-    <div>
-      <h2 className="fluid-h3 mb-4">{title}</h2>
-      <p className="text-lg text-ink-soft leading-relaxed">{body}</p>
-    </div>
-  );
-}
+function CaseStudyPage(){const {study,related}=Route.useLoaderData();const c=study.content_json||{};useEffect(()=>trackEvent("case_study_opened",{slug:study.slug}),[study.slug]);const services=arr(c.services);const stack=arr(c.technology_stack||c.technologies);const integrations=arr(c.integrations);const desktop=arr(c.desktop_screenshots);const mobile=arr(c.mobile_screenshots);const gallery=arr(c.gallery);const results=arr(c.measurable_results||c.results);return <SiteLayout>
+  <PageHero eyebrow={`${String(c.industry||c.category||"Case Study")}${c.client_name?` · ${String(c.client_name)}`:""}`} breadcrumbs={[{label:"Home",to:"/"},{label:"Work",to:"/work"},{label:study.title}]} title={study.title} intro={study.excerpt} primaryCta={{label:"Get a Free Technical Roadmap",to:"/technical-roadmap"}} />
+  <section className="py-16"><div className="container-page grid gap-4 border-b border-black/10 pb-12 sm:grid-cols-2 lg:grid-cols-4"><Meta label="Client" value={String(c.client_name||"Not publicly disclosed")}/><Meta label="Industry" value={String(c.industry||c.category||"—")}/><Meta label="Timeline" value={String(c.timeline||"Not publicly disclosed")}/><Meta label="Services" value={services.join(", ")||"—"}/></div></section>
+  <section className="pb-20"><div className="container-page grid gap-12 lg:grid-cols-12"><aside className="lg:col-span-3"><nav className="lg:sticky lg:top-28"><p className="eyebrow mb-4">Case study</p><ul className="space-y-2 text-sm text-ink-soft">{["Problem","Objectives","Work completed","Solution","Technology stack","Systems integrated","Screenshots","Process","Results"].map((item)=><li key={item}>· {item}</li>)}</ul></nav></aside><article className="space-y-14 lg:col-span-9"><Block title="Problem" body={String(c.challenge||"")}/>{arr(c.objectives).length?<ListBlock title="Objectives" items={arr(c.objectives)}/>:<Block title="Objectives" body={String(c.objectives||"")}/>}<ListBlock title="Work completed" items={arr(c.work_completed)}/><Block title="Solution" body={String(c.solution||c.body||"")}/>{stack.length?<TagBlock title="Technology stack" items={stack}/>:null}{integrations.length?<TagBlock title="Systems integrated" items={integrations}/>:null}<Gallery title="Desktop screenshots" items={desktop}/><Gallery title="Mobile screenshots" items={mobile} mobile/><Gallery title="Project gallery" items={gallery}/>{arr(c.process).length?<ListBlock title="Process" items={arr(c.process)}/>:<Block title="Process" body={String(c.process||"")}/>}{results.length?<ListBlock title="Measurable or qualitative results" items={results}/>:<div className="rounded-2xl bg-cream p-6"><p className="text-sm text-ink-soft">No outcome claims are published until the client supplies verified measurable or qualitative results.</p></div>}{c.testimonial?<blockquote className="rounded-3xl bg-ink p-8 text-white"><p className="text-xl leading-relaxed">“{String(c.testimonial)}”</p>{c.testimonial_name?<footer className="mt-5 text-sm text-white/60">{String(c.testimonial_name)}{c.testimonial_role?`, ${String(c.testimonial_role)}`:""}</footer>:null}</blockquote>:null}{c.live_url?<a href={String(c.live_url)} target="_blank" rel="noreferrer" className="btn-ghost-light">View live project <ExternalLink className="h-4 w-4"/></a>:null}</article></div></section>
+  {integrations.length?<SystemsWeIntegrate compact/>:null}
+  {services.length?<section className="py-16"><div className="container-page"><h2 className="fluid-h3">Related services</h2><div className="mt-6 flex flex-wrap gap-3">{services.map((service)=><Link key={service} to="/services/$slug" params={{slug:service.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}} className="rounded-full border border-black/10 px-5 py-3 text-sm font-semibold hover:border-brand-red">{service}</Link>)}</div></div></section>:null}
+  {related.length?<section className="bg-cream py-20"><div className="container-page"><h2 className="fluid-h3">Related case studies</h2><div className="mt-8 grid gap-4 md:grid-cols-3">{related.map((item)=><Link key={item.id} to="/work/$slug" params={{slug:item.slug}} className="rounded-2xl bg-white p-6"><p className="font-semibold">{item.title}</p><p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">Open <ArrowRight className="h-4 w-4"/></span></Link>)}</div></div></section>:null}
+  <TechnicalRoadmapCTA source={`case_study:${study.slug}`} />
+</SiteLayout>}
+function arr(value:unknown){return Array.isArray(value)?value.map(String).filter(Boolean):[]}
+function Meta({label,value}:{label:string;value:string}){return <div><p className="eyebrow">{label}</p><p className="mt-2 font-semibold">{value}</p></div>}
+function Block({title,body}:{title:string;body:string}){if(!body)return null;return <section><h2 className="fluid-h3">{title}</h2><p className="mt-4 text-lg leading-relaxed text-ink-soft whitespace-pre-line">{body}</p></section>}
+function ListBlock({title,items}:{title:string;items:string[]}){if(!items.length)return null;return <section><h2 className="fluid-h3">{title}</h2><ul className="mt-5 space-y-3">{items.map((item)=><li key={item} className="flex gap-3 text-ink-soft"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red"/>{item}</li>)}</ul></section>}
+function TagBlock({title,items}:{title:string;items:string[]}){return <section><h2 className="fluid-h3">{title}</h2><div className="mt-5 flex flex-wrap gap-2">{items.map((item)=><span key={item} className="rounded-full bg-lavender px-4 py-2 text-sm font-semibold">{item}</span>)}</div></section>}
+function Gallery({title,items,mobile=false}:{title:string;items:string[];mobile?:boolean}){if(!items.length)return null;return <section><h2 className="fluid-h3">{title}</h2><div className={`mt-6 grid gap-4 ${mobile?"grid-cols-2 md:grid-cols-4":"md:grid-cols-2"}`}>{items.map((src,index)=><div key={`${src}-${index}`} className="overflow-hidden rounded-2xl border border-black/10 bg-cream">{src?<img src={src} alt={`${title} ${index+1}`} loading="lazy" className={`w-full object-cover ${mobile?"aspect-[9/16]":"aspect-[16/10]"}`}/>:<div className="grid aspect-video place-items-center"><ImageIcon className="h-8 w-8 text-ink-soft"/></div>}</div>)}</div></section>}

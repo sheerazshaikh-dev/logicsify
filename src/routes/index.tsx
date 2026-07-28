@@ -22,8 +22,11 @@ import {
   Search,
   Megaphone,
 } from "lucide-react";
-import { caseStudies, industries, insights, allServices } from "@/lib/site-data";
+import { industries, allServices } from "@/lib/site-data";
 import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
+import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
+import { engagementModels } from "@/lib/expansion-data";
+import { trackAnalytics } from "@/lib/analytics";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -43,9 +46,9 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Technology, marketing, and automation—logically built for growth.",
       },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://logicsify.com/" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/" }],
   }),
 });
 
@@ -61,10 +64,14 @@ function HomePage() {
       <AutomationSpotlight />
       <ProcessSection />
       <WhyLogicsify />
-      <TechStack />
+      <SystemsWeIntegrate />
       <IndustriesGrid />
+      <EngagementModelsPreview />
+      <EstimatorPreview />
+      <TeamCredibility />
       <TestimonialSection />
       <InsightsSection />
+      <ResourcesPreview />
       <CTASection />
     </SiteLayout>
   );
@@ -88,7 +95,7 @@ function Hero() {
             <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
             Technology · Design · AI · Growth
           </div>
-          <h1 className="fluid-display text-white">
+          <h1 className="fluid-display text-white hero-heading-wrap">
             <span data-reveal style={{ ["--reveal-delay" as string]: "0ms" }} className="block">
               Build Smarter.
             </span>
@@ -116,8 +123,8 @@ function Hero() {
             style={{ ["--reveal-delay" as string]: "480ms" }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <Link to="/contact" className="btn-primary">
-              Start a Project <ArrowRight className="w-4 h-4" />
+            <Link to="/technical-roadmap" onClick={() => trackAnalytics("technical_roadmap_cta_clicked", { placement: "homepage_hero" })} className="btn-primary">
+              Get a Free Technical Roadmap <ArrowRight className="w-4 h-4" />
             </Link>
             <Link to="/work" className="btn-ghost-dark">
               Explore Our Work
@@ -446,49 +453,46 @@ function FeaturedServices() {
 
 /* ---------- FEATURED WORK ---------- */
 function FeaturedWork() {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("case_study").then((result) => active && setItems(result.filter((item) => item.featured))).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  if (!items.length) return null;
+
   return (
-    <section className="py-24 md:py-32 bg-cream">
+    <section className="bg-cream py-24 md:py-32">
       <div className="container-page">
-        <div className="max-w-3xl mb-16">
+        <div className="mb-16 max-w-3xl">
           <p className="eyebrow mb-4">Selected work</p>
-          <h2 className="fluid-h2">Digital systems built to create measurable impact.</h2>
+          <h2 className="fluid-h2">Real systems built around real operating problems.</h2>
         </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          {caseStudies.slice(0, 4).map((c, i) => (
-            <Link
-              to="/work/$slug"
-              params={{ slug: c.slug }}
-              key={c.slug}
-              data-reveal
-              style={{ ["--reveal-delay" as string]: `${i * 80}ms` }}
-              className="group relative overflow-hidden rounded-3xl bg-ink text-white p-8 md:p-10 min-h-[420px] flex flex-col justify-between hover:scale-[1.01] transition-transform duration-500"
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-brand-red/25 via-transparent to-brand-gold/20" />
-              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-gradient-brand opacity-20 blur-3xl group-hover:opacity-40 transition-opacity duration-700" />
-              <MockupVisual index={i} />
-              <div className="relative">
-                <p className="eyebrow text-white/60">
-                  {c.category} · {c.client}
-                </p>
-                <h3 className="mt-3 text-2xl md:text-3xl font-semibold leading-tight">{c.name}</h3>
-                <p className="mt-3 text-white/70 text-sm max-w-md">{c.challenge}</p>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {c.services.map((s) => (
-                    <span
-                      key={s}
-                      className="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/15"
-                    >
-                      {s}
-                    </span>
-                  ))}
+        <div className="grid gap-6 md:grid-cols-2">
+          {items.slice(0, 4).map((item, index) => {
+            const content = item.content_json || {};
+            const services = Array.isArray(content.services) ? content.services.map(String) : [];
+            return (
+              <Link
+                to="/work/$slug"
+                params={{ slug: item.slug }}
+                key={item.slug}
+                data-reveal
+                style={{ ["--reveal-delay" as string]: `${index * 80}ms` }}
+                className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-white transition-transform duration-500 hover:scale-[1.01] md:p-10"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-red/25 via-transparent to-brand-gold/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                {item.featured_image ? <img src={item.featured_image} alt="" loading="lazy" className="relative mb-8 aspect-[16/9] w-full rounded-2xl object-cover" /> : <MockupVisual index={index} />}
+                <div className="relative">
+                  <p className="eyebrow text-white/60">{[String(content.industry || ""), String(content.client_name || "")].filter(Boolean).join(" · ")}</p>
+                  <h3 className="mt-3 text-2xl font-semibold leading-tight md:text-3xl">{item.title}</h3>
+                  <p className="mt-3 max-w-md text-sm text-white/70">{item.excerpt}</p>
+                  {services.length ? <div className="mt-6 flex flex-wrap gap-2">{services.slice(0, 4).map((service) => <span key={service} className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] uppercase tracking-wider">{service.replace(/-/g, " ")}</span>)}</div> : null}
+                  <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold group-hover:text-gradient">Read case study <ArrowUpRight className="h-4 w-4" /></div>
                 </div>
-                <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-white group-hover:text-gradient">
-                  View case study{" "}
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition" />
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -586,9 +590,10 @@ function AutomationSpotlight() {
         </div>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <Link to="/services/$slug" params={{ slug: "ai-automations" }} className="btn-primary">
-            Explore AI Automations <ArrowRight className="w-4 h-4" />
+          <Link to="/automation-lab" className="btn-primary">
+            Try the Automation Lab <ArrowRight className="w-4 h-4" />
           </Link>
+          <Link to="/services/$slug" params={{ slug: "ai-automations" }} className="btn-ghost-dark">Explore AI Automations</Link>
         </div>
       </div>
     </section>
@@ -1016,53 +1021,60 @@ function TestimonialSection() {
 
 /* ---------- INSIGHTS ---------- */
 function InsightsSection() {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("insight").then((result) => active && setItems(result)).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  if (!items.length) return null;
   return (
-    <section className="py-24 md:py-32 bg-lavender">
+    <section className="bg-lavender py-24 md:py-32">
       <div className="container-page">
-        <div className="flex flex-wrap items-end justify-between gap-6 mb-16">
-          <div className="max-w-2xl">
-            <p className="eyebrow mb-4">Insights</p>
-            <h2 className="fluid-h2">Thinking on technology, AI, and growth.</h2>
-          </div>
-          <Link
-            to="/insights"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-ink group"
-          >
-            All insights <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </Link>
+        <div className="mb-16 flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-2xl"><p className="eyebrow mb-4">Insights</p><h2 className="fluid-h2">Practical thinking on software, automation, and growth.</h2></div>
+          <Link to="/insights" className="inline-flex items-center gap-2 text-sm font-semibold text-ink">All insights <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-5">
-          {insights.map((post) => (
-            <Link
-              to="/insights/$slug"
-              params={{ slug: post.slug }}
-              key={post.slug}
-              data-reveal
-              className="group rounded-2xl bg-white border border-black/5 overflow-hidden hover:-translate-y-1 transition-all duration-500"
-            >
-              <div className="aspect-[16/10] bg-ink relative overflow-hidden">
-                <div className="absolute inset-0 grid-noise opacity-70" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Zap className="w-16 h-16 text-white/20 group-hover:text-brand-gold transition-colors" />
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-3 text-xs text-ink-soft mb-3">
-                  <span className="px-2.5 py-1 rounded-full bg-lavender text-ink">
-                    {post.category}
-                  </span>
-                  <span>{post.date}</span>
-                  <span>· {post.read}</span>
-                </div>
-                <h3 className="text-lg font-semibold group-hover:text-gradient transition-colors">
-                  {post.title}
-                </h3>
-                <p className="mt-2 text-sm text-ink-soft leading-relaxed">{post.excerpt}</p>
-              </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          {items.slice(0, 3).map((post) => (
+            <Link to="/insights/$slug" params={{ slug: post.slug }} key={post.slug} data-reveal className="group overflow-hidden rounded-2xl border border-black/5 bg-white transition-all duration-500 hover:-translate-y-1">
+              <div className="aspect-[16/10] bg-ink">{post.featured_image ? <img src={post.featured_image} alt="" loading="lazy" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center"><Zap className="h-14 w-14 text-white/20" /></div>}</div>
+              <div className="p-6"><div className="mb-3 flex items-center gap-3 text-xs text-ink-soft"><span className="rounded-full bg-lavender px-2.5 py-1 text-ink">{String(post.content_json?.category || "Insight")}</span><span>{String(post.content_json?.reading_time || "")}</span></div><h3 className="text-lg font-semibold group-hover:text-gradient">{post.title}</h3><p className="mt-2 text-sm leading-relaxed text-ink-soft">{post.excerpt}</p></div>
             </Link>
           ))}
         </div>
       </div>
     </section>
   );
+}
+
+function EngagementModelsPreview() {
+  return (
+    <section className="py-24 md:py-32">
+      <div className="container-page">
+        <div className="mb-12 max-w-3xl"><p className="eyebrow mb-4">Engagement models</p><h2 className="fluid-h2">Choose a delivery model that matches the work.</h2></div>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">{engagementModels.map((model) => <article id={model.slug} key={model.slug} className="rounded-2xl border border-black/5 bg-white p-6"><h3 className="text-xl font-semibold text-ink">{model.title}</h3><p className="mt-3 text-sm leading-6 text-ink-soft">{model.bestFor}</p><Link to="/engagement-models" className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-ink">View model <ArrowRight className="h-4 w-4" /></Link></article>)}</div>
+      </div>
+    </section>
+  );
+}
+
+function EstimatorPreview() {
+  return (
+    <section className="bg-cream py-24 md:py-32"><div className="container-page"><div className="grid items-center gap-10 rounded-3xl bg-ink p-8 text-white md:grid-cols-[1.2fr_.8fr] md:p-12"><div><p className="eyebrow mb-4 text-white/60">Project estimator</p><h2 className="fluid-h2 text-white">Turn an idea into a rough scope before discovery.</h2><p className="mt-5 max-w-2xl text-white/70">Select the service, features, integrations, timeline, and budget. The result is a planning guide, not a binding quote.</p></div><div className="md:text-right"><Link to="/project-estimator" className="btn-primary">Build a rough scope <ArrowRight className="h-4 w-4" /></Link></div></div></div></section>
+  );
+}
+
+function TeamCredibility() {
+  const [team, setTeam] = useState<CmsContentItem[]>([]);
+  useEffect(() => { let active = true; getCmsContentList("team").then((items) => active && setTeam(items.filter((item) => item.title && item.content_json?.role))).catch(() => undefined); return () => { active = false; }; }, []);
+  if (!team.length) return null;
+  return <section id="team" className="py-24 md:py-32"><div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow mb-4">Operating credibility</p><h2 className="fluid-h2">The people responsible for the work.</h2></div><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{team.slice(0, 4).map((member) => <article key={member.slug} className="rounded-2xl border border-black/5 bg-white p-5">{member.featured_image ? <img src={member.featured_image} alt={member.title} loading="lazy" className="mb-5 aspect-square w-full rounded-xl object-cover" /> : null}<h3 className="text-lg font-semibold">{member.title}</h3><p className="mt-1 text-sm text-ink-soft">{String(member.content_json?.role || "")}</p></article>)}</div><Link to="/about" hash="team" className="mt-8 inline-flex items-center gap-2 font-semibold">Meet the team <ArrowRight className="h-4 w-4" /></Link></div></section>;
+}
+
+function ResourcesPreview() {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+  useEffect(() => { let active = true; getCmsContentList("resource").then((value) => active && setItems(value)).catch(() => undefined); return () => { active = false; }; }, []);
+  if (!items.length) return null;
+  return <section className="py-24 md:py-32"><div className="container-page"><div className="mb-12 flex items-end justify-between gap-6"><div><p className="eyebrow mb-4">Resources</p><h2 className="fluid-h2">Planning tools for better technical decisions.</h2></div><Link to="/resources" className="hidden items-center gap-2 font-semibold md:inline-flex">View library <ArrowRight className="h-4 w-4" /></Link></div><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">{items.slice(0,4).map((item) => <Link to="/resources/$slug" params={{ slug: item.slug }} key={item.slug} className="rounded-2xl border border-black/5 bg-white p-6 hover:shadow-lg"><span className="text-xs uppercase tracking-widest text-brand-red">{String(item.content_json?.file_type || "Resource")}</span><h3 className="mt-3 text-xl font-semibold">{item.title}</h3><p className="mt-3 text-sm leading-6 text-ink-soft">{item.excerpt}</p></Link>)}</div></div></section>;
 }

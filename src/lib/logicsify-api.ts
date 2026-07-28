@@ -97,6 +97,32 @@ export function submitContact(data: ContactSubmission) {
   });
 }
 
+
+
+export function submitNewsletter(data: { email: string; consent: boolean; source?: string; honey?: string }) {
+  return request<{ message: string }>("public/newsletter", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export type ResourceDownloadSubmission = {
+  resource_slug: string;
+  name: string;
+  email: string;
+  company: string;
+  phone?: string;
+  consent: boolean;
+  honey?: string;
+};
+
+export function requestResourceDownload(data: ResourceDownloadSubmission) {
+  return request<{ download_url: string; message: string }>("public/resource-download", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export function getAvailability(date: string) {
   return request<AvailabilityResponse>(`public/availability?date=${encodeURIComponent(date)}`);
 }
@@ -172,6 +198,8 @@ export type CmsContentItem = {
     title?: string;
     description?: string;
     canonical?: string;
+    og_image?: string;
+    noindex?: boolean;
   };
   published_at?: string;
   sort_order?: number;
@@ -280,6 +308,13 @@ export type PublicSiteSettings = {
   robots_index?: boolean;
   robots_follow?: boolean;
   theme_color?: string;
+  legal_name?: string;
+  service_areas?: string;
+  support_hours?: string;
+  support_response_expectation?: string;
+  emergency_support_policy?: string;
+  maintenance_exclusions?: string;
+  post_launch_period?: string;
 };
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
   try {

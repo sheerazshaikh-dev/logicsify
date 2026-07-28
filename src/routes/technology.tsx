@@ -13,9 +13,9 @@ export const Route = createFileRoute("/technology")({
         content:
           "The frontend, backend, mobile, cloud, AI, and marketing tools Logicsify works with every day.",
       },
-      { property: "og:url", content: "/technology" },
+      { property: "og:url", content: "https://logicsify.com/technology" },
     ],
-    links: [{ rel: "canonical", href: "/technology" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/technology" }],
   }),
 });
 

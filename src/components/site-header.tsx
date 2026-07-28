@@ -1,11 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
-import darkLogo from "@/assets/logicsify-dark.png.asset.json";
-import lightLogo from "@/assets/logicsify-light.png.asset.json";
-import { megaMenu } from "@/lib/site-data";
+import { DEFAULT_BRAND_ASSETS } from "@/lib/brand-assets";
 import { cn } from "@/lib/utils";
 import { normalizePublicHref } from "@/lib/content-routes";
+import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
 import {
   getPublicMenu,
   getPublicSiteSettings,
@@ -52,8 +51,8 @@ export function SiteHeader() {
   const stickyHeader = boolSetting(siteSettings.sticky_header, true);
   const transparentHeaderHome = boolSetting(siteSettings.transparent_header_home, true);
   const showHeaderCta = boolSetting(siteSettings.show_header_cta, true);
-  const headerCtaLabel = siteSettings.header_cta_label || "Book a Strategy Call";
-  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/book-a-call");
+  const headerCtaLabel = siteSettings.header_cta_label || "Get a Free Technical Roadmap";
+  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/technical-roadmap");
   const headerCtaNewTab = boolSetting(siteSettings.header_cta_new_tab);
   const desktopLogoHeight = numberSetting(siteSettings.header_logo_height_desktop, 36, 20, 80);
   const mobileLogoHeight = numberSetting(siteSettings.header_logo_height_mobile, 28, 20, 64);
@@ -74,7 +73,7 @@ export function SiteHeader() {
         if (!active) return;
         setSiteSettings(settings);
         if (menu.items.length) {
-          const tree = ensureDefaultMegaMenu(buildMenuTree(menu.items));
+          const tree = mergeFallbackNavigation(buildMenuTree(menu.items));
           if (tree.length) setPrimaryNav(tree);
         }
       })
@@ -104,8 +103,8 @@ export function SiteHeader() {
   }, [mobileOpen]);
 
   const logo = onDark
-    ? siteSettings.logo_light || lightLogo.url
-    : siteSettings.logo_dark || darkLogo.url;
+    ? siteSettings.logo_light || DEFAULT_BRAND_ASSETS.logoLight
+    : siteSettings.logo_dark || DEFAULT_BRAND_ASSETS.logoDark;
   const logoStyle = {
     "--header-logo-mobile": `${mobileLogoHeight}px`,
     "--header-logo-desktop": `${desktopLogoHeight}px`,
@@ -167,7 +166,12 @@ export function SiteHeader() {
                   <div
                     key={item.id}
                     className="relative group"
-                    onMouseEnter={() => hasMega && setMegaOpenId(item.id)}
+                    onMouseEnter={() => {
+                      if (hasMega) {
+                        setMegaOpenId(item.id);
+                        trackAnalytics("mega_menu_opened", { menu: item.label });
+                      }
+                    }}
                   >
                     {item.comingSoon ? (
                       <span
@@ -184,6 +188,7 @@ export function SiteHeader() {
                         href={item.to}
                         target={item.targetBlank ? "_blank" : undefined}
                         rel={item.targetBlank ? "noreferrer" : undefined}
+                        onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
                         className={cn(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
                           onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
@@ -195,6 +200,7 @@ export function SiteHeader() {
                     ) : (
                       <Link
                         to={item.to}
+                        onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
                         className={cn(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
                           onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
@@ -222,6 +228,7 @@ export function SiteHeader() {
                 href={headerCtaUrl}
                 target={headerCtaNewTab ? "_blank" : undefined}
                 rel={headerCtaNewTab ? "noreferrer" : undefined}
+                onClick={() => { rememberRoadmapSource("header"); trackAnalytics("technical_roadmap_cta_clicked", { placement: "header" }); }}
                 className="hidden md:inline-flex btn-primary text-sm"
               >
                 {headerCtaLabel} <ArrowRight className="w-4 h-4" />
@@ -276,7 +283,7 @@ export function SiteHeader() {
         >
           <div className="flex items-center justify-between p-5 border-b border-black/5">
             <img
-              src={siteSettings.mobile_logo || siteSettings.logo_dark || darkLogo.url}
+              src={siteSettings.mobile_logo || siteSettings.logo_dark || DEFAULT_BRAND_ASSETS.logoDark}
               alt={siteSettings.site_name || "Logicsify"}
               style={logoStyle}
               className="h-[var(--header-logo-mobile)] w-auto"
@@ -300,6 +307,7 @@ export function SiteHeader() {
                 href={headerCtaUrl}
                 target={headerCtaNewTab ? "_blank" : undefined}
                 rel={headerCtaNewTab ? "noreferrer" : undefined}
+                onClick={() => { rememberRoadmapSource("mobile_menu"); trackAnalytics("technical_roadmap_cta_clicked", { placement: "mobile_menu" }); }}
                 className="btn-primary w-full justify-center mt-6"
               >
                 {headerCtaLabel}
@@ -341,10 +349,10 @@ function DefaultMegaMenu({
             <div
               className={cn(
                 promoEnabled ? "col-span-9" : "col-span-12",
-                "grid grid-cols-3 gap-8 p-8",
+                "grid grid-cols-2 xl:grid-cols-4 gap-7 p-8",
               )}
             >
-              {groups.slice(0, 3).map((group) => (
+              {groups.slice(0, 4).map((group) => (
                 <div key={group.id}>
                   <p className="eyebrow mb-4">{group.label}</p>
                   <ul className="space-y-3">
@@ -367,6 +375,7 @@ function DefaultMegaMenu({
                               href={child.to}
                               target={child.targetBlank ? "_blank" : undefined}
                               rel={child.targetBlank ? "noreferrer" : undefined}
+                              onClick={() => trackAnalytics("navigation_item_clicked", { label: child.label, destination: child.to })}
                               className="group block"
                             >
                               <span className="text-sm font-semibold text-ink group-hover:text-gradient transition-colors">
@@ -390,20 +399,21 @@ function DefaultMegaMenu({
                 <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_20%,rgba(254,52,52,0.35),transparent_60%),radial-gradient(circle_at_80%_80%,rgba(253,190,2,0.25),transparent_60%)]" />
                 <div className="relative">
                   <p className="eyebrow text-white/60 mb-3">
-                    {item.megaPromoEyebrow || "Featured"}
+                    {item.megaPromoEyebrow || "Technical roadmap"}
                   </p>
                   <h3 className="text-xl font-semibold leading-tight mb-2">
-                    {item.megaPromoTitle || "Start a project with our senior team"}
+                    {item.megaPromoTitle || "Plan the right system before you build"}
                   </h3>
                   <p className="text-sm text-white/70 mb-6">
                     {item.megaPromoDescription ||
-                      "Book a free 30-minute strategy call. We'll map the fastest path from idea to launch."}
+                      "Share your current systems and priorities. We will outline the clearest technical path forward."}
                   </p>
                   {promoUrl && (item.megaPromoButtonUrl || fallbackCta.enabled) ? (
                     <a
                       href={promoUrl}
                       target={promoNewTab ? "_blank" : undefined}
                       rel={promoNewTab ? "noreferrer" : undefined}
+                      onClick={() => trackAnalytics("technical_roadmap_cta_clicked", { placement: "mega_menu" })}
                       className="btn-primary text-sm"
                     >
                       {promoLabel} <ArrowRight className="w-4 h-4" />
@@ -434,6 +444,7 @@ function CompactDropdown({ items }: { items: NavItem[] }) {
               href={item.to}
               target={item.targetBlank ? "_blank" : undefined}
               rel={item.targetBlank ? "noreferrer" : undefined}
+              onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
               className="block rounded-xl px-3 py-2.5 text-sm text-ink/75 hover:bg-lavender hover:text-ink"
             >
               <span className="font-medium">{item.label}</span>
@@ -491,6 +502,7 @@ function MobileMenuItem({ item }: { item: NavItem }) {
                       href={child.to}
                       target={child.targetBlank ? "_blank" : undefined}
                       rel={child.targetBlank ? "noreferrer" : undefined}
+                      onClick={() => trackAnalytics("navigation_item_clicked", { label: child.label, destination: child.to })}
                       className="block px-3 py-2 text-sm text-ink hover:text-brand-red"
                     >
                       {child.label}
@@ -508,6 +520,7 @@ function MobileMenuItem({ item }: { item: NavItem }) {
       href={item.to}
       target={item.targetBlank ? "_blank" : undefined}
       rel={item.targetBlank ? "noreferrer" : undefined}
+      onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
       className="block px-3 py-3 rounded-xl text-lg font-semibold text-ink hover:bg-lavender"
     >
       {item.label}
@@ -520,8 +533,8 @@ function normalizeMegaGroups(item: NavItem): NavItem[] {
   const explicitGroups = visible.filter((child) => child.isHeading || child.children.length > 0);
   if (explicitGroups.length) return explicitGroups;
 
-  const columns = [1, 2, 3].map((column) =>
-    visible.filter((child) => Math.min(3, Math.max(1, child.columnNumber || 1)) === column),
+  const columns = [1, 2, 3, 4, 5].map((column) =>
+    visible.filter((child) => Math.min(5, Math.max(1, child.columnNumber || 1)) === column),
   );
   return columns.map((children, index) => ({
     ...fallbackGroup(-9000 - index, `Column ${index + 1}`, index + 1),
@@ -529,24 +542,30 @@ function normalizeMegaGroups(item: NavItem): NavItem[] {
   }));
 }
 
-function ensureDefaultMegaMenu(items: NavItem[]): NavItem[] {
-  const fallbackServices = fallbackNavigation[0];
-  return items.map((item) => {
-    const isServices =
-      item.to.replace(/\/$/, "") === "/services" || item.label.toLowerCase() === "services";
-    if (!isServices) return item;
+function mergeFallbackNavigation(items: NavItem[]): NavItem[] {
+  const byKey = new Map(items.map((item) => [navKey(item), item]));
+  const merged = fallbackNavigation.map((fallback) => {
+    const existing = byKey.get(navKey(fallback));
+    if (!existing) return fallback;
+    byKey.delete(navKey(fallback));
+    const shouldHaveChildren = fallback.children.length > 0;
     return {
-      ...item,
-      menuStyle: "mega",
-      megaPromoEnabled: item.megaPromoEnabled ?? true,
-      megaPromoEyebrow: item.megaPromoEyebrow || fallbackServices.megaPromoEyebrow,
-      megaPromoTitle: item.megaPromoTitle || fallbackServices.megaPromoTitle,
-      megaPromoDescription: item.megaPromoDescription || fallbackServices.megaPromoDescription,
-      megaPromoButtonLabel: item.megaPromoButtonLabel || fallbackServices.megaPromoButtonLabel,
-      megaPromoButtonUrl: item.megaPromoButtonUrl || fallbackServices.megaPromoButtonUrl,
-      children: item.children.length ? item.children : fallbackServices.children,
+      ...existing,
+      menuStyle: shouldHaveChildren ? "mega" : existing.menuStyle,
+      children: existing.children.length ? existing.children : fallback.children,
+      megaPromoEnabled: existing.megaPromoEnabled ?? fallback.megaPromoEnabled,
+      megaPromoEyebrow: existing.megaPromoEyebrow || fallback.megaPromoEyebrow,
+      megaPromoTitle: existing.megaPromoTitle || fallback.megaPromoTitle,
+      megaPromoDescription: existing.megaPromoDescription || fallback.megaPromoDescription,
+      megaPromoButtonLabel: existing.megaPromoButtonLabel || fallback.megaPromoButtonLabel,
+      megaPromoButtonUrl: existing.megaPromoButtonUrl || fallback.megaPromoButtonUrl,
     };
   });
+  return [...merged, ...byKey.values()];
+}
+
+function navKey(item: NavItem) {
+  return item.label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 function buildMenuTree(items: PublicMenuItem[]): NavItem[] {
@@ -576,7 +595,7 @@ function mapPublicMenuItem(item: PublicMenuItem): NavItem {
     badgeText: item.badge_text,
     menuStyle:
       item.menu_style === "mega" || item.menu_style === "dropdown" ? item.menu_style : "link",
-    columnNumber: numberSetting(item.column_number, 1, 1, 3),
+    columnNumber: numberSetting(item.column_number, 1, 1, 5),
     isHeading: boolSetting(item.is_heading),
     hideDesktop: boolSetting(item.hide_desktop),
     hideMobile: boolSetting(item.hide_mobile),
@@ -595,38 +614,106 @@ function mapPublicMenuItem(item: PublicMenuItem): NavItem {
 }
 
 function buildFallbackNavigation(): NavItem[] {
-  let nextId = -1;
-  const groups = megaMenu.slice(0, 3).map((group, groupIndex) => {
+  let nextId = -1000;
+  const group = (title: string, column: number, items: Array<[string, string, string?]>) => {
     const groupId = nextId--;
     return {
-      ...fallbackGroup(groupId, group.title, groupIndex + 1),
-      parentId: -100,
-      children: group.items.map((service) => ({
-        ...fallbackLink(nextId--, service.name, service.route),
+      ...fallbackGroup(groupId, title, column),
+      children: items.map(([label, to, description]) => ({
+        ...fallbackLink(nextId--, label, to),
         parentId: groupId,
-        description: service.short,
-        columnNumber: groupIndex + 1,
+        description: description || null,
+        columnNumber: column,
       })),
     };
+  };
+  const root = (label: string, to: string, children: NavItem[], promo = true) => ({
+    ...fallbackLink(nextId--, label, to),
+    menuStyle: children.length ? ("mega" as const) : ("link" as const),
+    megaPromoEnabled: promo,
+    megaPromoEyebrow: "Technical roadmap",
+    megaPromoTitle: "Plan the right system before you build",
+    megaPromoDescription: "Share your current systems and priorities. We will outline the clearest technical path forward.",
+    megaPromoButtonLabel: "Get a Free Technical Roadmap",
+    megaPromoButtonUrl: "/technical-roadmap",
+    children,
   });
 
+  const services = root("Services", "/services", [
+    group("Design and Development", 1, [
+      ["Web Design and Development", "/services/web-design-development"],
+      ["Custom Web Applications", "/services/web-applications"],
+      ["SaaS Development", "/services/saas-development"],
+      ["Mobile App Development", "/services/mobile-apps"],
+      ["E-commerce Development", "/services/ecommerce"],
+      ["UI/UX and Product Design", "/services/ui-ux"],
+    ]),
+    group("AI and Automation", 2, [
+      ["AI Automations", "/services/ai-automations"],
+      ["AI Voice Agents", "/services/ai-agents"],
+      ["CRM and Workflow Automation", "/services/crm-automation"],
+      ["Document Automation", "/services/ai-automations"],
+      ["Support Chatbots", "/services/ai-agents"],
+      ["Systems Integration", "/services/api-integrations"],
+    ]),
+    group("Growth and Marketing", 3, [
+      ["SEO", "/services/seo"],
+      ["Paid Advertising", "/services/paid-advertising"],
+      ["Social Media Marketing", "/services/social-media"],
+      ["Content Marketing", "/services/content-marketing"],
+      ["Conversion Optimization", "/services/cro"],
+    ]),
+    group("Engagement Models", 4, [
+      ["Fixed-Scope Projects", "/engagement-models#fixed-scope-project"],
+      ["Monthly Development Support", "/engagement-models#monthly-development-support"],
+      ["Dedicated Teams", "/engagement-models#dedicated-team"],
+      ["Automation Consulting", "/engagement-models#automation-consulting"],
+    ]),
+  ]);
+
+  const industries = root("Industries", "/industries", [
+    group("Industries", 1, [
+      ["SaaS and Startups", "/industries/saas-startups"],
+      ["Home Services", "/industries/home-services"],
+      ["Healthcare", "/industries/healthcare"],
+      ["E-commerce", "/industries/ecommerce"],
+      ["Agencies", "/industries/agencies"],
+    ]),
+  ], false);
+
+  const resources = root("Resources", "/resources", [
+    group("Planning tools", 1, [
+      ["Resource Library", "/resources"],
+      ["Project Estimator", "/project-estimator"],
+      ["Comparisons", "/comparisons"],
+    ]),
+    group("Templates", 2, [
+      ["Website Planning Checklist", "/resources/website-planning-checklist"],
+      ["AI Automation Opportunity Audit", "/resources/ai-automation-opportunity-audit"],
+      ["CRM Migration Checklist", "/resources/crm-migration-checklist"],
+      ["SaaS MVP Scope Template", "/resources/saas-mvp-scope-template"],
+    ]),
+  ], false);
+
+  const insights = root("Insights", "/insights", [
+    group("Browse insights", 1, [
+      ["All Insights", "/insights"],
+      ["AI and Automation", "/insights?category=AI%20and%20Automation"],
+      ["Development", "/insights?category=Web%20Development"],
+      ["Marketing", "/insights?category=Digital%20Marketing"],
+      ["Company News", "/insights?category=Company%20News"],
+      ["Guides", "/insights?category=Guides"],
+    ]),
+  ], false);
+
   return [
-    {
-      ...fallbackLink(-100, "Services", "/services"),
-      menuStyle: "mega",
-      megaPromoEnabled: true,
-      megaPromoEyebrow: "Featured",
-      megaPromoTitle: "Start a project with our senior team",
-      megaPromoDescription:
-        "Book a free 30-minute strategy call. We'll map the fastest path from idea to launch.",
-      megaPromoButtonLabel: "Book a call",
-      megaPromoButtonUrl: "/book-a-call",
-      children: groups,
-    },
-    fallbackLink(-200, "Industries", "/industries"),
-    fallbackLink(-201, "Work", "/work"),
-    fallbackLink(-202, "About", "/about"),
-    fallbackLink(-203, "Insights", "/insights"),
+    services,
+    industries,
+    fallbackLink(nextId--, "Work", "/work"),
+    fallbackLink(nextId--, "Automation Lab", "/automation-lab"),
+    resources,
+    insights,
+    fallbackLink(nextId--, "About", "/about"),
   ];
 }
 

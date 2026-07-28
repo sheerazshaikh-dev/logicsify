@@ -35,12 +35,12 @@ export const Route = createFileRoute("/industries/")({
       { title: "Industries | Logicsify" },
       {
         name: "description",
-        content: "Sectors where Logicsify delivers senior-level technology, AI, and growth work.",
+        content: "Industry-focused websites, software, automation, CRM, and growth systems for SaaS, home services, healthcare, e-commerce, and agencies.",
       },
       { property: "og:title", content: "Industries | Logicsify" },
-      { property: "og:url", content: "/industries" },
+      { property: "og:url", content: "https://logicsify.com/industries" },
     ],
-    links: [{ rel: "canonical", href: "/industries" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/industries" }],
   }),
 });
 
@@ -57,7 +57,7 @@ function IndustriesOverview() {
           </>
         }
         intro="We build for teams whose products and operations have real complexity — where the details matter and the stakes are visible."
-        primaryCta={{ label: "Book a Strategy Call", to: "/book-a-call" }}
+        primaryCta={{ label: "Get a Free Technical Roadmap", to: "/technical-roadmap" }}
       />
       <section className="py-24">
         <div className="container-page grid md:grid-cols-2 lg:grid-cols-3 gap-5">

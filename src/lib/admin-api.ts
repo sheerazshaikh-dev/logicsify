@@ -124,7 +124,7 @@ export type DashboardResponse = {
 export type ContentItem = {
   id: number;
   content_type:
-    "page" | "service" | "industry" | "case_study" | "insight" | "career" | "testimonial" | "team";
+    "page" | "service" | "industry" | "case_study" | "insight" | "career" | "testimonial" | "team" | "resource" | "comparison" | "engagement_model" | "integration";
   title: string;
   slug: string;
   status: "draft" | "published" | "scheduled" | "archived";

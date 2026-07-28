@@ -1,5 +1,11 @@
 User-agent: *
-Disallow: /admin
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /preview/
+Disallow: /internal-preview/
+Disallow: /tmp/
+Disallow: /*?search=
+Disallow: /*?category=
 
 Sitemap: https://logicsify.com/sitemap.xml

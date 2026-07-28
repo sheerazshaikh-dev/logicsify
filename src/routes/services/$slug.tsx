@@ -21,20 +21,28 @@ export const Route = createFileRoute("/services/$slug")({
         ? genericServiceData(staticService.slug, staticService.name, staticService.short)
         : undefined);
     if (!cms && !fallback) throw notFound();
-    return { data: mergeServiceData(params.slug, cms, fallback) };
+    return { data: mergeServiceData(params.slug, cms, fallback), cms };
   },
   head: ({ loaderData, params }) => {
     const data = loaderData?.data;
+    const cms = loaderData?.cms;
     const name = data?.name ?? "Service";
+    const title = cms?.seo_json?.title || `${name} | Logicsify`;
+    const description = cms?.seo_json?.description || data?.heroIntro || "Logicsify services";
+    const image = cms?.seo_json?.og_image || cms?.featured_image;
     return {
       meta: [
-        { title: `${name} | Logicsify` },
-        { name: "description", content: data?.heroIntro ?? "Logicsify services" },
-        { property: "og:title", content: `${name} | Logicsify` },
-        { property: "og:description", content: data?.heroIntro ?? "" },
-        { property: "og:url", content: `/services/${params.slug}` },
+        { title },
+        { name: "description", content: description },
+        { name: "robots", content: cms?.seo_json?.noindex ? "noindex,nofollow" : "index,follow" },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: `https://logicsify.com/services/${params.slug}` },
+        ...(image ? [{ property: "og:image", content: image }, { name: "twitter:image", content: image }] : []),
       ],
-      links: [{ rel: "canonical", href: `/services/${params.slug}` }],
+      links: [{ rel: "canonical", href: cms?.seo_json?.canonical || `https://logicsify.com/services/${params.slug}` }],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Service", name, description, provider: { "@id": "https://logicsify.com/#organization" }, url: `https://logicsify.com/services/${params.slug}` }) }],
     };
   },
   notFoundComponent: () => (

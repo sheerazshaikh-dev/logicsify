@@ -5,6 +5,7 @@ import { CTASection } from "@/components/cta-section";
 import { megaMenu } from "@/lib/site-data";
 import { getCmsContentList } from "@/lib/logicsify-api";
 import { ArrowRight } from "lucide-react";
+import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 
 import { PublicRouteLoading } from "@/components/public-route-loading";
 export const Route = createFileRoute("/services/")({
@@ -53,9 +54,9 @@ export const Route = createFileRoute("/services/")({
         property: "og:description",
         content: "Design, engineering, AI, and marketing under one roof.",
       },
-      { property: "og:url", content: "/services" },
+      { property: "og:url", content: "https://logicsify.com/services" },
     ],
-    links: [{ rel: "canonical", href: "/services" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/services" }],
   }),
 });
 
@@ -81,8 +82,8 @@ function ServicesOverview() {
             <span className="text-gradient">every stage of growth.</span>
           </>
         }
-        intro="From first strategy conversation to long-term optimization — a senior team you can bring in for one capability or the entire journey."
-        primaryCta={{ label: "Book a Strategy Call", to: "/book-a-call" }}
+        intro="From technical planning to delivery and ongoing improvement, bring Logicsify in for one capability or a connected end-to-end system."
+        primaryCta={{ label: "Get a Free Technical Roadmap", to: "/technical-roadmap" }}
         secondaryCta={{ label: "See our work", to: "/work" }}
       />
       <section className="py-24">
@@ -125,6 +126,7 @@ function ServicesOverview() {
           ))}
         </div>
       </section>
+      <SystemsWeIntegrate />
       <CTASection />
     </SiteLayout>
   );

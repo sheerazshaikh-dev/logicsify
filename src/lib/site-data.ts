@@ -139,130 +139,37 @@ export const allServices: ServiceItem[] = megaMenu.flatMap((g) => g.items);
 
 export const industries = [
   {
-    slug: "startups-saas",
-    name: "Startups & SaaS",
-    tag: "Product-led growth",
-    desc: "MVPs, platform engineering, and marketing engines for venture-backed teams.",
-  },
-  {
-    slug: "professional-services",
-    name: "Professional Services",
-    tag: "Legal, consulting, agencies",
-    desc: "Client portals, intake automation, and thought-leadership sites.",
+    slug: "saas-startups",
+    name: "SaaS & Startups",
+    tag: "MVP, product, and scale",
+    desc: "Product design, SaaS architecture, billing, onboarding, analytics, admin systems, AI features, and scaling.",
   },
   {
     slug: "home-services",
     name: "Home Services",
-    tag: "HVAC, plumbing, roofing",
-    desc: "Local SEO, lead qualification, and dispatch integrations.",
+    tag: "Lead capture to dispatch",
+    desc: "Lead handling, appointment workflows, CRM pipelines, local growth, reviews, and technician operations.",
   },
   {
     slug: "healthcare",
     name: "Healthcare",
-    tag: "Clinics, dental, wellness",
-    desc: "HIPAA-aware portals, appointment AI, and patient acquisition.",
+    tag: "Intake and operations",
+    desc: "Accessible intake, appointment workflows, staff portals, reporting, and secure operational design without unsupported compliance claims.",
   },
   {
     slug: "ecommerce",
     name: "E-commerce",
-    tag: "DTC, retail, B2B",
-    desc: "Shopify Plus, headless storefronts, and lifecycle automation.",
+    tag: "Storefront to retention",
+    desc: "Shopify and custom storefronts, checkout, CRM, lifecycle flows, analytics, inventory, and support automation.",
   },
   {
-    slug: "real-estate",
-    name: "Real Estate",
-    tag: "Brokerage, PropTech",
-    desc: "IDX, agent portals, and inbound lead automation.",
-  },
-  {
-    slug: "financial-services",
-    name: "Financial Services",
-    tag: "Fintech, advisory",
-    desc: "Compliance-minded builds, dashboards, and CRM integrations.",
+    slug: "agencies",
+    name: "Agencies",
+    tag: "White-label delivery systems",
+    desc: "Overflow development, dedicated teams, custom CMS platforms, client portals, reporting, and repeatable delivery workflows.",
   },
 ];
 
-export const caseStudies = [
-  {
-    slug: "saas-intelligence-platform",
-    name: "SaaS Intelligence Platform",
-    client: "Client Placeholder — Vertical SaaS",
-    category: "SaaS",
-    services: ["Product Design", "Full-Stack Engineering", "AI Integration"],
-    challenge:
-      "Consolidate three internal tools into a single analytics workspace with role-based access.",
-    outcome: "Created a scalable product foundation and unified data model.",
-    tags: ["SaaS", "Web Apps", "AI Automation"],
-  },
-  {
-    slug: "healthcare-operations-portal",
-    name: "Healthcare Operations Portal",
-    client: "Client Placeholder — Multi-Clinic Group",
-    category: "Healthcare",
-    services: ["Web Application", "Workflow Automation", "Integrations"],
-    challenge:
-      "Replace spreadsheet-based scheduling across 12 locations with a live operations portal.",
-    outcome: "Reduced manual processing across scheduling and reporting.",
-    tags: ["Web Apps", "AI Automation"],
-  },
-  {
-    slug: "ecommerce-growth-system",
-    name: "E-commerce Growth System",
-    client: "Client Placeholder — DTC Brand",
-    category: "E-commerce",
-    services: ["Shopify Plus", "CRO", "Paid Advertising"],
-    challenge:
-      "Rebuild storefront and unify paid, lifecycle, and merchandising in one growth loop.",
-    outcome: "Improved conversion consistency across acquisition and retention.",
-    tags: ["E-commerce", "Marketing"],
-  },
-  {
-    slug: "ai-powered-lead-qualification",
-    name: "AI-Powered Lead Qualification",
-    client: "Client Placeholder — B2B Services",
-    category: "AI Automation",
-    services: ["AI Agents", "CRM Automation", "Reporting"],
-    challenge: "Qualify inbound leads 24/7 and route to the right rep with context.",
-    outcome: "Improved lead quality and consistent follow-up cadence.",
-    tags: ["AI Automation", "Web Apps"],
-  },
-  {
-    slug: "multi-location-marketing-platform",
-    name: "Multi-Location Marketing Platform",
-    client: "Client Placeholder — Franchise Network",
-    category: "Marketing",
-    services: ["Websites", "Local SEO", "Reporting Automation"],
-    challenge:
-      "Ship consistent, locally-tuned marketing pages and dashboards across 40+ locations.",
-    outcome: "Created a scalable page framework and unified reporting layer.",
-    tags: ["Websites", "Marketing", "AI Automation"],
-  },
-];
+export const caseStudies: Array<{ slug: string; name: string; client: string; category: string; services: string[]; challenge: string; outcome: string; tags: string[] }> = [];
 
-export const insights = [
-  {
-    slug: "where-ai-automation-creates-value",
-    category: "AI Automation",
-    title: "Where AI automation creates the fastest business value",
-    excerpt:
-      "The highest-ROI automations are the boring ones: qualification, routing, follow-up, reporting.",
-    date: "Jul 2026",
-    read: "6 min read",
-  },
-  {
-    slug: "website-vs-web-app-vs-saas",
-    category: "Strategy",
-    title: "Choosing between a website, web app, and SaaS product",
-    excerpt: "Three very different investments. How to know which one you actually need.",
-    date: "Jun 2026",
-    read: "8 min read",
-  },
-  {
-    slug: "connect-marketing-data-with-operations",
-    category: "Operations",
-    title: "How to connect marketing data with business operations",
-    excerpt: "When your CRM, ads, and reporting speak the same language, growth compounds.",
-    date: "May 2026",
-    read: "7 min read",
-  },
-];
+export const insights: Array<{ slug: string; category: string; title: string; excerpt: string; date: string; read: string }> = [];

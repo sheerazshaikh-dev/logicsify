@@ -78,6 +78,34 @@ const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => (
     video_url: "",
     video_poster: "",
     client_image: "",
+    author: "",
+    author_role: "",
+    article_type: "article",
+    reading_time: "",
+    source_name: "",
+    source_url: "",
+    industry: "",
+    client_logo: "",
+    challenge: "",
+    objectives: "",
+    solution: "",
+    work_completed: [],
+    timeline: "",
+    technology_stack: [],
+    integrations: [],
+    desktop_screenshots: [],
+    mobile_screenshots: [],
+    gallery: [],
+    measurable_results: [],
+    services: [],
+    live_url: "",
+    download_file: "",
+    preview_image: "",
+    file_type: "",
+    file_size: "",
+    includes: [],
+    audience: "",
+    related_service: "",
   },
   seo_json: { title: "", description: "", canonical: "", noindex: false, og_image: "" },
   published_at: "",
@@ -172,6 +200,34 @@ export function ContentManagerPage({
         video_url: "",
         video_poster: "",
         client_image: "",
+        author: "",
+        author_role: "",
+        article_type: "article",
+        reading_time: "",
+        source_name: "",
+        source_url: "",
+        industry: "",
+        client_logo: "",
+        challenge: "",
+        objectives: "",
+        solution: "",
+        work_completed: [],
+        timeline: "",
+        technology_stack: [],
+        integrations: [],
+        desktop_screenshots: [],
+        mobile_screenshots: [],
+        gallery: [],
+        measurable_results: [],
+        services: [],
+        live_url: "",
+        download_file: "",
+        preview_image: "",
+        file_type: "",
+        file_size: "",
+        includes: [],
+        audience: "",
+        related_service: "",
         ...(item.content_json || {}),
       },
       seo_json: {
@@ -556,8 +612,11 @@ function ContentEditor({
   const [loadingRevisions, setLoadingRevisions] = useState(false);
   const [mediaOpen, setMediaOpen] = useState(false);
   const [mediaTarget, setMediaTarget] = useState<
-    "featured" | "client_image" | "video" | "video_poster"
+    "featured" | "client_image" | "video" | "video_poster" | "structured"
   >("featured");
+  const [structuredMediaKey, setStructuredMediaKey] = useState("");
+  const [structuredMediaKind, setStructuredMediaKind] = useState<"images" | "videos" | "documents" | "all">("images");
+  const [structuredMediaAppend, setStructuredMediaAppend] = useState(false);
 
   useEffect(() => {
     formRef.current = item;
@@ -590,6 +649,18 @@ function ContentEditor({
 
   function chooseMedia(target: "featured" | "client_image" | "video" | "video_poster") {
     setMediaTarget(target);
+    setMediaOpen(true);
+  }
+
+  function chooseStructuredMedia(
+    key: string,
+    kind: "images" | "videos" | "documents" | "all" = "images",
+    append = false,
+  ) {
+    setMediaTarget("structured");
+    setStructuredMediaKey(key);
+    setStructuredMediaKind(kind);
+    setStructuredMediaAppend(append);
     setMediaOpen(true);
   }
 
@@ -905,6 +976,12 @@ function ContentEditor({
                       onChange={(value) => updateContentJson("body", value)}
                     />
                   </div>
+                  <StructuredContentFields
+                    type={form.content_type}
+                    content={contentJson}
+                    update={updateContentJson}
+                    chooseMedia={chooseStructuredMedia}
+                  />
                   <SectionBuilder
                     sections={sections}
                     onChange={(next) => updateContentJson("sections", next)}
@@ -1188,23 +1265,334 @@ function ContentEditor({
       <MediaPicker
         open={mediaOpen}
         onClose={() => setMediaOpen(false)}
-        kind={mediaTarget === "video" ? "videos" : "images"}
-        title={mediaTarget === "video" ? "Choose testimonial video" : "Choose image"}
+        kind={mediaTarget === "structured" ? structuredMediaKind : mediaTarget === "video" ? "videos" : "images"}
+        title={mediaTarget === "structured" ? "Choose media or document" : mediaTarget === "video" ? "Choose testimonial video" : "Choose image"}
         selectedUrl={
           mediaTarget === "featured"
             ? form.featured_image || ""
-            : String(contentJson[mediaTarget === "video" ? "video_url" : mediaTarget] || "")
+            : mediaTarget === "structured"
+              ? String(Array.isArray(contentJson[structuredMediaKey]) ? "" : contentJson[structuredMediaKey] || "")
+              : String(contentJson[mediaTarget === "video" ? "video_url" : mediaTarget] || "")
         }
         onSelect={(url) => {
           if (mediaTarget === "featured") setField("featured_image", url);
           else if (mediaTarget === "video") updateContentJson("video_url", url);
           else if (mediaTarget === "video_poster") updateContentJson("video_poster", url);
-          else updateContentJson("client_image", url);
+          else if (mediaTarget === "client_image") updateContentJson("client_image", url);
+          else if (structuredMediaAppend) {
+            const current = Array.isArray(contentJson[structuredMediaKey])
+              ? (contentJson[structuredMediaKey] as unknown[]).map(String)
+              : [];
+            updateContentJson(structuredMediaKey, Array.from(new Set([...current, url])));
+          } else updateContentJson(structuredMediaKey, url);
           setMediaOpen(false);
         }}
       />
     </>
   );
+}
+
+
+function textList(value: unknown) {
+  return Array.isArray(value)
+    ? value.map(String).filter(Boolean)
+    : String(value || "")
+        .split(/\r?\n|,/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function StructuredContentFields({
+  type,
+  content,
+  update,
+  chooseMedia,
+}: {
+  type?: ContentItem["content_type"];
+  content: NonNullable<ContentItem["content_json"]>;
+  update: (key: string, value: unknown) => void;
+  chooseMedia: (
+    key: string,
+    kind?: "images" | "videos" | "documents" | "all",
+    append?: boolean,
+  ) => void;
+}) {
+  const listField = (label: string, key: string, placeholder: string, rows = 4) => (
+    <div>
+      <FieldLabel>{label}</FieldLabel>
+      <textarea
+        rows={rows}
+        value={textList(content[key]).join("\n")}
+        onChange={(event) => update(key, textList(event.target.value))}
+        className={adminTextareaClass}
+        placeholder={placeholder}
+      />
+      <p className="mt-1 text-[11px] text-slate-400">Enter one item per line.</p>
+    </div>
+  );
+
+  const textField = (label: string, key: string, placeholder = "", textarea = false) => (
+    <div>
+      <FieldLabel>{label}</FieldLabel>
+      {textarea ? (
+        <textarea
+          rows={4}
+          value={String(content[key] || "")}
+          onChange={(event) => update(key, event.target.value)}
+          className={adminTextareaClass}
+          placeholder={placeholder}
+        />
+      ) : (
+        <input
+          value={String(content[key] || "")}
+          onChange={(event) => update(key, event.target.value)}
+          className={adminInputClass}
+          placeholder={placeholder}
+        />
+      )}
+    </div>
+  );
+
+  const mediaField = (
+    label: string,
+    key: string,
+    kind: "images" | "videos" | "documents" | "all" = "images",
+  ) => (
+    <div>
+      <FieldLabel>{label}</FieldLabel>
+      <div className="flex gap-2">
+        <input
+          value={String(content[key] || "")}
+          onChange={(event) => update(key, event.target.value)}
+          className={adminInputClass}
+          placeholder="https://…"
+        />
+        <AdminButton type="button" variant="secondary" onClick={() => chooseMedia(key, kind)}>
+          <ImageIcon className="h-4 w-4" /> Browse
+        </AdminButton>
+      </div>
+    </div>
+  );
+
+  const mediaList = (
+    label: string,
+    key: string,
+    kind: "images" | "videos" | "documents" | "all" = "images",
+  ) => {
+    const values = textList(content[key]);
+    return (
+      <div>
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <FieldLabel>{label}</FieldLabel>
+          <AdminButton type="button" variant="secondary" onClick={() => chooseMedia(key, kind, true)}>
+            <Plus className="h-4 w-4" /> Add media
+          </AdminButton>
+        </div>
+        {!values.length ? (
+          <div className="rounded-xl border border-dashed border-slate-300 p-5 text-center text-xs text-slate-400">
+            No files selected.
+          </div>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {values.map((url, index) => (
+              <div key={`${url}-${index}`} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                {kind === "images" ? (
+                  <img src={url} alt="" className="h-12 w-16 rounded-lg object-cover" />
+                ) : (
+                  <div className="grid h-12 w-16 place-items-center rounded-lg bg-white text-slate-400">
+                    <ImageIcon className="h-5 w-5" />
+                  </div>
+                )}
+                <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{url}</span>
+                <button
+                  type="button"
+                  onClick={() => update(key, values.filter((_, itemIndex) => itemIndex !== index))}
+                  className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                  aria-label={`Remove ${label} item ${index + 1}`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (type === "case_study") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <div>
+          <h3 className="text-base font-semibold text-[#190A2F]">Case study details</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Only publish claims and results supported by the client.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Client name", "client_name")}
+          {textField("Industry", "industry")}
+          {mediaField("Client logo", "client_logo")}
+          {textField("Timeline", "timeline", "For example: 10 weeks")}
+          {textField("Live URL", "live_url", "https://…")}
+        </div>
+        {textField("Challenge", "challenge", "Describe the verified business problem.", true)}
+        {listField("Objectives", "objectives", "Objective one\nObjective two")}
+        {textField("Solution", "solution", "Explain the implemented solution.", true)}
+        {listField("Work completed", "work_completed", "Discovery\nProduct design\nDevelopment")}
+        <div className="grid gap-4 md:grid-cols-2">
+          {listField("Technology stack", "technology_stack", "React\nPHP\nMySQL")}
+          {listField("Systems integrated", "integrations", "HubSpot\nStripe")}
+          {listField("Related services", "services", "web-design-development\nai-automations")}
+          {listField("Process", "process", "Discovery\nDesign\nDevelopment\nQA\nLaunch")}
+        </div>
+        {mediaList("Desktop screenshots", "desktop_screenshots")}
+        {mediaList("Mobile screenshots", "mobile_screenshots")}
+        {mediaList("Gallery", "gallery")}
+        {listField("Measurable or qualitative results", "measurable_results", "Reduced manual processing\nImproved mobile usability")}
+        {textField("Client testimonial", "testimonial", "Leave empty unless supplied by the client.", true)}
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Testimonial name", "testimonial_name")}
+          {textField("Testimonial role", "testimonial_role")}
+        </div>
+      </AdminCard>
+    );
+  }
+
+  if (type === "insight") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <div>
+          <h3 className="text-base font-semibold text-[#190A2F]">Insight and news details</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Use a source link for third-party technology updates and write an original summary.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Author", "author")}
+          {textField("Author role", "author_role")}
+          {textField("Reading time", "reading_time", "6 min read")}
+          <div>
+            <FieldLabel>Article type</FieldLabel>
+            <select value={String(content.article_type || "article")} onChange={(e) => update("article_type", e.target.value)} className={adminInputClass}>
+              <option value="article">Educational article</option>
+              <option value="technology_update">Technology update</option>
+              <option value="company_news">Company news</option>
+              <option value="guide">Guide</option>
+              <option value="project_announcement">Project announcement</option>
+            </select>
+          </div>
+          {textField("Updated date", "updated_date", "YYYY-MM-DD")}
+          {textField("Related service slug", "related_service")}
+          {textField("Related case study slug", "related_case_study")}
+          {textField("Related resource slugs", "related_resources", "slug-one, slug-two")}
+          {textField("Source name", "source_name")}
+          {textField("Source URL", "source_url", "https://…")}
+        </div>
+      </AdminCard>
+    );
+  }
+
+  if (type === "resource") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <div>
+          <h3 className="text-base font-semibold text-[#190A2F]">Resource file and access</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">The public API hides the file URL until a valid download form is submitted.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {mediaField("Download file", "download_file", "documents")}
+          {mediaField("Preview image", "preview_image", "images")}
+          {textField("File type", "file_type", "PDF, DOCX, XLSX…")}
+          {textField("File size", "file_size", "2.4 MB")}
+          {textField("Related service slug", "related_service")}
+        </div>
+        {listField("What is included", "includes", "Checklist\nPlanning worksheet\nImplementation notes")}
+        {textField("Who it is for", "audience", "Describe the intended reader.", true)}
+      </AdminCard>
+    );
+  }
+
+  if (type === "team") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <div>
+          <h3 className="text-base font-semibold text-[#190A2F]">Team profile</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Incomplete or draft profiles are not shown publicly.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Role", "role")}
+          {textField("LinkedIn URL", "linkedin_url", "https://linkedin.com/in/…")}
+        </div>
+        {listField("Skills", "skills", "Product strategy\nReact\nAutomation")}
+      </AdminCard>
+    );
+  }
+
+  if (type === "comparison") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <h3 className="text-base font-semibold text-[#190A2F]">Comparison details</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Option A", "option_a")}
+          {textField("Option B", "option_b")}
+          {textField("Best use case for option A", "best_a", "Describe when option A is the better fit.", true)}
+          {textField("Best use case for option B", "best_b", "Describe when option B is the better fit.", true)}
+        </div>
+        {listField("Comparison table rows", "comparison_rows", "Setup speed | Option A explanation | Option B explanation\nFlexibility | Option A explanation | Option B explanation")}
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Cost considerations", "cost_considerations", "Balanced cost considerations for both options.", true)}
+          {textField("Setup time", "setup_time", "Balanced setup-time considerations.", true)}
+          {textField("Flexibility", "flexibility", "Balanced flexibility considerations.", true)}
+          {textField("Maintenance", "maintenance", "Balanced maintenance considerations.", true)}
+          {textField("Integrations", "integrations", "Balanced integration considerations.", true)}
+          {textField("Ownership", "ownership", "Balanced ownership considerations.", true)}
+          {textField("Scalability", "scalability", "Balanced scalability considerations.", true)}
+        </div>
+        {textField("Decision framework", "decision_framework", "Explain when each option is the better fit.", true)}
+        {listField("Risks and assumptions", "risks", "Risk or assumption one\nRisk or assumption two")}
+        {listField("FAQs", "faqs", "Question | Answer\nQuestion | Answer")}
+        {listField("Related service slugs", "related_services", "web-design-development\ncrm-automation")}
+      </AdminCard>
+    );
+  }
+
+  if (type === "engagement_model") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <h3 className="text-base font-semibold text-[#190A2F]">Engagement model details</h3>
+        {textField("Best for", "best_for", "Describe the right project fit.", true)}
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Typical project type", "typical_project")}
+          {textField("Delivery cadence", "delivery_cadence")}
+          {textField("Communication format", "communication_format")}
+          {textField("Optional starting price", "starting_price", "Leave empty when not approved")}
+        </div>
+        {textField("How work is scoped", "scope", "Explain scope, capacity, milestones, and change control.", true)}
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Client responsibilities", "client_responsibilities", "Access, feedback, approvals, product ownership…", true)}
+          {textField("Logicsify responsibilities", "logicsify_responsibilities", "Delivery planning, design, engineering, QA…", true)}
+        </div>
+        {listField("Advantages", "advantages", "Advantage one\nAdvantage two")}
+        {listField("Tradeoffs", "tradeoffs", "Tradeoff one\nTradeoff two")}
+      </AdminCard>
+    );
+  }
+
+  if (type === "integration") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <h3 className="text-base font-semibold text-[#190A2F]">Integration details</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Category", "category", "CRM, AI, Marketing…")}
+          {mediaField("Platform logo", "logo")}
+          {textField("Official platform URL", "platform_url", "https://…")}
+        </div>
+        <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <input type="checkbox" checked={Boolean(content.formal_partnership)} onChange={(e) => update("formal_partnership", e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#FE3434]" />
+          <span><strong>Formal partnership verified.</strong> Keep unchecked unless Logicsify has documented authorization to make that claim.</span>
+        </label>
+      </AdminCard>
+    );
+  }
+
+  return null;
 }
 
 function SectionBuilder({

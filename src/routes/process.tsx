@@ -12,9 +12,9 @@ export const Route = createFileRoute("/process")({
         name: "description",
         content: "From discovery to scale — a transparent, senior-led delivery process.",
       },
-      { property: "og:url", content: "/process" },
+      { property: "og:url", content: "https://logicsify.com/process" },
     ],
-    links: [{ rel: "canonical", href: "/process" }],
+    links: [{ rel: "canonical", href: "https://logicsify.com/process" }],
   }),
 });
 
@@ -58,7 +58,7 @@ function ProcessPage() {
           </>
         }
         intro="Our five-stage process is designed for transparency, senior involvement, and measurable outcomes."
-        primaryCta={{ label: "Start a Project", to: "/contact" }}
+        primaryCta={{ label: "Get a Free Technical Roadmap", to: "/technical-roadmap" }}
       />
       <section className="py-24">
         <div className="container-page">

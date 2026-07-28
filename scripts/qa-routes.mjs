@@ -36,6 +36,11 @@ const staticRoutes = [
   "/services",
   "/industries",
   "/work",
+  "/automation-lab",
+  "/resources",
+  "/project-estimator",
+  "/comparisons",
+  "/engagement-models",
   "/insights",
   "/about",
   "/process",
@@ -43,6 +48,7 @@ const staticRoutes = [
   "/careers",
   "/contact",
   "/book-a-call",
+  "/technical-roadmap",
   "/privacy",
   "/terms",
   "/admin/login",
@@ -52,6 +58,10 @@ const staticRoutes = [
   "/admin/industries",
   "/admin/case-studies",
   "/admin/insights",
+  "/admin/resources",
+  "/admin/comparisons",
+  "/admin/engagement-models",
+  "/admin/integrations",
   "/admin/careers",
   "/admin/testimonials",
   "/admin/team",
@@ -78,7 +88,7 @@ const routes = [
 const vercel = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
 const hasSpaRewrite =
   Array.isArray(vercel.rewrites) &&
-  vercel.rewrites.some((rule) => rule?.source === "/(.*)" && rule?.destination === "/index.html");
+  vercel.rewrites.some((rule) => rule?.destination === "/index.html");
 if (!hasSpaRewrite) {
   console.error("vercel.json is missing the SPA fallback rewrite to /index.html.");
   process.exit(1);

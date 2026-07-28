@@ -47,9 +47,13 @@ export const Route = createFileRoute("/$slug")({
       meta: [
         { title: page?.seo_json?.title || `${page?.title || "Page"} | Logicsify` },
         { name: "description", content: page?.seo_json?.description || page?.excerpt || "" },
-        { property: "og:url", content: `/${params.slug}` },
+        { name: "robots", content: page?.seo_json?.noindex ? "noindex,nofollow" : "index,follow" },
+        { property: "og:title", content: page?.seo_json?.title || page?.title || "" },
+        { property: "og:description", content: page?.seo_json?.description || page?.excerpt || "" },
+        { property: "og:url", content: `https://logicsify.com/${params.slug}` },
+        ...((page?.seo_json?.og_image || page?.featured_image) ? [{ property: "og:image", content: page?.seo_json?.og_image || page?.featured_image }, { name: "twitter:image", content: page?.seo_json?.og_image || page?.featured_image }] : []),
       ],
-      links: [{ rel: "canonical", href: page?.seo_json?.canonical || `/${params.slug}` }],
+      links: [{ rel: "canonical", href: page?.seo_json?.canonical || `https://logicsify.com/${params.slug}` }],
     };
   },
   notFoundComponent: () => (

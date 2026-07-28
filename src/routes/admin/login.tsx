@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { adminLogin, getAdminToken, setAdminToken } from "@/lib/admin-api";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
+import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
@@ -20,7 +21,7 @@ function AdminLoginPage() {
   useEffect(() => {
     if (getAdminToken() && typeof window !== "undefined")
       window.location.replace("/admin/dashboard");
-    getPublicSiteSettings().then(setSiteSettings);
+    getPublicSiteSettings().then((settings) => setSiteSettings(withDefaultBranding(settings)));
   }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -46,26 +47,15 @@ function AdminLoginPage() {
     <main className="relative grid min-h-dvh overflow-hidden bg-[#190A2F] lg:grid-cols-[1.1fr_0.9fr]">
       <div className="absolute inset-0 grid-noise opacity-70" />
       <section className="relative hidden min-h-dvh flex-col justify-between p-12 text-white lg:flex xl:p-16">
-        <Link to="/" className="flex w-fit items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-2xl bg-gradient-brand font-display text-lg font-black">
-            {siteSettings.admin_logo ? (
-              <img
-                src={siteSettings.admin_logo}
-                alt=""
-                className="h-full w-full object-contain p-2"
-              />
-            ) : (
-              (siteSettings.site_name || "Logicsify").charAt(0).toUpperCase()
-            )}
-          </span>
-          <div>
-            <p className="font-display text-xl font-semibold">
-              {siteSettings.site_name || "Logicsify"}
-            </p>
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/45">
-              Content Studio
-            </p>
-          </div>
+        <Link to="/" className="block w-fit">
+          <img
+            src={siteSettings.admin_logo || DEFAULT_BRAND_ASSETS.adminLogo}
+            alt={siteSettings.site_name || "Logicsify"}
+            className="h-11 w-auto max-w-[230px] object-contain object-left"
+          />
+          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.24em] text-white/45">
+            Content Studio
+          </p>
         </Link>
         <div className="max-w-2xl">
           <p className="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-white/45">
@@ -88,21 +78,12 @@ function AdminLoginPage() {
       <section className="relative flex min-h-dvh items-center justify-center p-5 sm:p-10">
         <div className="w-full max-w-md rounded-[32px] border border-white/15 bg-white p-7 shadow-2xl sm:p-10">
           <div className="mb-8 lg:hidden">
-            <Link to="/" className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-2xl bg-gradient-brand font-display font-black text-white">
-                {siteSettings.admin_logo ? (
-                  <img
-                    src={siteSettings.admin_logo}
-                    alt=""
-                    className="h-full w-full object-contain p-2"
-                  />
-                ) : (
-                  (siteSettings.site_name || "Logicsify").charAt(0).toUpperCase()
-                )}
-              </span>
-              <span className="font-display text-xl font-semibold text-[#190A2F]">
-                {siteSettings.site_name || "Logicsify"}
-              </span>
+            <Link to="/" className="block w-fit">
+              <img
+                src={siteSettings.logo_dark || DEFAULT_BRAND_ASSETS.adminLogoDark}
+                alt={siteSettings.site_name || "Logicsify"}
+                className="h-9 w-auto max-w-[210px] object-contain object-left"
+              />
             </Link>
           </div>
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">

@@ -31,13 +31,21 @@ export function contentPublicPath(type: PublicContentType, slugValue: unknown): 
       return `/insights/${slug}`;
     case "career":
       return `/careers#${encodeURIComponent(slug)}`;
+    case "resource":
+      return `/resources/${slug}`;
+    case "comparison":
+      return `/comparisons/${slug}`;
+    case "engagement_model":
+      return `/engagement-models#${encodeURIComponent(slug)}`;
+    case "integration":
+      return `/services/api-integrations#${encodeURIComponent(slug)}`;
     default:
       return null;
   }
 }
 
 export function visualEditorPath(type: PublicContentType, slugValue: unknown): string | null {
-  if (type === "career" || type === "testimonial" || type === "team") return null;
+  if (type === "career" || type === "testimonial" || type === "team" || type === "integration" || type === "engagement_model") return null;
   return contentPublicPath(type, slugValue);
 }
 
@@ -47,7 +55,9 @@ export function isVisualEditableType(type: PublicContentType | undefined): boole
     type === "service" ||
     type === "industry" ||
     type === "case_study" ||
-    type === "insight"
+    type === "insight" ||
+    type === "resource" ||
+    type === "comparison"
   );
 }
 
@@ -106,6 +116,12 @@ export function resolveContentFromPath(pathnameValue: string): {
   }
   if (segments[0] === "insights" && segments[1]) {
     return { type: "insight", slug: segments.slice(1).join("/") };
+  }
+  if (segments[0] === "resources" && segments[1]) {
+    return { type: "resource", slug: segments.slice(1).join("/") };
+  }
+  if (segments[0] === "comparisons" && segments[1]) {
+    return { type: "comparison", slug: segments.slice(1).join("/") };
   }
 
   return { type: "page", slug: segments.join("/") };
