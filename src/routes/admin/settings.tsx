@@ -1205,7 +1205,7 @@ function normalizeSnippets(value: unknown): CodeSnippet[] {
   if (!Array.isArray(value)) return [];
   return value
     .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
-    .map((item, index) => ({
+    .map((item, index): CodeSnippet => ({
       id: String(item.id || `snippet-${index}`),
       title: String(item.title || "Untitled snippet"),
       snippet_type: item.snippet_type === "integration" ? "integration" : "custom_code",

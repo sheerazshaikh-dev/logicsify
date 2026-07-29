@@ -105,7 +105,11 @@ function IntegrationsPage() {
                 </li>
               ))}
             </ul>
-            <Link to="/services/custom-ai-integrations" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-ink hover:text-brand-red">
+            <Link
+              to="/services/$slug"
+              params={{ slug: "custom-ai-integrations" }}
+              className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-ink hover:text-brand-red"
+            >
               Explore Custom AI Integrations <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

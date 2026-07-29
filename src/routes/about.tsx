@@ -197,14 +197,14 @@ const processSteps = [
 ] as const;
 
 const connectedSystems = [
-  { label: "Website", icon: PanelsTopLeft, position: "left-[7%] top-[17%]" },
-  { label: "CRM", icon: LayoutDashboard, position: "left-[39%] top-[3%]" },
-  { label: "AI Automation", icon: Bot, position: "right-[5%] top-[18%]" },
-  { label: "Mobile App", icon: Smartphone, position: "right-[1%] top-[57%]" },
-  { label: "Marketing", icon: Megaphone, position: "right-[22%] bottom-[2%]" },
-  { label: "Analytics", icon: BarChart3, position: "left-[36%] bottom-[-1%]" },
-  { label: "Payments", icon: CircleDollarSign, position: "left-[5%] bottom-[14%]" },
-  { label: "Customer Support", icon: MessageSquareText, position: "left-[-1%] top-[51%]" },
+  { label: "Website", icon: PanelsTopLeft, x: 135, y: 155 },
+  { label: "CRM", icon: LayoutDashboard, x: 350, y: 76 },
+  { label: "AI Automation", icon: Bot, x: 565, y: 155 },
+  { label: "Mobile App", icon: Smartphone, x: 600, y: 338 },
+  { label: "Marketing", icon: Megaphone, x: 520, y: 490 },
+  { label: "Analytics", icon: BarChart3, x: 350, y: 515 },
+  { label: "Payments", icon: CircleDollarSign, x: 180, y: 490 },
+  { label: "Customer Support", icon: MessageSquareText, x: 100, y: 338 },
 ] as const;
 
 const whyCards: Array<{
@@ -387,18 +387,18 @@ function AboutPage() {
           </div>
 
           <div className="relative mt-12 hidden lg:block" data-reveal>
-            <div className="absolute left-[6%] right-[6%] top-6 h-px bg-black/10" />
-            <div className="grid grid-cols-7 gap-3">
+            <div className="absolute left-[7.142857%] right-[7.142857%] top-6 h-px bg-black/10" />
+            <div className="grid grid-cols-7">
               {processSteps.map((step, index) => (
                 <button
                   key={step.title}
                   type="button"
                   aria-pressed={activeStep === index}
                   onClick={() => setActiveStep(index)}
-                  className="group relative text-left"
+                  className="group relative flex min-w-0 flex-col items-center px-2 text-center"
                 >
                   <span
-                    className={`relative z-10 grid h-12 w-12 place-items-center rounded-full border text-sm font-semibold transition ${
+                    className={`relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full border text-sm font-semibold transition ${
                       activeStep === index
                         ? "border-transparent bg-gradient-brand text-white shadow-lg"
                         : "border-black/10 bg-white text-ink group-hover:border-brand-red/30"
@@ -406,14 +406,14 @@ function AboutPage() {
                   >
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span className="mt-4 block max-w-[150px] text-sm font-semibold leading-5 text-ink">
+                  <span className="mt-4 flex min-h-[44px] max-w-[170px] items-start justify-center text-sm font-semibold leading-5 text-ink">
                     {step.title}
                   </span>
                 </button>
               ))}
             </div>
             <div
-              className="mt-10 grid items-center gap-8 rounded-3xl bg-ink p-8 text-white md:grid-cols-[auto_1fr] md:p-10"
+              className="mt-8 grid items-center gap-8 rounded-3xl bg-ink p-8 text-white md:grid-cols-[auto_1fr] md:p-10"
               aria-live="polite"
             >
               <span className="grid h-16 w-16 place-items-center rounded-2xl bg-white/10 text-xl font-semibold text-brand-gold">
@@ -722,27 +722,29 @@ function AboutPage() {
 
 function HeroTechnologyEcosystem() {
   const nodes = [
-    { label: "Website", icon: PanelsTopLeft, x: 82, y: 104 },
-    { label: "CRM", icon: LayoutDashboard, x: 250, y: 54 },
-    { label: "AI Agents", icon: PhoneCall, x: 420, y: 116 },
-    { label: "Payments", icon: CircleDollarSign, x: 410, y: 344 },
-    { label: "Analytics", icon: BarChart3, x: 250, y: 414 },
-    { label: "Automation", icon: Workflow, x: 78, y: 338 },
+    { label: "Website", icon: PanelsTopLeft, x: 95, y: 145 },
+    { label: "CRM", icon: LayoutDashboard, x: 250, y: 60 },
+    { label: "AI Agents", icon: PhoneCall, x: 405, y: 145 },
+    { label: "Payments", icon: CircleDollarSign, x: 405, y: 355 },
+    { label: "Analytics", icon: BarChart3, x: 250, y: 440 },
+    { label: "Automation", icon: Workflow, x: 95, y: 355 },
   ];
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[520px]" aria-label="Connected Logicsify technology ecosystem">
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 500 500"
-        className="absolute inset-0 h-full w-full"
-      >
+    <div
+      className="relative mx-auto aspect-square w-full max-w-[520px]"
+      role="img"
+      aria-label="Connected Logicsify technology ecosystem"
+    >
+      <svg aria-hidden="true" viewBox="0 0 500 500" className="absolute inset-0 h-full w-full">
         <defs>
           <linearGradient id="about-hero-line" x1="0" y1="0" x2="1" y2="1">
             <stop stopColor="#FE3434" />
             <stop offset="1" stopColor="#FDBE02" />
           </linearGradient>
         </defs>
+        <circle cx="250" cy="250" r="112" fill="none" stroke="white" strokeOpacity="0.08" />
+        <circle cx="250" cy="250" r="188" fill="none" stroke="white" strokeOpacity="0.05" />
         {nodes.map((node, index) => (
           <line
             key={node.label}
@@ -761,31 +763,22 @@ function HeroTechnologyEcosystem() {
             }}
           />
         ))}
-        <circle cx="250" cy="250" r="112" fill="none" stroke="white" strokeOpacity="0.08" />
-        <circle cx="250" cy="250" r="165" fill="none" stroke="white" strokeOpacity="0.05" />
       </svg>
 
       {nodes.map(({ label, icon: Icon, x, y }) => (
         <div
           key={label}
-          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/12 bg-white/8 px-3 py-3 text-center text-white backdrop-blur transition duration-300 hover:-translate-y-[58%] hover:bg-white/14"
+          className="absolute z-10 flex h-[70px] w-[88px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-white/12 bg-[#2b1a3d]/95 px-2 text-center text-white backdrop-blur transition duration-300 hover:-translate-y-[55%] hover:border-brand-gold/35 hover:bg-[#35204b] sm:h-[78px] sm:w-[102px]"
           style={{ left: `${(x / 500) * 100}%`, top: `${(y / 500) * 100}%` }}
         >
-          <Icon className="mx-auto h-4 w-4 text-brand-gold" />
-          <span className="mt-1.5 block text-[10px] font-semibold sm:text-xs">{label}</span>
+          <Icon className="h-4 w-4 shrink-0 text-brand-gold" />
+          <span className="mt-2 block text-[10px] font-semibold leading-tight sm:text-xs">{label}</span>
         </div>
       ))}
 
-      <div className="absolute left-1/2 top-1/2 z-10 grid h-32 w-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white shadow-[0_0_80px_rgba(253,190,2,0.18)] sm:h-40 sm:w-40">
+      <div className="absolute left-1/2 top-1/2 z-20 grid h-32 w-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white shadow-[0_0_80px_rgba(253,190,2,0.18)] sm:h-40 sm:w-40">
         <div className="absolute inset-3 rounded-full border border-dashed border-black/10 animate-spin-slow" />
         <img src="/logicsify-mark.png" alt="Logicsify" className="relative h-14 w-14 sm:h-16 sm:w-16" />
-      </div>
-
-      <div className="absolute bottom-[18%] left-[25%] hidden rounded-xl border border-white/10 bg-white/8 px-3 py-2 text-[10px] text-white/60 backdrop-blur sm:block">
-        Live data flow
-      </div>
-      <div className="absolute right-[18%] top-[31%] hidden rounded-xl border border-white/10 bg-white/8 px-3 py-2 text-[10px] text-white/60 backdrop-blur sm:block">
-        Connected actions
       </div>
     </div>
   );
@@ -793,7 +786,11 @@ function HeroTechnologyEcosystem() {
 
 function ConnectedSystemsVisual() {
   return (
-    <div className="relative mx-auto aspect-[1/0.88] w-full max-w-[690px] rounded-3xl border border-white/10 bg-white/[0.035] p-5 sm:p-8">
+    <div
+      className="relative mx-auto aspect-[700/610] w-full max-w-[690px] overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035]"
+      role="img"
+      aria-label="Website, CRM, AI automation, mobile, marketing, analytics, payments, and customer support connected through Logicsify"
+    >
       <svg aria-hidden="true" viewBox="0 0 700 610" className="absolute inset-0 h-full w-full">
         <defs>
           <linearGradient id="about-connected-line" x1="0" y1="0" x2="1" y2="1">
@@ -801,26 +798,19 @@ function ConnectedSystemsVisual() {
             <stop offset="1" stopColor="#FDBE02" />
           </linearGradient>
         </defs>
-        {[
-          [350, 305, 105, 125],
-          [350, 305, 330, 68],
-          [350, 305, 590, 135],
-          [350, 305, 625, 350],
-          [350, 305, 505, 545],
-          [350, 305, 275, 555],
-          [350, 305, 80, 465],
-          [350, 305, 55, 275],
-        ].map(([x1, y1, x2, y2], index) => (
+        <circle cx="350" cy="305" r="146" fill="none" stroke="white" strokeOpacity="0.06" />
+        <circle cx="350" cy="305" r="234" fill="none" stroke="white" strokeOpacity="0.035" />
+        {connectedSystems.map((node, index) => (
           <line
-            key={`${x2}-${y2}`}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
+            key={node.label}
+            x1="350"
+            y1="305"
+            x2={node.x}
+            y2={node.y}
             stroke="url(#about-connected-line)"
             strokeWidth="1.5"
             strokeDasharray="8 9"
-            opacity="0.48"
+            opacity="0.5"
             style={{
               strokeDashoffset: 1000,
               animation: "draw-line 2.3s ease-out forwards",
@@ -828,22 +818,24 @@ function ConnectedSystemsVisual() {
             }}
           />
         ))}
-        <circle cx="350" cy="305" r="148" fill="none" stroke="white" strokeOpacity="0.06" />
       </svg>
 
-      {connectedSystems.map(({ label, icon: Icon, position }) => (
+      {connectedSystems.map(({ label, icon: Icon, x, y }) => (
         <div
           key={label}
-          className={`group absolute ${position} z-10 w-[118px] rounded-2xl border border-white/12 bg-[#221335]/95 p-3 text-center text-white transition duration-300 hover:-translate-y-1 hover:border-brand-gold/40 hover:bg-[#2b1842] sm:w-[132px] sm:p-4`}
+          className="group absolute z-10 flex h-[64px] w-[88px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-white/12 bg-[#221335]/95 px-2 text-center text-white transition duration-300 hover:-translate-y-[55%] hover:border-brand-gold/40 hover:bg-[#2b1842] sm:h-[76px] sm:w-[124px] sm:px-3"
+          style={{ left: `${(x / 700) * 100}%`, top: `${(y / 610) * 100}%` }}
         >
-          <Icon className="mx-auto h-4 w-4 text-brand-gold sm:h-5 sm:w-5" />
-          <span className="mt-2 block text-[10px] font-semibold sm:text-xs">{label}</span>
+          <Icon className="h-4 w-4 shrink-0 text-brand-gold sm:h-5 sm:w-5" />
+          <span className="mt-1.5 block text-[9px] font-semibold leading-tight sm:mt-2 sm:text-xs">
+            {label}
+          </span>
         </div>
       ))}
 
-      <div className="absolute left-1/2 top-1/2 z-20 grid h-32 w-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white sm:h-40 sm:w-40">
+      <div className="absolute left-1/2 top-1/2 z-20 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white sm:h-40 sm:w-40">
         <div className="absolute inset-3 rounded-full border border-dashed border-black/10 animate-spin-slow" />
-        <img src="/logicsify-mark.png" alt="Logicsify" className="relative h-14 w-14 sm:h-16 sm:w-16" />
+        <img src="/logicsify-mark.png" alt="Logicsify" className="relative h-12 w-12 sm:h-16 sm:w-16" />
       </div>
     </div>
   );
