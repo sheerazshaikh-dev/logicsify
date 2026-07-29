@@ -722,7 +722,7 @@ function buildFallbackNavigation(): NavItem[] {
 
   return [
     fallbackLink(nextId--, "Home", "/"),
-    fallbackLink(nextId--, "About", "/about"),
+    fallbackLink(nextId--, "Who We Are", "/about"),
     services,
     fallbackLink(nextId--, "Work", "/work"),
     resources,

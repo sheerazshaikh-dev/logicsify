@@ -32,7 +32,7 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
     title: "Company",
     links: [
       ["Home", "/"],
-      ["About", "/about"],
+      ["Who We Are", "/about"],
       ["Work", "/work"],
       ["Contact", "/contact"],
       ["Technical Roadmap", "/technical-roadmap"],
