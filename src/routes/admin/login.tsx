@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Eye, EyeOff, Loader2, LockKeyhole, Mail } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { adminLogin, getAdminToken, setAdminToken } from "@/lib/admin-api";
+import { adminLogin, getAdminToken, getPublicAdminAccessPolicy, setAdminToken, verifyAdminTwoFactor } from "@/lib/admin-api";
+import { adminHref, legacyAdminPath } from "@/lib/admin-path";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
 import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
 
@@ -13,15 +14,22 @@ export const Route = createFileRoute("/admin/login")({
   }),
 });
 
-function AdminLoginPage() {
+export function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [siteSettings, setSiteSettings] = useState<PublicSiteSettings>({});
+  const [challenge, setChallenge] = useState("");
+  const [accessAllowed, setAccessAllowed] = useState<boolean | null>(legacyAdminPath() ? null : true);
 
   useEffect(() => {
     if (getAdminToken() && typeof window !== "undefined")
-      window.location.replace("/admin/dashboard");
+      window.location.replace(adminHref("dashboard"));
     getPublicSiteSettings().then((settings) => setSiteSettings(withDefaultBranding(settings)));
+    if (legacyAdminPath()) {
+      getPublicAdminAccessPolicy()
+        .then((policy) => setAccessAllowed(policy.legacy_admin_path_enabled))
+        .catch(() => setAccessAllowed(true));
+    }
   }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -29,19 +37,33 @@ function AdminLoginPage() {
     const form = new FormData(event.currentTarget);
     setLoading(true);
     try {
-      const result = await adminLogin(
-        String(form.get("email") || ""),
-        String(form.get("password") || ""),
-      );
+      if (challenge) {
+        const result = await verifyAdminTwoFactor(challenge, String(form.get("code") || ""));
+        setAdminToken(result.token);
+        toast.success(`Welcome back, ${result.administrator.name}.`);
+        window.location.replace(adminHref("dashboard"));
+        return;
+      }
+      const result = await adminLogin(String(form.get("email") || ""), String(form.get("password") || ""));
+      if ("requires_2fa" in result && result.requires_2fa) {
+        setChallenge(result.challenge_token);
+        toast.success("Password accepted. Enter your authenticator code.");
+        return;
+      }
       setAdminToken(result.token);
       toast.success(`Welcome back, ${result.administrator.name}.`);
-      if (typeof window !== "undefined") window.location.replace("/admin/dashboard");
+      window.location.replace(adminHref("dashboard"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not sign in.");
     } finally {
       setLoading(false);
     }
   }
+
+  if (accessAllowed === false) {
+    return <main className="grid min-h-dvh place-items-center bg-[#190A2F] p-6 text-white"><div className="text-center"><p className="text-sm uppercase tracking-[0.2em] text-white/45">404</p><h1 className="mt-4 text-4xl font-semibold">Page not found</h1></div></main>;
+  }
+  if (accessAllowed === null) return <main className="grid min-h-dvh place-items-center bg-[#190A2F] text-white">Checking secure admin access…</main>;
 
   return (
     <main className="relative grid min-h-dvh overflow-hidden bg-[#190A2F] lg:grid-cols-[1.1fr_0.9fr]">
@@ -97,6 +119,7 @@ function AdminLoginPage() {
           </p>
 
           <form onSubmit={submit} className="mt-8 space-y-5">
+            {!challenge ? <>
             <div>
               <label
                 htmlFor="admin-email"
@@ -145,6 +168,11 @@ function AdminLoginPage() {
                 </button>
               </div>
             </div>
+            </> : <div>
+              <label htmlFor="admin-code" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Authenticator code</label>
+              <input id="admin-code" name="code" inputMode="numeric" autoComplete="one-time-code" required className="h-12 w-full rounded-xl border border-slate-200 px-4 text-center text-lg tracking-[0.35em] outline-none transition focus:border-[#FE3434] focus:ring-4 focus:ring-[#FE3434]/10" placeholder="123456" />
+              <button type="button" onClick={() => setChallenge("")} className="mt-3 text-xs font-semibold text-slate-500 hover:text-[#190A2F]">Use a different account</button>
+            </div>}
             <button
               type="submit"
               disabled={loading}
@@ -154,7 +182,7 @@ function AdminLoginPage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  Sign in <ArrowRight className="h-4 w-4" />
+                  {challenge ? "Verify code" : "Sign in"} <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>

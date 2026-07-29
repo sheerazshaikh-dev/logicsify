@@ -19,6 +19,19 @@
       ]
     },
     {
+      "source": "/control/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
@@ -43,6 +56,11 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/admin/audit-logs",
+      "destination": "/admin/security",
+      "permanent": true
+    },
     {
       "source": "/resources/:slug",
       "destination": "/guides/:slug",

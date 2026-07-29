@@ -13,7 +13,8 @@ function walk(dir) {
 }
 
 function pascalToken(token) {
-  if (token === '$slug') return 'Slug';
+  if (token === '$') return 'Splat';
+  if (token.startsWith('$')) return token.slice(1).charAt(0).toUpperCase() + token.slice(2);
   if (token === 'index') return 'Index';
   return token
     .replace(/\.[^.]+$/, '')

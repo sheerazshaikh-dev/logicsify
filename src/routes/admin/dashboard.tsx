@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { adminHref } from "@/lib/admin-path";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -44,11 +45,11 @@ function DashboardPage() {
         title="Dashboard"
         description="Manage website content, incoming leads, strategy calls and operational settings from one place."
         actions={
-          <Link to="/admin/pages">
+          <a href={adminHref("pages")}>
             <AdminButton>
               <Plus className="h-4 w-4" /> Create content
             </AdminButton>
-          </Link>
+          </a>
         }
       />
       {loading || !data ? (
@@ -109,9 +110,9 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link
+            <a
               key={card.label}
-              to={card.to}
+              href={adminHref(card.to.replace(/^\/admin\//, ""))}
               className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_50px_-38px_rgba(25,10,47,0.45)] transition hover:-translate-y-0.5 hover:border-[#FE3434]/30 hover:shadow-xl"
             >
               <div className="flex items-start justify-between">
@@ -123,7 +124,7 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
               <p className="mt-5 text-3xl font-semibold text-[#190A2F]">{card.value}</p>
               <p className="mt-1 text-sm font-semibold text-slate-700">{card.label}</p>
               <p className="mt-2 text-xs leading-5 text-slate-400">{card.note}</p>
-            </Link>
+            </a>
           );
         })}
       </div>
@@ -164,9 +165,9 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
               <h2 className="font-semibold text-[#190A2F]">Recent leads</h2>
               <p className="mt-1 text-xs text-slate-400">Latest contact-form submissions</p>
             </div>
-            <Link to="/admin/leads" className="text-xs font-semibold text-[#FE3434]">
+            <a href={adminHref("leads")} className="text-xs font-semibold text-[#FE3434]">
               View all
-            </Link>
+            </a>
           </div>
           {!data.recent_leads.length ? (
             <div className="p-8 text-center text-sm text-slate-400">
@@ -198,9 +199,9 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
               Latest booking requests and confirmed sessions
             </p>
           </div>
-          <Link to="/admin/bookings" className="text-xs font-semibold text-[#FE3434]">
+          <a href={adminHref("bookings")} className="text-xs font-semibold text-[#FE3434]">
             Manage calendar
-          </Link>
+          </a>
         </div>
         {!data.recent_bookings.length ? (
           <div className="p-8 text-center text-sm text-slate-400">

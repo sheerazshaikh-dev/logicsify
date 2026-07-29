@@ -173,8 +173,8 @@ function HeroVisual() {
       <svg viewBox="0 0 400 400" className="absolute inset-0 z-10 w-full h-full" aria-hidden>
         <defs>
           <linearGradient id="node-line" x1="0" x2="1">
-            <stop offset="0%" stopColor="#FE3434" />
-            <stop offset="100%" stopColor="#FDBE02" />
+            <stop offset="0%" stopColor="var(--theme-primary-start)" />
+            <stop offset="100%" stopColor="var(--theme-primary-end)" />
           </linearGradient>
         </defs>
         {nodes.map(([x, y], i) => (
@@ -633,8 +633,8 @@ function ConnectedSystemsVisual() {
       <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden>
         <defs>
           <linearGradient id="cs-line" x1="0" x2="1">
-            <stop offset="0" stopColor="#FE3434" />
-            <stop offset="1" stopColor="#FDBE02" />
+            <stop offset="0" stopColor="var(--theme-primary-start)" />
+            <stop offset="1" stopColor="var(--theme-primary-end)" />
           </linearGradient>
         </defs>
         <polygon
@@ -647,7 +647,7 @@ function ConnectedSystemsVisual() {
         {nodes.map(({ x, y, label }) => (
           <g key={label}>
             <line x1="200" y1="200" x2={x} y2={y} stroke="url(#cs-line)" strokeWidth="1.4" opacity="0.48" />
-            <circle cx={x} cy={y} r="27" fill="#190A2F" />
+            <circle cx={x} cy={y} r="27" fill="var(--theme-dark)" />
             <circle cx={x} cy={y} r="27" fill="none" stroke="url(#cs-line)" strokeWidth="1.2" opacity="0.7" />
             <text x={x} y={y + 4} textAnchor="middle" fontSize="10" fill="#fff" fontFamily="Inter">
               {label}

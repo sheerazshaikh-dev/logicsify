@@ -104,7 +104,7 @@ function AccountPage() {
                 </span>
                 <h2 className="mt-4 text-xl font-semibold text-[#190A2F]">Profile details</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  This identity appears in the admin panel and audit logs.
+                  This identity appears in the admin panel and Security logs.
                 </p>
               </div>
               <div className="space-y-5">

@@ -11,6 +11,10 @@ export type Administrator = {
   last_login_at?: string | null;
   created_at?: string;
   updated_at?: string;
+  two_factor_enabled?: boolean | number;
+  failed_login_count?: number;
+  locked_until?: string | null;
+  password_changed_at?: string | null;
 };
 
 export type ApiMeta = {
@@ -292,24 +296,39 @@ export type AuditLog = {
   id: number;
   administrator_id?: number | null;
   administrator_name?: string | null;
+  administrator_email?: string | null;
   action: string;
+  category?: string;
+  severity?: "info" | "warning" | "important" | "critical" | string;
+  status?: "success" | "failed" | "blocked" | "pending" | string;
+  message?: string | null;
   entity_type: string;
   entity_id?: number | null;
   details_json?: Record<string, unknown> | string | null;
   ip_address?: string | null;
+  user_agent?: string | null;
+  request_method?: string | null;
+  request_path?: string | null;
+  request_id?: string | null;
   created_at: string;
 };
 
+export type AdminLoginResult =
+  | { token: string; expires_at: string; administrator: Administrator; requires_2fa?: false }
+  | { requires_2fa: true; challenge_token: string; expires_at: string };
+
 export function adminLogin(email: string, password: string) {
-  return adminRequest<{
-    token: string;
-    expires_at: string;
-    administrator: Administrator;
-  }>("auth/login", { method: "POST", body: JSON.stringify({ email, password }) }) as Promise<{
-    token: string;
-    expires_at: string;
-    administrator: Administrator;
-  }>;
+  return adminRequest<AdminLoginResult>("auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  }) as Promise<AdminLoginResult>;
+}
+
+export function verifyAdminTwoFactor(challenge_token: string, code: string) {
+  return adminRequest<{ token: string; expires_at: string; administrator: Administrator }>(
+    "auth/verify-2fa",
+    { method: "POST", body: JSON.stringify({ challenge_token, code }) },
+  ) as Promise<{ token: string; expires_at: string; administrator: Administrator }>;
 }
 
 export function getCurrentAdmin() {
@@ -600,6 +619,174 @@ export function permanentlyDeleteTrashItem(item: Pick<TrashItem, "entity_type" |
     method: "DELETE",
     body: JSON.stringify(item),
   }) as Promise<{ deleted: boolean }>;
+}
+
+export type SecurityOverview = {
+  summary: {
+    events_24h: number;
+    failed_logins_7d: number;
+    blocked_events_7d: number;
+    active_sessions: number;
+    locked_administrators: number;
+    two_factor_enabled: number;
+  };
+  recent_events: AuditLog[];
+  locked_administrators: Administrator[];
+};
+
+export type SecuritySession = {
+  id: number;
+  administrator_id: number;
+  administrator_name: string;
+  administrator_email: string;
+  expires_at: string;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  last_used_at?: string | null;
+  label?: string | null;
+  created_at: string;
+  current: boolean;
+};
+
+export type SecuritySettings = {
+  admin_slug?: string;
+  admin_entry_path?: string;
+  legacy_admin_path_enabled?: boolean;
+  session_timeout_minutes?: number;
+  max_login_attempts?: number;
+  lockout_minutes?: number;
+  minimum_password_length?: number;
+  password_require_uppercase?: boolean;
+  password_require_lowercase?: boolean;
+  password_require_number?: boolean;
+  password_require_symbol?: boolean;
+  allowed_admin_ips?: string;
+  blocked_admin_ips?: string;
+  notify_new_login?: boolean;
+  notify_failed_logins?: boolean;
+  security_alert_email?: string;
+  audit_retention_days?: number;
+  force_https?: boolean;
+  hsts_enabled?: boolean;
+  hsts_max_age?: number;
+  backend_csp_mode?: "strict" | "report-only" | "off";
+  frame_policy?: "deny" | "sameorigin";
+  is_super_admin?: boolean;
+  two_factor_enabled?: boolean;
+};
+
+export function getSecurityOverview() {
+  return adminRequest<SecurityOverview>("security/overview") as Promise<SecurityOverview>;
+}
+
+export function listSecurityEvents(params: {
+  search?: string;
+  category?: string;
+  severity?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  perPage?: number;
+} = {}) {
+  const search = new URLSearchParams({
+    search: params.search || "",
+    category: params.category || "",
+    severity: params.severity || "",
+    status: params.status || "",
+    date_from: params.dateFrom || "",
+    date_to: params.dateTo || "",
+    page: String(params.page || 1),
+    per_page: String(params.perPage || 100),
+  });
+  return adminRequest<AuditLog[]>(`security/events?${search.toString()}`, {}, true) as Promise<{
+    data: AuditLog[];
+    meta: ApiMeta;
+  }>;
+}
+
+export function getSecurityConfig() {
+  return adminRequest<SecuritySettings>("security/config") as Promise<SecuritySettings>;
+}
+
+export function saveSecuritySettings(values: SecuritySettings) {
+  return adminRequest<{ saved: boolean; settings: SecuritySettings }>("security/settings", {
+    method: "PUT",
+    body: JSON.stringify(values),
+  }) as Promise<{ saved: boolean; settings: SecuritySettings }>;
+}
+
+export function listSecuritySessions() {
+  return adminRequest<SecuritySession[]>("security/sessions") as Promise<SecuritySession[]>;
+}
+
+export function revokeSecuritySession(id: number) {
+  return adminRequest<{ revoked: boolean; current: boolean }>(`security/sessions/${id}`, {
+    method: "DELETE",
+  }) as Promise<{ revoked: boolean; current: boolean }>;
+}
+
+export function revokeOtherSecuritySessions() {
+  return adminRequest<{ revoked: number }>("security/sessions/revoke-others", {
+    method: "POST",
+  }) as Promise<{ revoked: number }>;
+}
+
+export function startTwoFactorSetup(current_password: string) {
+  return adminRequest<{ secret: string; otpauth_uri: string }>("security/2fa/setup", {
+    method: "POST",
+    body: JSON.stringify({ current_password }),
+  }) as Promise<{ secret: string; otpauth_uri: string }>;
+}
+
+export function enableTwoFactor(code: string) {
+  return adminRequest<{ enabled: boolean; recovery_codes: string[] }>("security/2fa/enable", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  }) as Promise<{ enabled: boolean; recovery_codes: string[] }>;
+}
+
+export function disableTwoFactor(current_password: string, code: string) {
+  return adminRequest<{ disabled: boolean }>("security/2fa/disable", {
+    method: "POST",
+    body: JSON.stringify({ current_password, code }),
+  }) as Promise<{ disabled: boolean }>;
+}
+
+export function testSecurityAlert() {
+  return adminRequest<{ sent: boolean }>("security/test-alert", { method: "POST" }) as Promise<{
+    sent: boolean;
+  }>;
+}
+
+export function purgeSecurityLogs() {
+  return adminRequest<{ deleted: number }>("security/purge-logs", { method: "POST" }) as Promise<{
+    deleted: number;
+  }>;
+}
+
+export function unlockAdministrator(id: number) {
+  return adminRequest<{ unlocked: boolean }>(`security/unlock-administrator/${id}`, {
+    method: "POST",
+  }) as Promise<{ unlocked: boolean }>;
+}
+
+export async function getPublicAdminAccessPolicy() {
+  const response = await fetch(`${API_BASE}/public/security/access-policy`);
+  const payload = (await response.json()) as ApiEnvelope<{ legacy_admin_path_enabled: boolean }>;
+  if (!response.ok || !payload.success) throw new Error(payload.message || "Could not check admin access policy.");
+  return payload.data;
+}
+
+export async function validateAdminPath(slug: string) {
+  const response = await fetch(`${API_BASE}/public/security/validate-admin-path`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug }),
+  });
+  const payload = (await response.json()) as ApiEnvelope<{ valid: boolean }>;
+  if (!response.ok || !payload.success) return false;
+  return payload.data.valid;
 }
 
 export function listAuditLogs(params: { search?: string; page?: number } = {}) {

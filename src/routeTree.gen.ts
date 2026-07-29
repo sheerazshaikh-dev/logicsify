@@ -34,6 +34,7 @@ import { Route as AdminCaseStudiesRouteImport } from './routes/admin/case-studie
 import { Route as AdminComparisonsRouteImport } from './routes/admin/comparisons'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminEngagementModelsRouteImport } from './routes/admin/engagement-models'
+import { Route as AdminGlobalStylingRouteImport } from './routes/admin/global-styling'
 import { Route as AdminGuidesRouteImport } from './routes/admin/guides'
 import { Route as AdminIndustriesRouteImport } from './routes/admin/industries'
 import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
@@ -44,6 +45,7 @@ import { Route as AdminMediaRouteImport } from './routes/admin/media'
 import { Route as AdminMenusRouteImport } from './routes/admin/menus'
 import { Route as AdminPagesRouteImport } from './routes/admin/pages'
 import { Route as AdminResourcesRouteImport } from './routes/admin/resources'
+import { Route as AdminSecurityRouteImport } from './routes/admin/security'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
@@ -63,6 +65,7 @@ import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as WorkIndexRouteImport } from './routes/work/index'
 import { Route as WorkSlugRouteImport } from './routes/work/$slug'
+import { Route as ControlAdminSlugSplatRouteImport } from './routes/control/$adminSlug/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -189,6 +192,11 @@ const AdminEngagementModelsRoute = AdminEngagementModelsRouteImport.update({
   path: '/admin/engagement-models',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGlobalStylingRoute = AdminGlobalStylingRouteImport.update({
+  id: '/admin/global-styling',
+  path: '/admin/global-styling',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminGuidesRoute = AdminGuidesRouteImport.update({
   id: '/admin/guides',
   path: '/admin/guides',
@@ -237,6 +245,11 @@ const AdminPagesRoute = AdminPagesRouteImport.update({
 const AdminResourcesRoute = AdminResourcesRouteImport.update({
   id: '/admin/resources',
   path: '/admin/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSecurityRoute = AdminSecurityRouteImport.update({
+  id: '/admin/security',
+  path: '/admin/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminServicesRoute = AdminServicesRouteImport.update({
@@ -334,6 +347,11 @@ const WorkSlugRoute = WorkSlugRouteImport.update({
   path: '/work/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ControlAdminSlugSplatRoute = ControlAdminSlugSplatRouteImport.update({
+  id: '/control/$adminSlug/$',
+  path: '/control/$adminSlug/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -360,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
+  '/admin/global-styling': typeof AdminGlobalStylingRoute
   '/admin/guides': typeof AdminGuidesRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
@@ -370,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
   '/admin/resources': typeof AdminResourcesRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -390,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/resources/': typeof ResourcesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/work/': typeof WorkIndexRoute
+  '/control/$adminSlug/$': typeof ControlAdminSlugSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -416,6 +437,7 @@ export interface FileRoutesByTo {
   '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
+  '/admin/global-styling': typeof AdminGlobalStylingRoute
   '/admin/guides': typeof AdminGuidesRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
@@ -426,6 +448,7 @@ export interface FileRoutesByTo {
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
   '/admin/resources': typeof AdminResourcesRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -446,6 +469,7 @@ export interface FileRoutesByTo {
   '/resources': typeof ResourcesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/work': typeof WorkIndexRoute
+  '/control/$adminSlug/$': typeof ControlAdminSlugSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -473,6 +497,7 @@ export interface FileRoutesById {
   '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
+  '/admin/global-styling': typeof AdminGlobalStylingRoute
   '/admin/guides': typeof AdminGuidesRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
@@ -483,6 +508,7 @@ export interface FileRoutesById {
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
   '/admin/resources': typeof AdminResourcesRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -503,6 +529,7 @@ export interface FileRoutesById {
   '/resources/': typeof ResourcesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/work/': typeof WorkIndexRoute
+  '/control/$adminSlug/$': typeof ControlAdminSlugSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -531,6 +558,7 @@ export interface FileRouteTypes {
     | '/admin/comparisons'
     | '/admin/dashboard'
     | '/admin/engagement-models'
+    | '/admin/global-styling'
     | '/admin/guides'
     | '/admin/industries'
     | '/admin/insights'
@@ -541,6 +569,7 @@ export interface FileRouteTypes {
     | '/admin/menus'
     | '/admin/pages'
     | '/admin/resources'
+    | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
@@ -561,6 +590,7 @@ export interface FileRouteTypes {
     | '/resources/'
     | '/services/'
     | '/work/'
+    | '/control/$adminSlug/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -587,6 +617,7 @@ export interface FileRouteTypes {
     | '/admin/comparisons'
     | '/admin/dashboard'
     | '/admin/engagement-models'
+    | '/admin/global-styling'
     | '/admin/guides'
     | '/admin/industries'
     | '/admin/insights'
@@ -597,6 +628,7 @@ export interface FileRouteTypes {
     | '/admin/menus'
     | '/admin/pages'
     | '/admin/resources'
+    | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
@@ -617,6 +649,7 @@ export interface FileRouteTypes {
     | '/resources'
     | '/services'
     | '/work'
+    | '/control/$adminSlug/$'
   id:
     | '__root__'
     | '/'
@@ -643,6 +676,7 @@ export interface FileRouteTypes {
     | '/admin/comparisons'
     | '/admin/dashboard'
     | '/admin/engagement-models'
+    | '/admin/global-styling'
     | '/admin/guides'
     | '/admin/industries'
     | '/admin/insights'
@@ -653,6 +687,7 @@ export interface FileRouteTypes {
     | '/admin/menus'
     | '/admin/pages'
     | '/admin/resources'
+    | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
@@ -673,6 +708,7 @@ export interface FileRouteTypes {
     | '/resources/'
     | '/services/'
     | '/work/'
+    | '/control/$adminSlug/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -700,6 +736,7 @@ export interface RootRouteChildren {
   AdminComparisonsRoute: typeof AdminComparisonsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEngagementModelsRoute: typeof AdminEngagementModelsRoute
+  AdminGlobalStylingRoute: typeof AdminGlobalStylingRoute
   AdminGuidesRoute: typeof AdminGuidesRoute
   AdminIndustriesRoute: typeof AdminIndustriesRoute
   AdminInsightsRoute: typeof AdminInsightsRoute
@@ -710,6 +747,7 @@ export interface RootRouteChildren {
   AdminMenusRoute: typeof AdminMenusRoute
   AdminPagesRoute: typeof AdminPagesRoute
   AdminResourcesRoute: typeof AdminResourcesRoute
+  AdminSecurityRoute: typeof AdminSecurityRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
@@ -730,6 +768,7 @@ export interface RootRouteChildren {
   ResourcesIndexRoute: typeof ResourcesIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   WorkIndexRoute: typeof WorkIndexRoute
+  ControlAdminSlugSplatRoute: typeof ControlAdminSlugSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -909,6 +948,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEngagementModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/global-styling': {
+      id: '/admin/global-styling'
+      path: '/admin/global-styling'
+      fullPath: '/admin/global-styling'
+      preLoaderRoute: typeof AdminGlobalStylingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/guides': {
       id: '/admin/guides'
       path: '/admin/guides'
@@ -977,6 +1023,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/resources'
       fullPath: '/admin/resources'
       preLoaderRoute: typeof AdminResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/security': {
+      id: '/admin/security'
+      path: '/admin/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminSecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/services': {
@@ -1112,6 +1165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/control/$adminSlug/$': {
+      id: '/control/$adminSlug/$'
+      path: '/control/$adminSlug/$'
+      fullPath: '/control/$adminSlug/$'
+      preLoaderRoute: typeof ControlAdminSlugSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1140,6 +1200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminComparisonsRoute: AdminComparisonsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEngagementModelsRoute: AdminEngagementModelsRoute,
+  AdminGlobalStylingRoute: AdminGlobalStylingRoute,
   AdminGuidesRoute: AdminGuidesRoute,
   AdminIndustriesRoute: AdminIndustriesRoute,
   AdminInsightsRoute: AdminInsightsRoute,
@@ -1150,6 +1211,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminMenusRoute: AdminMenusRoute,
   AdminPagesRoute: AdminPagesRoute,
   AdminResourcesRoute: AdminResourcesRoute,
+  AdminSecurityRoute: AdminSecurityRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
@@ -1170,6 +1232,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesIndexRoute: ResourcesIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   WorkIndexRoute: WorkIndexRoute,
+  ControlAdminSlugSplatRoute: ControlAdminSlugSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

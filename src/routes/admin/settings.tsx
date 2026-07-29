@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { adminHref } from "@/lib/admin-path";
 import {
   CalendarDays,
   Code2,
@@ -1007,12 +1008,12 @@ function AdministratorsSettings() {
             the latest login activity.
           </p>
         </div>
-        <Link
-          to="/admin/administrators"
+        <a
+          href={adminHref("administrators")}
           className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#190A2F] px-5 text-sm font-semibold text-white transition hover:bg-[#2a1546]"
         >
           Manage administrators <ExternalLink className="h-4 w-4" />
-        </Link>
+        </a>
       </div>
     </SettingsSection>
   );

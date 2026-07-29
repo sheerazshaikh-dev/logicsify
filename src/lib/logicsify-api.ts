@@ -252,6 +252,46 @@ export async function getPublicIntegrations(): Promise<PublicIntegrations> {
   }
 }
 
+export type PublicThemeSettings = {
+  primary_start?: string;
+  primary_end?: string;
+  dark?: string;
+  background?: string;
+  surface?: string;
+  text?: string;
+  muted_text?: string;
+  border?: string;
+  heading_font?: string;
+  body_font?: string;
+  base_font_size?: number;
+  h1_min?: number;
+  h1_max?: number;
+  h2_min?: number;
+  h2_max?: number;
+  h3_min?: number;
+  h3_max?: number;
+  nav_font_size?: number;
+  button_font_size?: number;
+  small_font_size?: number;
+  container_max_width?: number;
+  section_spacing_desktop?: number;
+  section_spacing_mobile?: number;
+  card_radius?: number;
+  button_radius?: number;
+  input_radius?: number;
+  gradient_angle?: number;
+  animation_speed?: number;
+  shadow_strength?: number;
+};
+
+export async function getPublicThemeSettings(): Promise<PublicThemeSettings> {
+  try {
+    return await request<PublicThemeSettings>("public/settings/theme");
+  } catch {
+    return {};
+  }
+}
+
 export type PublicSiteSettings = {
   site_name?: string;
   tagline?: string;

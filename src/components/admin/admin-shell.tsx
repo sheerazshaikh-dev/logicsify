@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import {
   ArchiveRestore,
   BookOpen,
@@ -27,12 +27,13 @@ import {
   Users,
   UserCog,
   Workflow,
-  ScrollText,
+  Paintbrush,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   adminLogout,
+  getSecurityConfig,
   clearAdminToken,
   getAdminToken,
   getCurrentAdmin,
@@ -41,45 +42,47 @@ import {
 import { AdminLoading } from "@/components/admin/admin-ui";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
 import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
+import { adminHref, getAdminSection, legacyAdminPath } from "@/lib/admin-path";
 
 const navigation = [
   {
     label: "Overview",
-    items: [{ label: "Dashboard", to: "/admin/dashboard", icon: Gauge }],
+    items: [{ label: "Dashboard", to: "/admin/dashboard", section: "dashboard", icon: Gauge }],
   },
   {
     label: "Content",
     items: [
-      { label: "Pages", to: "/admin/pages", icon: FileText },
-      { label: "Services", to: "/admin/services", icon: Sparkles },
-      { label: "Case Studies", to: "/admin/case-studies", icon: BriefcaseBusiness },
-      { label: "Insights", to: "/admin/insights", icon: Newspaper },
-      { label: "Careers", to: "/admin/careers", icon: BookOpen },
-      { label: "Testimonials", to: "/admin/testimonials", icon: MessageSquareText },
-      { label: "Team", to: "/admin/team", icon: Users },
-      { label: "Guides", to: "/admin/guides", icon: FileDown },
-      { label: "Comparisons", to: "/admin/comparisons", icon: Scale },
-      { label: "Engagement Models", to: "/admin/engagement-models", icon: Handshake },
-      { label: "Integrations", to: "/admin/integrations", icon: PlugZap },
+      { label: "Pages", to: "/admin/pages", section: "pages", icon: FileText },
+      { label: "Services", to: "/admin/services", section: "services", icon: Sparkles },
+      { label: "Case Studies", to: "/admin/case-studies", section: "case-studies", icon: BriefcaseBusiness },
+      { label: "Insights", to: "/admin/insights", section: "insights", icon: Newspaper },
+      { label: "Careers", to: "/admin/careers", section: "careers", icon: BookOpen },
+      { label: "Testimonials", to: "/admin/testimonials", section: "testimonials", icon: MessageSquareText },
+      { label: "Team", to: "/admin/team", section: "team", icon: Users },
+      { label: "Guides", to: "/admin/guides", section: "guides", icon: FileDown },
+      { label: "Comparisons", to: "/admin/comparisons", section: "comparisons", icon: Scale },
+      { label: "Engagement Models", to: "/admin/engagement-models", section: "engagement-models", icon: Handshake },
+      { label: "Integrations", to: "/admin/integrations", section: "integrations", icon: PlugZap },
     ],
   },
   {
     label: "Operations",
     items: [
-      { label: "Leads", to: "/admin/leads", icon: Layers3 },
-      { label: "Bookings", to: "/admin/bookings", icon: CalendarDays },
-      { label: "Media", to: "/admin/media", icon: Images },
-      { label: "Menus", to: "/admin/menus", icon: Workflow },
+      { label: "Leads", to: "/admin/leads", section: "leads", icon: Layers3 },
+      { label: "Bookings", to: "/admin/bookings", section: "bookings", icon: CalendarDays },
+      { label: "Media", to: "/admin/media", section: "media", icon: Images },
+      { label: "Menus", to: "/admin/menus", section: "menus", icon: Workflow },
     ],
   },
   {
     label: "System",
     items: [
-      { label: "Settings", to: "/admin/settings", icon: Settings },
-      { label: "Administrators", to: "/admin/administrators", icon: ShieldCheck },
-      { label: "Recycle Bin", to: "/admin/trash", icon: ArchiveRestore },
-      { label: "Audit Logs", to: "/admin/audit-logs", icon: ScrollText },
-      { label: "My Account", to: "/admin/account", icon: UserCog },
+      { label: "Settings", to: "/admin/settings", section: "settings", icon: Settings },
+      { label: "Global Styling", to: "/admin/global-styling", section: "global-styling", icon: Paintbrush },
+      { label: "Administrators", to: "/admin/administrators", section: "administrators", icon: ShieldCheck },
+      { label: "Recycle Bin", to: "/admin/trash", section: "trash", icon: ArchiveRestore },
+      { label: "Security", to: "/admin/security", section: "security", icon: ShieldCheck },
+      { label: "My Account", to: "/admin/account", section: "account", icon: UserCog },
     ],
   },
 ];
@@ -96,7 +99,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     let alive = true;
     if (!getAdminToken()) {
-      if (typeof window !== "undefined") window.location.replace("/admin/login");
+      if (typeof window !== "undefined") window.location.replace(adminHref("login"));
       return;
     }
     getCurrentAdmin()
@@ -105,7 +108,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       })
       .catch(() => {
         clearAdminToken();
-        if (typeof window !== "undefined") window.location.replace("/admin/login");
+        if (typeof window !== "undefined") window.location.replace(adminHref("login"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -131,6 +134,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!admin || !legacyAdminPath(location.pathname)) return;
+    getSecurityConfig().then((security) => {
+      if (security.legacy_admin_path_enabled === false && security.admin_entry_path) {
+        const section = getAdminSection(location.pathname);
+        const base = security.admin_entry_path.replace(/\/login$/, "");
+        window.location.replace(`${base}/${section}`);
+      }
+    }).catch(() => undefined);
+  }, [admin, location.pathname]);
+
+  useEffect(() => {
     let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
     const created = !robots;
     if (!robots) {
@@ -146,13 +160,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const currentSection = getAdminSection(location.pathname);
   const pageTitle = useMemo(() => {
     for (const group of navigation) {
-      const match = group.items.find((item) => item.to === location.pathname);
+      const match = group.items.find((item) => item.section === currentSection);
       if (match) return match.label;
     }
     return "Admin";
-  }, [location.pathname]);
+  }, [currentSection]);
 
   async function logout() {
     try {
@@ -161,7 +176,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       // Clear locally even when the API is unreachable.
     }
     clearAdminToken();
-    if (typeof window !== "undefined") window.location.replace("/admin/login");
+    if (typeof window !== "undefined") window.location.replace(adminHref("login"));
   }
 
   if (loading || !admin) {
@@ -177,7 +192,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       className={`flex h-full flex-col border-r border-white/10 bg-[#190A2F] text-white transition-all duration-300 ${collapsed ? "w-[88px]" : "w-[274px]"}`}
     >
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-        <Link to="/admin/dashboard" className="flex min-w-0 items-center gap-3 overflow-hidden">
+        <a href={adminHref("dashboard", location.pathname)} className="flex min-w-0 items-center gap-3 overflow-hidden">
           {collapsed ? (
             <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl shadow-lg">
               <img
@@ -198,7 +213,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </p>
             </div>
           )}
-        </Link>
+        </a>
         <button
           className="hidden rounded-lg p-2 text-white/50 transition hover:bg-white/10 hover:text-white lg:block"
           onClick={() => setCollapsed((value) => !value)}
@@ -229,17 +244,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
             ) : null}
             <div className="space-y-1">
               {group.items.map((item) => {
-                const active = location.pathname === item.to;
+                const active = currentSection === item.section;
                 const Icon = item.icon;
                 const hiddenForRole =
                   (item.to === "/admin/administrators" && admin.role !== "super_admin") ||
-                  ((item.to === "/admin/settings" || item.to === "/admin/audit-logs") &&
+                  ((item.section === "settings" || item.section === "global-styling") &&
                     admin.role === "editor");
                 if (hiddenForRole) return null;
                 return (
-                  <Link
+                  <a
                     key={item.to}
-                    to={item.to}
+                    href={adminHref(item.section, location.pathname)}
                     title={collapsed ? item.label : undefined}
                     className={`group flex h-11 items-center rounded-xl px-3 text-sm font-medium transition ${
                       active
@@ -254,7 +269,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     {!collapsed && active ? (
                       <ChevronRight className="ml-auto h-4 w-4 text-[#FE3434]" />
                     ) : null}
-                  </Link>
+                  </a>
                 );
               })}
             </div>
@@ -338,13 +353,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     {admin.role.replaceAll("_", " ")}
                   </p>
                 </div>
-                <Link
-                  to="/admin/account"
+                <a
+                  href={adminHref("account", location.pathname)}
                   onClick={() => setProfileOpen(false)}
                   className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#190A2F] hover:bg-slate-50"
                 >
                   <UserCog className="h-4 w-4" /> My account
-                </Link>
+                </a>
                 <button
                   onClick={logout}
                   className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
