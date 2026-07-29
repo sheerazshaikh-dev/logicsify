@@ -5,6 +5,7 @@ import {
   createRootRouteWithContext,
   useRouter,
   HeadContent,
+  notFound,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -73,6 +74,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: ({ location }) => {
+    if (/^\/admin(?:\/|$)/.test(location.pathname)) {
+      throw notFound();
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },

@@ -51,16 +51,11 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|admin(?:/|$)).*)",
       "destination": "/index.html"
     }
   ],
   "redirects": [
-    {
-      "source": "/admin/audit-logs",
-      "destination": "/admin/security",
-      "permanent": true
-    },
     {
       "source": "/resources/:slug",
       "destination": "/guides/:slug",
