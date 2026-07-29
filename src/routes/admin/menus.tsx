@@ -50,7 +50,6 @@ type EditableMenuItem = Omit<MenuItem, "parent_index"> & {
 const contentTypes: Array<{ type: ContentItem["content_type"]; label: string }> = [
   { type: "page", label: "Pages" },
   { type: "service", label: "Services" },
-  { type: "industry", label: "Industries" },
   { type: "case_study", label: "Case Studies" },
   { type: "insight", label: "Insights" },
   { type: "career", label: "Careers" },
@@ -225,7 +224,7 @@ function MenusPage() {
     if (!selectedMenu || selectedMenu.location !== "header") return;
     if (
       !window.confirm(
-        "Restore the original Logicsify Services mega menu? This replaces only the current Services mega-menu children and promo content. Other header links stay unchanged.",
+        "Restore the current Logicsify Services mega menu defaults? This replaces only the current Services mega-menu children and promo content. Other header links stay unchanged.",
       )
     )
       return;
@@ -284,7 +283,7 @@ function MenusPage() {
                 disabled={restoringDefault}
               >
                 <RotateCcw className="h-4 w-4" />
-                {restoringDefault ? "Restoring…" : "Restore original Services mega menu"}
+                {restoringDefault ? "Restoring…" : "Restore default Services mega menu"}
               </AdminButton>
             ) : null}
             <AdminButton onClick={() => void save()} disabled={!selectedMenu || saving}>
@@ -1095,7 +1094,6 @@ function contentPath(item: ContentItem) {
   const slug = item.slug.replace(/^\/+/, "");
   if (item.content_type === "page") return slug === "home" ? "/" : `/${slug}`;
   if (item.content_type === "service") return `/services/${slug}`;
-  if (item.content_type === "industry") return `/industries/${slug}`;
   if (item.content_type === "case_study") return `/work/${slug}`;
   if (item.content_type === "insight") return `/insights/${slug}`;
   if (item.content_type === "career") return `/careers#${slug}`;

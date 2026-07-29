@@ -52,7 +52,6 @@ const navigation = [
     items: [
       { label: "Pages", to: "/admin/pages", icon: FileText },
       { label: "Services", to: "/admin/services", icon: Sparkles },
-      { label: "Industries", to: "/admin/industries", icon: Globe2 },
       { label: "Case Studies", to: "/admin/case-studies", icon: BriefcaseBusiness },
       { label: "Insights", to: "/admin/insights", icon: Newspaper },
       { label: "Careers", to: "/admin/careers", icon: BookOpen },

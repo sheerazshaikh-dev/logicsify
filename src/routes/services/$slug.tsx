@@ -1,8 +1,8 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site-layout";
 import { ServicePageTemplate, type ServicePageData } from "@/components/service-page-template";
 import { serviceData } from "@/lib/service-data";
-import { allServices } from "@/lib/site-data";
+import { allServices, legacyServiceRedirects } from "@/lib/site-data";
 import { getCmsContentItem } from "@/lib/logicsify-api";
 import { asRecord, asRecordArray } from "@/lib/content-utils";
 import { PublicRouteLoading } from "@/components/public-route-loading";
@@ -13,6 +13,8 @@ export const Route = createFileRoute("/services/$slug")({
   pendingMinMs: 250,
   pendingComponent: PublicRouteLoading,
   loader: async ({ params }) => {
+    const legacyDestination = legacyServiceRedirects[params.slug];
+    if (legacyDestination) throw redirect({ href: legacyDestination, statusCode: 301 });
     const cms = await getCmsContentItem("service", params.slug);
     const staticService = allServices.find((item) => item.slug === params.slug);
     const fallback =
@@ -228,6 +230,7 @@ function mergeServiceData(
     technologies: stringArray(content.technologies, defaultData.technologies),
     faqs,
     related: stringArray(content.related, defaultData.related),
+    useCases: stringArray(content.use_cases, defaultData.useCases || []),
   };
 }
 

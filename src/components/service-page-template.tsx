@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check, HelpCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Check, HelpCircle } from "lucide-react";
 import { PageHero } from "./page-hero";
 import { CTASection } from "./cta-section";
 import { allServices } from "@/lib/site-data";
-import type { ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
+import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 
 export type ServicePageData = {
   slug: string;
@@ -20,6 +21,7 @@ export type ServicePageData = {
   technologies: string[];
   faqs: { q: string; a: string }[];
   related: string[];
+  useCases?: string[];
   icon?: ComponentType<{ className?: string }>;
 };
 
@@ -43,7 +45,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </>
         }
         intro={data.heroIntro}
-        primaryCta={{ label: "Get a Free Technical Roadmap", to: "/technical-roadmap" }}
+        primaryCta={{ label: "Discuss Your Project", to: "/contact" }}
         secondaryCta={{ label: "View Our Work", to: "/work" }}
         visual={<ServiceHeroVisual name={data.name} />}
       />
@@ -92,6 +94,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
             {data.capabilities.map((c) => (
               <div
                 key={c.title}
+                id={capabilityAnchor(data.slug, c.title)}
                 data-reveal
                 className="group rounded-2xl border border-black/10 p-6 md:p-8 bg-white hover:shadow-[0_20px_50px_-20px_rgba(25,10,47,0.2)] transition-all"
               >
@@ -107,6 +110,25 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </div>
         </div>
       </section>
+
+      {data.useCases?.length ? (
+        <section className="bg-cream py-20 md:py-28">
+          <div className="container-page">
+            <div className="mb-12 max-w-2xl">
+              <p className="eyebrow mb-4">Use cases</p>
+              <h2 className="fluid-h2">Where this system creates practical value.</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {data.useCases.map((item, index) => (
+                <div key={item} data-reveal className="rounded-2xl border border-black/10 bg-white p-6">
+                  <div className="mb-4 text-sm font-bold text-gradient">{String(index + 1).padStart(2, "0")}</div>
+                  <p className="font-semibold text-ink">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Visual workflow */}
       <section className="py-20 md:py-28 section-dark grid-noise">
@@ -203,7 +225,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
       </section>
 
 
-      {(["ai-automations", "crm-automation", "api-integrations"].includes(data.slug)) ? <SystemsWeIntegrate /> : null}
+      {(["ai-automation-voice-agents", "crm-revenue-operations", "custom-websites-portals-cms"].includes(data.slug)) ? <SystemsWeIntegrate /> : null}
 
       <section className="py-20 md:py-28">
         <div className="container-page">
@@ -213,6 +235,8 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </div>
         </div>
       </section>
+
+      <RelatedWork serviceSlug={data.slug} />
 
       {/* FAQs */}
       <section className="py-20 md:py-28 bg-cream">
@@ -309,3 +333,48 @@ function ServiceHeroVisual({ name }: { name: string }) {
     </div>
   );
 }
+
+function RelatedWork({ serviceSlug }: { serviceSlug: string }) {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("case_study")
+      .then((result) => {
+        if (!active) return;
+        const matched = result.filter((item) => {
+          const services = Array.isArray(item.content_json?.services) ? item.content_json.services.map(String) : [];
+          return services.includes(serviceSlug) || item.featured;
+        }).slice(0, 3);
+        setItems(matched);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, [serviceSlug]);
+  if (!items.length) return null;
+  return (
+    <section className="bg-cream py-20 md:py-28">
+      <div className="container-page">
+        <div className="mb-10 max-w-2xl"><p className="eyebrow mb-4">Related work</p><h2 className="fluid-h2">Systems delivered around real operating problems.</h2></div>
+        <div className="grid gap-5 md:grid-cols-3">
+          {items.map((item) => (
+            <Link key={item.slug} to="/work/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-2xl border border-black/10 bg-white">
+              {item.featured_image ? <img src={item.featured_image} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" /> : <div className="grid aspect-[16/9] place-items-center bg-ink"><BriefcaseBusiness className="h-10 w-10 text-white/20" /></div>}
+              <div className="p-6"><h3 className="text-lg font-semibold">{item.title}</h3><p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">Read case study <ArrowUpRight className="h-4 w-4" /></span></div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+function capabilityAnchor(serviceSlug: string, title: string) {
+  if (serviceSlug === "cloud-maintenance") {
+    const normalized = title.toLowerCase();
+    if (normalized.includes("cloud")) return "cloud-deployment";
+    if (normalized.includes("maintenance")) return "website-maintenance";
+    if (normalized.includes("security")) return "cybersecurity";
+    if (normalized.includes("augmentation") || normalized.includes("capacity")) return "staff-augmentation";
+  }
+  return title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+

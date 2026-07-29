@@ -8,20 +8,170 @@
     {
       "source": "/admin/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-        { "key": "Cache-Control", "value": "no-store" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), geolocation=(), microphone=(self)" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), geolocation=(), microphone=(self)"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/industries",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/industries/saas-startups",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/industries/startups-saas",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/industries/home-services",
+      "destination": "/services/crm-revenue-operations",
+      "permanent": true
+    },
+    {
+      "source": "/industries/healthcare",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/industries/ecommerce",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/industries/agencies",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/industries/:path*",
+      "destination": "/services",
+      "permanent": true
+    },
+    {
+      "source": "/services/ai-automations",
+      "destination": "/services/ai-automation-voice-agents",
+      "permanent": true
+    },
+    {
+      "source": "/services/ai-agents",
+      "destination": "/services/ai-automation-voice-agents",
+      "permanent": true
+    },
+    {
+      "source": "/services/crm-automation",
+      "destination": "/services/crm-revenue-operations",
+      "permanent": true
+    },
+    {
+      "source": "/services/api-integrations",
+      "destination": "/services/crm-revenue-operations",
+      "permanent": true
+    },
+    {
+      "source": "/services/web-design-development",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/services/web-applications",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/services/saas-development",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/services/ecommerce",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/services/mobile-apps",
+      "destination": "/services/mobile-app-development",
+      "permanent": true
+    },
+    {
+      "source": "/services/ui-ux",
+      "destination": "/services/ui-ux-design",
+      "permanent": true
+    },
+    {
+      "source": "/services/seo",
+      "destination": "/services/seo-digital-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/services/paid-advertising",
+      "destination": "/services/seo-digital-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/services/social-media",
+      "destination": "/services/seo-digital-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/services/content-marketing",
+      "destination": "/services/seo-digital-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/services/cro",
+      "destination": "/services/seo-digital-marketing",
+      "permanent": true
+    },
+    {
+      "source": "/services/maintenance",
+      "destination": "/services/cloud-maintenance",
+      "permanent": true
+    },
+    {
+      "source": "/web-design-development",
+      "destination": "/services/custom-websites-portals-cms",
+      "permanent": true
+    },
+    {
+      "source": "/ai-automations",
+      "destination": "/services/ai-automation-voice-agents",
+      "permanent": true
+    }
   ]
 }

@@ -17,12 +17,16 @@ export function TechnicalRoadmapCTA({
   title = "Turn the next technical decision into a clear plan.",
   body = "Share the systems, constraints, timeline, and outcome. Logicsify will use that context to prepare a practical roadmap for discovery.",
   source = "global_cta",
+  buttonLabel = "Get a Free Technical Roadmap",
+  to = "/technical-roadmap",
 }: {
   compact?: boolean;
   eyebrow?: string;
   title?: string;
   body?: string;
   source?: string;
+  buttonLabel?: string;
+  to?: string;
 }) {
   return (
     <section className={compact ? "py-14" : "py-20 md:py-28"}>
@@ -44,11 +48,11 @@ export function TechnicalRoadmapCTA({
             </div>
             <div className="lg:col-span-4 lg:text-right">
               <Link
-                to="/technical-roadmap"
+                to={to}
                 className="btn-primary"
                 onClick={() => trackContextualCta(source)}
               >
-                Get a Free Technical Roadmap <ArrowRight className="h-4 w-4" />
+                {buttonLabel} <ArrowRight className="h-4 w-4" />
               </Link>
               <p className="mt-3 text-xs text-white/50">No binding quote is created from the form.</p>
             </div>

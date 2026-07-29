@@ -16,74 +16,30 @@ for (const required of [distIndex, vercelPath, routeTreePath]) {
 }
 
 const source = fs.readFileSync(path.join(root, "src/lib/site-data.ts"), "utf8");
-const serviceBlock = source.split("export const industries")[0];
-const serviceRoutes = [...serviceBlock.matchAll(/route:\s*"([^"]+)"/g)].map((match) => match[1]);
+const serviceRoutes = [...source.matchAll(/route:\s*"(\/services\/[^"]+)"/g)]
+  .map((match) => match[1].split("#")[0]);
 function slugsBetween(start, end) {
   const block = source.split(start)[1]?.split(end)[0] || "";
   return [...block.matchAll(/slug:\s*"([^"]+)"/g)].map((match) => match[1]);
 }
-const industryRoutes = slugsBetween("export const industries = [", "];").map(
-  (slug) => `/industries/${slug}`,
-);
-const workRoutes = slugsBetween("export const caseStudies = [", "];").map(
-  (slug) => `/work/${slug}`,
-);
-const insightRoutes = slugsBetween("export const insights = [", "];").map(
-  (slug) => `/insights/${slug}`,
-);
+const workRoutes = slugsBetween("export const caseStudies = [", "];" ).map((slug) => `/work/${slug}`);
+const insightRoutes = slugsBetween("export const insights = [", "];" ).map((slug) => `/insights/${slug}`);
 const staticRoutes = [
-  "/",
-  "/services",
-  "/industries",
-  "/work",
-  "/automation-lab",
-  "/resources",
-  "/project-estimator",
-  "/comparisons",
-  "/engagement-models",
-  "/insights",
-  "/about",
-  "/process",
-  "/technology",
-  "/careers",
-  "/contact",
-  "/book-a-call",
-  "/technical-roadmap",
-  "/privacy",
-  "/terms",
-  "/admin/login",
-  "/admin/dashboard",
-  "/admin/pages",
-  "/admin/services",
-  "/admin/industries",
-  "/admin/case-studies",
-  "/admin/insights",
-  "/admin/resources",
-  "/admin/comparisons",
-  "/admin/engagement-models",
-  "/admin/integrations",
-  "/admin/careers",
-  "/admin/testimonials",
-  "/admin/team",
-  "/admin/leads",
-  "/admin/bookings",
-  "/admin/media",
-  "/admin/menus",
-  "/admin/settings",
-  "/admin/administrators",
-  "/admin/trash",
-  "/admin/audit-logs",
-  "/admin/account",
+  "/", "/services", "/work", "/automation-lab", "/resources", "/project-estimator",
+  "/comparisons", "/engagement-models", "/insights", "/about", "/process", "/technology",
+  "/careers", "/contact", "/book-a-call", "/technical-roadmap", "/privacy", "/terms",
+  "/admin/login", "/admin/dashboard", "/admin/pages", "/admin/services", "/admin/case-studies",
+  "/admin/insights", "/admin/resources", "/admin/comparisons", "/admin/engagement-models",
+  "/admin/integrations", "/admin/careers", "/admin/testimonials", "/admin/team", "/admin/leads",
+  "/admin/bookings", "/admin/media", "/admin/menus", "/admin/settings", "/admin/administrators",
+  "/admin/trash", "/admin/audit-logs", "/admin/account",
 ];
-const routes = [
-  ...new Set([
-    ...staticRoutes,
-    ...serviceRoutes,
-    ...industryRoutes,
-    ...workRoutes,
-    ...insightRoutes,
-  ]),
+const legacyRedirectRoutes = [
+  "/industries", "/industries/home-services", "/industries/healthcare", "/industries/ecommerce",
+  "/industries/saas-startups", "/industries/agencies", "/services/ai-automations",
+  "/services/ai-agents", "/services/crm-automation", "/services/web-design-development",
 ];
+const routes = [...new Set([...staticRoutes, ...serviceRoutes, ...workRoutes, ...insightRoutes, ...legacyRedirectRoutes])];
 
 const vercel = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
 const hasSpaRewrite =

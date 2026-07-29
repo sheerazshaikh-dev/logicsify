@@ -22,7 +22,7 @@ import {
   Search,
   Megaphone,
 } from "lucide-react";
-import { industries, allServices } from "@/lib/site-data";
+import { coreServices, otherServices } from "@/lib/site-data";
 import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
@@ -32,11 +32,11 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   head: () => ({
     meta: [
-      { title: "Logicsify | Web Development, AI Automation & Digital Marketing" },
+      { title: "Logicsify | AI Automation, CRM & Custom Business Platforms" },
       {
         name: "description",
         content:
-          "Logicsify designs websites, web applications, SaaS products, AI automations, and digital marketing systems that help businesses grow.",
+          "Logicsify builds AI-powered sales, customer service, CRM, website, portal, CMS, and business operations systems.",
       },
       {
         property: "og:title",
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:description",
-        content: "Technology, marketing, and automation—logically built for growth.",
+        content: "We build AI-powered sales, customer service, and business operations systems.",
       },
       { property: "og:url", content: "https://logicsify.com/" },
     ],
@@ -58,14 +58,12 @@ function HomePage() {
       <Hero />
       <TrustStrip />
       <Introduction />
-      <ServicesGrid />
-      <FeaturedServices />
+      <HomeServices />
       <FeaturedWork />
       <AutomationSpotlight />
       <ProcessSection />
       <WhyLogicsify />
       <SystemsWeIntegrate />
-      <IndustriesGrid />
       <EngagementModelsPreview />
       <EstimatorPreview />
       <TeamCredibility />
@@ -93,21 +91,21 @@ function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs text-white/80 mb-8"
           >
             <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
-            Technology · Design · AI · Growth
+            AI · CRM · Platforms · Operations
           </div>
           <h1 className="fluid-display text-white hero-heading-wrap">
             <span data-reveal style={{ ["--reveal-delay" as string]: "0ms" }} className="block">
-              Build Smarter.
+              Build Connected.
             </span>
             <span data-reveal style={{ ["--reveal-delay" as string]: "120ms" }} className="block">
-              Grow Faster.
+              Respond Faster.
             </span>
             <span
               data-reveal
               style={{ ["--reveal-delay" as string]: "240ms" }}
               className="block text-gradient animate-gradient"
             >
-              Automate Everything.
+              Operate Smarter.
             </span>
           </h1>
           <p
@@ -115,19 +113,18 @@ function Hero() {
             style={{ ["--reveal-delay" as string]: "360ms" }}
             className="mt-8 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed"
           >
-            Logicsify combines technology, marketing, and AI automation to turn complex business
-            challenges into connected digital systems.
+            We build AI-powered sales, customer service, and business operations systems that reduce manual work, improve lead response, and keep customer data connected.
           </p>
           <div
             data-reveal
             style={{ ["--reveal-delay" as string]: "480ms" }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <Link to="/technical-roadmap" onClick={() => trackAnalytics("technical_roadmap_cta_clicked", { placement: "homepage_hero" })} className="btn-primary">
-              Get a Free Technical Roadmap <ArrowRight className="w-4 h-4" />
+            <Link to="/contact" onClick={() => trackAnalytics("technical_roadmap_cta_clicked", { placement: "homepage_hero" })} className="btn-primary">
+              Discuss Your Project <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/work" className="btn-ghost-dark">
-              Explore Our Work
+            <Link to="/services" className="btn-ghost-dark">
+              Explore Our Services
             </Link>
           </div>
           <p
@@ -135,7 +132,7 @@ function Hero() {
             style={{ ["--reveal-delay" as string]: "600ms" }}
             className="mt-10 text-xs uppercase tracking-[0.2em] text-white/50"
           >
-            Websites · Applications · AI Automations · Digital Growth
+            AI Agents · CRM Operations · Websites · Portals · CMS Platforms
           </p>
         </div>
 
@@ -236,8 +233,8 @@ function TrustStrip() {
     <section className="border-y border-black/5 bg-cream py-10 overflow-hidden">
       <div className="container-page">
         <p className="text-center text-ink-soft text-sm mb-8">
-          Strategy, design, development, marketing, and automation —{" "}
-          <span className="text-ink font-semibold">under one roof.</span>
+          AI conversations, CRM workflows, digital platforms, payments, and reporting —{" "}
+          <span className="text-ink font-semibold">connected around the same customer journey.</span>
         </p>
       </div>
       <div className="relative">
@@ -260,21 +257,18 @@ function Introduction() {
     <section className="py-24 md:py-32">
       <div className="container-page grid lg:grid-cols-12 gap-12">
         <div className="lg:col-span-7">
-          <p className="eyebrow mb-6">A connected growth partner</p>
+          <p className="eyebrow mb-6">How we position the work</p>
           <h2 data-reveal className="fluid-h2">
-            We turn disconnected ideas, tools, and processes into{" "}
-            <span className="text-gradient">one intelligent growth system.</span>
+            We build AI-powered sales, customer service, and{" "}
+            <span className="text-gradient">business operations systems.</span>
           </h2>
         </div>
         <div className="lg:col-span-5 lg:pt-24 space-y-6 text-ink-soft leading-relaxed">
           <p data-reveal>
-            Most companies don't have a technology problem or a marketing problem — they have a
-            coordination problem. Design lives in one tool. Data in another. Marketing runs in
-            parallel to the product. Automation is a wishlist.
+            Missed opportunities usually come from disconnected conversations, lead records, websites, calendars, payments, and internal handoffs. The software exists, but the operating system between the tools does not.
           </p>
           <p data-reveal style={{ ["--reveal-delay" as string]: "120ms" }}>
-            Logicsify brings strategy, engineering, AI, and growth into the same room so every
-            decision reinforces the next.
+            Logicsify maps the customer and operational workflow first, then builds the AI, CRM, website, portal, integration, and reporting layers required to make it work.
           </p>
           <Link
             to="/about"
@@ -290,159 +284,73 @@ function Introduction() {
   );
 }
 
-/* ---------- SERVICES GRID (4 categories) ---------- */
-function ServicesGrid() {
-  const cats = [
-    {
-      n: "01",
-      title: "Design",
-      icon: Palette,
-      items: ["UI/UX & Product Design", "Branding & Creative", "Web Design"],
-      link: "/services",
-      desc: "Interfaces that convert and identities that last.",
-    },
-    {
-      n: "02",
-      title: "Development",
-      icon: Code2,
-      items: ["Web Applications", "SaaS Development", "Mobile Apps", "E-commerce"],
-      link: "/services",
-      desc: "Modern engineering across web, mobile, and platform.",
-    },
-    {
-      n: "03",
-      title: "AI & Automation",
-      icon: Bot,
-      items: ["AI Automations", "AI Agents", "CRM Automation", "API Integrations"],
-      link: "/services/ai-automations",
-      desc: "Automation designed around real operations.",
-    },
-    {
-      n: "04",
-      title: "Growth Marketing",
-      icon: TrendingUp,
-      items: ["SEO", "Paid Advertising", "Content", "CRO"],
-      link: "/services/seo",
-      desc: "Compounding, measurable acquisition systems.",
-    },
-  ];
+/* ---------- CORE SERVICES ---------- */
+function HomeServices() {
+  const [services, setServices] = useState<CmsContentItem[]>([]);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("service").then((result) => active && setServices(result)).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  const cmsBySlug = new Map(services.map((item) => [item.slug, item]));
+  return <><CoreServicesSection cmsBySlug={cmsBySlug} /><OtherServicesSection cmsBySlug={cmsBySlug} /></>;
+}
+
+function CoreServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContentItem> }) {
+  const icons = [Bot, Workflow, Code2];
   return (
-    <section className="py-24 md:py-32 bg-cream">
+    <section className="bg-cream py-24 md:py-32">
       <div className="container-page">
-        <div className="max-w-3xl mb-16">
-          <p className="eyebrow mb-4">What we do</p>
-          <h2 className="fluid-h2">Everything you need to build and scale digitally.</h2>
+        <div className="mb-16 max-w-3xl">
+          <p className="eyebrow mb-4">Core services</p>
+          <h2 className="fluid-h2">AI-Powered Systems Built for Business Growth</h2>
+          <p className="mt-5 text-lg leading-8 text-ink-soft">From AI agents and CRM automation to custom websites and business platforms, we build connected systems that improve sales, service, and operations.</p>
         </div>
-        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-          {cats.map(({ n, title, icon: Icon, items, link, desc }) => (
-            <Link
-              to={link}
-              key={n}
-              data-reveal
-              className="group relative overflow-hidden rounded-3xl bg-white border border-black/5 p-8 md:p-10 hover:shadow-[0_30px_60px_-30px_rgba(25,10,47,0.35)] transition-all duration-500"
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-brand-red/5 to-brand-gold/5" />
-              <div className="relative flex items-start justify-between mb-8">
-                <span className="text-6xl md:text-7xl font-display font-bold text-ink/10 group-hover:text-gradient transition-colors">
-                  {n}
-                </span>
-                <div className="h-14 w-14 rounded-2xl bg-ink text-white flex items-center justify-center group-hover:bg-gradient-brand transition-all duration-500">
-                  <Icon className="w-6 h-6" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          {coreServices.map((service, index) => {
+            const Icon = icons[index];
+            return (
+              <Link key={service.slug} to={service.route} hash={service.hash} data-reveal className="group relative min-h-[430px] overflow-hidden rounded-3xl bg-ink p-8 text-white transition duration-500 hover:-translate-y-1 md:p-9">
+                <div className="absolute inset-0 grid-noise opacity-60" />
+                <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-brand-gold/20 blur-3xl" />
+                <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-brand-red/20 blur-3xl" />
+                <div className="relative flex h-full flex-col">
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand"><Icon className="h-6 w-6" /></div>
+                  <p className="eyebrow mt-10 text-white/50">Core service {index + 1}</p>
+                  <h3 className="mt-4 text-3xl font-semibold leading-tight">{cmsBySlug.get(service.slug)?.title || service.name}</h3>
+                  <p className="mt-5 leading-7 text-white/70">{cmsBySlug.get(service.slug)?.excerpt || service.short}</p>
+                  <span className="mt-auto inline-flex items-center gap-2 pt-10 font-semibold">Discuss this system <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
                 </div>
-              </div>
-              <h3 className="fluid-h3 mb-3">{title}</h3>
-              <p className="text-ink-soft mb-6">{desc}</p>
-              <ul className="flex flex-wrap gap-2">
-                {items.map((i) => (
-                  <li key={i} className="text-xs px-3 py-1.5 rounded-full bg-lavender text-ink/80">
-                    {i}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-ink">
-                Explore <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
+        </div>
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link to="/contact" className="btn-primary">Discuss Your Project <ArrowRight className="h-4 w-4" /></Link>
+          <Link to="/services" className="btn-ghost-light">Explore Our Services <ArrowRight className="h-4 w-4" /></Link>
         </div>
       </div>
     </section>
   );
 }
 
-/* ---------- FEATURED SERVICES (6 cards) ---------- */
-function FeaturedServices() {
-  const featured = [
-    {
-      icon: Code2,
-      name: "Web Design & Development",
-      value: "Editorial marketing sites that convert.",
-      link: "/services/web-design-development",
-    },
-    {
-      icon: Layers,
-      name: "Custom Web Applications",
-      value: "Internal tools and platforms, built to scale.",
-      link: "/services/web-applications",
-    },
-    {
-      icon: Cpu,
-      name: "SaaS Product Development",
-      value: "End-to-end product engineering.",
-      link: "/services/saas-development",
-    },
-    {
-      icon: Bot,
-      name: "AI Automations",
-      value: "Practical automation with measurable ROI.",
-      link: "/services/ai-automations",
-    },
-    {
-      icon: Search,
-      name: "Search Engine Optimization",
-      value: "Technical and editorial SEO combined.",
-      link: "/services/seo",
-    },
-    {
-      icon: Megaphone,
-      name: "Paid Media & Growth",
-      value: "Multi-channel acquisition that compounds.",
-      link: "/services/paid-advertising",
-    },
-  ];
+/* ---------- OTHER SERVICES ---------- */
+function OtherServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContentItem> }) {
+  const display = otherServices.filter((service) => ["mobile-app-development", "ui-ux-design", "seo-digital-marketing", "branding", "ecommerce-development", "cloud-deployment", "website-maintenance", "cybersecurity", "staff-augmentation"].includes(service.slug));
   return (
     <section className="py-24 md:py-32">
       <div className="container-page">
-        <div className="flex flex-wrap items-end justify-between gap-6 mb-16">
-          <div className="max-w-2xl">
-            <p className="eyebrow mb-4">Featured services</p>
-            <h2 className="fluid-h2">Six capabilities we deliver at senior level.</h2>
-          </div>
-          <Link
-            to="/services"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-ink group"
-          >
-            View all services{" "}
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </Link>
+        <div className="mb-12 max-w-3xl">
+          <p className="eyebrow mb-4">Other services</p>
+          <h2 className="fluid-h2">Specialist support around the core systems.</h2>
+          <p className="mt-5 text-lg text-ink-soft">These services support a wider engagement when the operating problem requires them.</p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {featured.map(({ icon: Icon, name, value, link }) => (
-            <Link
-              to={link}
-              key={name}
-              data-reveal
-              className="group relative rounded-2xl border border-black/10 p-6 md:p-8 bg-white hover:-translate-y-1 transition-all duration-500"
-            >
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-gradient pointer-events-none" />
-              <div className="h-12 w-12 rounded-xl bg-lavender group-hover:bg-gradient-brand text-ink group-hover:text-white flex items-center justify-center mb-6 transition-all duration-500">
-                <Icon className="w-5 h-5" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{name}</h3>
-              <p className="text-sm text-ink-soft leading-relaxed">{value}</p>
-              <div className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-ink group-hover:text-gradient">
-                Explore service <ArrowRight className="w-3.5 h-3.5" />
-              </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {display.map((service) => (
+            <Link key={service.slug} to={service.route} hash={service.hash} className="group rounded-2xl border border-black/10 bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
+              <h3 className="text-lg font-semibold">{cmsBySlug.get(service.slug)?.title || service.name}</h3>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">{cmsBySlug.get(service.slug)?.excerpt || service.short}</p>
+              <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold">Learn more <ArrowRight className="h-3.5 w-3.5" /></span>
             </Link>
           ))}
         </div>
@@ -828,65 +736,6 @@ function TechStack() {
               {t}
             </span>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- INDUSTRIES ---------- */
-function IndustriesGrid() {
-  return (
-    <section className="py-24 md:py-32 bg-cream">
-      <div className="container-page">
-        <div className="max-w-2xl mb-16">
-          <p className="eyebrow mb-4">Industries</p>
-          <h2 className="fluid-h2">Sectors where we deliver senior-level work.</h2>
-        </div>
-        <div className="grid md:grid-cols-6 gap-5">
-          {industries.map((ind, i) => {
-            const featured = i === 0;
-            return (
-              <Link
-                to="/industries/$slug"
-                params={{ slug: ind.slug }}
-                key={ind.slug}
-                data-reveal
-                className={`group relative overflow-hidden rounded-2xl border border-black/5 p-6 md:p-8 hover:shadow-[0_20px_50px_-20px_rgba(25,10,47,0.25)] transition-all ${
-                  featured
-                    ? "section-dark grid-noise md:col-span-3 md:row-span-2 md:min-h-[380px] text-white"
-                    : i === 1
-                      ? "md:col-span-3 bg-white"
-                      : i === 3
-                        ? "md:col-span-4 bg-white"
-                        : "md:col-span-2 bg-white"
-                }`}
-              >
-                {featured ? (
-                  <>
-                    <div className="absolute -right-20 -top-24 h-80 w-80 rounded-full bg-brand-gold/35 blur-3xl" />
-                    <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-brand-red/25 blur-3xl" />
-                    <div className="absolute right-8 top-8 h-24 w-24 rounded-full border border-white/10" />
-                    <div className="absolute right-16 top-16 h-8 w-8 rounded-full bg-gradient-brand shadow-[0_0_28px_rgba(253,190,2,0.65)]" />
-                  </>
-                ) : null}
-                <div className="relative z-10 flex h-full flex-col justify-end">
-                  <div className={`inline-block text-[10px] uppercase tracking-widest ${featured ? "text-white/60" : "text-ink-soft"} mb-3`}>
-                    {ind.tag}
-                  </div>
-                  <h3 className={`text-2xl md:text-3xl font-semibold ${featured ? "text-white" : "text-ink"} mb-3`}>
-                    {ind.name}
-                  </h3>
-                  <p className={`text-sm ${featured ? "text-white/70" : "text-ink-soft"} max-w-md`}>
-                    {ind.desc}
-                  </p>
-                  <div className={`mt-6 inline-flex items-center gap-1 text-sm font-semibold ${featured ? "text-white" : "text-ink"} group-hover:text-gradient`}>
-                    Explore <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
         </div>
       </div>
     </section>

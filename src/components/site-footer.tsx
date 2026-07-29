@@ -7,43 +7,31 @@ import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-
 
 const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   {
-    title: "Services",
+    title: "Core Services",
     links: [
-      ["Web Development", "/services/web-design-development"],
-      ["Custom Web Applications", "/services/web-applications"],
-      ["SaaS Development", "/services/saas-development"],
-      ["AI Automations", "/services/ai-automations"],
-      ["CRM Automation", "/services/crm-automation"],
-      ["Digital Marketing", "/services/seo"],
+      ["AI Automation & Voice Agents", "/services/ai-automation-voice-agents"],
+      ["CRM & Revenue Operations", "/services/crm-revenue-operations"],
+      ["Custom Websites, Portals & CMS", "/services/custom-websites-portals-cms"],
     ],
   },
   {
-    title: "Industries",
+    title: "Other Services",
     links: [
-      ["SaaS and Startups", "/industries/saas-startups"],
-      ["Home Services", "/industries/home-services"],
-      ["Healthcare", "/industries/healthcare"],
-      ["E-commerce", "/industries/ecommerce"],
-      ["Agencies", "/industries/agencies"],
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      ["Automation Lab", "/automation-lab"],
-      ["Project Estimator", "/project-estimator"],
-      ["Comparisons", "/comparisons"],
-      ["Resource Library", "/resources"],
-      ["Insights", "/insights"],
+      ["Mobile App Development", "/services/mobile-app-development"],
+      ["UI/UX Design", "/services/ui-ux-design"],
+      ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
+      ["Branding", "/services/branding"],
+      ["Cloud & Maintenance", "/services/cloud-maintenance"],
     ],
   },
   {
     title: "Company",
     links: [
+      ["Home", "/"],
       ["About", "/about"],
+      ["Services", "/services"],
       ["Work", "/work"],
-      ["Engagement Models", "/engagement-models"],
-      ["Team", "/about#team"],
+      ["Insights", "/insights"],
       ["Contact", "/contact"],
     ],
   },
@@ -67,9 +55,9 @@ export function SiteFooter() {
   const description =
     settings.footer_description ||
     settings.tagline ||
-    "Logicsify designs, builds, markets, and automates connected digital systems for growing businesses.";
-  const ctaLabel = settings.footer_cta_label || "Get a Free Technical Roadmap";
-  const ctaUrl = settings.footer_cta_url || "/technical-roadmap";
+    "We build AI-powered sales, customer service, and business operations systems.";
+  const ctaLabel = settings.footer_cta_label || "Discuss Your Project";
+  const ctaUrl = settings.footer_cta_url || "/contact";
   const copyright = (settings.copyright_text || "© {year} Logicsify. All rights reserved.").replace(
     /\{year\}/g,
     String(new Date().getFullYear()),
@@ -86,7 +74,7 @@ export function SiteFooter() {
     <footer data-cms-ignore="true" className="section-dark grid-noise relative mt-24 pb-10 pt-20">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-brand" />
       <div className="container-page relative">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+        <div className="grid gap-12 lg:grid-cols-[1.35fr_repeat(3,1fr)]">
           <div>
             <img
               src={settings.footer_logo || settings.logo_light || DEFAULT_BRAND_ASSETS.logoLight}

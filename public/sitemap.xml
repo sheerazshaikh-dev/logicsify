@@ -15,15 +15,6 @@
   <url><loc>https://logicsify.com/engagement-models</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/home</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/industries</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/agencies</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/ecommerce</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/financial-services</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/healthcare</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/home-services</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/professional-services</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/real-estate</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/saas-startups</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries/startups-saas</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/insights</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/insights/connect-marketing-data-with-operations</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://logicsify.com/insights/website-vs-web-app-vs-saas</loc><changefreq>monthly</changefreq></url>
@@ -33,23 +24,15 @@
   <url><loc>https://logicsify.com/project-estimator</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/resources</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/services</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/ai-agents</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/ai-automations</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/api-integrations</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/ai-automation-voice-agents</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/services/branding</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/content-marketing</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/crm-automation</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/cro</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/ecommerce</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/maintenance</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/mobile-apps</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/paid-advertising</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/saas-development</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/seo</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/social-media</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/ui-ux</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/web-applications</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/services/web-design-development</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/cloud-maintenance</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/crm-revenue-operations</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/custom-websites-portals-cms</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/ecommerce-development</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/mobile-app-development</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/seo-digital-marketing</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/services/ui-ux-design</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/technical-roadmap</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/technology</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/terms</loc><changefreq>weekly</changefreq></url>

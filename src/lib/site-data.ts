@@ -3,6 +3,8 @@ export type ServiceItem = {
   name: string;
   short: string;
   route: string;
+  tier: "core" | "other";
+  hash?: string;
 };
 
 export type ServiceGroup = {
@@ -10,166 +12,89 @@ export type ServiceGroup = {
   items: ServiceItem[];
 };
 
+export const coreServices: ServiceItem[] = [
+  {
+    slug: "ai-automation-voice-agents",
+    name: "AI Automation & Voice Agents",
+    short: "Automate conversations, follow-ups, and repetitive business processes with practical AI systems.",
+    route: "/services/ai-automation-voice-agents",
+    tier: "core",
+  },
+  {
+    slug: "crm-revenue-operations",
+    name: "CRM & Revenue Operations",
+    short: "We build systems that capture, organize, follow up with, and convert every lead.",
+    route: "/services/crm-revenue-operations",
+    tier: "core",
+  },
+  {
+    slug: "custom-websites-portals-cms",
+    name: "Custom Websites, Portals & CMS Platforms",
+    short: "Websites and platforms connected directly to sales, operations, payments, and customer workflows.",
+    route: "/services/custom-websites-portals-cms",
+    tier: "core",
+  },
+];
+
+export const otherServices: ServiceItem[] = [
+  { slug: "mobile-app-development", name: "Mobile App Development", short: "Customer and internal mobile applications built around clear workflows.", route: "/services/mobile-app-development", tier: "other" },
+  { slug: "ui-ux-design", name: "UI/UX Design", short: "Research, user flows, prototypes, and consistent interface systems.", route: "/services/ui-ux-design", tier: "other" },
+  { slug: "seo-digital-marketing", name: "SEO & Digital Marketing", short: "Search, paid media, social, content, and conversion programs tied to measurable demand.", route: "/services/seo-digital-marketing", tier: "other" },
+  { slug: "branding", name: "Branding & Graphic Design", short: "Identity, campaign, presentation, and product design systems.", route: "/services/branding", tier: "other" },
+  { slug: "ecommerce-development", name: "E-commerce Development", short: "Storefronts, payments, inventory, analytics, and customer lifecycle integrations.", route: "/services/ecommerce-development", tier: "other" },
+  { slug: "cloud-deployment", name: "Cloud Deployment", short: "Production hosting, deployment pipelines, monitoring, and environment management.", route: "/services/cloud-maintenance", hash: "cloud-deployment", tier: "other" },
+  { slug: "website-maintenance", name: "Website Maintenance", short: "Security updates, performance monitoring, fixes, and ongoing improvements.", route: "/services/cloud-maintenance", hash: "website-maintenance", tier: "other" },
+  { slug: "cybersecurity", name: "Cybersecurity", short: "Practical application, access, dependency, and deployment security reviews.", route: "/services/cloud-maintenance", hash: "cybersecurity", tier: "other" },
+  { slug: "staff-augmentation", name: "Staff Augmentation", short: "Additional design and engineering capacity with documented ownership and delivery controls.", route: "/services/cloud-maintenance", hash: "staff-augmentation", tier: "other" },
+];
+
 export const megaMenu: ServiceGroup[] = [
+  { title: "Core Services", items: coreServices },
   {
-    title: "Design & Development",
+    title: "Other Services",
     items: [
-      {
-        slug: "web-design-development",
-        name: "Web Design & Development",
-        short: "Fast, editorial marketing sites.",
-        route: "/services/web-design-development",
-      },
-      {
-        slug: "web-applications",
-        name: "Custom Web Applications",
-        short: "Business tools built to scale.",
-        route: "/services/web-applications",
-      },
-      {
-        slug: "saas-development",
-        name: "SaaS Product Development",
-        short: "End-to-end platform engineering.",
-        route: "/services/saas-development",
-      },
-      {
-        slug: "mobile-apps",
-        name: "Mobile App Development",
-        short: "iOS, Android, React Native.",
-        route: "/services/mobile-apps",
-      },
-      {
-        slug: "ecommerce",
-        name: "E-commerce Development",
-        short: "Shopify, headless, custom stacks.",
-        route: "/services/ecommerce",
-      },
-      {
-        slug: "ui-ux",
-        name: "UI/UX & Product Design",
-        short: "Research-led interface systems.",
-        route: "/services/ui-ux",
-      },
-    ],
-  },
-  {
-    title: "AI & Automation",
-    items: [
-      {
-        slug: "ai-automations",
-        name: "AI Automations",
-        short: "Practical automation with measurable ROI.",
-        route: "/services/ai-automations",
-      },
-      {
-        slug: "ai-agents",
-        name: "AI Agents & Chatbots",
-        short: "Voice, chat, and knowledge agents.",
-        route: "/services/ai-agents",
-      },
-      {
-        slug: "crm-automation",
-        name: "CRM & Workflow Automation",
-        short: "HubSpot, GHL, custom flows.",
-        route: "/services/crm-automation",
-      },
-      {
-        slug: "api-integrations",
-        name: "API & Systems Integration",
-        short: "Connect the stack you already run.",
-        route: "/services/api-integrations",
-      },
-    ],
-  },
-  {
-    title: "Growth & Marketing",
-    items: [
-      {
-        slug: "seo",
-        name: "Search Engine Optimization",
-        short: "Technical + editorial SEO.",
-        route: "/services/seo",
-      },
-      {
-        slug: "paid-advertising",
-        name: "Paid Advertising",
-        short: "Google, Meta, LinkedIn.",
-        route: "/services/paid-advertising",
-      },
-      {
-        slug: "social-media",
-        name: "Social Media Marketing",
-        short: "Content that compounds.",
-        route: "/services/social-media",
-      },
-      {
-        slug: "content-marketing",
-        name: "Content Marketing",
-        short: "Editorial engines that rank.",
-        route: "/services/content-marketing",
-      },
-      {
-        slug: "branding",
-        name: "Branding & Creative Design",
-        short: "Identity systems for tech brands.",
-        route: "/services/branding",
-      },
-      {
-        slug: "cro",
-        name: "Conversion Rate Optimization",
-        short: "Experimentation with rigor.",
-        route: "/services/cro",
-      },
-    ],
-  },
-  {
-    title: "Support",
-    items: [
-      {
-        slug: "maintenance",
-        name: "Website Maintenance",
-        short: "Uptime, security, performance.",
-        route: "/services/maintenance",
-      },
+      otherServices.find((item) => item.slug === "mobile-app-development")!,
+      otherServices.find((item) => item.slug === "ui-ux-design")!,
+      otherServices.find((item) => item.slug === "seo-digital-marketing")!,
+      otherServices.find((item) => item.slug === "branding")!,
+      { slug: "cloud-maintenance", name: "Cloud & Maintenance", short: "Deployment, security, maintenance, and delivery support.", route: "/services/cloud-maintenance", tier: "other" },
     ],
   },
 ];
 
-export const allServices: ServiceItem[] = megaMenu.flatMap((g) => g.items);
-
-export const industries = [
-  {
-    slug: "saas-startups",
-    name: "SaaS & Startups",
-    tag: "MVP, product, and scale",
-    desc: "Product design, SaaS architecture, billing, onboarding, analytics, admin systems, AI features, and scaling.",
-  },
-  {
-    slug: "home-services",
-    name: "Home Services",
-    tag: "Lead capture to dispatch",
-    desc: "Lead handling, appointment workflows, CRM pipelines, local growth, reviews, and technician operations.",
-  },
-  {
-    slug: "healthcare",
-    name: "Healthcare",
-    tag: "Intake and operations",
-    desc: "Accessible intake, appointment workflows, staff portals, reporting, and secure operational design without unsupported compliance claims.",
-  },
-  {
-    slug: "ecommerce",
-    name: "E-commerce",
-    tag: "Storefront to retention",
-    desc: "Shopify and custom storefronts, checkout, CRM, lifecycle flows, analytics, inventory, and support automation.",
-  },
-  {
-    slug: "agencies",
-    name: "Agencies",
-    tag: "White-label delivery systems",
-    desc: "Overflow development, dedicated teams, custom CMS platforms, client portals, reporting, and repeatable delivery workflows.",
-  },
+export const allServices: ServiceItem[] = [
+  ...coreServices,
+  ...otherServices,
+  { slug: "cloud-maintenance", name: "Cloud & Maintenance", short: "Deployment, security, maintenance, and delivery support.", route: "/services/cloud-maintenance", tier: "other" },
 ];
+
+export const legacyServiceRedirects: Record<string, string> = {
+  "ai-automations": "/services/ai-automation-voice-agents",
+  "ai-agents": "/services/ai-automation-voice-agents",
+  "crm-automation": "/services/crm-revenue-operations",
+  "api-integrations": "/services/crm-revenue-operations",
+  "web-design-development": "/services/custom-websites-portals-cms",
+  "web-applications": "/services/custom-websites-portals-cms",
+  "saas-development": "/services/custom-websites-portals-cms",
+  ecommerce: "/services/custom-websites-portals-cms",
+  "mobile-apps": "/services/mobile-app-development",
+  "ui-ux": "/services/ui-ux-design",
+  seo: "/services/seo-digital-marketing",
+  "paid-advertising": "/services/seo-digital-marketing",
+  "social-media": "/services/seo-digital-marketing",
+  "content-marketing": "/services/seo-digital-marketing",
+  cro: "/services/seo-digital-marketing",
+  maintenance: "/services/cloud-maintenance",
+};
+
+export const industryRedirects: Record<string, string> = {
+  "saas-startups": "/services/custom-websites-portals-cms",
+  "startups-saas": "/services/custom-websites-portals-cms",
+  "home-services": "/services/crm-revenue-operations",
+  healthcare: "/services/custom-websites-portals-cms",
+  ecommerce: "/services/custom-websites-portals-cms",
+  agencies: "/services/custom-websites-portals-cms",
+};
 
 export const caseStudies: Array<{ slug: string; name: string; client: string; category: string; services: string[]; challenge: string; outcome: string; tags: string[] }> = [];
-
 export const insights: Array<{ slug: string; category: string; title: string; excerpt: string; date: string; read: string }> = [];

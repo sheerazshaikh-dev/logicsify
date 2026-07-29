@@ -5,16 +5,15 @@ const apiBase = (process.env.VITE_API_URL || "https://backend.logicsify.com/api"
 const publicDir = new URL("../public/", import.meta.url);
 
 const corePaths = [
-  "/", "/services", "/industries", "/work", "/automation-lab", "/resources", "/project-estimator",
+  "/", "/services", "/work", "/automation-lab", "/resources", "/project-estimator",
   "/comparisons", "/engagement-models", "/insights", "/about", "/process", "/technology", "/careers",
   "/contact", "/book-a-call", "/technical-roadmap", "/privacy", "/terms",
 ];
 const serviceSlugs = [
-  "web-design-development", "web-applications", "saas-development", "mobile-apps", "ecommerce", "ui-ux",
-  "ai-automations", "ai-agents", "crm-automation", "api-integrations", "seo", "paid-advertising",
-  "social-media", "content-marketing", "branding", "cro", "maintenance",
+  "ai-automation-voice-agents", "crm-revenue-operations", "custom-websites-portals-cms",
+  "mobile-app-development", "ui-ux-design", "seo-digital-marketing", "branding",
+  "ecommerce-development", "cloud-maintenance",
 ];
-const industrySlugs = ["saas-startups", "home-services", "healthcare", "ecommerce", "agencies"];
 const comparisonSlugs = [
   "custom-cms-vs-wordpress", "custom-web-app-vs-saas-tools", "retell-ai-vs-twilio-voice",
   "gohighlevel-vs-custom-crm", "in-house-developer-vs-dedicated-agency",
@@ -41,7 +40,6 @@ async function list(type) {
 const dynamicTypes = [
   ["page", (slug) => `/${slug}`],
   ["service", (slug) => `/services/${slug}`],
-  ["industry", (slug) => `/industries/${slug}`],
   ["case_study", (slug) => `/work/${slug}`],
   ["insight", (slug) => `/insights/${slug}`],
   ["resource", (slug) => `/resources/${slug}`],
@@ -51,14 +49,17 @@ const dynamicTypes = [
 const paths = new Set([
   ...corePaths,
   ...serviceSlugs.map((slug) => `/services/${slug}`),
-  ...industrySlugs.map((slug) => `/industries/${slug}`),
   ...comparisonSlugs.map((slug) => `/comparisons/${slug}`),
 ]);
 const fetched = {};
 for (const [type, toPath] of dynamicTypes) {
   const items = await list(type);
   fetched[type] = items;
-  for (const item of items) if (item?.slug) paths.add(toPath(item.slug));
+  for (const item of items) {
+    if (!item?.slug) continue;
+    if (type === "service" && !serviceSlugs.includes(item.slug)) continue;
+    paths.add(toPath(item.slug));
+  }
 }
 // Resource placeholders stay out of the sitemap until the CMS publishes them.
 if ((fetched.resource || []).length === 0) resourceSlugs.forEach(() => undefined);

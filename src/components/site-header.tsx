@@ -51,8 +51,8 @@ export function SiteHeader() {
   const stickyHeader = boolSetting(siteSettings.sticky_header, true);
   const transparentHeaderHome = boolSetting(siteSettings.transparent_header_home, true);
   const showHeaderCta = boolSetting(siteSettings.show_header_cta, true);
-  const headerCtaLabel = siteSettings.header_cta_label || "Get a Free Technical Roadmap";
-  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/technical-roadmap");
+  const headerCtaLabel = siteSettings.header_cta_label || "Discuss Your Project";
+  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/contact");
   const headerCtaNewTab = boolSetting(siteSettings.header_cta_new_tab);
   const desktopLogoHeight = numberSetting(siteSettings.header_logo_height_desktop, 36, 20, 80);
   const mobileLogoHeight = numberSetting(siteSettings.header_logo_height_mobile, 28, 20, 64);
@@ -543,25 +543,29 @@ function normalizeMegaGroups(item: NavItem): NavItem[] {
 }
 
 function mergeFallbackNavigation(items: NavItem[]): NavItem[] {
-  const byKey = new Map(items.map((item) => [navKey(item), item]));
-  const merged = fallbackNavigation.map((fallback) => {
+  const visibleItems = items.filter((item) => navKey(item) !== "industries");
+  const byKey = new Map(visibleItems.map((item) => [navKey(item), item]));
+  return fallbackNavigation.map((fallback) => {
     const existing = byKey.get(navKey(fallback));
     if (!existing) return fallback;
-    byKey.delete(navKey(fallback));
-    const shouldHaveChildren = fallback.children.length > 0;
+    const isServices = navKey(fallback) === "services";
     return {
       ...existing,
-      menuStyle: shouldHaveChildren ? "mega" : existing.menuStyle,
-      children: existing.children.length ? existing.children : fallback.children,
-      megaPromoEnabled: existing.megaPromoEnabled ?? fallback.megaPromoEnabled,
-      megaPromoEyebrow: existing.megaPromoEyebrow || fallback.megaPromoEyebrow,
-      megaPromoTitle: existing.megaPromoTitle || fallback.megaPromoTitle,
-      megaPromoDescription: existing.megaPromoDescription || fallback.megaPromoDescription,
-      megaPromoButtonLabel: existing.megaPromoButtonLabel || fallback.megaPromoButtonLabel,
-      megaPromoButtonUrl: existing.megaPromoButtonUrl || fallback.megaPromoButtonUrl,
+      label: fallback.label,
+      to: fallback.to,
+      menuStyle: fallback.children.length ? "mega" : "link",
+      children: isServices ? fallback.children : existing.children.length ? existing.children : fallback.children,
+      comingSoon: false,
+      hideDesktop: false,
+      hideMobile: false,
+      megaPromoEnabled: isServices ? true : existing.megaPromoEnabled,
+      megaPromoEyebrow: isServices ? fallback.megaPromoEyebrow : existing.megaPromoEyebrow,
+      megaPromoTitle: isServices ? fallback.megaPromoTitle : existing.megaPromoTitle,
+      megaPromoDescription: isServices ? fallback.megaPromoDescription : existing.megaPromoDescription,
+      megaPromoButtonLabel: isServices ? fallback.megaPromoButtonLabel : existing.megaPromoButtonLabel,
+      megaPromoButtonUrl: isServices ? fallback.megaPromoButtonUrl : existing.megaPromoButtonUrl,
     };
   });
-  return [...merged, ...byKey.values()];
 }
 
 function navKey(item: NavItem) {
@@ -631,89 +635,36 @@ function buildFallbackNavigation(): NavItem[] {
     ...fallbackLink(nextId--, label, to),
     menuStyle: children.length ? ("mega" as const) : ("link" as const),
     megaPromoEnabled: promo,
-    megaPromoEyebrow: "Technical roadmap",
-    megaPromoTitle: "Plan the right system before you build",
-    megaPromoDescription: "Share your current systems and priorities. We will outline the clearest technical path forward.",
-    megaPromoButtonLabel: "Get a Free Technical Roadmap",
-    megaPromoButtonUrl: "/technical-roadmap",
+    megaPromoEyebrow: "Build the right system",
+    megaPromoTitle: "Connect sales, service, and operations",
+    megaPromoDescription: "Discuss the business problem, current tools, and the clearest path to a working system.",
+    megaPromoButtonLabel: "Discuss Your Project",
+    megaPromoButtonUrl: "/contact",
     children,
   });
 
   const services = root("Services", "/services", [
-    group("Design and Development", 1, [
-      ["Web Design and Development", "/services/web-design-development"],
-      ["Custom Web Applications", "/services/web-applications"],
-      ["SaaS Development", "/services/saas-development"],
-      ["Mobile App Development", "/services/mobile-apps"],
-      ["E-commerce Development", "/services/ecommerce"],
-      ["UI/UX and Product Design", "/services/ui-ux"],
+    group("Core Services", 1, [
+      ["AI Automation & Voice Agents", "/services/ai-automation-voice-agents", "AI calls, booking, qualification, support, follow-up, documents, and internal workflows."],
+      ["CRM & Revenue Operations", "/services/crm-revenue-operations", "Lead capture, routing, pipelines, communications, scheduling, reporting, payments, and migration."],
+      ["Custom Websites, Portals & CMS", "/services/custom-websites-portals-cms", "Connected websites, portals, CMS platforms, dashboards, bookings, payments, and admin systems."],
     ]),
-    group("AI and Automation", 2, [
-      ["AI Automations", "/services/ai-automations"],
-      ["AI Voice Agents", "/services/ai-agents"],
-      ["CRM and Workflow Automation", "/services/crm-automation"],
-      ["Document Automation", "/services/ai-automations"],
-      ["Support Chatbots", "/services/ai-agents"],
-      ["Systems Integration", "/services/api-integrations"],
-    ]),
-    group("Growth and Marketing", 3, [
-      ["SEO", "/services/seo"],
-      ["Paid Advertising", "/services/paid-advertising"],
-      ["Social Media Marketing", "/services/social-media"],
-      ["Content Marketing", "/services/content-marketing"],
-      ["Conversion Optimization", "/services/cro"],
-    ]),
-    group("Engagement Models", 4, [
-      ["Fixed-Scope Projects", "/engagement-models#fixed-scope-project"],
-      ["Monthly Development Support", "/engagement-models#monthly-development-support"],
-      ["Dedicated Teams", "/engagement-models#dedicated-team"],
-      ["Automation Consulting", "/engagement-models#automation-consulting"],
+    group("Other Services", 2, [
+      ["Mobile App Development", "/services/mobile-app-development"],
+      ["UI/UX Design", "/services/ui-ux-design"],
+      ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
+      ["Branding", "/services/branding"],
+      ["Cloud & Maintenance", "/services/cloud-maintenance"],
     ]),
   ]);
 
-  const industries = root("Industries", "/industries", [
-    group("Industries", 1, [
-      ["SaaS and Startups", "/industries/saas-startups"],
-      ["Home Services", "/industries/home-services"],
-      ["Healthcare", "/industries/healthcare"],
-      ["E-commerce", "/industries/ecommerce"],
-      ["Agencies", "/industries/agencies"],
-    ]),
-  ], false);
-
-  const resources = root("Resources", "/resources", [
-    group("Planning tools", 1, [
-      ["Resource Library", "/resources"],
-      ["Project Estimator", "/project-estimator"],
-      ["Comparisons", "/comparisons"],
-    ]),
-    group("Templates", 2, [
-      ["Website Planning Checklist", "/resources/website-planning-checklist"],
-      ["AI Automation Opportunity Audit", "/resources/ai-automation-opportunity-audit"],
-      ["CRM Migration Checklist", "/resources/crm-migration-checklist"],
-      ["SaaS MVP Scope Template", "/resources/saas-mvp-scope-template"],
-    ]),
-  ], false);
-
-  const insights = root("Insights", "/insights", [
-    group("Browse insights", 1, [
-      ["All Insights", "/insights"],
-      ["AI and Automation", "/insights?category=AI%20and%20Automation"],
-      ["Development", "/insights?category=Web%20Development"],
-      ["Marketing", "/insights?category=Digital%20Marketing"],
-      ["Company News", "/insights?category=Company%20News"],
-      ["Guides", "/insights?category=Guides"],
-    ]),
-  ], false);
-
   return [
-    services,
-    industries,
-    fallbackLink(nextId--, "Work", "/work"),
-    fallbackLink(nextId--, "Automation Lab", "/automation-lab"),
-    resources,
-    insights,
+    fallbackLink(nextId--, "Home", "/"),
     fallbackLink(nextId--, "About", "/about"),
+    services,
+    fallbackLink(nextId--, "Work", "/work"),
+    fallbackLink(nextId--, "Insights", "/insights"),
+    fallbackLink(nextId--, "Contact", "/contact"),
   ];
 }
 

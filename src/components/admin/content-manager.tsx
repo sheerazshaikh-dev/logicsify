@@ -106,6 +106,13 @@ const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => (
     includes: [],
     audience: "",
     related_service: "",
+    problems: [],
+    capabilities: [],
+    workflow: [],
+    technologies: [],
+    faqs: [],
+    related: [],
+    use_cases: [],
   },
   seo_json: { title: "", description: "", canonical: "", noindex: false, og_image: "" },
   published_at: "",
@@ -228,6 +235,13 @@ export function ContentManagerPage({
         includes: [],
         audience: "",
         related_service: "",
+        problems: [],
+        capabilities: [],
+        workflow: [],
+        technologies: [],
+        faqs: [],
+        related: [],
+        use_cases: [],
         ...(item.content_json || {}),
       },
       seo_json: {
@@ -1419,6 +1433,72 @@ function StructuredContentFields({
       </div>
     );
   };
+
+  const structuredListField = (
+    label: string,
+    key: string,
+    leftLabel: string,
+    rightLabel: string,
+    rows = 5,
+  ) => {
+    const values = Array.isArray(content[key])
+      ? content[key]
+          .map((entry) => {
+            if (!entry || typeof entry !== "object") return "";
+            const item = entry as Record<string, unknown>;
+            const left = String(item.title || item.q || item.question || "");
+            const right = String(item.body || item.a || item.answer || "");
+            return left || right ? `${left} | ${right}` : "";
+          })
+          .filter(Boolean)
+      : [];
+    return (
+      <div>
+        <FieldLabel>{label}</FieldLabel>
+        <textarea
+          rows={rows}
+          value={values.join("\n")}
+          onChange={(event) => {
+            const parsed = event.target.value
+              .split(/\r?\n/)
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((line) => {
+                const [left, ...rest] = line.split("|");
+                return key === "faqs"
+                  ? { q: left.trim(), a: rest.join("|").trim() }
+                  : { title: left.trim(), body: rest.join("|").trim() };
+              });
+            update(key, parsed);
+          }}
+          className={adminTextareaClass}
+          placeholder={`${leftLabel} | ${rightLabel}`}
+        />
+        <p className="mt-1 text-[11px] text-slate-400">One row per line, separated with |.</p>
+      </div>
+    );
+  };
+
+  if (type === "service") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <div>
+          <h3 className="text-base font-semibold text-[#190A2F]">Service page details</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">Core and Other service placement is controlled by the approved service slug. All page copy remains editable here.</p>
+        </div>
+        {textField("Main positioning / value proposition", "body", "Explain the connected business outcome.", true)}
+        <div className="grid gap-4 md:grid-cols-2">
+          {listField("Business problems solved", "problems", "Problem one\nProblem two")}
+          {listField("Use cases", "use_cases", "Appointment booking\nLead routing\nCustomer portal")}
+          {listField("Workflow steps", "workflow", "Lead captured\nQualified\nCRM updated\nFollow-up")}
+          {listField("Platforms and technologies", "technologies", "HubSpot\nGoHighLevel\nTwilio")}
+          {listField("Related service slugs", "related", "ai-automation-voice-agents\ncrm-revenue-operations")}
+        </div>
+        {structuredListField("Capabilities", "capabilities", "Capability title", "Capability description", 7)}
+        {structuredListField("FAQs", "faqs", "Question", "Answer", 6)}
+      </AdminCard>
+    );
+  }
 
   if (type === "case_study") {
     return (

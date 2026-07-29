@@ -82,6 +82,16 @@ for (const file of sourceFiles.filter((item) => /\.(?:ts|tsx)$/.test(item))) {
 const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
 const hasSpaFallback = Array.isArray(vercel.rewrites) && vercel.rewrites.some((rule) => rule?.destination === "/index.html");
 if (!hasSpaFallback) errors.push("vercel.json is missing the SPA fallback to /index.html");
+const redirectPairs = new Set((vercel.redirects || []).map((rule) => `${rule?.source}=>${rule?.destination}`));
+for (const pair of [
+  "/industries=>/services",
+  "/industries/home-services=>/services/crm-revenue-operations",
+  "/services/ai-automations=>/services/ai-automation-voice-agents",
+  "/services/crm-automation=>/services/crm-revenue-operations",
+  "/services/web-design-development=>/services/custom-websites-portals-cms",
+]) {
+  if (!redirectPairs.has(pair)) errors.push(`vercel.json is missing permanent redirect ${pair}`);
+}
 const robots = fs.readFileSync(path.join(root, "public", "robots.txt"), "utf8");
 if (!robots.includes("Disallow: /admin/")) errors.push("robots.txt must disallow /admin/");
 const sitemap = fs.readFileSync(path.join(root, "public", "sitemap.xml"), "utf8");
