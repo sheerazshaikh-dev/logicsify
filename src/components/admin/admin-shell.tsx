@@ -34,6 +34,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   adminLogout,
   getSecurityConfig,
+  getAdminRuntimeCustomization,
   clearAdminToken,
   getAdminToken,
   getCurrentAdmin,
@@ -43,6 +44,7 @@ import { AdminLoading } from "@/components/admin/admin-ui";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
 import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
 import { adminHref, getAdminSection, legacyAdminPath } from "@/lib/admin-path";
+import { injectCodeSnippets, injectRuntimeStyle, removeRuntimeNamespace } from "@/lib/runtime-code";
 
 const navigation = [
   {
@@ -132,6 +134,33 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     getPublicSiteSettings().then((settings) => setSiteSettings(withDefaultBranding(settings)));
   }, []);
+
+  useEffect(() => {
+    if (!admin || typeof window === "undefined") return;
+    const safeAdmin = new URLSearchParams(window.location.search).get("safe-admin") === "1";
+    if (safeAdmin) {
+      injectRuntimeStyle("admin-custom-css", "");
+      return;
+    }
+
+    injectRuntimeStyle("public-custom-css", "");
+    getAdminRuntimeCustomization()
+      .then((customization) => {
+        injectRuntimeStyle(
+          "admin-custom-css",
+          customization.admin_custom_css_enabled !== false
+            ? customization.admin_custom_css
+            : "",
+        );
+        injectCodeSnippets(customization.snippets, "admin", "admin-snippet");
+      })
+      .catch(() => undefined);
+
+    return () => {
+      injectRuntimeStyle("admin-custom-css", "");
+      removeRuntimeNamespace("admin-snippet");
+    };
+  }, [admin]);
 
   useEffect(() => {
     if (!admin || !legacyAdminPath(location.pathname)) return;

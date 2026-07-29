@@ -17,7 +17,8 @@
     "qa:routes": "node scripts/qa-routes.mjs",
     "qa:static": "node scripts/static-qa.mjs",
     "qa": "node scripts/run-qa.mjs",
-    "qa:build": "node scripts/build-qa.mjs"
+    "qa:build": "node scripts/build-qa.mjs",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

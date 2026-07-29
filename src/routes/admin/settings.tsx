@@ -2,17 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { adminHref } from "@/lib/admin-path";
 import {
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
   Code2,
+  Copy,
   ExternalLink,
   Globe2,
   Image as ImageIcon,
   LayoutPanelTop,
+  Plus,
   Loader2,
   Mail,
   Palette,
   Save,
   SearchCheck,
   Send,
+  ShieldAlert,
   Settings2,
   Share2,
   ShieldCheck,
@@ -33,12 +38,14 @@ import {
   adminTextareaClass,
 } from "@/components/admin/admin-ui";
 import {
+  getCurrentAdmin,
   getSettings,
   saveSettings,
   testSmtp,
   uploadMedia,
   type SettingsResponse,
 } from "@/lib/admin-api";
+import type { CodeSnippet } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
@@ -68,15 +75,17 @@ function SettingsPage() {
   const [settings, setSettings] = useState<SettingsResponse>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
-    getSettings()
-      .then((loaded) =>
+    Promise.all([getSettings(), getCurrentAdmin()])
+      .then(([loaded, admin]) => {
         setSettings({
           ...loaded,
           site: withDefaultBranding((loaded.site || {}) as Record<string, unknown>),
-        }),
-      )
+        });
+        setIsSuperAdmin(admin.role === "super_admin");
+      })
       .catch((error) =>
         toast.error(error instanceof Error ? error.message : "Could not load settings."),
       )
@@ -174,6 +183,7 @@ function SettingsPage() {
               <IntegrationSettings
                 values={settings.integrations || {}}
                 update={(key, value) => update("integrations", key, value)}
+                canManageCustomCode={isSuperAdmin}
               />
             ) : null}
             {tab === "calendar" ? (
@@ -798,12 +808,78 @@ function EmailSettings({ values, update }: SettingsProps) {
   );
 }
 
-function IntegrationSettings({ values, update }: SettingsProps) {
+function IntegrationSettings({
+  values,
+  update,
+  canManageCustomCode,
+}: SettingsProps & { canManageCustomCode: boolean }) {
+  const snippets = normalizeSnippets(values.snippets);
+
+  function setSnippets(next: CodeSnippet[]) {
+    update(
+      "snippets",
+      next.map((snippet, index) => ({ ...snippet, sort_order: index })),
+    );
+  }
+
+  function addSnippet(snippetType: CodeSnippet["snippet_type"]) {
+    const id =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `snippet-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setSnippets([
+      ...snippets,
+      {
+        id,
+        title: snippetType === "integration" ? "New integration" : "New code block",
+        snippet_type: snippetType,
+        placement: "body_end",
+        target: "public",
+        code: "",
+        enabled: false,
+        sort_order: snippets.length,
+      },
+    ]);
+  }
+
+  function patchSnippet(index: number, patch: Partial<CodeSnippet>) {
+    setSnippets(snippets.map((snippet, itemIndex) => (itemIndex === index ? { ...snippet, ...patch } : snippet)));
+  }
+
+  function moveSnippet(index: number, direction: -1 | 1) {
+    const destination = index + direction;
+    if (destination < 0 || destination >= snippets.length) return;
+    const next = [...snippets];
+    [next[index], next[destination]] = [next[destination], next[index]];
+    setSnippets(next);
+  }
+
+  function duplicateSnippet(index: number) {
+    const source = snippets[index];
+    const id =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `snippet-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const next = [...snippets];
+    next.splice(index + 1, 0, {
+      ...source,
+      id,
+      title: `${source.title} copy`,
+      enabled: false,
+    });
+    setSnippets(next);
+  }
+
+  function removeSnippet(index: number) {
+    if (!window.confirm("Delete this code snippet?")) return;
+    setSnippets(snippets.filter((_, itemIndex) => itemIndex !== index));
+  }
+
   return (
     <div className="space-y-6">
       <SettingsSection
         title="Tracking master switch"
-        description="Disable all optional analytics and advertising scripts without deleting saved IDs."
+        description="Disable built-in analytics and advertising scripts without deleting saved IDs. Custom snippets have their own enable switches."
       >
         <ToggleSetting
           label="Enable website tracking"
@@ -814,9 +890,10 @@ function IntegrationSettings({ values, update }: SettingsProps) {
           onChange={(value) => update("tracking_enabled", value)}
         />
       </SettingsSection>
+
       <SettingsSection
         title="Analytics and advertising"
-        description="Paste the platform identifiers only; the website runtime loads the correct scripts."
+        description="Paste platform identifiers only. The website runtime loads the standard scripts."
       >
         <div className="grid gap-5 md:grid-cols-2">
           <SettingInput
@@ -863,6 +940,7 @@ function IntegrationSettings({ values, update }: SettingsProps) {
           />
         </div>
       </SettingsSection>
+
       <SettingsSection
         title="Chat and customer tools"
         description="Enable customer messaging and support widgets."
@@ -880,6 +958,7 @@ function IntegrationSettings({ values, update }: SettingsProps) {
           />
         </div>
       </SettingsSection>
+
       <SettingsSection
         title="Search verification"
         description="Verification tokens used by webmaster and search tools."
@@ -897,36 +976,262 @@ function IntegrationSettings({ values, update }: SettingsProps) {
           />
         </div>
       </SettingsSection>
+
       <SettingsSection
-        title="Custom code"
-        description="Advanced scripts inserted after built-in integrations. Only trusted administrators should edit these fields."
+        title="Custom snippets"
+        description="Create separate, titled integration or code blocks and control exactly where each one is inserted."
         icon={Code2}
       >
-        <div className="space-y-5">
-          <div>
-            <FieldLabel>Head code</FieldLabel>
-            <textarea
-              rows={8}
-              value={stringValue(values.head_code)}
-              onChange={(event) => update("head_code", event.target.value)}
-              className={`${adminTextareaClass} font-mono text-xs`}
-              placeholder="<!-- Custom code before </head> -->"
-            />
-          </div>
-          <div>
-            <FieldLabel>Body code</FieldLabel>
-            <textarea
-              rows={8}
-              value={stringValue(values.body_code)}
-              onChange={(event) => update("body_code", event.target.value)}
-              className={`${adminTextareaClass} font-mono text-xs`}
-              placeholder="<!-- Custom code before </body> -->"
-            />
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
+            <div>
+              <p className="font-semibold">Frontend code only</p>
+              <p className="mt-1 leading-6">
+                Never place API secrets, database credentials, private tokens, or server keys here.
+                Snippets run in the visitor’s browser. Use <code>?safe-runtime=1</code> on the public
+                site or <code>?safe-admin=1</code> in the admin panel to temporarily bypass custom
+                code during recovery.
+              </p>
+            </div>
           </div>
         </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-semibold text-[#190A2F]">{snippets.length} code blocks</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Disabled snippets remain saved but are not executed.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <AdminButton
+              type="button"
+              variant="secondary"
+              disabled={!canManageCustomCode}
+              onClick={() => addSnippet("integration")}
+            >
+              <Plus className="h-4 w-4" /> Add integration
+            </AdminButton>
+            <AdminButton
+              type="button"
+              disabled={!canManageCustomCode}
+              onClick={() => addSnippet("custom_code")}
+            >
+              <Plus className="h-4 w-4" /> Add code block
+            </AdminButton>
+          </div>
+        </div>
+
+        {!canManageCustomCode ? (
+          <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-600">
+            Only a Super Admin can add, edit, enable, reorder, or delete snippets.
+          </p>
+        ) : null}
+
+        {snippets.length ? (
+          <div className="space-y-4">
+            {snippets.map((snippet, index) => (
+              <div key={snippet.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-[#190A2F] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                        {snippet.snippet_type === "integration" ? "Integration" : "Code"}
+                      </span>
+                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        {placementLabel(snippet.placement)}
+                      </span>
+                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        {targetLabel(snippet.target)}
+                      </span>
+                    </div>
+                    <p className="mt-3 truncate font-semibold text-[#190A2F]">
+                      {snippet.title || "Untitled snippet"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      title="Move up"
+                      disabled={!canManageCustomCode || index === 0}
+                      onClick={() => moveSnippet(index, -1)}
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-[#190A2F] disabled:opacity-35"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Move down"
+                      disabled={!canManageCustomCode || index === snippets.length - 1}
+                      onClick={() => moveSnippet(index, 1)}
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-[#190A2F] disabled:opacity-35"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Duplicate"
+                      disabled={!canManageCustomCode}
+                      onClick={() => duplicateSnippet(index)}
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-[#190A2F] disabled:opacity-35"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Delete"
+                      disabled={!canManageCustomCode}
+                      onClick={() => removeSnippet(index)}
+                      className="rounded-lg border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50 disabled:opacity-35"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="xl:col-span-2">
+                    <FieldLabel>Title</FieldLabel>
+                    <input
+                      value={snippet.title}
+                      disabled={!canManageCustomCode}
+                      onChange={(event) => patchSnippet(index, { title: event.target.value })}
+                      className={adminInputClass}
+                      placeholder="For example: CallRail tracking"
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Type</FieldLabel>
+                    <select
+                      value={snippet.snippet_type}
+                      disabled={!canManageCustomCode}
+                      onChange={(event) =>
+                        patchSnippet(index, {
+                          snippet_type: event.target.value as CodeSnippet["snippet_type"],
+                        })
+                      }
+                      className={adminInputClass}
+                    >
+                      <option value="integration">Integration</option>
+                      <option value="custom_code">Custom code</option>
+                    </select>
+                  </div>
+                  <div>
+                    <FieldLabel>Status</FieldLabel>
+                    <label className="flex h-11 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={snippet.enabled}
+                        disabled={!canManageCustomCode}
+                        onChange={(event) => patchSnippet(index, { enabled: event.target.checked })}
+                        className="h-4 w-4 accent-[#FE3434]"
+                      />
+                      Enabled
+                    </label>
+                  </div>
+                  <div>
+                    <FieldLabel>Insert location</FieldLabel>
+                    <select
+                      value={snippet.placement}
+                      disabled={!canManageCustomCode}
+                      onChange={(event) =>
+                        patchSnippet(index, {
+                          placement: event.target.value as CodeSnippet["placement"],
+                        })
+                      }
+                      className={adminInputClass}
+                    >
+                      <option value="head">Head</option>
+                      <option value="body_start">Start of body</option>
+                      <option value="body_end">End of body</option>
+                    </select>
+                  </div>
+                  <div>
+                    <FieldLabel>Run on</FieldLabel>
+                    <select
+                      value={snippet.target}
+                      disabled={!canManageCustomCode}
+                      onChange={(event) =>
+                        patchSnippet(index, {
+                          target: event.target.value as CodeSnippet["target"],
+                        })
+                      }
+                      className={adminInputClass}
+                    >
+                      <option value="public">Public website</option>
+                      <option value="admin">Admin panel</option>
+                      <option value="both">Website and admin</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <FieldLabel>Code</FieldLabel>
+                    <span className="text-xs text-slate-500">
+                      {snippet.code.length.toLocaleString()} characters
+                    </span>
+                  </div>
+                  <textarea
+                    rows={12}
+                    value={snippet.code}
+                    disabled={!canManageCustomCode}
+                    onChange={(event) => patchSnippet(index, { code: event.target.value })}
+                    className={`${adminTextareaClass} font-mono text-xs disabled:cursor-not-allowed disabled:bg-slate-100`}
+                    placeholder={'<script>\n  // Your browser-side integration code\n</script>'}
+                    spellCheck={false}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+            <Code2 className="mx-auto h-8 w-8 text-slate-300" />
+            <p className="mt-4 font-semibold text-[#190A2F]">No custom snippets yet</p>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
+              Built-in analytics IDs above do not require snippets. Add a block only for a trusted
+              service that is not already supported.
+            </p>
+          </div>
+        )}
       </SettingsSection>
     </div>
   );
+}
+
+function normalizeSnippets(value: unknown): CodeSnippet[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .map((item, index) => ({
+      id: String(item.id || `snippet-${index}`),
+      title: String(item.title || "Untitled snippet"),
+      snippet_type: item.snippet_type === "integration" ? "integration" : "custom_code",
+      placement:
+        item.placement === "head" || item.placement === "body_start"
+          ? item.placement
+          : "body_end",
+      target:
+        item.target === "admin" || item.target === "both" ? item.target : "public",
+      code: String(item.code || ""),
+      enabled: boolValue(item.enabled),
+      sort_order: Number(item.sort_order || index),
+    }))
+    .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+}
+
+function placementLabel(value: CodeSnippet["placement"]) {
+  if (value === "head") return "Head";
+  if (value === "body_start") return "Body start";
+  return "Body end";
+}
+
+function targetLabel(value: CodeSnippet["target"]) {
+  if (value === "admin") return "Admin";
+  if (value === "both") return "Website + admin";
+  return "Website";
 }
 
 function CalendarSettings({ values, update }: SettingsProps) {

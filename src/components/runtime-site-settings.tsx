@@ -1,6 +1,8 @@
+import { useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { getPublicSiteSettings, getPublicThemeSettings, type PublicThemeSettings } from "@/lib/logicsify-api";
 import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
+import { injectRuntimeStyle } from "@/lib/runtime-code";
 
 function upsertMeta(selector: string, attributes: Record<string, string>, content?: string) {
   if (!content) return;
@@ -68,11 +70,22 @@ function applyTheme(settings: PublicThemeSettings) {
   else delete root.dataset.themeMotion;
 }
 export function RuntimeSiteSettings() {
+  const location = useLocation();
+
   useEffect(() => {
     let active = true;
     Promise.all([getPublicSiteSettings(), getPublicThemeSettings()]).then(([loadedSettings, themeSettings]) => {
       if (!active) return;
       applyTheme(themeSettings);
+      const safeRuntime = new URLSearchParams(window.location.search).get("safe-runtime") === "1";
+      const isAdminRoute =
+        location.pathname.startsWith("/admin") || location.pathname.startsWith("/control/");
+      injectRuntimeStyle(
+        "public-custom-css",
+        !safeRuntime && !isAdminRoute && themeSettings.website_custom_css_enabled !== false
+          ? themeSettings.website_custom_css
+          : "",
+      );
       const settings = withDefaultBranding(loadedSettings);
 
       upsertLink("icon", settings.favicon || DEFAULT_BRAND_ASSETS.favicon);
@@ -127,7 +140,7 @@ export function RuntimeSiteSettings() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [location.pathname]);
 
   return null;
 }

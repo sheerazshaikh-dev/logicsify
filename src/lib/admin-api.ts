@@ -1,4 +1,4 @@
-import { API_BASE } from "@/lib/logicsify-api";
+import { API_BASE, type CodeSnippet } from "@/lib/logicsify-api";
 
 export const ADMIN_TOKEN_KEY = "logicsify_admin_token";
 
@@ -799,4 +799,14 @@ export function listAuditLogs(params: { search?: string; page?: number } = {}) {
     data: AuditLog[];
     meta: ApiMeta;
   }>;
+}
+
+export type AdminRuntimeCustomization = {
+  admin_custom_css_enabled?: boolean;
+  admin_custom_css?: string;
+  snippets?: CodeSnippet[];
+};
+
+export function getAdminRuntimeCustomization() {
+  return adminRequest<AdminRuntimeCustomization>("settings/runtime-admin") as Promise<AdminRuntimeCustomization>;
 }

@@ -226,6 +226,17 @@ export async function getCmsContentItem(
   }
 }
 
+export type CodeSnippet = {
+  id: string;
+  title: string;
+  snippet_type: "integration" | "custom_code";
+  placement: "head" | "body_start" | "body_end";
+  target: "public" | "admin" | "both";
+  code: string;
+  enabled: boolean;
+  sort_order?: number;
+};
+
 export type PublicIntegrations = {
   tracking_enabled?: boolean;
   gtm_id?: string;
@@ -242,6 +253,7 @@ export type PublicIntegrations = {
   bing_site_verification?: string;
   head_code?: string;
   body_code?: string;
+  snippets?: CodeSnippet[];
 };
 
 export async function getPublicIntegrations(): Promise<PublicIntegrations> {
@@ -282,6 +294,10 @@ export type PublicThemeSettings = {
   gradient_angle?: number;
   animation_speed?: number;
   shadow_strength?: number;
+  website_custom_css_enabled?: boolean;
+  website_custom_css?: string;
+  admin_custom_css_enabled?: boolean;
+  admin_custom_css?: string;
 };
 
 export async function getPublicThemeSettings(): Promise<PublicThemeSettings> {
