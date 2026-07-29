@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Check, HelpCircle } from "lucide-react";
 import { PageHero } from "./page-hero";
 import { CTASection } from "./cta-section";
-import { allServices } from "@/lib/site-data";
+import { allServices, getParentCoreService, getSubservicesForCore } from "@/lib/site-data";
 import { useEffect, useState, type ComponentType } from "react";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
@@ -26,6 +26,8 @@ export type ServicePageData = {
 };
 
 export function ServicePageTemplate({ data }: { data: ServicePageData }) {
+  const subservices = getSubservicesForCore(data.slug);
+  const parentCore = getParentCoreService(data.slug);
   return (
     <>
       <PageHero
@@ -33,6 +35,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         breadcrumbs={[
           { label: "Home", to: "/" },
           { label: "Services", to: "/services" },
+          ...(parentCore ? [{ label: parentCore.name, to: parentCore.route }] : []),
           { label: data.name },
         ]}
         title={
@@ -62,6 +65,49 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </div>
         </div>
       </section>
+
+      {subservices.length ? (
+        <section className="border-y border-black/5 bg-cream py-20 md:py-28">
+          <div className="container-page">
+            <div className="mb-12 max-w-3xl">
+              <p className="eyebrow mb-4">Subservices</p>
+              <h2 className="fluid-h2">Choose the capability your operation needs.</h2>
+              <p className="mt-5 text-lg leading-8 text-ink-soft">
+                Each capability has its own page, scope, workflow, and CMS record. They can be delivered independently or combined under this core service.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {subservices.map((service, index) => (
+                <Link
+                  key={service.slug}
+                  to={service.route}
+                  data-reveal
+                  className="group flex min-h-[220px] flex-col rounded-2xl border border-black/10 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_18px_50px_-26px_rgba(25,10,47,.35)]"
+                >
+                  <div className="text-sm font-bold text-gradient">{String(index + 1).padStart(2, "0")}</div>
+                  <h3 className="mt-5 text-xl font-semibold text-ink">{service.name}</h3>
+                  <p className="mt-3 text-sm leading-6 text-ink-soft">{service.short}</p>
+                  <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold">
+                    Explore subservice <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : parentCore ? (
+        <section className="border-y border-black/5 bg-cream py-12">
+          <div className="container-page flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="eyebrow mb-2">Part of a core service</p>
+              <h2 className="text-2xl font-semibold">{parentCore.name}</h2>
+            </div>
+            <Link to={parentCore.route} className="btn-secondary">
+              View all {parentCore.name} capabilities <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       {/* Problems solved */}
       <section className="py-20 md:py-28 bg-cream">

@@ -28,7 +28,7 @@ export function contentPublicPath(type: PublicContentType, slugValue: unknown): 
     case "case_study": return `/work/${slug}`;
     case "insight": return `/insights/${slug}`;
     case "career": return `/careers#${encodeURIComponent(slug)}`;
-    case "resource": return `/resources/${slug}`;
+    case "resource": return `/guides/${slug}`;
     case "comparison": return `/comparisons/${slug}`;
     case "engagement_model": return `/engagement-models#${encodeURIComponent(slug)}`;
     case "integration": return `/services/crm-revenue-operations#${encodeURIComponent(slug)}`;
@@ -60,6 +60,7 @@ export function normalizePublicHref(value: unknown): string {
   else if (serviceSlugs.has(slug)) repaired = `/services/${slug}`;
   else if (caseStudySlugs.has(slug)) repaired = `/work/${slug}`;
   else if (insightSlugs.has(slug)) repaired = `/insights/${slug}`;
+  else if (slug.startsWith("resources/")) repaired = `/guides/${slug.slice("resources/".length)}`;
   if (slug === "industries") repaired = "/services";
   return `${repaired}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
 }
@@ -83,7 +84,7 @@ export function resolveContentFromPath(pathnameValue: string): { type: PublicCon
   if (segments[0] === "services" && segments[1]) return { type: "service", slug: segments.slice(1).join("/") };
   if (segments[0] === "work" && segments[1]) return { type: "case_study", slug: segments.slice(1).join("/") };
   if (segments[0] === "insights" && segments[1]) return { type: "insight", slug: segments.slice(1).join("/") };
-  if (segments[0] === "resources" && segments[1]) return { type: "resource", slug: segments.slice(1).join("/") };
+  if ((segments[0] === "guides" || segments[0] === "resources") && segments[1]) return { type: "resource", slug: segments.slice(1).join("/") };
   if (segments[0] === "comparisons" && segments[1]) return { type: "comparison", slug: segments.slice(1).join("/") };
   return { type: "page", slug: segments.join("/") };
 }

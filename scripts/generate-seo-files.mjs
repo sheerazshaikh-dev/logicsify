@@ -5,12 +5,21 @@ const apiBase = (process.env.VITE_API_URL || "https://backend.logicsify.com/api"
 const publicDir = new URL("../public/", import.meta.url);
 
 const corePaths = [
-  "/", "/services", "/work", "/automation-lab", "/resources", "/project-estimator",
+  "/", "/services", "/work", "/automation-lab", "/resources", "/guides", "/project-estimator",
   "/comparisons", "/engagement-models", "/insights", "/about", "/process", "/technology", "/careers",
   "/contact", "/book-a-call", "/technical-roadmap", "/privacy", "/terms",
 ];
 const serviceSlugs = [
   "ai-automation-voice-agents", "crm-revenue-operations", "custom-websites-portals-cms",
+  "ai-calling-agents", "appointment-booking-agents", "lead-qualification-agents", "ai-support-chatbots",
+  "automated-lead-follow-up", "messaging-calendar-automation", "document-extraction-processing",
+  "internal-workflow-automation", "custom-ai-integrations",
+  "gohighlevel-implementation", "hubspot-implementation", "custom-crm-development",
+  "sales-pipeline-lead-routing", "crm-follow-up-automation", "crm-appointment-scheduling",
+  "revenue-reporting-dashboards", "crm-payment-api-integrations", "crm-migration-optimization",
+  "conversion-focused-business-websites", "custom-cms-platforms", "wordpress-modernization",
+  "customer-employee-portals", "membership-booking-platforms", "ecommerce-platforms",
+  "custom-dashboards-admin-panels", "website-api-payment-integrations",
   "mobile-app-development", "ui-ux-design", "seo-digital-marketing", "branding",
   "ecommerce-development", "cloud-maintenance",
 ];
@@ -42,7 +51,7 @@ const dynamicTypes = [
   ["service", (slug) => `/services/${slug}`],
   ["case_study", (slug) => `/work/${slug}`],
   ["insight", (slug) => `/insights/${slug}`],
-  ["resource", (slug) => `/resources/${slug}`],
+  ["resource", (slug) => `/guides/${slug}`],
   ["comparison", (slug) => `/comparisons/${slug}`],
 ];
 

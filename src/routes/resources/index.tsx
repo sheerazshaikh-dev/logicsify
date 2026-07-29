@@ -1,48 +1,238 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { ArrowRight, FileText, Search } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpenCheck,
+  Bot,
+  Calculator,
+  FileText,
+  Handshake,
+  Newspaper,
+  Scale,
+  Sparkles,
+  Workflow,
+} from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
-import { getCmsContentList } from "@/lib/logicsify-api";
-import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
+import { getCmsContentList } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/resources/")({
   pendingComponent: PublicRouteLoading,
-  loader: async () => ({ resources: await getCmsContentList("resource") }),
-  component: ResourcesPage,
+  loader: async () => {
+    const [insights, guides, work] = await Promise.all([
+      getCmsContentList("insight"),
+      getCmsContentList("resource"),
+      getCmsContentList("case_study"),
+    ]);
+    return {
+      counts: {
+        insights: insights.length,
+        guides: guides.length,
+        work: work.length,
+      },
+    };
+  },
+  component: ResourcesHub,
   head: () => ({
     meta: [
-      { title: "Business Technology Resources & Templates | Logicsify" },
-      { name: "description", content: "Download practical checklists, audits, and planning templates for websites, SaaS products, CRM migrations, and AI automation." },
-      { property: "og:title", content: "Business Technology Resources & Templates | Logicsify" },
-      { property: "og:description", content: "Practical resources for websites, software, CRM migrations, and automation planning." },
+      { title: "Resources, Guides & Interactive Tools | Logicsify" },
+      {
+        name: "description",
+        content:
+          "Explore Logicsify insights, downloadable guides, case studies, engagement models, automation demos, comparisons, and a multi-step project estimator.",
+      },
+      { property: "og:title", content: "Resources, Guides & Interactive Tools | Logicsify" },
+      {
+        property: "og:description",
+        content:
+          "Practical content and interactive planning tools for AI automation, CRM operations, websites, portals, and CMS platforms.",
+      },
       { property: "og:url", content: "https://logicsify.com/resources" },
     ],
     links: [{ rel: "canonical", href: "https://logicsify.com/resources" }],
   }),
 });
 
-function ResourcesPage() {
-  const { resources } = Route.useLoaderData();
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const categories = useMemo(() => ["All", ...Array.from(new Set(resources.map((item) => String(item.content_json?.category || "General"))))], [resources]);
-  const filtered = resources.filter((item) => {
-    const matchesCategory = category === "All" || String(item.content_json?.category || "General") === category;
-    const q = search.trim().toLowerCase();
-    const matchesSearch = !q || `${item.title} ${item.excerpt || ""}`.toLowerCase().includes(q);
-    return matchesCategory && matchesSearch;
-  });
-  const featured = resources.find((item) => Boolean(item.featured));
-  return <SiteLayout>
-    <PageHero eyebrow="Resource library" breadcrumbs={[{label:"Home",to:"/"},{label:"Resources"}]} title={<>Planning tools for better <span className="text-gradient">technical decisions.</span></>} intro="Published resources appear here only after a file, useful description, and download flow are configured in the existing admin panel." primaryCta={{label:"Get a Free Technical Roadmap",to:"/technical-roadmap"}} />
-    <section className="py-20 md:py-28"><div className="container-page">
-      {featured ? <Link to="/resources/$slug" params={{slug:featured.slug}} className="mb-12 grid gap-8 rounded-3xl bg-ink p-8 text-white md:grid-cols-12 md:p-12" onClick={()=>trackEvent("resource_opened",{slug:featured.slug,placement:"featured"})}><div className="md:col-span-8"><p className="eyebrow text-white/60">Featured resource</p><h2 className="mt-4 fluid-h3">{featured.title}</h2><p className="mt-4 max-w-2xl text-white/65">{featured.excerpt}</p><span className="mt-6 inline-flex items-center gap-2 font-semibold">Open resource <ArrowRight className="h-4 w-4"/></span></div>{featured.featured_image?<img src={featured.featured_image} alt="" className="h-60 w-full rounded-2xl object-cover md:col-span-4" loading="lazy"/>:<div className="grid h-60 place-items-center rounded-2xl bg-white/5 md:col-span-4"><FileText className="h-14 w-14 text-white/30"/></div>}</Link> : null}
-      <div className="flex flex-col gap-4 border-b border-black/10 pb-6 md:flex-row md:items-center md:justify-between"><div className="relative max-w-md flex-1"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft"/><input value={search} onChange={(e)=>setSearch(e.target.value)} className="form-input pl-11" placeholder="Search resources" aria-label="Search resources"/></div><div className="flex flex-wrap gap-2" role="group" aria-label="Resource categories">{categories.map((item)=><button key={item} aria-pressed={category===item} onClick={()=>setCategory(item)} className={`rounded-full border px-4 py-2 text-sm font-semibold ${category===item?"border-ink bg-ink text-white":"border-black/10"}`}>{item}</button>)}</div></div>
-      {!filtered.length ? <div className="py-20 text-center"><FileText className="mx-auto h-10 w-10 text-ink-soft"/><h2 className="mt-5 fluid-h3">No published resources yet.</h2><p className="mx-auto mt-3 max-w-xl text-ink-soft">Draft resources remain private until a real file and complete content are published through Admin → Resources.</p></div> : <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{filtered.map((item)=><Link key={item.id} to="/resources/$slug" params={{slug:item.slug}} onClick={()=>trackEvent("resource_opened",{slug:item.slug,placement:"grid"})} className="group overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1 hover:shadow-lg">{item.featured_image?<img src={item.featured_image} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy"/>:<div className="grid aspect-[16/9] place-items-center bg-cream"><FileText className="h-10 w-10 text-ink-soft"/></div>}<div className="p-6"><p className="eyebrow">{String(item.content_json?.category||"Resource")}</p><h3 className="mt-3 text-xl font-semibold text-ink">{item.title}</h3><p className="mt-3 text-sm text-ink-soft">{item.excerpt}</p><div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">View resource <ArrowRight className="h-4 w-4"/></div></div></Link>)}</div>}
-    </div></section>
-    <TechnicalRoadmapCTA source="resources" />
-  </SiteLayout>
+const generalResources = [
+  {
+    title: "Insights",
+    description: "Articles, guides, technical analysis, company news, and practical operating advice.",
+    to: "/insights",
+    icon: Newspaper,
+    countKey: "insights" as const,
+  },
+  {
+    title: "Guides",
+    description: "Downloadable checklists, audits, templates, and PDF resources managed through the CMS.",
+    to: "/guides",
+    icon: BookOpenCheck,
+    countKey: "guides" as const,
+  },
+  {
+    title: "Case Studies",
+    description: "See how connected systems are applied to real operating, sales, service, and platform problems.",
+    to: "/work",
+    icon: FileText,
+    countKey: "work" as const,
+  },
+  {
+    title: "Engagement Models",
+    description: "Compare fixed-scope projects, monthly support, dedicated teams, and automation consulting.",
+    to: "/engagement-models",
+    icon: Handshake,
+  },
+];
+
+const interactiveResources = [
+  {
+    title: "Automation Lab",
+    description: "Run controlled demos for lead qualification, voice booking, CRM workflows, document extraction, and support chatbots.",
+    to: "/automation-lab",
+    icon: Bot,
+    badge: "5 demos",
+  },
+  {
+    title: "Project Estimator",
+    description: "Use the multi-step form to create a rough scope, timeline, complexity level, and implementation plan.",
+    to: "/project-estimator",
+    icon: Calculator,
+    badge: "8 steps",
+  },
+  {
+    title: "Comparisons",
+    description: "Balanced decision pages for CMS, CRM, SaaS, voice AI, and delivery-model choices.",
+    to: "/comparisons",
+    icon: Scale,
+  },
+  {
+    title: "Technical Roadmap",
+    description: "Share the current problem, systems, budget, and timeline for a focused technical review.",
+    to: "/technical-roadmap",
+    icon: Workflow,
+  },
+];
+
+function ResourcesHub() {
+  const { counts } = Route.useLoaderData();
+  return (
+    <SiteLayout>
+      <PageHero
+        eyebrow="Resources"
+        breadcrumbs={[{ label: "Home", to: "/" }, { label: "Resources" }]}
+        title={
+          <>
+            Learn, compare, test, and plan the <span className="text-gradient">right system.</span>
+          </>
+        }
+        intro="One place for Logicsify insights, downloadable guides, case studies, engagement models, controlled automation demos, comparisons, and project-planning tools."
+        primaryCta={{ label: "Open Project Estimator", to: "/project-estimator" }}
+        secondaryCta={{ label: "Try Automation Demos", to: "/automation-lab" }}
+      />
+
+      <section className="py-20 md:py-28">
+        <div className="container-page">
+          <div className="mb-12 max-w-3xl">
+            <p className="eyebrow mb-4">General</p>
+            <h2 className="fluid-h2">Research and proof before the build starts.</h2>
+            <p className="mt-5 text-lg leading-8 text-ink-soft">
+              Use the content below to understand delivery options, review published work, and download practical planning material.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            {generalResources.map((item) => {
+              const Icon = item.icon;
+              const count = item.countKey ? counts[item.countKey] : undefined;
+              return (
+                <Link
+                  key={item.title}
+                  to={item.to}
+                  data-reveal
+                  className="group rounded-3xl border border-black/10 bg-white p-7 transition hover:-translate-y-1 hover:shadow-[0_22px_60px_-30px_rgba(25,10,47,.35)] md:p-8"
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-lavender">
+                      <Icon className="h-5 w-5 text-ink" />
+                    </div>
+                    {typeof count === "number" ? (
+                      <span className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-ink-soft">
+                        {count} published
+                      </span>
+                    ) : null}
+                  </div>
+                  <h3 className="mt-8 text-2xl font-semibold">{item.title}</h3>
+                  <p className="mt-3 leading-7 text-ink-soft">{item.description}</p>
+                  <span className="mt-7 inline-flex items-center gap-2 font-semibold">
+                    Explore {item.title} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-dark grid-noise py-20 md:py-28">
+        <div className="container-page">
+          <div className="mb-12 max-w-3xl">
+            <p className="eyebrow mb-4 text-white/55">Interactive tools</p>
+            <h2 className="fluid-h2 text-white">Test the workflow before discussing implementation.</h2>
+            <p className="mt-5 text-lg leading-8 text-white/65">
+              These controlled tools help you understand the shape of a solution. They do not trigger unrestricted production actions.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            {interactiveResources.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.title}
+                  to={item.to}
+                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[.055] p-7 text-white backdrop-blur transition hover:-translate-y-1 hover:bg-white/[.08] md:p-8"
+                >
+                  <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-brand-gold/15 blur-3xl" />
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      {item.badge ? (
+                        <span className="rounded-full border border-white/15 px-3 py-1 text-xs font-semibold text-white/65">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </div>
+                    <h3 className="mt-8 text-2xl font-semibold">{item.title}</h3>
+                    <p className="mt-3 leading-7 text-white/65">{item.description}</p>
+                    <span className="mt-7 inline-flex items-center gap-2 font-semibold">
+                      Open {item.title} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-cream py-20 md:py-24">
+        <div className="container-page grid gap-8 rounded-3xl border border-black/5 bg-white p-8 md:grid-cols-[1fr_auto] md:items-center md:p-10">
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-red">
+              <Sparkles className="h-4 w-4" /> Start with a planning tool
+            </div>
+            <h2 className="fluid-h3">The multi-step estimator is the fastest place to begin.</h2>
+            <p className="mt-4 max-w-2xl text-ink-soft">
+              Select the service, features, systems, budget, and timeline. You will receive an initial planning summary before submitting it for a roadmap discussion.
+            </p>
+          </div>
+          <Link to="/project-estimator" className="btn-primary justify-center">
+            Start Project Estimator <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      <TechnicalRoadmapCTA source="resources_hub" />
+    </SiteLayout>
+  );
 }

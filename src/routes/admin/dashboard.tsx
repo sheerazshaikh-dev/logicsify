@@ -71,7 +71,7 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
       value: contentTotal,
       icon: FileText,
       to: "/admin/pages",
-      note: "Pages, services and resources",
+      note: "Pages, services and guides",
     },
     {
       label: "New leads",

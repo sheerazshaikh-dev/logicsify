@@ -3,8 +3,13 @@ import path from "node:path";
 
 const root = process.cwd();
 const siteData = fs.readFileSync(path.join(root, "src/lib/site-data.ts"), "utf8");
-const serviceRoutes = [...siteData.matchAll(/route:\s*"(\/services\/[^"]+)"/g)]
-  .map((match) => match[1].split("#")[0]);
+const directServiceRoutes = [...siteData.matchAll(/"(\/services\/[a-z0-9-]+)(?:#[^"]*)?"/g)]
+  .map((match) => match[1]);
+const declaredServiceSlugs = [
+  ...[...siteData.matchAll(/slug:\s*"([a-z0-9-]+)"/g)].map((match) => match[1]),
+  ...[...siteData.matchAll(/subservice\(\s*"[a-z0-9-]+"\s*,\s*"([a-z0-9-]+)"/g)].map((match) => match[1]),
+];
+const serviceRoutes = [...new Set([...directServiceRoutes, ...declaredServiceSlugs.map((slug) => `/services/${slug}`)])];
 
 const files = [];
 function walk(dir) {
@@ -46,6 +51,9 @@ const required = [
   "/services/ai-automation-voice-agents",
   "/services/crm-revenue-operations",
   "/services/custom-websites-portals-cms",
+  "/services/ai-calling-agents",
+  "/services/gohighlevel-implementation",
+  "/services/custom-cms-platforms",
 ];
 for (const route of required) {
   if (!canonicalRoutes.has(route)) problems.push(`Missing canonical core service route: ${route}`);

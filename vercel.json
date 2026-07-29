@@ -44,6 +44,11 @@
   ],
   "redirects": [
     {
+      "source": "/resources/:slug",
+      "destination": "/guides/:slug",
+      "permanent": true
+    },
+    {
       "source": "/industries",
       "destination": "/services",
       "permanent": true

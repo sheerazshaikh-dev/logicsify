@@ -52,6 +52,9 @@ const contentTypes: Array<{ type: ContentItem["content_type"]; label: string }> 
   { type: "service", label: "Services" },
   { type: "case_study", label: "Case Studies" },
   { type: "insight", label: "Insights" },
+  { type: "resource", label: "Guides" },
+  { type: "comparison", label: "Comparisons" },
+  { type: "engagement_model", label: "Engagement Models" },
   { type: "career", label: "Careers" },
 ];
 

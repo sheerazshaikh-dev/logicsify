@@ -2,7 +2,7 @@ import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site-layout";
 import { ServicePageTemplate, type ServicePageData } from "@/components/service-page-template";
 import { serviceData } from "@/lib/service-data";
-import { allServices, legacyServiceRedirects } from "@/lib/site-data";
+import { allServices, getParentCoreService, legacyServiceRedirects } from "@/lib/site-data";
 import { getCmsContentItem } from "@/lib/logicsify-api";
 import { asRecord, asRecordArray } from "@/lib/content-utils";
 import { PublicRouteLoading } from "@/components/public-route-loading";
@@ -57,30 +57,33 @@ export const Route = createFileRoute("/services/$slug")({
 });
 
 function genericServiceData(slug: string, name: string, intro: string): ServicePageData {
+  const parent = getParentCoreService(slug);
+  const parentContext = parent
+    ? `This capability is part of ${parent.name}. It can be scoped independently or combined with adjacent capabilities under one connected implementation.`
+    : "Logicsify combines senior strategy, design, engineering, automation, and operating-system expertise into one accountable delivery team.";
   return {
     slug,
     name,
     heroTitle: { prefix: name },
     heroIntro: intro,
-    valueProp:
-      "Logicsify combines senior strategy, design, engineering, automation, and growth expertise into one accountable delivery team.",
+    valueProp: `${intro} ${parentContext}`,
     problems: [
-      "Disconnected tools and unclear ownership",
-      "Manual work that slows the team down",
-      "Digital experiences that are difficult to improve",
+      `The current process related to ${name.toLowerCase()} depends on manual work or inconsistent ownership.`,
+      "Customer, lead, content, or operational data is split across disconnected systems.",
+      "The team cannot reliably measure response, completion, conversion, or failure points.",
     ],
     capabilities: [
       {
-        title: "Strategy and planning",
-        body: "A practical roadmap tied to business goals, users, and measurable outcomes.",
+        title: "Workflow and requirements mapping",
+        body: "Document users, triggers, data, ownership, exceptions, integrations, and measurable outcomes before implementation.",
       },
       {
-        title: "Design and implementation",
-        body: "Senior specialists deliver the experience and systems required to launch confidently.",
+        title: "Connected implementation",
+        body: "Build the interface, automation, integration, permissions, and operational controls required for the agreed workflow.",
       },
       {
-        title: "Optimization and support",
-        body: "Analytics, iteration, maintenance, and growth support after launch.",
+        title: "Testing, reporting, and handover",
+        body: "Validate normal and failure paths, document ownership, and provide the reporting or monitoring agreed in scope.",
       },
     ],
     workflow: ["Discover", "Plan", "Design", "Build", "Launch", "Improve"],

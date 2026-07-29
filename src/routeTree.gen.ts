@@ -33,6 +33,7 @@ import { Route as AdminCaseStudiesRouteImport } from './routes/admin/case-studie
 import { Route as AdminComparisonsRouteImport } from './routes/admin/comparisons'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminEngagementModelsRouteImport } from './routes/admin/engagement-models'
+import { Route as AdminGuidesRouteImport } from './routes/admin/guides'
 import { Route as AdminIndustriesRouteImport } from './routes/admin/industries'
 import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin/integrations'
@@ -49,6 +50,8 @@ import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonia
 import { Route as AdminTrashRouteImport } from './routes/admin/trash'
 import { Route as ComparisonsIndexRouteImport } from './routes/comparisons/index'
 import { Route as ComparisonsSlugRouteImport } from './routes/comparisons/$slug'
+import { Route as GuidesIndexRouteImport } from './routes/guides/index'
+import { Route as GuidesSlugRouteImport } from './routes/guides/$slug'
 import { Route as IndustriesIndexRouteImport } from './routes/industries/index'
 import { Route as IndustriesSlugRouteImport } from './routes/industries/$slug'
 import { Route as InsightsIndexRouteImport } from './routes/insights/index'
@@ -180,6 +183,11 @@ const AdminEngagementModelsRoute = AdminEngagementModelsRouteImport.update({
   path: '/admin/engagement-models',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGuidesRoute = AdminGuidesRouteImport.update({
+  id: '/admin/guides',
+  path: '/admin/guides',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndustriesRoute = AdminIndustriesRouteImport.update({
   id: '/admin/industries',
   path: '/admin/industries',
@@ -260,6 +268,16 @@ const ComparisonsSlugRoute = ComparisonsSlugRouteImport.update({
   path: '/comparisons/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesIndexRoute = GuidesIndexRouteImport.update({
+  id: '/guides/',
+  path: '/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesSlugRoute = GuidesSlugRouteImport.update({
+  id: '/guides/$slug',
+  path: '/guides/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndustriesIndexRoute = IndustriesIndexRouteImport.update({
   id: '/industries/',
   path: '/industries/',
@@ -335,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
+  '/admin/guides': typeof AdminGuidesRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -350,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
   '/resources/$slug': typeof ResourcesSlugRoute
@@ -357,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/comparisons/': typeof ComparisonsIndexRoute
+  '/guides/': typeof GuidesIndexRoute
   '/industries/': typeof IndustriesIndexRoute
   '/insights/': typeof InsightsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
@@ -387,6 +408,7 @@ export interface FileRoutesByTo {
   '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
+  '/admin/guides': typeof AdminGuidesRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -402,6 +424,7 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
   '/resources/$slug': typeof ResourcesSlugRoute
@@ -409,6 +432,7 @@ export interface FileRoutesByTo {
   '/work/$slug': typeof WorkSlugRoute
   '/admin': typeof AdminIndexRoute
   '/comparisons': typeof ComparisonsIndexRoute
+  '/guides': typeof GuidesIndexRoute
   '/industries': typeof IndustriesIndexRoute
   '/insights': typeof InsightsIndexRoute
   '/resources': typeof ResourcesIndexRoute
@@ -440,6 +464,7 @@ export interface FileRoutesById {
   '/admin/comparisons': typeof AdminComparisonsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
+  '/admin/guides': typeof AdminGuidesRoute
   '/admin/industries': typeof AdminIndustriesRoute
   '/admin/insights': typeof AdminInsightsRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
@@ -455,6 +480,7 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
   '/resources/$slug': typeof ResourcesSlugRoute
@@ -462,6 +488,7 @@ export interface FileRoutesById {
   '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/comparisons/': typeof ComparisonsIndexRoute
+  '/guides/': typeof GuidesIndexRoute
   '/industries/': typeof IndustriesIndexRoute
   '/insights/': typeof InsightsIndexRoute
   '/resources/': typeof ResourcesIndexRoute
@@ -494,6 +521,7 @@ export interface FileRouteTypes {
     | '/admin/comparisons'
     | '/admin/dashboard'
     | '/admin/engagement-models'
+    | '/admin/guides'
     | '/admin/industries'
     | '/admin/insights'
     | '/admin/integrations'
@@ -509,6 +537,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
+    | '/guides/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
     | '/resources/$slug'
@@ -516,6 +545,7 @@ export interface FileRouteTypes {
     | '/work/$slug'
     | '/admin/'
     | '/comparisons/'
+    | '/guides/'
     | '/industries/'
     | '/insights/'
     | '/resources/'
@@ -546,6 +576,7 @@ export interface FileRouteTypes {
     | '/admin/comparisons'
     | '/admin/dashboard'
     | '/admin/engagement-models'
+    | '/admin/guides'
     | '/admin/industries'
     | '/admin/insights'
     | '/admin/integrations'
@@ -561,6 +592,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
+    | '/guides/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
     | '/resources/$slug'
@@ -568,6 +600,7 @@ export interface FileRouteTypes {
     | '/work/$slug'
     | '/admin'
     | '/comparisons'
+    | '/guides'
     | '/industries'
     | '/insights'
     | '/resources'
@@ -598,6 +631,7 @@ export interface FileRouteTypes {
     | '/admin/comparisons'
     | '/admin/dashboard'
     | '/admin/engagement-models'
+    | '/admin/guides'
     | '/admin/industries'
     | '/admin/insights'
     | '/admin/integrations'
@@ -613,6 +647,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
+    | '/guides/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
     | '/resources/$slug'
@@ -620,6 +655,7 @@ export interface FileRouteTypes {
     | '/work/$slug'
     | '/admin/'
     | '/comparisons/'
+    | '/guides/'
     | '/industries/'
     | '/insights/'
     | '/resources/'
@@ -651,6 +687,7 @@ export interface RootRouteChildren {
   AdminComparisonsRoute: typeof AdminComparisonsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEngagementModelsRoute: typeof AdminEngagementModelsRoute
+  AdminGuidesRoute: typeof AdminGuidesRoute
   AdminIndustriesRoute: typeof AdminIndustriesRoute
   AdminInsightsRoute: typeof AdminInsightsRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
@@ -666,6 +703,7 @@ export interface RootRouteChildren {
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminTrashRoute: typeof AdminTrashRoute
   ComparisonsSlugRoute: typeof ComparisonsSlugRoute
+  GuidesSlugRoute: typeof GuidesSlugRoute
   IndustriesSlugRoute: typeof IndustriesSlugRoute
   InsightsSlugRoute: typeof InsightsSlugRoute
   ResourcesSlugRoute: typeof ResourcesSlugRoute
@@ -673,6 +711,7 @@ export interface RootRouteChildren {
   WorkSlugRoute: typeof WorkSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ComparisonsIndexRoute: typeof ComparisonsIndexRoute
+  GuidesIndexRoute: typeof GuidesIndexRoute
   IndustriesIndexRoute: typeof IndustriesIndexRoute
   InsightsIndexRoute: typeof InsightsIndexRoute
   ResourcesIndexRoute: typeof ResourcesIndexRoute
@@ -850,6 +889,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEngagementModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/guides': {
+      id: '/admin/guides'
+      path: '/admin/guides'
+      fullPath: '/admin/guides'
+      preLoaderRoute: typeof AdminGuidesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/industries': {
       id: '/admin/industries'
       path: '/admin/industries'
@@ -962,6 +1008,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComparisonsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/': {
+      id: '/guides/'
+      path: '/guides'
+      fullPath: '/guides/'
+      preLoaderRoute: typeof GuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/$slug': {
+      id: '/guides/$slug'
+      path: '/guides/$slug'
+      fullPath: '/guides/$slug'
+      preLoaderRoute: typeof GuidesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/industries/': {
       id: '/industries/'
       path: '/industries'
@@ -1059,6 +1119,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminComparisonsRoute: AdminComparisonsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEngagementModelsRoute: AdminEngagementModelsRoute,
+  AdminGuidesRoute: AdminGuidesRoute,
   AdminIndustriesRoute: AdminIndustriesRoute,
   AdminInsightsRoute: AdminInsightsRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
@@ -1074,6 +1135,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminTrashRoute: AdminTrashRoute,
   ComparisonsSlugRoute: ComparisonsSlugRoute,
+  GuidesSlugRoute: GuidesSlugRoute,
   IndustriesSlugRoute: IndustriesSlugRoute,
   InsightsSlugRoute: InsightsSlugRoute,
   ResourcesSlugRoute: ResourcesSlugRoute,
@@ -1081,6 +1143,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkSlugRoute: WorkSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   ComparisonsIndexRoute: ComparisonsIndexRoute,
+  GuidesIndexRoute: GuidesIndexRoute,
   IndustriesIndexRoute: IndustriesIndexRoute,
   InsightsIndexRoute: InsightsIndexRoute,
   ResourcesIndexRoute: ResourcesIndexRoute,

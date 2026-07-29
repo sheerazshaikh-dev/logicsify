@@ -12,16 +12,19 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
       ["AI Automation & Voice Agents", "/services/ai-automation-voice-agents"],
       ["CRM & Revenue Operations", "/services/crm-revenue-operations"],
       ["Custom Websites, Portals & CMS", "/services/custom-websites-portals-cms"],
+      ["All Services", "/services"],
     ],
   },
   {
-    title: "Other Services",
+    title: "Resources",
     links: [
-      ["Mobile App Development", "/services/mobile-app-development"],
-      ["UI/UX Design", "/services/ui-ux-design"],
-      ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
-      ["Branding", "/services/branding"],
-      ["Cloud & Maintenance", "/services/cloud-maintenance"],
+      ["Resource Hub", "/resources"],
+      ["Insights", "/insights"],
+      ["Guides", "/guides"],
+      ["Case Studies", "/work"],
+      ["Automation Lab", "/automation-lab"],
+      ["Project Estimator", "/project-estimator"],
+      ["Engagement Models", "/engagement-models"],
     ],
   },
   {
@@ -29,10 +32,9 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
     links: [
       ["Home", "/"],
       ["About", "/about"],
-      ["Services", "/services"],
       ["Work", "/work"],
-      ["Insights", "/insights"],
       ["Contact", "/contact"],
+      ["Technical Roadmap", "/technical-roadmap"],
     ],
   },
 ];

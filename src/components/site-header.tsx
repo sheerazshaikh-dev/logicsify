@@ -349,7 +349,8 @@ function DefaultMegaMenu({
             <div
               className={cn(
                 promoEnabled ? "col-span-9" : "col-span-12",
-                "grid grid-cols-2 xl:grid-cols-4 gap-7 p-8",
+                "grid gap-7 p-8",
+                groups.length <= 2 ? "grid-cols-2" : groups.length === 3 ? "grid-cols-3" : "grid-cols-2 xl:grid-cols-4",
               )}
             >
               {groups.slice(0, 4).map((group) => (
@@ -548,22 +549,21 @@ function mergeFallbackNavigation(items: NavItem[]): NavItem[] {
   return fallbackNavigation.map((fallback) => {
     const existing = byKey.get(navKey(fallback));
     if (!existing) return fallback;
-    const isServices = navKey(fallback) === "services";
     return {
       ...existing,
       label: fallback.label,
       to: fallback.to,
       menuStyle: fallback.children.length ? "mega" : "link",
-      children: isServices ? fallback.children : existing.children.length ? existing.children : fallback.children,
+      children: existing.children.length ? existing.children : fallback.children,
       comingSoon: false,
       hideDesktop: false,
       hideMobile: false,
-      megaPromoEnabled: isServices ? true : existing.megaPromoEnabled,
-      megaPromoEyebrow: isServices ? fallback.megaPromoEyebrow : existing.megaPromoEyebrow,
-      megaPromoTitle: isServices ? fallback.megaPromoTitle : existing.megaPromoTitle,
-      megaPromoDescription: isServices ? fallback.megaPromoDescription : existing.megaPromoDescription,
-      megaPromoButtonLabel: isServices ? fallback.megaPromoButtonLabel : existing.megaPromoButtonLabel,
-      megaPromoButtonUrl: isServices ? fallback.megaPromoButtonUrl : existing.megaPromoButtonUrl,
+      megaPromoEnabled: existing.megaPromoEnabled,
+      megaPromoEyebrow: existing.megaPromoEyebrow || fallback.megaPromoEyebrow,
+      megaPromoTitle: existing.megaPromoTitle || fallback.megaPromoTitle,
+      megaPromoDescription: existing.megaPromoDescription || fallback.megaPromoDescription,
+      megaPromoButtonLabel: existing.megaPromoButtonLabel || fallback.megaPromoButtonLabel,
+      megaPromoButtonUrl: existing.megaPromoButtonUrl || fallback.megaPromoButtonUrl,
     };
   });
 }
@@ -631,39 +631,100 @@ function buildFallbackNavigation(): NavItem[] {
       })),
     };
   };
-  const root = (label: string, to: string, children: NavItem[], promo = true) => ({
+  const root = (
+    label: string,
+    to: string,
+    children: NavItem[],
+    promo: { eyebrow: string; title: string; description: string; label: string; url: string },
+  ) => ({
     ...fallbackLink(nextId--, label, to),
     menuStyle: children.length ? ("mega" as const) : ("link" as const),
-    megaPromoEnabled: promo,
-    megaPromoEyebrow: "Build the right system",
-    megaPromoTitle: "Connect sales, service, and operations",
-    megaPromoDescription: "Discuss the business problem, current tools, and the clearest path to a working system.",
-    megaPromoButtonLabel: "Discuss Your Project",
-    megaPromoButtonUrl: "/contact",
+    megaPromoEnabled: true,
+    megaPromoEyebrow: promo.eyebrow,
+    megaPromoTitle: promo.title,
+    megaPromoDescription: promo.description,
+    megaPromoButtonLabel: promo.label,
+    megaPromoButtonUrl: promo.url,
     children,
   });
 
-  const services = root("Services", "/services", [
-    group("Core Services", 1, [
-      ["AI Automation & Voice Agents", "/services/ai-automation-voice-agents", "AI calls, booking, qualification, support, follow-up, documents, and internal workflows."],
-      ["CRM & Revenue Operations", "/services/crm-revenue-operations", "Lead capture, routing, pipelines, communications, scheduling, reporting, payments, and migration."],
-      ["Custom Websites, Portals & CMS", "/services/custom-websites-portals-cms", "Connected websites, portals, CMS platforms, dashboards, bookings, payments, and admin systems."],
-    ]),
-    group("Other Services", 2, [
-      ["Mobile App Development", "/services/mobile-app-development"],
-      ["UI/UX Design", "/services/ui-ux-design"],
-      ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
-      ["Branding", "/services/branding"],
-      ["Cloud & Maintenance", "/services/cloud-maintenance"],
-    ]),
-  ]);
+  const services = root(
+    "Services",
+    "/services",
+    [
+      group("AI Automation & Voice Agents", 1, [
+        ["Core service overview", "/services/ai-automation-voice-agents"],
+        ["AI Calling Agents", "/services/ai-calling-agents"],
+        ["Appointment-Booking Agents", "/services/appointment-booking-agents"],
+        ["Lead Qualification Agents", "/services/lead-qualification-agents"],
+        ["AI Support Chatbots", "/services/ai-support-chatbots"],
+        ["Document Extraction", "/services/document-extraction-processing"],
+      ]),
+      group("CRM & Revenue Operations", 2, [
+        ["Core service overview", "/services/crm-revenue-operations"],
+        ["GoHighLevel Implementation", "/services/gohighlevel-implementation"],
+        ["HubSpot Implementation", "/services/hubspot-implementation"],
+        ["Custom CRM Development", "/services/custom-crm-development"],
+        ["Pipeline & Lead Routing", "/services/sales-pipeline-lead-routing"],
+        ["CRM Migration & Optimization", "/services/crm-migration-optimization"],
+      ]),
+      group("Websites, Portals & CMS", 3, [
+        ["Core service overview", "/services/custom-websites-portals-cms"],
+        ["Business Websites", "/services/conversion-focused-business-websites"],
+        ["Custom CMS Platforms", "/services/custom-cms-platforms"],
+        ["WordPress Modernization", "/services/wordpress-modernization"],
+        ["Customer & Employee Portals", "/services/customer-employee-portals"],
+        ["Dashboards & Admin Panels", "/services/custom-dashboards-admin-panels"],
+      ]),
+      group("Other Services", 4, [
+        ["Mobile App Development", "/services/mobile-app-development"],
+        ["UI/UX Design", "/services/ui-ux-design"],
+        ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
+        ["Branding", "/services/branding"],
+        ["Cloud & Maintenance", "/services/cloud-maintenance"],
+      ]),
+    ],
+    {
+      eyebrow: "Connected business systems",
+      title: "Start with the operating problem",
+      description: "Choose a core service, then review the exact subservice pages that fit the workflow.",
+      label: "Explore All Services",
+      url: "/services",
+    },
+  );
+
+  const resources = root(
+    "Resources",
+    "/resources",
+    [
+      group("General", 1, [
+        ["Insights", "/insights", "Articles, analysis, company news, and practical guides."],
+        ["Guides", "/guides", "Downloadable PDFs, checklists, audits, and templates."],
+        ["Case Studies", "/work", "Published work connected to real operating problems."],
+        ["Engagement Models", "/engagement-models", "Compare project, support, team, and consulting models."],
+      ]),
+      group("Interactive Tools", 2, [
+        ["Automation Lab", "/automation-lab", "Five controlled AI, voice, CRM, document, and support demos."],
+        ["Project Estimator", "/project-estimator", "An eight-step form for scope, timeline, and complexity."],
+        ["Comparisons", "/comparisons", "Balanced decision pages for technology and delivery choices."],
+        ["Technical Roadmap", "/technical-roadmap", "Submit the problem, systems, budget, and timeline."],
+      ]),
+    ],
+    {
+      eyebrow: "Plan before you build",
+      title: "Use the estimator and automation demos",
+      description: "Explore the content hub, download guides, compare options, or test a controlled workflow.",
+      label: "Open Resources",
+      url: "/resources",
+    },
+  );
 
   return [
     fallbackLink(nextId--, "Home", "/"),
     fallbackLink(nextId--, "About", "/about"),
     services,
     fallbackLink(nextId--, "Work", "/work"),
-    fallbackLink(nextId--, "Insights", "/insights"),
+    resources,
     fallbackLink(nextId--, "Contact", "/contact"),
   ];
 }

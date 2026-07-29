@@ -57,7 +57,7 @@ const navigation = [
       { label: "Careers", to: "/admin/careers", icon: BookOpen },
       { label: "Testimonials", to: "/admin/testimonials", icon: MessageSquareText },
       { label: "Team", to: "/admin/team", icon: Users },
-      { label: "Resources", to: "/admin/resources", icon: FileDown },
+      { label: "Guides", to: "/admin/guides", icon: FileDown },
       { label: "Comparisons", to: "/admin/comparisons", icon: Scale },
       { label: "Engagement Models", to: "/admin/engagement-models", icon: Handshake },
       { label: "Integrations", to: "/admin/integrations", icon: PlugZap },

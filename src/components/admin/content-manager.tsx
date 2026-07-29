@@ -1573,8 +1573,8 @@ function StructuredContentFields({
     return (
       <AdminCard className="space-y-5 p-5">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Resource file and access</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">The public API hides the file URL until a valid download form is submitted.</p>
+          <h3 className="text-base font-semibold text-[#190A2F]">Guide file and access</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">The public API hides the guide file URL until a valid download form is submitted.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {mediaField("Download file", "download_file", "documents")}

@@ -22,7 +22,7 @@ import { PageHero } from "@/components/page-hero";
 import { CTASection } from "@/components/cta-section";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
-import { coreServices, otherServices } from "@/lib/site-data";
+import { coreServiceDefinitions, coreServices, otherServices } from "@/lib/site-data";
 import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/services/")({
@@ -118,6 +118,14 @@ function ServicesOverview() {
                     <p className="eyebrow mt-10 text-white/55">Core service {index + 1}</p>
                     <h3 className="mt-4 text-3xl font-semibold leading-tight">{cms?.title || service.name}</h3>
                     <p className="mt-5 leading-7 text-white/72">{cms?.excerpt || service.short}</p>
+                    <ul className="mt-7 space-y-2 border-t border-white/10 pt-6 text-sm text-white/65">
+                      {(coreServiceDefinitions[index]?.subservices || []).slice(0, 4).map((subservice) => (
+                        <li key={subservice.slug} className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full bg-brand-gold" />
+                          {subservice.name}
+                        </li>
+                      ))}
+                    </ul>
                     <div className="mt-auto pt-10">
                       <span className="inline-flex items-center gap-2 font-semibold">Explore service <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
                     </div>
