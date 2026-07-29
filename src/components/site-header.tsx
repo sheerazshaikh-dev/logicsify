@@ -682,6 +682,7 @@ function buildFallbackNavigation(): NavItem[] {
         ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
         ["Branding", "/services/branding"],
         ["Cloud & Maintenance", "/services/cloud-maintenance"],
+        ["Supported Integrations", "/integrations", "CRM, AI, payments, communication, development, and automation platforms."],
       ]),
     ],
     {

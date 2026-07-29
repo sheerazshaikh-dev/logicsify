@@ -7,6 +7,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
 import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
+import { RelatedAutomationDemo } from "@/components/related-automation-demo";
 
 export type ServicePageData = {
   slug: string;
@@ -28,6 +29,7 @@ export type ServicePageData = {
 export function ServicePageTemplate({ data }: { data: ServicePageData }) {
   const subservices = getSubservicesForCore(data.slug);
   const parentCore = getParentCoreService(data.slug);
+  const isAiAutomationFamily = data.slug === "ai-automation-voice-agents" || parentCore?.slug === "ai-automation-voice-agents";
   return (
     <>
       <PageHero
@@ -156,6 +158,8 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </div>
         </div>
       </section>
+
+      {isAiAutomationFamily ? <RelatedAutomationDemo serviceSlug={data.slug} serviceName={data.name} /> : null}
 
       {data.useCases?.length ? (
         <section className="bg-cream py-20 md:py-28">

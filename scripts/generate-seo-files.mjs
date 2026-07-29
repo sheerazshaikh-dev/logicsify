@@ -5,7 +5,7 @@ const apiBase = (process.env.VITE_API_URL || "https://backend.logicsify.com/api"
 const publicDir = new URL("../public/", import.meta.url);
 
 const corePaths = [
-  "/", "/services", "/work", "/automation-lab", "/resources", "/guides", "/project-estimator",
+  "/", "/services", "/work", "/automation-lab", "/integrations", "/resources", "/guides", "/project-estimator",
   "/comparisons", "/engagement-models", "/insights", "/about", "/process", "/technology", "/careers",
   "/contact", "/book-a-call", "/technical-roadmap", "/privacy", "/terms",
 ];

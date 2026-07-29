@@ -4,7 +4,7 @@ import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 
 const categories = ["All", "CRM", "Development", "AI", "Marketing", "Automation", "Payments", "Communication"] as const;
 type Category = (typeof categories)[number];
-type IntegrationItem = { name: string; category: Exclude<Category, "All">; text: string; logo?: string; platformUrl?: string };
+type IntegrationItem = { slug: string; name: string; category: Exclude<Category, "All">; text: string; logo?: string; platformUrl?: string };
 
 function normalizeCategory(value: unknown): Exclude<Category, "All"> {
   const label = String(value || "Development");
@@ -14,12 +14,17 @@ function normalizeCategory(value: unknown): Exclude<Category, "All"> {
 function fromCms(item: CmsContentItem): IntegrationItem {
   const content = item.content_json || {};
   return {
+    slug: item.slug,
     name: item.title,
     category: normalizeCategory(content.category),
     text: item.excerpt || String(content.category || "Supported integration"),
     logo: String(content.logo || item.featured_image || "") || undefined,
     platformUrl: String(content.platform_url || "") || undefined,
   };
+}
+
+function slugify(value: string) {
+  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export function SystemsWeIntegrate({ compact = false }: { compact?: boolean }) {
@@ -36,7 +41,7 @@ export function SystemsWeIntegrate({ compact = false }: { compact?: boolean }) {
 
   const source: IntegrationItem[] = managed.length
     ? managed
-    : supportedIntegrations.map((item) => ({ ...item, category: normalizeCategory(item.category) }));
+    : supportedIntegrations.map((item) => ({ ...item, slug: slugify(item.name), category: normalizeCategory(item.category) }));
   const items = useMemo(
     () => source.filter((item) => category === "All" || item.category === category),
     [category, source],
@@ -79,11 +84,11 @@ export function SystemsWeIntegrate({ compact = false }: { compact?: boolean }) {
               <p className="mt-1 text-[11px] text-ink-soft">{item.text}</p>
             </>;
             return item.platformUrl ? (
-              <a key={item.name} href={item.platformUrl} target="_blank" rel="noreferrer" className="rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <a id={item.slug} key={item.name} href={item.platformUrl} target="_blank" rel="noreferrer" className="scroll-mt-28 rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 {card}
               </a>
             ) : (
-              <div key={item.name} className="rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm">{card}</div>
+              <div id={item.slug} key={item.name} className="scroll-mt-28 rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm">{card}</div>
             );
           })}
         </div>

@@ -13,6 +13,7 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
       ["CRM & Revenue Operations", "/services/crm-revenue-operations"],
       ["Custom Websites, Portals & CMS", "/services/custom-websites-portals-cms"],
       ["All Services", "/services"],
+      ["Supported Integrations", "/integrations"],
     ],
   },
   {

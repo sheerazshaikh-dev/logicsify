@@ -31,7 +31,7 @@ export function contentPublicPath(type: PublicContentType, slugValue: unknown): 
     case "resource": return `/guides/${slug}`;
     case "comparison": return `/comparisons/${slug}`;
     case "engagement_model": return `/engagement-models#${encodeURIComponent(slug)}`;
-    case "integration": return `/services/crm-revenue-operations#${encodeURIComponent(slug)}`;
+    case "integration": return `/integrations#${encodeURIComponent(slug)}`;
     default: return null;
   }
 }

@@ -17,6 +17,7 @@ import { Route as BookACallRouteImport } from './routes/book-a-call'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EngagementModelsRouteImport } from './routes/engagement-models'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProcessRouteImport } from './routes/process'
 import { Route as ProjectEstimatorRouteImport } from './routes/project-estimator'
@@ -101,6 +102,11 @@ const ContactRoute = ContactRouteImport.update({
 const EngagementModelsRoute = EngagementModelsRouteImport.update({
   id: '/engagement-models',
   path: '/engagement-models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/engagement-models': typeof EngagementModelsRoute
+  '/integrations': typeof IntegrationsRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/project-estimator': typeof ProjectEstimatorRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/engagement-models': typeof EngagementModelsRoute
+  '/integrations': typeof IntegrationsRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/project-estimator': typeof ProjectEstimatorRoute
@@ -449,6 +457,7 @@ export interface FileRoutesById {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/engagement-models': typeof EngagementModelsRoute
+  '/integrations': typeof IntegrationsRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/project-estimator': typeof ProjectEstimatorRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/engagement-models'
+    | '/integrations'
     | '/privacy'
     | '/process'
     | '/project-estimator'
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/engagement-models'
+    | '/integrations'
     | '/privacy'
     | '/process'
     | '/project-estimator'
@@ -616,6 +627,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/engagement-models'
+    | '/integrations'
     | '/privacy'
     | '/process'
     | '/project-estimator'
@@ -672,6 +684,7 @@ export interface RootRouteChildren {
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
   EngagementModelsRoute: typeof EngagementModelsRoute
+  IntegrationsRoute: typeof IntegrationsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
   ProjectEstimatorRoute: typeof ProjectEstimatorRoute
@@ -775,6 +788,13 @@ declare module '@tanstack/react-router' {
       path: '/engagement-models'
       fullPath: '/engagement-models'
       preLoaderRoute: typeof EngagementModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1104,6 +1124,7 @@ const rootRouteChildren: RootRouteChildren = {
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
   EngagementModelsRoute: EngagementModelsRoute,
+  IntegrationsRoute: IntegrationsRoute,
   PrivacyRoute: PrivacyRoute,
   ProcessRoute: ProcessRoute,
   ProjectEstimatorRoute: ProjectEstimatorRoute,
