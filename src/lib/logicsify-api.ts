@@ -308,10 +308,36 @@ export async function getPublicThemeSettings(): Promise<PublicThemeSettings> {
   }
 }
 
+export type SiteLocation = {
+  id: string;
+  name: string;
+  city?: string;
+  country?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  contact_name?: string;
+  contact_role?: string;
+  map_url?: string;
+  enabled?: boolean;
+  sort_order?: number;
+};
+
+export type SocialProfile = {
+  id: string;
+  platform: string;
+  label: string;
+  url: string;
+  enabled?: boolean;
+  sort_order?: number;
+};
+
 export type PublicSiteSettings = {
   site_name?: string;
   tagline?: string;
   contact_email?: string;
+  sales_email?: string;
+  support_email?: string;
   phone?: string;
   site_url?: string;
   timezone?: string;
@@ -358,6 +384,8 @@ export type PublicSiteSettings = {
   x_url?: string;
   youtube_url?: string;
   portfolio_url?: string;
+  locations?: SiteLocation[];
+  social_links?: SocialProfile[];
   default_seo_title?: string;
   default_seo_description?: string;
   default_og_image?: string;

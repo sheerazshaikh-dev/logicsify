@@ -1,11 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
-import { SiteLayout } from "@/components/site-layout";
-import { PageHero } from "@/components/page-hero";
-import { StrategyCallCalendar } from "@/components/strategy-call-calendar";
-import { submitContact } from "@/lib/logicsify-api";
-import { Check, Mail, Calendar, Shield, Loader2 } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  Calendar,
+  Check,
+  ExternalLink,
+  Headphones,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Shield,
+} from "lucide-react";
 import { z } from "zod";
+import { PageHero } from "@/components/page-hero";
+import { SiteLayout } from "@/components/site-layout";
+import { SocialProfileLinks } from "@/components/social-profile-links";
+import { StrategyCallCalendar } from "@/components/strategy-call-calendar";
+import {
+  getContactEmails,
+  getSiteLocations,
+  getSocialProfiles,
+  locationMapUrl,
+  telHref,
+} from "@/lib/contact-directory";
+import {
+  getPublicSiteSettings,
+  submitContact,
+  type PublicSiteSettings,
+} from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/contact")({
   component: ContactPage,
@@ -38,22 +60,17 @@ const schema = z.object({
 });
 
 const services = [
-  "Website Design",
-  "Web Development",
-  "Web Application",
-  "SaaS Development",
-  "Mobile App",
-  "E-commerce",
-  "AI Automation",
-  "AI Agent",
-  "CRM Automation",
-  "SEO",
-  "Paid Advertising",
-  "Social Media Marketing",
+  "AI Automation & Voice Agents",
+  "CRM & Revenue Operations",
+  "Custom Websites, Portals & CMS",
+  "Mobile App Development",
+  "UI/UX Design",
+  "SEO & Digital Marketing",
   "Branding",
-  "Ongoing Support",
+  "Cloud & Maintenance",
   "Other",
 ];
+
 const budgets = [
   "Under $5,000",
   "$5,000–$10,000",
@@ -67,6 +84,22 @@ function ContactPage() {
   const [state, setState] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
+  const [settings, setSettings] = useState<PublicSiteSettings>({});
+
+  useEffect(() => {
+    let active = true;
+    getPublicSiteSettings()
+      .then((value) => active && setSettings(value))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const emails = getContactEmails(settings);
+  const locations = getSiteLocations(settings);
+  const socialProfiles = getSocialProfiles(settings);
+  const primaryPhone = settings.phone || locations.find((location) => location.phone)?.phone || "";
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,49 +146,80 @@ function ContactPage() {
       />
 
       <section className="py-20">
-        <div className="container-page grid lg:grid-cols-12 gap-10">
-          <aside className="lg:col-span-5 space-y-8">
-            <div className="rounded-2xl border border-black/10 p-8 bg-white">
-              <Mail className="w-5 h-5 text-brand-red mb-3" />
-              <p className="eyebrow mb-2">Email</p>
-              <a
-                href="mailto:hello@logicsify.com"
-                className="text-xl font-semibold hover:text-gradient"
-              >
-                hello@logicsify.com
-              </a>
-              <p className="mt-3 text-sm text-ink-soft">Responses within one business day.</p>
+        <div className="container-page grid gap-10 lg:grid-cols-12">
+          <aside className="space-y-6 lg:col-span-5">
+            <div className="rounded-3xl border border-black/10 bg-white p-7 md:p-8">
+              <p className="eyebrow mb-5">Contact channels</p>
+              <div className="divide-y divide-black/8">
+                <ContactChannel
+                  icon={Mail}
+                  label="General inquiries"
+                  value={emails.general}
+                  href={`mailto:${emails.general}`}
+                />
+                <ContactChannel
+                  icon={Mail}
+                  label="Sales and projects"
+                  value={emails.sales}
+                  href={`mailto:${emails.sales}`}
+                />
+                <ContactChannel
+                  icon={Headphones}
+                  label="Customer support"
+                  value={emails.support}
+                  href={`mailto:${emails.support}`}
+                />
+                {primaryPhone ? (
+                  <ContactChannel
+                    icon={Phone}
+                    label="Call us"
+                    value={primaryPhone}
+                    href={telHref(primaryPhone)}
+                  />
+                ) : null}
+              </div>
+              {socialProfiles.length ? (
+                <div className="mt-6 border-t border-black/8 pt-6">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft">
+                    Follow Logicsify
+                  </p>
+                  <SocialProfileLinks profiles={socialProfiles} tone="light" showLabels />
+                </div>
+              ) : null}
             </div>
+
             <a
               href="#calendar"
-              className="block rounded-2xl border border-black/10 p-8 bg-white hover:-translate-y-1 transition-transform"
+              className="block rounded-3xl border border-black/10 bg-white p-7 transition-transform hover:-translate-y-1 md:p-8"
             >
-              <Calendar className="w-5 h-5 text-brand-red mb-3" />
+              <Calendar className="mb-3 h-5 w-5 text-brand-red" />
               <p className="eyebrow mb-2">Prefer to talk?</p>
               <p className="text-lg font-semibold">Book a 30-minute strategy call</p>
-              <span className="mt-3 inline-block text-sm font-semibold underline underline-offset-4 decoration-brand-red">
+              <span className="mt-3 inline-block text-sm font-semibold underline decoration-brand-red underline-offset-4">
                 Choose a date and time →
               </span>
             </a>
-            <div className="rounded-2xl bg-lavender p-8">
+
+            <div className="rounded-3xl bg-lavender p-7 md:p-8">
               <p className="eyebrow mb-2">Where we help</p>
               <ul className="space-y-2 text-sm text-ink">
                 {[
-                  "Websites & Web Applications",
-                  "SaaS Product Engineering",
-                  "AI Automation & Agents",
-                  "CRM & Systems Integration",
-                  "SEO, Paid, and Content",
+                  "AI automation and voice agents",
+                  "CRM and revenue operations",
+                  "Websites, portals and CMS platforms",
+                  "Mobile products and user experience",
+                  "Digital growth and ongoing support",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-brand-red" />
+                    <Check className="h-4 w-4 text-brand-red" />
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
+
             <div className="flex items-start gap-3 text-xs text-ink-soft">
-              <Shield className="w-4 h-4 mt-0.5 shrink-0" />
+              <Shield className="mt-0.5 h-4 w-4 shrink-0" />
               We treat every inquiry as confidential. Your information is stored securely and used
               only to respond to your project.
             </div>
@@ -163,17 +227,17 @@ function ContactPage() {
 
           <form
             onSubmit={onSubmit}
-            className="lg:col-span-7 rounded-3xl bg-ink text-white p-8 md:p-10 relative overflow-hidden"
+            className="relative overflow-hidden rounded-3xl bg-ink p-8 text-white md:p-10 lg:col-span-7"
           >
-            <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-gradient-brand opacity-15 blur-3xl" />
+            <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-gradient-brand opacity-15 blur-3xl" />
             <div className="relative">
-              <p className="eyebrow text-white/60 mb-2">Project inquiry</p>
-              <h2 className="text-3xl font-semibold mb-8">Tell us about your project</h2>
+              <p className="eyebrow mb-2 text-white/60">Project inquiry</p>
+              <h2 className="mb-8 text-3xl font-semibold">Tell us about your project</h2>
 
               {state === "success" ? (
-                <div className="rounded-2xl border border-white/20 p-8 bg-white/5">
-                  <div className="h-12 w-12 rounded-full bg-gradient-brand flex items-center justify-center mb-4">
-                    <Check className="w-6 h-6 text-white" />
+                <div className="rounded-2xl border border-white/20 bg-white/5 p-8">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-brand">
+                    <Check className="h-6 w-6 text-white" />
                   </div>
                   <h3 className="text-2xl font-semibold">Thanks — got it.</h3>
                   <p className="mt-2 text-white/70">{message}</p>
@@ -189,7 +253,7 @@ function ContactPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
                   <Field name="name" label="Full name*" error={errors.name} />
                   <Field name="email" label="Work email*" type="email" error={errors.email} />
                   <Field name="phone" label="Phone" type="tel" error={errors.phone} />
@@ -241,7 +305,7 @@ function ContactPage() {
                     className="hidden"
                     aria-hidden
                   />
-                  <label className="md:col-span-2 flex items-start gap-3 text-sm text-white/80">
+                  <label className="flex items-start gap-3 text-sm text-white/80 md:col-span-2">
                     <input
                       type="checkbox"
                       name="consent"
@@ -250,25 +314,25 @@ function ContactPage() {
                     I agree to be contacted about my inquiry and understand the privacy policy
                     applies.*
                   </label>
-                  {errors.consent && (
+                  {errors.consent ? (
                     <p className="text-xs text-red-400 md:col-span-2">{errors.consent}</p>
-                  )}
+                  ) : null}
                   <button
                     type="submit"
                     disabled={state === "submitting"}
-                    className="md:col-span-2 btn-primary justify-center w-full mt-2 disabled:opacity-60"
+                    className="btn-primary mt-2 w-full justify-center disabled:opacity-60 md:col-span-2"
                   >
                     {state === "submitting" ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Sending…
+                        <Loader2 className="h-4 w-4 animate-spin" /> Sending…
                       </>
                     ) : (
                       "Send inquiry"
                     )}
                   </button>
-                  {state === "error" && (
-                    <p className="md:col-span-2 text-sm text-red-300">{message}</p>
-                  )}
+                  {state === "error" ? (
+                    <p className="text-sm text-red-300 md:col-span-2">{message}</p>
+                  ) : null}
                 </div>
               )}
             </div>
@@ -276,20 +340,103 @@ function ContactPage() {
         </div>
       </section>
 
-      <section id="calendar" className="py-20 bg-cream scroll-mt-24">
+      <section className="border-y border-black/5 bg-cream py-20">
         <div className="container-page">
-          <div className="max-w-3xl mb-10">
+          <div className="mb-10 max-w-3xl">
+            <p className="eyebrow mb-3">Global presence</p>
+            <h2 className="fluid-h2">
+              Talk to the team <span className="text-gradient">closest to your market.</span>
+            </h2>
+            <p className="mt-5 text-lg text-ink-soft">
+              Logicsify currently operates across Pakistan, Saudi Arabia, and Portugal. Every
+              location is managed globally from the same website settings.
+            </p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-3">
+            {locations.map((location) => {
+              const mapUrl = locationMapUrl(location);
+              return (
+                <article
+                  key={location.id}
+                  className="flex min-h-80 flex-col rounded-3xl border border-black/8 bg-white p-7 md:p-8"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lavender text-brand-red">
+                      <MapPin className="h-5 w-5" />
+                    </span>
+                    <span className="rounded-full bg-cream px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-ink-soft">
+                      {location.country || "Location"}
+                    </span>
+                  </div>
+                  <h3 className="mt-6 text-2xl font-semibold text-ink">{location.name}</h3>
+                  {location.city && location.city !== location.name ? (
+                    <p className="mt-1 text-sm text-ink-soft">{location.city}</p>
+                  ) : null}
+                  {location.address ? (
+                    <p className="mt-5 whitespace-pre-line text-sm leading-6 text-ink-soft">
+                      {location.address}
+                    </p>
+                  ) : null}
+                  {(location.contact_name || location.contact_role) ? (
+                    <div className="mt-6 border-t border-black/8 pt-5">
+                      {location.contact_name ? (
+                        <p className="font-semibold text-ink">{location.contact_name}</p>
+                      ) : null}
+                      {location.contact_role ? (
+                        <p className="mt-1 text-xs text-ink-soft">{location.contact_role}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-6 text-sm font-semibold">
+                    {location.phone ? (
+                      <a
+                        href={telHref(location.phone)}
+                        className="inline-flex items-center gap-2 text-ink hover:text-brand-red"
+                      >
+                        <Phone className="h-4 w-4" /> {location.phone}
+                      </a>
+                    ) : null}
+                    {location.email ? (
+                      <a
+                        href={`mailto:${location.email}`}
+                        className="inline-flex items-center gap-2 text-ink hover:text-brand-red"
+                      >
+                        <Mail className="h-4 w-4" /> {location.email}
+                      </a>
+                    ) : null}
+                    {mapUrl ? (
+                      <a
+                        href={mapUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 text-ink hover:text-brand-red"
+                      >
+                        Map <ExternalLink className="h-4 w-4" />
+                      </a>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section id="calendar" className="scroll-mt-24 bg-cream py-20">
+        <div className="container-page">
+          <div className="mb-10 max-w-3xl">
             <p className="eyebrow mb-3">Live calendar</p>
             <h2 className="fluid-h2">
               Choose a time that <span className="text-gradient">works for you.</span>
             </h2>
-            <p className="mt-5 text-ink-soft text-lg">
+            <p className="mt-5 text-lg text-ink-soft">
               Available times are loaded directly from our calendar settings. Your request will
               appear instantly in the Logicsify admin panel.
             </p>
           </div>
-          <div className="rounded-3xl bg-ink text-white p-7 md:p-10 relative overflow-hidden">
-            <div className="absolute -top-40 right-0 w-96 h-96 rounded-full bg-gradient-brand opacity-15 blur-3xl" />
+          <div className="relative overflow-hidden rounded-3xl bg-ink p-7 text-white md:p-10">
+            <div className="absolute -top-40 right-0 h-96 w-96 rounded-full bg-gradient-brand opacity-15 blur-3xl" />
             <div className="relative">
               <StrategyCallCalendar />
             </div>
@@ -297,6 +444,34 @@ function ContactPage() {
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+function ContactChannel({
+  icon: Icon,
+  label,
+  value,
+  href,
+}: {
+  icon: typeof Mail;
+  label: string;
+  value: string;
+  href: string;
+}) {
+  return (
+    <a href={href} className="group flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cream text-brand-red transition group-hover:bg-lavender">
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[11px] font-semibold uppercase tracking-[0.15em] text-ink-soft">
+          {label}
+        </span>
+        <span className="mt-1 block break-all font-semibold text-ink transition group-hover:text-brand-red">
+          {value}
+        </span>
+      </span>
+    </a>
   );
 }
 
@@ -317,7 +492,7 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label className="block text-xs uppercase tracking-widest text-white/60 mb-2" htmlFor={name}>
+      <label className="mb-2 block text-xs uppercase tracking-widest text-white/60" htmlFor={name}>
         {label}
       </label>
       <input
@@ -325,9 +500,9 @@ function Field({
         name={name}
         type={type}
         placeholder={placeholder}
-        className="w-full rounded-xl bg-white/5 border border-white/15 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/30"
+        className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30"
       />
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error ? <p className="mt-1 text-xs text-red-400">{error}</p> : null}
     </div>
   );
 }
@@ -345,25 +520,25 @@ function SelectField({
 }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-widest text-white/60 mb-2" htmlFor={name}>
+      <label className="mb-2 block text-xs uppercase tracking-widest text-white/60" htmlFor={name}>
         {label}
       </label>
       <select
         id={name}
         name={name}
         defaultValue=""
-        className="w-full rounded-xl bg-white/5 border border-white/15 px-4 py-3 text-white focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/30"
+        className="w-full rounded-xl border border-white/15 bg-[#24113e] px-4 py-3 text-white focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30"
       >
-        <option value="" disabled className="text-black">
-          Select…
+        <option value="" disabled>
+          Select one
         </option>
         {options.map((option) => (
-          <option key={option} value={option} className="text-black">
+          <option key={option} value={option}>
             {option}
           </option>
         ))}
       </select>
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error ? <p className="mt-1 text-xs text-red-400">{error}</p> : null}
     </div>
   );
 }
@@ -381,16 +556,16 @@ function TextArea({
 }) {
   return (
     <div className={className}>
-      <label className="block text-xs uppercase tracking-widest text-white/60 mb-2" htmlFor={name}>
+      <label className="mb-2 block text-xs uppercase tracking-widest text-white/60" htmlFor={name}>
         {label}
       </label>
       <textarea
         id={name}
         name={name}
-        rows={5}
-        className="w-full rounded-xl bg-white/5 border border-white/15 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/30"
+        rows={6}
+        className="w-full resize-y rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30"
       />
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error ? <p className="mt-1 text-xs text-red-400">{error}</p> : null}
     </div>
   );
 }

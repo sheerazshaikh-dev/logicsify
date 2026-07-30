@@ -120,6 +120,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               name: "Logicsify",
               url: "https://logicsify.com/",
               logo: "https://logicsify.com/logicsify-logo-dark.png",
+              email: "connect@logicsify.com",
+              contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  contactType: "sales",
+                  email: "sales@logicsify.com",
+                  telephone: "+966544415405",
+                },
+                {
+                  "@type": "ContactPoint",
+                  contactType: "customer support",
+                  email: "support@logicsify.com",
+                },
+              ],
+              location: [
+                { "@type": "Place", name: "Karachi, Pakistan" },
+                { "@type": "Place", name: "Jeddah, Saudi Arabia" },
+                { "@type": "Place", name: "Leiria / Nazaré, Portugal" },
+              ],
               description: "Technology, marketing, and automation—logically built for growth."
             },
             {

@@ -1,9 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ExternalLink, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DEFAULT_BRAND_ASSETS } from "@/lib/brand-assets";
 import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
+import {
+  getContactEmails,
+  getSiteLocations,
+  getSocialProfiles,
+  locationMapUrl,
+  telHref,
+} from "@/lib/contact-directory";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
+import { SocialProfileLinks } from "@/components/social-profile-links";
 
 const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   {
@@ -53,8 +61,10 @@ export function SiteFooter() {
     };
   }, []);
 
-  const email = settings.footer_email || settings.contact_email || "hello@logicsify.com";
-  const phone = settings.footer_phone || settings.phone || "";
+  const emails = getContactEmails(settings);
+  const locations = getSiteLocations(settings);
+  const socialProfiles = getSocialProfiles(settings);
+  const phone = settings.phone || "+966 54 441 5405";
   const description =
     settings.footer_description ||
     settings.tagline ||
@@ -65,19 +75,12 @@ export function SiteFooter() {
     /\{year\}/g,
     String(new Date().getFullYear()),
   );
-  const socialLinks = [
-    { icon: Linkedin, href: settings.linkedin_url, label: "LinkedIn" },
-    { icon: Instagram, href: settings.instagram_url, label: "Instagram" },
-    { icon: Facebook, href: settings.facebook_url, label: "Facebook" },
-    { icon: Youtube, href: settings.youtube_url, label: "YouTube" },
-    { icon: ExternalLink, href: settings.portfolio_url, label: "Portfolio" },
-  ].filter((item) => Boolean(item.href));
 
   return (
     <footer data-cms-ignore="true" className="section-dark grid-noise relative mt-24 pb-10 pt-20">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-brand" />
       <div className="container-page relative">
-        <div className="grid gap-12 lg:grid-cols-[1.35fr_repeat(3,1fr)]">
+        <div className="grid gap-12 lg:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">
           <div>
             <img
               src={settings.footer_logo || settings.logo_light || DEFAULT_BRAND_ASSETS.logoLight}
@@ -87,24 +90,20 @@ export function SiteFooter() {
             <p className="max-w-sm text-sm leading-relaxed text-white/70">{description}</p>
             <Link
               to={ctaUrl}
-              onClick={() => { rememberRoadmapSource("footer"); trackAnalytics("technical_roadmap_cta_clicked", { placement: "footer" }); }}
+              onClick={() => {
+                rememberRoadmapSource("footer");
+                trackAnalytics("technical_roadmap_cta_clicked", { placement: "footer" });
+              }}
               className="btn-primary mt-7 inline-flex text-sm"
             >
               {ctaLabel} <ArrowRight className="h-4 w-4" />
             </Link>
-            <div className="mt-7 space-y-2 text-sm text-white/65">
-              <a href={`mailto:${email}`} className="block hover:text-white">{email}</a>
-              {phone ? <a href={`tel:${phone}`} className="block hover:text-white">{phone}</a> : null}
-              {settings.footer_address ? <p className="whitespace-pre-line">{settings.footer_address}</p> : null}
-            </div>
-            {boolSetting(settings.show_social_links, true) && socialLinks.length ? (
-              <div className="mt-6 flex flex-wrap gap-3">
-                {socialLinks.map(({ icon: Icon, href, label }) => (
-                  <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 hover:bg-white/10">
-                    <Icon className="h-4 w-4" />
-                  </a>
-                ))}
-              </div>
+            {boolSetting(settings.show_social_links, true) ? (
+              <SocialProfileLinks
+                profiles={socialProfiles}
+                tone="dark"
+                className="mt-6"
+              />
             ) : null}
           </div>
 
@@ -114,7 +113,10 @@ export function SiteFooter() {
               <ul className="space-y-2.5">
                 {column.links.map(([label, href]) => (
                   <li key={href}>
-                    <Link to={href} className="text-sm text-white/75 transition-colors hover:text-white">
+                    <Link
+                      to={href}
+                      className="text-sm text-white/75 transition-colors hover:text-white"
+                    >
                       {label}
                     </Link>
                   </li>
@@ -124,15 +126,111 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/50 md:flex-row md:items-center">
+        <div className="mt-14 grid gap-8 border-t border-white/10 pt-10 xl:grid-cols-[0.78fr_2.22fr]">
+          <div>
+            <p className="eyebrow mb-5 text-white/60">Contact</p>
+            <div className="space-y-4 text-sm">
+              <ContactLink icon={Mail} label="General" href={`mailto:${emails.general}`} value={emails.general} />
+              <ContactLink icon={Mail} label="Sales" href={`mailto:${emails.sales}`} value={emails.sales} />
+              <ContactLink icon={Mail} label="Support" href={`mailto:${emails.support}`} value={emails.support} />
+              {phone ? <ContactLink icon={Phone} label="Phone" href={telHref(phone)} value={phone} /> : null}
+            </div>
+          </div>
+
+          <div>
+            <p className="eyebrow mb-5 text-white/60">Our locations</p>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {locations.map((location) => {
+                const mapUrl = locationMapUrl(location);
+                return (
+                  <article
+                    key={location.id}
+                    className="flex min-h-52 flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-5"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[#FDBE02]">
+                        <MapPin className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <h3 className="font-semibold text-white">{location.name}</h3>
+                        <p className="mt-1 text-xs text-white/50">
+                          {[location.city, location.country]
+                            .filter(Boolean)
+                            .filter((value, index, values) => values.indexOf(value) === index)
+                            .join(", ")}
+                        </p>
+                      </div>
+                    </div>
+                    {location.address ? (
+                      <p className="mt-4 whitespace-pre-line text-xs leading-5 text-white/60">
+                        {location.address}
+                      </p>
+                    ) : null}
+                    <div className="mt-auto pt-5 text-xs text-white/65">
+                      {location.phone ? (
+                        <a href={telHref(location.phone)} className="block hover:text-white">
+                          {location.phone}
+                        </a>
+                      ) : null}
+                      {mapUrl ? (
+                        <a
+                          href={mapUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-2 inline-flex font-semibold text-white hover:text-[#FDBE02]"
+                        >
+                          Open in maps →
+                        </a>
+                      ) : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/50 md:flex-row md:items-center">
           <p>{copyright}</p>
           <div className="flex gap-6">
-            {boolSetting(settings.show_privacy_link, true) ? <Link to="/privacy" className="hover:text-white">Privacy Policy</Link> : null}
-            {boolSetting(settings.show_terms_link, true) ? <Link to="/terms" className="hover:text-white">Terms &amp; Conditions</Link> : null}
+            {boolSetting(settings.show_privacy_link, true) ? (
+              <Link to="/privacy" className="hover:text-white">
+                Privacy Policy
+              </Link>
+            ) : null}
+            {boolSetting(settings.show_terms_link, true) ? (
+              <Link to="/terms" className="hover:text-white">
+                Terms &amp; Conditions
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>
     </footer>
+  );
+}
+
+function ContactLink({
+  icon: Icon,
+  label,
+  href,
+  value,
+}: {
+  icon: typeof Mail;
+  label: string;
+  href: string;
+  value: string;
+}) {
+  return (
+    <a href={href} className="group flex items-start gap-3">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-white/35 transition group-hover:text-[#FDBE02]" />
+      <span className="min-w-0">
+        <span className="block text-[10px] uppercase tracking-[0.16em] text-white/35">{label}</span>
+        <span className="mt-0.5 block break-all text-white/70 transition group-hover:text-white">
+          {value}
+        </span>
+      </span>
+    </a>
   );
 }
 

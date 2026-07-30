@@ -53,6 +53,7 @@ export function AdminButton({
   variant = "primary",
   disabled = false,
   className = "",
+  ariaLabel,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -60,6 +61,7 @@ export function AdminButton({
   variant?: "primary" | "secondary" | "danger" | "ghost";
   disabled?: boolean;
   className?: string;
+  ariaLabel?: string;
 }) {
   const styles = {
     primary:
@@ -75,6 +77,7 @@ export function AdminButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:pointer-events-none disabled:opacity-50 ${styles} ${className}`}
     >
       {children}

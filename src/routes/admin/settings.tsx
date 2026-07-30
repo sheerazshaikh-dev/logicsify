@@ -13,6 +13,8 @@ import {
   Plus,
   Loader2,
   Mail,
+  MapPin,
+  Phone,
   Palette,
   Save,
   SearchCheck,
@@ -27,6 +29,7 @@ import {
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { withDefaultBranding } from "@/lib/brand-assets";
+import { DEFAULT_CONTACT_EMAILS, DEFAULT_SITE_LOCATIONS } from "@/lib/contact-directory";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminButton,
@@ -45,7 +48,7 @@ import {
   uploadMedia,
   type SettingsResponse,
 } from "@/lib/admin-api";
-import type { CodeSnippet } from "@/lib/logicsify-api";
+import type { CodeSnippet, SiteLocation, SocialProfile } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
@@ -250,104 +253,442 @@ function SiteSettings({ values, update }: SettingsProps) {
         </div>
       </SettingsSection>
 
+      <ContactDirectoryEditor values={values} update={update} />
+    </div>
+  );
+}
+
+function ContactDirectoryEditor({ values, update }: SettingsProps) {
+  const locations = normalizeLocations(values.locations);
+  const socialLinks = normalizeSocialProfiles(values.social_links);
+
+  function patchLocation(index: number, patch: Partial<SiteLocation>) {
+    update(
+      "locations",
+      locations.map((location, itemIndex) =>
+        itemIndex === index ? { ...location, ...patch } : location,
+      ),
+    );
+  }
+
+  function addLocation() {
+    update("locations", [
+      ...locations,
+      {
+        id: `location-${Date.now()}`,
+        name: "New location",
+        city: "",
+        country: "",
+        address: "",
+        phone: "",
+        email: "",
+        contact_name: "",
+        contact_role: "",
+        map_url: "",
+        enabled: true,
+        sort_order: locations.length,
+      },
+    ] satisfies SiteLocation[]);
+  }
+
+  function removeLocation(index: number) {
+    update(
+      "locations",
+      locations
+        .filter((_, itemIndex) => itemIndex !== index)
+        .map((location, itemIndex) => ({ ...location, sort_order: itemIndex })),
+    );
+  }
+
+  function moveLocation(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= locations.length) return;
+    const next = [...locations];
+    [next[index], next[target]] = [next[target], next[index]];
+    update(
+      "locations",
+      next.map((location, itemIndex) => ({ ...location, sort_order: itemIndex })),
+    );
+  }
+
+  function patchSocial(index: number, patch: Partial<SocialProfile>) {
+    update(
+      "social_links",
+      socialLinks.map((profile, itemIndex) =>
+        itemIndex === index ? { ...profile, ...patch } : profile,
+      ),
+    );
+  }
+
+  function addSocial() {
+    update("social_links", [
+      ...socialLinks,
+      {
+        id: `social-${Date.now()}`,
+        platform: "linkedin",
+        label: "LinkedIn",
+        url: "",
+        enabled: true,
+        sort_order: socialLinks.length,
+      },
+    ] satisfies SocialProfile[]);
+  }
+
+  function removeSocial(index: number) {
+    update(
+      "social_links",
+      socialLinks
+        .filter((_, itemIndex) => itemIndex !== index)
+        .map((profile, itemIndex) => ({ ...profile, sort_order: itemIndex })),
+    );
+  }
+
+  function moveSocial(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= socialLinks.length) return;
+    const next = [...socialLinks];
+    [next[index], next[target]] = [next[target], next[index]];
+    update(
+      "social_links",
+      next.map((profile, itemIndex) => ({ ...profile, sort_order: itemIndex })),
+    );
+  }
+
+  return (
+    <>
       <SettingsSection
-        title="Contact information"
-        description="Contact details used in the footer, forms, schema and customer-facing pages."
+        title="Global contact details"
+        description="These email addresses and the primary phone number are reused on the Contact page, footer and organization details."
+        icon={Mail}
       >
         <div className="grid gap-5 md:grid-cols-2">
           <SettingInput
-            label="Primary email"
+            label="General inquiries email"
             value={values.contact_email}
             onChange={(value) => update("contact_email", value)}
-            placeholder="hello@logicsify.com"
+            placeholder={DEFAULT_CONTACT_EMAILS.general}
             type="email"
           />
           <SettingInput
-            label="Phone number"
+            label="Sales email"
+            value={values.sales_email}
+            onChange={(value) => update("sales_email", value)}
+            placeholder={DEFAULT_CONTACT_EMAILS.sales}
+            type="email"
+          />
+          <SettingInput
+            label="Support email"
+            value={values.support_email}
+            onChange={(value) => update("support_email", value)}
+            placeholder={DEFAULT_CONTACT_EMAILS.support}
+            type="email"
+          />
+          <SettingInput
+            label="Primary phone number"
             value={values.phone}
             onChange={(value) => update("phone", value)}
-            placeholder="+1 000 000 0000"
-          />
-          <SettingInput
-            label="Address line 1"
-            value={values.address_line_1}
-            onChange={(value) => update("address_line_1", value)}
-            placeholder="Street address"
-          />
-          <SettingInput
-            label="Address line 2"
-            value={values.address_line_2}
-            onChange={(value) => update("address_line_2", value)}
-            placeholder="Suite, floor or unit"
-          />
-          <SettingInput
-            label="City"
-            value={values.city}
-            onChange={(value) => update("city", value)}
-          />
-          <SettingInput
-            label="State / Province"
-            value={values.state}
-            onChange={(value) => update("state", value)}
-          />
-          <SettingInput
-            label="Postal code"
-            value={values.postal_code}
-            onChange={(value) => update("postal_code", value)}
-          />
-          <SettingInput
-            label="Country"
-            value={values.country}
-            onChange={(value) => update("country", value)}
+            placeholder="+966 54 441 5405"
           />
         </div>
       </SettingsSection>
 
       <SettingsSection
-        title="Social profiles"
-        description="Social links displayed in the footer and included in organization schema."
+        title="Business locations"
+        description="Add, reorder, disable or remove locations. Published locations appear as balanced cards on the Contact page and in the footer."
+        icon={MapPin}
+        actions={
+          <AdminButton variant="secondary" onClick={addLocation}>
+            <Plus className="h-4 w-4" /> Add location
+          </AdminButton>
+        }
       >
-        <div className="grid gap-5 md:grid-cols-2">
-          <SettingInput
-            label="LinkedIn URL"
-            value={values.linkedin_url}
-            onChange={(value) => update("linkedin_url", value)}
-            placeholder="https://linkedin.com/company/…"
-          />
-          <SettingInput
-            label="Instagram URL"
-            value={values.instagram_url}
-            onChange={(value) => update("instagram_url", value)}
-            placeholder="https://instagram.com/…"
-          />
-          <SettingInput
-            label="Facebook URL"
-            value={values.facebook_url}
-            onChange={(value) => update("facebook_url", value)}
-            placeholder="https://facebook.com/…"
-          />
-          <SettingInput
-            label="X / Twitter URL"
-            value={values.x_url}
-            onChange={(value) => update("x_url", value)}
-            placeholder="https://x.com/…"
-          />
-          <SettingInput
-            label="YouTube URL"
-            value={values.youtube_url}
-            onChange={(value) => update("youtube_url", value)}
-            placeholder="https://youtube.com/@…"
-          />
-          <SettingInput
-            label="Behance / Dribbble URL"
-            value={values.portfolio_url}
-            onChange={(value) => update("portfolio_url", value)}
-            placeholder="https://…"
-          />
+        <div className="space-y-4">
+          {!locations.length ? (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+              <MapPin className="mx-auto h-8 w-8 text-slate-300" />
+              <p className="mt-4 font-semibold text-[#190A2F]">No business locations configured</p>
+              <p className="mt-2 text-sm text-slate-500">Use Add location to publish a new office or regional contact point.</p>
+            </div>
+          ) : null}
+          {locations.map((location, index) => (
+            <div key={location.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
+                    <MapPin className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-[#190A2F]">{location.name || `Location ${index + 1}`}</p>
+                    <p className="text-xs text-slate-400">Location {index + 1}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <AdminButton
+                    variant="secondary"
+                    onClick={() => moveLocation(index, -1)}
+                    disabled={index === 0}
+                    ariaLabel="Move location up"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    onClick={() => moveLocation(index, 1)}
+                    disabled={index === locations.length - 1}
+                    ariaLabel="Move location down"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </AdminButton>
+                  <AdminButton variant="danger" onClick={() => removeLocation(index)}>
+                    <Trash2 className="h-4 w-4" /> Remove
+                  </AdminButton>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <SettingInput
+                  label="Location name"
+                  value={location.name}
+                  onChange={(value) => patchLocation(index, { name: value })}
+                  placeholder="Karachi"
+                />
+                <SettingInput
+                  label="City / region"
+                  value={location.city}
+                  onChange={(value) => patchLocation(index, { city: value })}
+                  placeholder="Karachi"
+                />
+                <SettingInput
+                  label="Country"
+                  value={location.country}
+                  onChange={(value) => patchLocation(index, { country: value })}
+                  placeholder="Pakistan"
+                />
+                <SettingInput
+                  label="Phone number"
+                  value={location.phone}
+                  onChange={(value) => patchLocation(index, { phone: value })}
+                  placeholder="International format"
+                />
+                <SettingInput
+                  label="Location email (optional)"
+                  value={location.email}
+                  onChange={(value) => patchLocation(index, { email: value })}
+                  placeholder="Defaults to global contact emails"
+                  type="email"
+                />
+                <SettingInput
+                  label="Map URL (optional)"
+                  value={location.map_url}
+                  onChange={(value) => patchLocation(index, { map_url: value })}
+                  placeholder="Generated from the address when empty"
+                />
+                <SettingInput
+                  label="Contact person (optional)"
+                  value={location.contact_name}
+                  onChange={(value) => patchLocation(index, { contact_name: value })}
+                  placeholder="Name"
+                />
+                <SettingInput
+                  label="Contact role (optional)"
+                  value={location.contact_role}
+                  onChange={(value) => patchLocation(index, { contact_role: value })}
+                  placeholder="Business Development Manager"
+                />
+                <div className="md:col-span-2">
+                  <FieldLabel>Street address</FieldLabel>
+                  <textarea
+                    rows={4}
+                    value={location.address || ""}
+                    onChange={(event) => patchLocation(index, { address: event.target.value })}
+                    className={adminTextareaClass}
+                    placeholder="Use one line per office address when a city has more than one office."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <ToggleSetting
+                    label="Publish this location"
+                    description="Disabled locations remain saved but are hidden from the website."
+                    checked={location.enabled !== false}
+                    onChange={(value) => patchLocation(index, { enabled: value })}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <details className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-[#190A2F]">
+            Legacy single-address fallback
+          </summary>
+          <p className="mt-2 text-xs leading-5 text-slate-400">
+            These fields remain for backward compatibility and schema fallbacks. New public layouts use the location cards above.
+          </p>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <SettingInput label="Address line 1" value={values.address_line_1} onChange={(value) => update("address_line_1", value)} />
+            <SettingInput label="Address line 2" value={values.address_line_2} onChange={(value) => update("address_line_2", value)} />
+            <SettingInput label="City" value={values.city} onChange={(value) => update("city", value)} />
+            <SettingInput label="State / Province" value={values.state} onChange={(value) => update("state", value)} />
+            <SettingInput label="Postal code" value={values.postal_code} onChange={(value) => update("postal_code", value)} />
+            <SettingInput label="Country" value={values.country} onChange={(value) => update("country", value)} />
+          </div>
+        </details>
       </SettingsSection>
-    </div>
+
+      <SettingsSection
+        title="Global social and platform links"
+        description="Add any social network, portfolio, directory, review platform or community profile. Enabled links appear as icons in the footer and Contact page."
+        icon={Share2}
+        actions={
+          <AdminButton variant="secondary" onClick={addSocial}>
+            <Plus className="h-4 w-4" /> Add social link
+          </AdminButton>
+        }
+      >
+        {socialLinks.length ? (
+          <div className="space-y-4">
+            {socialLinks.map((profile, index) => (
+              <div key={profile.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <div className="grid gap-4 lg:grid-cols-[180px_1fr_1.5fr_auto] lg:items-end">
+                  <div>
+                    <FieldLabel>Platform</FieldLabel>
+                    <select
+                      value={profile.platform}
+                      onChange={(event) =>
+                        patchSocial(index, {
+                          platform: event.target.value,
+                          label: profile.label || socialPlatformLabel(event.target.value),
+                        })
+                      }
+                      className={adminInputClass}
+                    >
+                      {socialPlatforms.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <SettingInput
+                    label="Display title"
+                    value={profile.label}
+                    onChange={(value) => patchSocial(index, { label: value })}
+                    placeholder="LinkedIn"
+                  />
+                  <SettingInput
+                    label="Profile URL"
+                    value={profile.url}
+                    onChange={(value) => patchSocial(index, { url: value })}
+                    placeholder="https://…"
+                    type="url"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <AdminButton variant="secondary" onClick={() => moveSocial(index, -1)} disabled={index === 0} ariaLabel="Move social link up">
+                      <ChevronUp className="h-4 w-4" />
+                    </AdminButton>
+                    <AdminButton variant="secondary" onClick={() => moveSocial(index, 1)} disabled={index === socialLinks.length - 1} ariaLabel="Move social link down">
+                      <ChevronDown className="h-4 w-4" />
+                    </AdminButton>
+                    <AdminButton variant="danger" onClick={() => removeSocial(index)} ariaLabel="Remove social link">
+                      <Trash2 className="h-4 w-4" />
+                    </AdminButton>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <ToggleSetting
+                    label="Show this profile"
+                    description="Keep the link saved while temporarily hiding it from the public website."
+                    checked={profile.enabled !== false}
+                    onChange={(value) => patchSocial(index, { enabled: value })}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+            <Share2 className="mx-auto h-8 w-8 text-slate-300" />
+            <p className="mt-4 font-semibold text-[#190A2F]">No social links added yet</p>
+            <p className="mt-2 text-sm text-slate-500">Add only official Logicsify profiles. Empty or disabled links are never shown publicly.</p>
+          </div>
+        )}
+
+        <details className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-[#190A2F]">
+            Legacy fixed social fields
+          </summary>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <SettingInput label="LinkedIn URL" value={values.linkedin_url} onChange={(value) => update("linkedin_url", value)} />
+            <SettingInput label="Instagram URL" value={values.instagram_url} onChange={(value) => update("instagram_url", value)} />
+            <SettingInput label="Facebook URL" value={values.facebook_url} onChange={(value) => update("facebook_url", value)} />
+            <SettingInput label="X / Twitter URL" value={values.x_url} onChange={(value) => update("x_url", value)} />
+            <SettingInput label="YouTube URL" value={values.youtube_url} onChange={(value) => update("youtube_url", value)} />
+            <SettingInput label="Portfolio URL" value={values.portfolio_url} onChange={(value) => update("portfolio_url", value)} />
+          </div>
+        </details>
+      </SettingsSection>
+    </>
   );
+}
+
+const socialPlatforms: Array<[string, string]> = [
+  ["linkedin", "LinkedIn"],
+  ["instagram", "Instagram"],
+  ["facebook", "Facebook"],
+  ["x", "X / Twitter"],
+  ["youtube", "YouTube"],
+  ["tiktok", "TikTok"],
+  ["github", "GitHub"],
+  ["behance", "Behance"],
+  ["dribbble", "Dribbble"],
+  ["whatsapp", "WhatsApp"],
+  ["clutch", "Clutch"],
+  ["portfolio", "Portfolio"],
+  ["website", "Website"],
+  ["other", "Other platform"],
+];
+
+function socialPlatformLabel(value: string) {
+  return socialPlatforms.find(([platform]) => platform === value)?.[1] || "External profile";
+}
+
+function normalizeLocations(value: unknown): SiteLocation[] {
+  if (!Array.isArray(value)) {
+    return DEFAULT_SITE_LOCATIONS.map((location) => ({ ...location }));
+  }
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .map((item, index): SiteLocation => ({
+      id: String(item.id || `location-${index}`),
+      name: String(item.name || `Location ${index + 1}`),
+      city: String(item.city || ""),
+      country: String(item.country || ""),
+      address: String(item.address || ""),
+      phone: String(item.phone || ""),
+      email: String(item.email || ""),
+      contact_name: String(item.contact_name || ""),
+      contact_role: String(item.contact_role || ""),
+      map_url: String(item.map_url || ""),
+      enabled: item.enabled === undefined ? true : boolValue(item.enabled),
+      sort_order: Number(item.sort_order ?? index),
+    }))
+    .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+}
+
+function normalizeSocialProfiles(value: unknown): SocialProfile[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .map((item, index): SocialProfile => ({
+      id: String(item.id || `social-${index}`),
+      platform: String(item.platform || "website"),
+      label: String(item.label || socialPlatformLabel(String(item.platform || "website"))),
+      url: String(item.url || ""),
+      enabled: item.enabled === undefined ? true : boolValue(item.enabled),
+      sort_order: Number(item.sort_order ?? index),
+    }))
+    .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
 }
 
 function HeaderSettings({ values, update }: SettingsProps) {
@@ -503,7 +844,7 @@ function FooterSettings({ values, update }: SettingsProps) {
     <div className="space-y-6">
       <SettingsSection
         title="Footer branding"
-        description="Control the footer logo, company description and contact details."
+        description="Control the footer logo and company description. Contact channels, locations and social profiles are managed globally under Site Settings."
       >
         <div className="grid gap-5 md:grid-cols-2">
           <ImageSettingField
@@ -519,32 +860,12 @@ function FooterSettings({ values, update }: SettingsProps) {
               value={stringValue(values.footer_description)}
               onChange={(event) => update("footer_description", event.target.value)}
               className={adminTextareaClass}
-              placeholder="Logicsify designs, builds, markets, and automates digital systems for ambitious businesses."
+              placeholder="We build AI-powered sales, customer service, and business operations systems."
             />
           </div>
-          <SettingInput
-            label="Footer email"
-            value={values.footer_email}
-            onChange={(value) => update("footer_email", value)}
-            placeholder="Defaults to primary email"
-            type="email"
-          />
-          <SettingInput
-            label="Footer phone"
-            value={values.footer_phone}
-            onChange={(value) => update("footer_phone", value)}
-            placeholder="Defaults to primary phone"
-          />
-          <div className="md:col-span-2">
-            <FieldLabel>Footer address</FieldLabel>
-            <textarea
-              rows={3}
-              value={stringValue(values.footer_address)}
-              onChange={(event) => update("footer_address", event.target.value)}
-              className={adminTextareaClass}
-              placeholder="Optional formatted address"
-            />
-          </div>
+        </div>
+        <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
+          The footer now uses the global contact emails, phone, business locations and social links configured in the Site Settings tab. This keeps the Contact page and footer synchronized.
         </div>
       </SettingsSection>
 
