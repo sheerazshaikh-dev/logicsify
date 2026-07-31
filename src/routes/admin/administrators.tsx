@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { KeyRound, Plus, ShieldCheck, Trash2, UserCog } from "lucide-react";
+import { KeyRound, MailCheck, Plus, ShieldCheck, Smartphone, Trash2, UserCog } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -131,12 +131,13 @@ function AdministratorsPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left">
+            <table className="w-full min-w-[980px] text-left">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
                   <th className="px-5 py-4">Administrator</th>
                   <th className="px-5 py-4">Role</th>
                   <th className="px-5 py-4">Status</th>
+                  <th className="px-5 py-4">Two-factor</th>
                   <th className="px-5 py-4">Last login</th>
                   <th className="px-5 py-4 text-right">Actions</th>
                 </tr>
@@ -170,6 +171,13 @@ function AdministratorsPage() {
                     </td>
                     <td className="px-5 py-4">
                       <StatusBadge status={item.status || "active"} />
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.two_factor_authenticator_enabled ? <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-semibold text-violet-700"><Smartphone className="h-3 w-3" /> Authenticator</span> : null}
+                        {item.two_factor_email_enabled ? <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700"><MailCheck className="h-3 w-3" /> Email</span> : null}
+                        {!item.two_factor_authenticator_enabled && !item.two_factor_email_enabled ? <span className="text-xs text-slate-400">Not enabled</span> : null}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-xs text-slate-400">
                       {item.last_login_at

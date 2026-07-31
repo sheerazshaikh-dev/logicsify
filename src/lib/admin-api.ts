@@ -12,6 +12,9 @@ export type Administrator = {
   created_at?: string;
   updated_at?: string;
   two_factor_enabled?: boolean | number;
+  two_factor_authenticator_enabled?: boolean | number;
+  two_factor_email_enabled?: boolean | number;
+  two_factor_email_verified_at?: string | null;
   failed_login_count?: number;
   locked_until?: string | null;
   password_changed_at?: string | null;
@@ -313,9 +316,19 @@ export type AuditLog = {
   created_at: string;
 };
 
+export type TwoFactorMethod = "authenticator" | "email";
+
 export type AdminLoginResult =
   | { token: string; expires_at: string; administrator: Administrator; requires_2fa?: false }
-  | { requires_2fa: true; challenge_token: string; expires_at: string };
+  | {
+      requires_2fa: true;
+      challenge_token: string;
+      expires_at: string;
+      methods: TwoFactorMethod[];
+      masked_email?: string;
+      email_sent?: boolean;
+      resend_after_seconds?: number;
+    };
 
 export function adminLogin(email: string, password: string) {
   return adminRequest<AdminLoginResult>("auth/login", {
@@ -324,10 +337,17 @@ export function adminLogin(email: string, password: string) {
   }) as Promise<AdminLoginResult>;
 }
 
-export function verifyAdminTwoFactor(challenge_token: string, code: string) {
+export function sendAdminEmailTwoFactor(challenge_token: string) {
+  return adminRequest<{ sent: boolean; masked_email: string; expires_at: string; resend_after_seconds: number }>(
+    "auth/send-email-2fa",
+    { method: "POST", body: JSON.stringify({ challenge_token }) },
+  ) as Promise<{ sent: boolean; masked_email: string; expires_at: string; resend_after_seconds: number }>;
+}
+
+export function verifyAdminTwoFactor(challenge_token: string, code: string, method: TwoFactorMethod) {
   return adminRequest<{ token: string; expires_at: string; administrator: Administrator }>(
     "auth/verify-2fa",
-    { method: "POST", body: JSON.stringify({ challenge_token, code }) },
+    { method: "POST", body: JSON.stringify({ challenge_token, code, method }) },
   ) as Promise<{ token: string; expires_at: string; administrator: Administrator }>;
 }
 
@@ -629,6 +649,8 @@ export type SecurityOverview = {
     active_sessions: number;
     locked_administrators: number;
     two_factor_enabled: number;
+    authenticator_two_factor_enabled?: number;
+    email_two_factor_enabled?: number;
   };
   recent_events: AuditLog[];
   locked_administrators: Administrator[];
@@ -673,6 +695,9 @@ export type SecuritySettings = {
   frame_policy?: "deny" | "sameorigin";
   is_super_admin?: boolean;
   two_factor_enabled?: boolean;
+  two_factor_authenticator_enabled?: boolean;
+  two_factor_email_enabled?: boolean;
+  two_factor_email_address?: string;
 };
 
 export function getSecurityOverview() {
@@ -751,6 +776,36 @@ export function disableTwoFactor(current_password: string, code: string) {
     method: "POST",
     body: JSON.stringify({ current_password, code }),
   }) as Promise<{ disabled: boolean }>;
+}
+
+export function startEmailTwoFactorAction(action: "enable" | "disable", current_password: string) {
+  return adminRequest<{
+    sent: boolean;
+    action_token: string;
+    masked_email: string;
+    expires_at: string;
+    resend_after_seconds: number;
+  }>(`security/2fa/email/start-${action}`, {
+    method: "POST",
+    body: JSON.stringify({ current_password }),
+  }) as Promise<{
+    sent: boolean;
+    action_token: string;
+    masked_email: string;
+    expires_at: string;
+    resend_after_seconds: number;
+  }>;
+}
+
+export function completeEmailTwoFactorAction(
+  action: "enable" | "disable",
+  action_token: string,
+  code: string,
+) {
+  return adminRequest<{ enabled?: boolean; disabled?: boolean }>(`security/2fa/email/${action}`, {
+    method: "POST",
+    body: JSON.stringify({ action_token, code }),
+  }) as Promise<{ enabled?: boolean; disabled?: boolean }>;
 }
 
 export function testSecurityAlert() {

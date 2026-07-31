@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Activity, AlertTriangle, Ban, CheckCircle2, ClipboardCopy, KeyRound, LockKeyhole,
-  MailCheck, MonitorSmartphone, RefreshCw, Save, Search, ShieldCheck, Trash2, UserX,
+  Mail, MailCheck, MonitorSmartphone, RefreshCw, Save, Search, ShieldCheck, Smartphone, Trash2, UserX,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
@@ -11,9 +11,9 @@ import {
   adminInputClass, adminTextareaClass,
 } from "@/components/admin/admin-ui";
 import {
-  clearAdminToken, disableTwoFactor, enableTwoFactor, getSecurityConfig, getSecurityOverview,
+  clearAdminToken, completeEmailTwoFactorAction, disableTwoFactor, enableTwoFactor, getSecurityConfig, getSecurityOverview,
   listSecurityEvents, listSecuritySessions, purgeSecurityLogs, revokeOtherSecuritySessions,
-  revokeSecuritySession, saveSecuritySettings, startTwoFactorSetup, testSecurityAlert,
+  revokeSecuritySession, saveSecuritySettings, startEmailTwoFactorAction, startTwoFactorSetup, testSecurityAlert,
   unlockAdministrator,
   type AuditLog, type SecurityOverview, type SecuritySession, type SecuritySettings,
 } from "@/lib/admin-api";
@@ -114,6 +114,8 @@ function Overview({ overview, events, refresh }: { overview: SecurityOverview; e
     ["Active sessions", overview.summary.active_sessions, MonitorSmartphone],
     ["Locked administrators", overview.summary.locked_administrators, UserX],
     ["Administrators using 2FA", overview.summary.two_factor_enabled, KeyRound],
+    ["Authenticator 2FA", overview.summary.authenticator_two_factor_enabled || 0, Smartphone],
+    ["Email 2FA", overview.summary.email_two_factor_enabled || 0, MailCheck],
   ] as const;
 
   async function unlock(id: number) {
@@ -195,11 +197,97 @@ function AccessSettings({ settings, setSettings, entryUrl, save, saving }: Secur
 }
 
 function AuthenticationSettings({ settings, setSettings, twoFactor, setTwoFactor, save, saving, refresh }: SecuritySettingsProps & { twoFactor: { secret?: string; uri?: string; recovery?: string[] }; setTwoFactor: Dispatch<SetStateAction<{ secret?: string; uri?: string; recovery?: string[] }>>; refresh: () => void }) {
-  const [password, setPassword] = useState(""); const [code, setCode] = useState("");
-  async function setup() { try { const result = await startTwoFactorSetup(password); setTwoFactor({ secret: result.secret, uri: result.otpauth_uri }); toast.success("Add the secret to your authenticator, then verify a code."); } catch (error) { toast.error(error instanceof Error ? error.message : "Could not start 2FA setup."); } }
-  async function enable() { try { const result = await enableTwoFactor(code); setTwoFactor((c) => ({ ...c, recovery: result.recovery_codes })); setSettings((c) => ({ ...c, two_factor_enabled: true })); toast.success("Two-factor authentication enabled."); refresh(); } catch (error) { toast.error(error instanceof Error ? error.message : "Could not enable 2FA."); } }
-  async function disable() { try { await disableTwoFactor(password, code); setTwoFactor({}); setSettings((c) => ({ ...c, two_factor_enabled: false })); toast.success("Two-factor authentication disabled."); refresh(); } catch (error) { toast.error(error instanceof Error ? error.message : "Could not disable 2FA."); } }
-  return <div className="space-y-6"><AdminCard className="p-6"><div className="flex items-start gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#190A2F] text-white"><KeyRound className="h-5 w-5" /></span><div><h2 className="text-lg font-semibold text-[#190A2F]">Your two-factor authentication</h2><p className="mt-1 text-sm text-slate-500">Status: <strong>{settings.two_factor_enabled ? "Enabled" : "Not enabled"}</strong>. Compatible with standard TOTP authenticator apps.</p></div></div><div className="mt-6 grid gap-4 md:grid-cols-2"><div><FieldLabel>Current password</FieldLabel><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={adminInputClass} /></div><div><FieldLabel>Authenticator or recovery code</FieldLabel><input value={code} onChange={(e) => setCode(e.target.value)} className={adminInputClass} placeholder="123456" /></div></div><div className="mt-4 flex flex-wrap gap-2">{!settings.two_factor_enabled ? <><AdminButton variant="secondary" onClick={() => void setup()}>Generate setup secret</AdminButton>{twoFactor.secret ? <AdminButton onClick={() => void enable()}>Verify and enable</AdminButton> : null}</> : <AdminButton variant="danger" onClick={() => void disable()}>Disable 2FA</AdminButton>}</div>{twoFactor.secret ? <div className="mt-5 rounded-xl bg-slate-50 p-4"><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Manual authenticator secret</p><p className="mt-2 break-all font-mono text-sm text-[#190A2F]">{twoFactor.secret}</p><p className="mt-3 break-all text-xs text-slate-400">{twoFactor.uri}</p></div> : null}{twoFactor.recovery ? <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="font-semibold text-amber-900">Save these one-time recovery codes now.</p><div className="mt-3 grid grid-cols-2 gap-2 font-mono text-sm">{twoFactor.recovery.map((item) => <span key={item}>{item}</span>)}</div></div> : null}</AdminCard>{settings.is_super_admin ? <><AdminCard className="p-6"><h2 className="text-lg font-semibold text-[#190A2F]">Login and password policy</h2><div className="mt-5 grid gap-5 md:grid-cols-2"><NumberField label="Session timeout" value={settings.session_timeout_minutes} suffix="minutes" min={15} max={10080} onChange={(v) => setSettings((c) => ({ ...c, session_timeout_minutes: v }))} /><NumberField label="Failed attempts before lock" value={settings.max_login_attempts} suffix="attempts" min={3} max={20} onChange={(v) => setSettings((c) => ({ ...c, max_login_attempts: v }))} /><NumberField label="Account lockout" value={settings.lockout_minutes} suffix="minutes" min={5} max={1440} onChange={(v) => setSettings((c) => ({ ...c, lockout_minutes: v }))} /><NumberField label="Minimum password length" value={settings.minimum_password_length} suffix="characters" min={10} max={64} onChange={(v) => setSettings((c) => ({ ...c, minimum_password_length: v }))} /></div>{(["password_require_uppercase","password_require_lowercase","password_require_number","password_require_symbol"] as const).map((key) => <Toggle key={key} label={key.replace("password_require_", "Require ").replaceAll("_"," ")} checked={Boolean(settings[key])} onChange={(value) => setSettings((c) => ({ ...c, [key]: value }))} />)}</AdminCard><SaveBar save={save} saving={saving} /></> : null}</div>;
+  const [authPassword, setAuthPassword] = useState("");
+  const [authCode, setAuthCode] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [emailAction, setEmailAction] = useState<{ mode: "enable" | "disable"; token: string; maskedEmail: string } | null>(null);
+  const [emailBusy, setEmailBusy] = useState(false);
+
+  async function setupAuthenticator() {
+    try {
+      const result = await startTwoFactorSetup(authPassword);
+      setTwoFactor({ secret: result.secret, uri: result.otpauth_uri });
+      toast.success("Add the key to your authenticator app, then verify its current code.");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not start authenticator setup."); }
+  }
+
+  async function enableAuthenticator() {
+    try {
+      const result = await enableTwoFactor(authCode);
+      setTwoFactor((current) => ({ ...current, recovery: result.recovery_codes }));
+      setSettings((current) => ({ ...current, two_factor_enabled: true, two_factor_authenticator_enabled: true }));
+      toast.success("Authenticator-app two-factor authentication enabled.");
+      refresh();
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not enable authenticator 2FA."); }
+  }
+
+  async function disableAuthenticator() {
+    try {
+      await disableTwoFactor(authPassword, authCode);
+      setTwoFactor({});
+      setSettings((current) => ({
+        ...current,
+        two_factor_authenticator_enabled: false,
+        two_factor_enabled: Boolean(current.two_factor_email_enabled),
+      }));
+      toast.success("Authenticator-app two-factor authentication disabled.");
+      refresh();
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not disable authenticator 2FA."); }
+  }
+
+  async function startEmailAction(mode: "enable" | "disable") {
+    setEmailBusy(true);
+    try {
+      const result = await startEmailTwoFactorAction(mode, emailPassword);
+      setEmailAction({ mode, token: result.action_token, maskedEmail: result.masked_email });
+      setEmailCode("");
+      toast.success(`Verification code sent to ${result.masked_email}.`);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not send the email verification code."); }
+    finally { setEmailBusy(false); }
+  }
+
+  async function completeEmailAction() {
+    if (!emailAction) return;
+    setEmailBusy(true);
+    try {
+      await completeEmailTwoFactorAction(emailAction.mode, emailAction.token, emailCode);
+      const enabled = emailAction.mode === "enable";
+      setSettings((current) => ({
+        ...current,
+        two_factor_email_enabled: enabled,
+        two_factor_enabled: enabled || Boolean(current.two_factor_authenticator_enabled),
+      }));
+      setEmailAction(null);
+      setEmailCode("");
+      toast.success(`Email two-factor authentication ${enabled ? "enabled" : "disabled"}.`);
+      refresh();
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not verify the email code."); }
+    finally { setEmailBusy(false); }
+  }
+
+  return <div className="space-y-6">
+    <div className="grid gap-6 xl:grid-cols-2">
+      <AdminCard className="p-6">
+        <div className="flex items-start gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#190A2F] text-white"><Smartphone className="h-5 w-5" /></span><div><h2 className="text-lg font-semibold text-[#190A2F]">Authenticator app</h2><p className="mt-1 text-sm text-slate-500">Status: <strong>{settings.two_factor_authenticator_enabled ? "Enabled" : "Not enabled"}</strong>. Works with Google Authenticator, Microsoft Authenticator, Authy, 1Password, and other TOTP apps.</p></div></div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2"><div><FieldLabel>Current password</FieldLabel><input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} className={adminInputClass} autoComplete="current-password" /></div><div><FieldLabel>Authenticator or recovery code</FieldLabel><input value={authCode} onChange={(event) => setAuthCode(event.target.value)} className={adminInputClass} placeholder="123456" autoComplete="one-time-code" /></div></div>
+        <div className="mt-4 flex flex-wrap gap-2">{!settings.two_factor_authenticator_enabled ? <><AdminButton variant="secondary" onClick={() => void setupAuthenticator()}>Generate authenticator key</AdminButton>{twoFactor.secret ? <AdminButton onClick={() => void enableAuthenticator()}>Verify and enable</AdminButton> : null}</> : <AdminButton variant="danger" onClick={() => void disableAuthenticator()}>Disable authenticator 2FA</AdminButton>}</div>
+        {twoFactor.secret ? <div className="mt-5 rounded-xl bg-slate-50 p-4"><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Manual setup key</p><p className="mt-2 break-all font-mono text-sm text-[#190A2F]">{twoFactor.secret}</p>{twoFactor.uri ? <a href={twoFactor.uri} className="mt-3 inline-flex text-xs font-semibold text-[#FE3434] hover:text-[#190A2F]">Open in an authenticator app</a> : null}<p className="mt-3 text-xs leading-5 text-slate-500">Add an account manually using this key. The app must use six digits, SHA-1, and a 30-second period.</p></div> : null}
+        {twoFactor.recovery ? <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="font-semibold text-amber-900">Save these one-time recovery codes now.</p><p className="mt-1 text-xs text-amber-800">Store them offline. Each code works once when your authenticator is unavailable.</p><div className="mt-3 grid grid-cols-2 gap-2 font-mono text-sm">{twoFactor.recovery.map((item) => <span key={item}>{item}</span>)}</div></div> : null}
+      </AdminCard>
+
+      <AdminCard className="p-6">
+        <div className="flex items-start gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#FFF3F0] text-[#FE3434]"><Mail className="h-5 w-5" /></span><div><h2 className="text-lg font-semibold text-[#190A2F]">Email verification</h2><p className="mt-1 text-sm text-slate-500">Status: <strong>{settings.two_factor_email_enabled ? "Enabled" : "Not enabled"}</strong>. Codes are sent to {settings.two_factor_email_address || "your administrator email"} and expire after 10 minutes.</p></div></div>
+        <div className="mt-6"><FieldLabel>Current password</FieldLabel><input type="password" value={emailPassword} onChange={(event) => setEmailPassword(event.target.value)} className={adminInputClass} autoComplete="current-password" /></div>
+        {!emailAction ? <div className="mt-4"><AdminButton variant={settings.two_factor_email_enabled ? "danger" : "secondary"} disabled={emailBusy} onClick={() => void startEmailAction(settings.two_factor_email_enabled ? "disable" : "enable")}><MailCheck className="h-4 w-4" /> {settings.two_factor_email_enabled ? "Send code to disable email 2FA" : "Send verification code and enable"}</AdminButton></div> : <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="text-sm font-semibold text-[#190A2F]">Code sent to {emailAction.maskedEmail}</p><p className="mt-1 text-xs leading-5 text-slate-500">Enter the latest six-digit code to {emailAction.mode === "enable" ? "enable" : "disable"} email two-factor authentication.</p><div className="mt-4"><FieldLabel>Email code</FieldLabel><input inputMode="numeric" autoComplete="one-time-code" value={emailCode} onChange={(event) => setEmailCode(event.target.value.replace(/\D/g, "").slice(0, 6))} className={adminInputClass} placeholder="123456" /></div><div className="mt-4 flex flex-wrap gap-2"><AdminButton disabled={emailBusy || emailCode.length !== 6} onClick={() => void completeEmailAction()}>Verify code</AdminButton><AdminButton variant="secondary" onClick={() => setEmailAction(null)}>Cancel</AdminButton></div></div>}
+        <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-900"><strong>SMTP requirement:</strong> Email 2FA depends on the saved SMTP settings under Settings → Email. Test SMTP before enabling this method.</div>
+      </AdminCard>
+    </div>
+
+    {settings.two_factor_authenticator_enabled && settings.two_factor_email_enabled ? <AdminCard className="border-emerald-200 bg-emerald-50 p-5"><div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-700" /><div><h3 className="font-semibold text-emerald-950">Both verification methods are active</h3><p className="mt-1 text-sm text-emerald-800">At login you can choose the authenticator app or request an email code. Recovery codes remain available for the authenticator method.</p></div></div></AdminCard> : null}
+
+    {settings.is_super_admin ? <><AdminCard className="p-6"><h2 className="text-lg font-semibold text-[#190A2F]">Login and password policy</h2><div className="mt-5 grid gap-5 md:grid-cols-2"><NumberField label="Session timeout" value={settings.session_timeout_minutes} suffix="minutes" min={15} max={10080} onChange={(value) => setSettings((current) => ({ ...current, session_timeout_minutes: value }))} /><NumberField label="Failed attempts before lock" value={settings.max_login_attempts} suffix="attempts" min={3} max={20} onChange={(value) => setSettings((current) => ({ ...current, max_login_attempts: value }))} /><NumberField label="Account lockout" value={settings.lockout_minutes} suffix="minutes" min={5} max={1440} onChange={(value) => setSettings((current) => ({ ...current, lockout_minutes: value }))} /><NumberField label="Minimum password length" value={settings.minimum_password_length} suffix="characters" min={10} max={64} onChange={(value) => setSettings((current) => ({ ...current, minimum_password_length: value }))} /></div>{(["password_require_uppercase","password_require_lowercase","password_require_number","password_require_symbol"] as const).map((key) => <Toggle key={key} label={key.replace("password_require_", "Require ").replaceAll("_", " ")} checked={Boolean(settings[key])} onChange={(value) => setSettings((current) => ({ ...current, [key]: value }))} />)}</AdminCard><SaveBar save={save} saving={saving} /></> : null}
+  </div>;
 }
 
 function HardeningSettings({ settings, setSettings, save, saving }: SecuritySettingsProps) {
