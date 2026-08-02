@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import type { ConnectProfile } from "@/lib/admin-api";
+import { API_BASE } from "@/lib/logicsify-api";
 import {
   CONNECT_PROFILE_PLATFORM_LABELS,
   connectProfileLinkText,
@@ -69,7 +70,12 @@ function drawImageContain(
   );
 }
 
-async function loadImage(source?: string | null) {
+type LoadedImage = {
+  image: HTMLImageElement;
+  release: () => void;
+};
+
+async function loadImage(source?: string | null): Promise<LoadedImage | null> {
   if (!source) return null;
   let objectUrl: string | undefined;
   try {
@@ -79,12 +85,23 @@ async function loadImage(source?: string | null) {
     const image = new Image();
     image.src = objectUrl;
     await image.decode();
-    return image;
+    const loadedUrl = objectUrl;
+    objectUrl = undefined;
+    return {
+      image,
+      release: () => URL.revokeObjectURL(loadedUrl),
+    };
   } catch {
     return null;
   } finally {
     if (objectUrl) URL.revokeObjectURL(objectUrl);
   }
+}
+
+function exportMediaUrl(source?: string | null) {
+  if (!source) return null;
+  if (source.startsWith("data:") || source.startsWith("blob:")) return source;
+  return `${API_BASE}/public/connect-image?src=${encodeURIComponent(source)}`;
 }
 
 function fitText(
@@ -180,16 +197,62 @@ function drawSocialLink(
   width: number,
 ) {
   const platform = resolveConnectProfilePlatform(link);
-  context.fillStyle = "#F3EFF7";
+  const platformColor: Record<string, string> = {
+    whatsapp: "#25D366",
+    linkedin: "#0A66C2",
+    instagram: "#C13584",
+    facebook: "#1877F2",
+    youtube: "#FF0000",
+    x: "#111111",
+    github: "#24292F",
+    tiktok: "#111111",
+    website: INK,
+    link: INK,
+  };
+  context.fillStyle = platformColor[platform] || INK;
   context.beginPath();
   context.arc(x + 28, y + 28, 28, 0, Math.PI * 2);
   context.fill();
-  context.fillStyle = INK;
+  context.fillStyle = "#FFFFFF";
   context.textAlign = "center";
   context.textBaseline = "middle";
   const mark = connectProfilePlatformMark(platform);
-  context.font = `800 ${mark.length > 1 ? 17 : 24}px Inter, Arial, sans-serif`;
-  context.fillText(mark, x + 28, y + 29);
+  if (platform === "instagram") {
+    context.strokeStyle = "#FFFFFF";
+    context.lineWidth = 3;
+    roundedRect(context, x + 16, y + 16, 24, 24, 7);
+    context.stroke();
+    context.beginPath();
+    context.arc(x + 28, y + 28, 6, 0, Math.PI * 2);
+    context.stroke();
+    context.beginPath();
+    context.arc(x + 35, y + 21, 1.8, 0, Math.PI * 2);
+    context.fill();
+  } else if (platform === "youtube") {
+    context.beginPath();
+    context.moveTo(x + 24, y + 20);
+    context.lineTo(x + 24, y + 36);
+    context.lineTo(x + 37, y + 28);
+    context.closePath();
+    context.fill();
+  } else if (platform === "whatsapp") {
+    context.strokeStyle = "#FFFFFF";
+    context.lineWidth = 3;
+    context.beginPath();
+    context.arc(x + 28, y + 27, 11, 0, Math.PI * 2);
+    context.stroke();
+    context.beginPath();
+    context.moveTo(x + 20, y + 35);
+    context.lineTo(x + 18, y + 41);
+    context.lineTo(x + 25, y + 38);
+    context.stroke();
+    context.beginPath();
+    context.arc(x + 28, y + 27, 6, 0.7, 2.45);
+    context.stroke();
+  } else {
+    context.font = `800 ${mark.length > 1 ? 17 : 24}px Inter, Arial, sans-serif`;
+    context.fillText(mark, x + 28, y + 29);
+  }
   context.textAlign = "left";
   context.textBaseline = "alphabetic";
   context.fillStyle = INK;
@@ -213,9 +276,11 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Your browser could not create the downloadable card.");
 
-  const [cover, avatar, logo, qr] = await Promise.all([
-    loadImage(profile.global_cover_url || profile.cover_url),
-    loadImage(profile.avatar_url),
+  const coverSource = profile.global_cover_url || profile.cover_url;
+  const avatarSource = profile.avatar_url;
+  const [coverResource, avatarResource, logoResource, qrResource] = await Promise.all([
+    loadImage(exportMediaUrl(coverSource)),
+    loadImage(exportMediaUrl(avatarSource)),
     loadImage("/logicsify-logo-dark.png"),
     QRCode.toDataURL(profileUrl, {
       width: 420,
@@ -224,6 +289,26 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
       color: { dark: INK, light: "#FFFFFF" },
     }).then(loadImage),
   ]);
+
+  const loadedResources = [coverResource, avatarResource, logoResource, qrResource].filter(
+    (resource): resource is LoadedImage => Boolean(resource),
+  );
+  const cover = coverResource?.image || null;
+  const avatar = avatarResource?.image || null;
+  const logo = logoResource?.image || null;
+  const qr = qrResource?.image || null;
+  if (coverSource && !cover) {
+    loadedResources.forEach((resource) => resource.release());
+    throw new Error(
+      "The global cover could not be loaded from Media Library. Deploy the backend image-export hotfix first, then try again.",
+    );
+  }
+  if (avatarSource && !avatar) {
+    loadedResources.forEach((resource) => resource.release());
+    throw new Error(
+      "The avatar could not be loaded from Media Library. Re-select it in the profile editor and try again.",
+    );
+  }
 
   context.fillStyle = "#F4F0F7";
   context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
@@ -284,28 +369,28 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.fillStyle = INK;
   const nameSize = fitText(context, profile.display_name, 690, 58, 38, 800);
   context.font = `800 ${nameSize}px Sora, Inter, Arial, sans-serif`;
-  context.fillText(profile.display_name, 390, 502, 700);
+  context.fillText(profile.display_name, 390, 548, 700);
   if (profile.headline) {
     context.fillStyle = "#6F6679";
     const headlineSize = fitText(context, profile.headline, 700, 29, 20, 500);
     context.font = `500 ${headlineSize}px Inter, Arial, sans-serif`;
-    context.fillText(profile.headline, 390, 552, 700);
+    context.fillText(profile.headline, 390, 596, 700);
   }
-  const accentGradient = context.createLinearGradient(390, 584, 650, 584);
+  const accentGradient = context.createLinearGradient(390, 629, 650, 629);
   accentGradient.addColorStop(0, RED);
   accentGradient.addColorStop(1, GOLD);
   context.fillStyle = accentGradient;
-  roundedRect(context, 390, 583, 235, 10, 5);
+  roundedRect(context, 390, 628, 235, 10, 5);
   context.fill();
 
   context.fillStyle = INK;
   context.font = "800 24px Sora, Inter, Arial, sans-serif";
-  context.fillText("CONTACT", 88, 690);
+  context.fillText("CONTACT", 88, 705);
   context.fillStyle = "#A39BAA";
   context.font = "600 17px Inter, Arial, sans-serif";
-  context.fillText("Direct ways to reach me", 88, 724);
+  context.fillText("Direct ways to reach me", 88, 739);
 
-  let contactY = 758;
+  let contactY = 772;
   const phone = profile.phone || profile.whatsapp;
   if (phone) {
     drawContactRow(context, "phone", "Phone", phone, 88, contactY, 1064);
@@ -342,12 +427,20 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.font = "600 17px Inter, Arial, sans-serif";
   context.fillText("Find me online", 88, contactY + 68);
 
-  const socialStart = contactY + 98;
-  const visibleLinks = socialLinks.slice(0, 8);
+  const socialStart = contactY + 112;
+  const socialPanelY = socialStart - 28;
+  roundedRect(context, 88, socialPanelY, 1064, 350, 30);
+  context.fillStyle = "#F8F6FA";
+  context.fill();
+  context.strokeStyle = "#ECE7F0";
+  context.lineWidth = 2;
+  context.stroke();
+
+  const visibleLinks = socialLinks.slice(0, 6);
   visibleLinks.forEach((link, index) => {
     const column = index % 2;
     const row = Math.floor(index / 2);
-    drawSocialLink(context, link, 88 + column * 410, socialStart + row * 76, 382);
+    drawSocialLink(context, link, 120 + column * 340, socialStart + row * 82, 312);
   });
   if (socialLinks.length > visibleLinks.length) {
     context.fillStyle = "#81798A";
@@ -355,27 +448,27 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     context.fillText(
       `+${socialLinks.length - visibleLinks.length} more link${socialLinks.length - visibleLinks.length === 1 ? "" : "s"} on the QR profile`,
       88,
-      socialStart + 324,
+      socialStart + 278,
     );
   }
   if (!visibleLinks.length) {
     context.fillStyle = "#81798A";
     context.font = "500 20px Inter, Arial, sans-serif";
-    context.fillText("Scan the QR code to open this connect profile.", 88, socialStart + 34);
+    context.fillText("Scan the QR code to open this connect profile.", 120, socialStart + 34);
   }
 
   if (qr) {
-    roundedRect(context, 866, 1276, 286, 340, 32);
-    context.fillStyle = "#F8F6FA";
+    roundedRect(context, 838, socialPanelY + 20, 286, 310, 26);
+    context.fillStyle = "#FFFFFF";
     context.fill();
-    context.drawImage(qr, 891, 1301, 236, 236);
+    context.drawImage(qr, 870, socialPanelY + 43, 222, 222);
     context.fillStyle = INK;
     context.textAlign = "center";
-    context.font = "800 19px Sora, Inter, Arial, sans-serif";
-    context.fillText("SCAN TO CONNECT", 1009, 1574);
+    context.font = "800 17px Sora, Inter, Arial, sans-serif";
+    context.fillText("SCAN TO CONNECT", 981, socialPanelY + 286);
     context.fillStyle = "#81798A";
-    context.font = "500 15px Inter, Arial, sans-serif";
-    context.fillText("Open my live profile", 1009, 1601);
+    context.font = "500 14px Inter, Arial, sans-serif";
+    context.fillText("Open my live profile", 981, socialPanelY + 312);
     context.textAlign = "left";
   }
 
@@ -390,6 +483,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.fillText("logicsify.com", 1152, 1685);
   context.textAlign = "left";
 
+  loadedResources.forEach((resource) => resource.release());
   return canvas;
 }
 
