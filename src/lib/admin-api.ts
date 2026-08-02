@@ -288,12 +288,36 @@ export type Menu = {
 export type SettingsResponse = Record<string, Record<string, unknown>>;
 
 export type TrashItem = {
-  entity_type: "content" | "lead" | "booking" | "media";
+  entity_type: "content" | "connect_profile" | "lead" | "booking" | "media";
   id: number;
   title: string;
   subtitle?: string;
   deleted_at: string;
 };
+
+export type ConnectProfileLink = { label: string; url: string; icon?: string };
+export type ConnectProfile = {
+  id: number; slug: string; display_name: string; headline?: string | null; company?: string | null;
+  bio?: string | null; avatar_url?: string | null; cover_url?: string | null; email?: string | null;
+  phone?: string | null; whatsapp?: string | null; website?: string | null; address?: string | null;
+  links_json: ConnectProfileLink[]; theme_json: { accent?: string };
+  status: "draft" | "published" | "archived"; is_unlisted: boolean; noindex: boolean;
+  created_at?: string; updated_at?: string;
+};
+
+export function listConnectProfiles(params: { status?: string; search?: string; page?: number } = {}) {
+  const search = new URLSearchParams({ status: params.status || "all", search: params.search || "", page: String(params.page || 1), per_page: "50" });
+  return adminRequest<ConnectProfile[]>(`connect-profiles?${search}`, {}, true) as Promise<{ data: ConnectProfile[]; meta: ApiMeta }>;
+}
+export function createConnectProfile(payload: Partial<ConnectProfile>) {
+  return adminRequest<ConnectProfile>("connect-profiles", { method: "POST", body: JSON.stringify(payload) }) as Promise<ConnectProfile>;
+}
+export function updateConnectProfile(id: number, payload: Partial<ConnectProfile>) {
+  return adminRequest<ConnectProfile>(`connect-profiles/${id}`, { method: "PUT", body: JSON.stringify(payload) }) as Promise<ConnectProfile>;
+}
+export function deleteConnectProfile(id: number) {
+  return adminRequest<{ deleted: boolean }>(`connect-profiles/${id}`, { method: "DELETE" }) as Promise<{ deleted: boolean }>;
+}
 
 export type AuditLog = {
   id: number;

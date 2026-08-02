@@ -136,6 +136,18 @@ export function submitBooking(data: BookingSubmission) {
 
 export { API_BASE };
 
+export type PublicConnectProfile = {
+  id: number; slug: string; display_name: string; headline?: string | null; company?: string | null;
+  bio?: string | null; avatar_url?: string | null; cover_url?: string | null; email?: string | null;
+  phone?: string | null; whatsapp?: string | null; website?: string | null; address?: string | null;
+  links_json: Array<{ label: string; url: string; icon?: string }>;
+  theme_json: { accent?: string }; is_unlisted: boolean; noindex: boolean;
+};
+
+export function getConnectProfile(slug: string) {
+  return request<PublicConnectProfile>(`public/connect/${encodeURIComponent(slug)}`);
+}
+
 export type PublicMenuItem = {
   id: number;
   parent_id?: number | null;

@@ -32,6 +32,7 @@ import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminCareersRouteImport } from './routes/admin/careers'
 import { Route as AdminCaseStudiesRouteImport } from './routes/admin/case-studies'
 import { Route as AdminComparisonsRouteImport } from './routes/admin/comparisons'
+import { Route as AdminConnectProfilesRouteImport } from './routes/admin/connect-profiles'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminEngagementModelsRouteImport } from './routes/admin/engagement-models'
 import { Route as AdminGlobalStylingRouteImport } from './routes/admin/global-styling'
@@ -53,6 +54,7 @@ import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonia
 import { Route as AdminTrashRouteImport } from './routes/admin/trash'
 import { Route as ComparisonsIndexRouteImport } from './routes/comparisons/index'
 import { Route as ComparisonsSlugRouteImport } from './routes/comparisons/$slug'
+import { Route as ConnectSlugRouteImport } from './routes/connect/$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides/index'
 import { Route as GuidesSlugRouteImport } from './routes/guides/$slug'
 import { Route as IndustriesIndexRouteImport } from './routes/industries/index'
@@ -182,6 +184,11 @@ const AdminComparisonsRoute = AdminComparisonsRouteImport.update({
   path: '/admin/comparisons',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminConnectProfilesRoute = AdminConnectProfilesRouteImport.update({
+  id: '/admin/connect-profiles',
+  path: '/admin/connect-profiles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
@@ -287,6 +294,11 @@ const ComparisonsSlugRoute = ComparisonsSlugRouteImport.update({
   path: '/comparisons/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConnectSlugRoute = ConnectSlugRouteImport.update({
+  id: '/connect/$slug',
+  path: '/connect/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuidesIndexRoute = GuidesIndexRouteImport.update({
   id: '/guides/',
   path: '/guides/',
@@ -376,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/admin/careers': typeof AdminCareersRoute
   '/admin/case-studies': typeof AdminCaseStudiesRoute
   '/admin/comparisons': typeof AdminComparisonsRoute
+  '/admin/connect-profiles': typeof AdminConnectProfilesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
   '/admin/global-styling': typeof AdminGlobalStylingRoute
@@ -396,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
+  '/connect/$slug': typeof ConnectSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
@@ -435,6 +449,7 @@ export interface FileRoutesByTo {
   '/admin/careers': typeof AdminCareersRoute
   '/admin/case-studies': typeof AdminCaseStudiesRoute
   '/admin/comparisons': typeof AdminComparisonsRoute
+  '/admin/connect-profiles': typeof AdminConnectProfilesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
   '/admin/global-styling': typeof AdminGlobalStylingRoute
@@ -455,6 +470,7 @@ export interface FileRoutesByTo {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
+  '/connect/$slug': typeof ConnectSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
@@ -495,6 +511,7 @@ export interface FileRoutesById {
   '/admin/careers': typeof AdminCareersRoute
   '/admin/case-studies': typeof AdminCaseStudiesRoute
   '/admin/comparisons': typeof AdminComparisonsRoute
+  '/admin/connect-profiles': typeof AdminConnectProfilesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/engagement-models': typeof AdminEngagementModelsRoute
   '/admin/global-styling': typeof AdminGlobalStylingRoute
@@ -515,6 +532,7 @@ export interface FileRoutesById {
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
+  '/connect/$slug': typeof ConnectSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/industries/$slug': typeof IndustriesSlugRoute
   '/insights/$slug': typeof InsightsSlugRoute
@@ -556,6 +574,7 @@ export interface FileRouteTypes {
     | '/admin/careers'
     | '/admin/case-studies'
     | '/admin/comparisons'
+    | '/admin/connect-profiles'
     | '/admin/dashboard'
     | '/admin/engagement-models'
     | '/admin/global-styling'
@@ -576,6 +595,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
+    | '/connect/$slug'
     | '/guides/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
@@ -615,6 +635,7 @@ export interface FileRouteTypes {
     | '/admin/careers'
     | '/admin/case-studies'
     | '/admin/comparisons'
+    | '/admin/connect-profiles'
     | '/admin/dashboard'
     | '/admin/engagement-models'
     | '/admin/global-styling'
@@ -635,6 +656,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
+    | '/connect/$slug'
     | '/guides/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
@@ -674,6 +696,7 @@ export interface FileRouteTypes {
     | '/admin/careers'
     | '/admin/case-studies'
     | '/admin/comparisons'
+    | '/admin/connect-profiles'
     | '/admin/dashboard'
     | '/admin/engagement-models'
     | '/admin/global-styling'
@@ -694,6 +717,7 @@ export interface FileRouteTypes {
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
+    | '/connect/$slug'
     | '/guides/$slug'
     | '/industries/$slug'
     | '/insights/$slug'
@@ -734,6 +758,7 @@ export interface RootRouteChildren {
   AdminCareersRoute: typeof AdminCareersRoute
   AdminCaseStudiesRoute: typeof AdminCaseStudiesRoute
   AdminComparisonsRoute: typeof AdminComparisonsRoute
+  AdminConnectProfilesRoute: typeof AdminConnectProfilesRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminEngagementModelsRoute: typeof AdminEngagementModelsRoute
   AdminGlobalStylingRoute: typeof AdminGlobalStylingRoute
@@ -754,6 +779,7 @@ export interface RootRouteChildren {
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminTrashRoute: typeof AdminTrashRoute
   ComparisonsSlugRoute: typeof ComparisonsSlugRoute
+  ConnectSlugRoute: typeof ConnectSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   IndustriesSlugRoute: typeof IndustriesSlugRoute
   InsightsSlugRoute: typeof InsightsSlugRoute
@@ -934,6 +960,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminComparisonsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/connect-profiles': {
+      id: '/admin/connect-profiles'
+      path: '/admin/connect-profiles'
+      fullPath: '/admin/connect-profiles'
+      preLoaderRoute: typeof AdminConnectProfilesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/admin/dashboard'
@@ -1081,6 +1114,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComparisonsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/connect/$slug': {
+      id: '/connect/$slug'
+      path: '/connect/$slug'
+      fullPath: '/connect/$slug'
+      preLoaderRoute: typeof ConnectSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/': {
       id: '/guides/'
       path: '/guides'
@@ -1198,6 +1238,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCareersRoute: AdminCareersRoute,
   AdminCaseStudiesRoute: AdminCaseStudiesRoute,
   AdminComparisonsRoute: AdminComparisonsRoute,
+  AdminConnectProfilesRoute: AdminConnectProfilesRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminEngagementModelsRoute: AdminEngagementModelsRoute,
   AdminGlobalStylingRoute: AdminGlobalStylingRoute,
@@ -1218,6 +1259,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminTrashRoute: AdminTrashRoute,
   ComparisonsSlugRoute: ComparisonsSlugRoute,
+  ConnectSlugRoute: ConnectSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   IndustriesSlugRoute: IndustriesSlugRoute,
   InsightsSlugRoute: InsightsSlugRoute,
