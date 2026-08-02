@@ -336,7 +336,9 @@ export type ConnectProfile = {
   phone?: string | null;
   whatsapp?: string | null;
   website?: string | null;
+  /** Derived from enabled locations in location_ids_json; it is not edited on the person. */
   address?: string | null;
+  assigned_locations?: SiteLocation[];
   global_cover_url?: string | null;
   links_json: ConnectProfileLink[];
   theme_json: { accent?: string };

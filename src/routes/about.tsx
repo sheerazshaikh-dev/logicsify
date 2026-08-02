@@ -580,6 +580,11 @@ function AboutPage() {
                         {member.locations.map((location) => location.name).join(" · ")}
                       </p>
                     ) : null}
+                    {member.address ? (
+                      <p className="mt-3 whitespace-pre-line text-xs leading-5 text-ink-soft">
+                        {member.address}
+                      </p>
+                    ) : null}
                     <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
                       {member.email ? <a href={`mailto:${member.email}`}>Email</a> : null}
                       {member.phone ? <a href={`tel:${member.phone}`}>Call</a> : null}

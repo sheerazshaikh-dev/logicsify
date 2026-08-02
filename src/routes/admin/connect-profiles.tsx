@@ -68,7 +68,6 @@ const emptyProfile: Partial<ConnectProfile> = {
   email: "",
   phone: "",
   whatsapp: "",
-  address: "",
   links_json: [],
   skills_json: [],
   location_ids_json: [],
@@ -501,7 +500,6 @@ function ProfileEditor({
           value={value.whatsapp}
           onChange={(v) => set("whatsapp", v)}
         />
-        <Field label="Address" value={value.address} onChange={(v) => set("address", v)} />
         <div>
           <FieldLabel>Accent color</FieldLabel>
           <input
@@ -611,8 +609,9 @@ function ProfileEditor({
       <div className="mt-7 border-t border-slate-200 pt-6">
         <h3 className="font-semibold text-[#190A2F]">Assigned locations</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Assigned offices can appear with the member. Every other enabled office is shown under
-          “Other locations” on their live Connect page only.
+          Select the office or offices this person belongs to. Their address is pulled
+          automatically from these locations, so it only needs to be maintained once. Every other
+          enabled office is shown under “Other locations” on their live Connect page only.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {locations.map((location) => (
@@ -640,8 +639,9 @@ function ProfileEditor({
       <div className="mt-7 border-t border-slate-200 pt-6">
         <h3 className="font-semibold text-[#190A2F]">Field visibility</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Name is always visible. Bio, skills, and the location directory remain web-only and are
-          intentionally excluded from downloads.
+          Name is always visible. “Assigned address” uses the addresses from the locations selected
+          above. Bio, skills, and the location directory remain web-only and are intentionally
+          excluded from downloads.
         </p>
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
           <table className="w-full min-w-[640px] text-sm">

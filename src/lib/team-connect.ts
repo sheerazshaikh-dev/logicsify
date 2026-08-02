@@ -12,9 +12,9 @@ export const TEAM_CONNECT_FIELD_LABELS: Record<ConnectProfileField, string> = {
   email: "Email",
   phone: "Phone",
   whatsapp: "WhatsApp",
-  address: "Address",
+  address: "Assigned address",
   social_links: "Social links",
-  locations: "Assigned locations",
+  locations: "Assigned location details",
   skills: "Skills",
 };
 

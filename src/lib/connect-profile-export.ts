@@ -139,17 +139,52 @@ function drawContactRow(
   y: number,
   width: number,
 ) {
-  roundedRect(context, x, y, width, kind === "address" ? 112 : 94, 24);
+  const textX = x + 84;
+  const textWidth = width - 112;
+  let addressLines: string[] = [];
+  if (kind === "address") {
+    context.font = "600 22px Inter, Arial, sans-serif";
+    const paragraphs = value.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+    for (const paragraph of paragraphs) {
+      let line = "";
+      for (const word of paragraph.split(/\s+/)) {
+        const candidate = line ? `${line} ${word}` : word;
+        if (line && context.measureText(candidate).width > textWidth) {
+          addressLines.push(line);
+          line = word;
+        } else {
+          line = candidate;
+        }
+      }
+      if (line) addressLines.push(line);
+    }
+    if (addressLines.length > 4) {
+      addressLines = addressLines.slice(0, 4);
+      let last = addressLines[3];
+      while (last && context.measureText(`${last}…`).width > textWidth) {
+        last = last.slice(0, -1).trimEnd();
+      }
+      addressLines[3] = `${last}…`;
+    }
+  }
+  const height = kind === "address" ? Math.max(112, 62 + addressLines.length * 28) : 94;
+  roundedRect(context, x, y, width, height, 24);
   context.fillStyle = "#F8F6FA";
   context.fill();
   drawContactIcon(context, kind, x + 46, y + 47);
   context.fillStyle = "#81798A";
   context.font = "700 17px Inter, Arial, sans-serif";
-  context.fillText(label.toUpperCase(), x + 84, y + 32);
+  context.fillText(label.toUpperCase(), textX, y + 32);
   context.fillStyle = INK;
-  const fontSize = fitText(context, value, width - 112, kind === "address" ? 24 : 27, 18, 600);
-  context.font = `600 ${fontSize}px Inter, Arial, sans-serif`;
-  context.fillText(value, x + 84, y + 68, width - 112);
+  if (kind === "address") {
+    context.font = "600 22px Inter, Arial, sans-serif";
+    addressLines.forEach((line, index) => context.fillText(line, textX, y + 69 + index * 28));
+  } else {
+    const fontSize = fitText(context, value, textWidth, 27, 18, 600);
+    context.font = `600 ${fontSize}px Inter, Arial, sans-serif`;
+    context.fillText(value, textX, y + 68, textWidth);
+  }
+  return height;
 }
 
 function drawSocialLink(
@@ -356,16 +391,16 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
       ? profile.whatsapp
       : null;
   if (phone) {
-    drawContactRow(context, "phone", "Phone", phone, 88, contactY, 1064);
-    contactY += 110;
+    contactY += drawContactRow(context, "phone", "Phone", phone, 88, contactY, 1064) + 16;
   }
   if (profile.email && fieldVisible(profile, "email", "export")) {
-    drawContactRow(context, "email", "Email", profile.email, 88, contactY, 1064);
-    contactY += 110;
+    contactY +=
+      drawContactRow(context, "email", "Email", profile.email, 88, contactY, 1064) + 16;
   }
   if (profile.address && fieldVisible(profile, "address", "export")) {
-    drawContactRow(context, "address", "Address", profile.address, 88, contactY, 1064);
-    contactY += 130;
+    contactY +=
+      drawContactRow(context, "address", "Assigned location", profile.address, 88, contactY, 1064) +
+      18;
   }
 
   const savedSocialLinks = fieldVisible(profile, "social_links", "export")
