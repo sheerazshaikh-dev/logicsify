@@ -24,6 +24,7 @@ import { Route as SecurityRoute } from "@/routes/admin/security";
 import { Route as ServicesRoute } from "@/routes/admin/services";
 import { Route as SettingsRoute } from "@/routes/admin/settings";
 import { Route as TeamRoute } from "@/routes/admin/team";
+import { Route as TeamConnectRoute } from "@/routes/admin/team-connect";
 import { Route as TestimonialsRoute } from "@/routes/admin/testimonials";
 import { Route as TrashRoute } from "@/routes/admin/trash";
 
@@ -32,9 +33,10 @@ export const Route = createFileRoute("/control/$adminSlug/$")({ component: Custo
 const routes: Record<string, unknown> = {
   login: LoginRoute, dashboard: DashboardRoute, pages: PagesRoute, services: ServicesRoute,
   "case-studies": CaseStudiesRoute, insights: InsightsRoute, careers: CareersRoute,
-  testimonials: TestimonialsRoute, team: TeamRoute, guides: GuidesRoute,
+  testimonials: TestimonialsRoute, team: TeamRoute, "connect-profiles": ConnectProfilesRoute,
+  "team-connect": TeamConnectRoute, guides: GuidesRoute,
   comparisons: ComparisonsRoute, "engagement-models": EngagementModelsRoute,
-  integrations: IntegrationsRoute, "connect-profiles": ConnectProfilesRoute, leads: LeadsRoute, bookings: BookingsRoute, media: MediaRoute,
+  integrations: IntegrationsRoute, leads: LeadsRoute, bookings: BookingsRoute, media: MediaRoute,
   menus: MenusRoute, settings: SettingsRoute, "global-styling": GlobalStylingRoute,
   administrators: AdministratorsRoute, trash: TrashRoute, security: SecurityRoute, "audit-logs": SecurityRoute, account: AccountRoute,
 };

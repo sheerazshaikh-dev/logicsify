@@ -13,7 +13,6 @@ import {
   Plus,
   Loader2,
   Mail,
-  MapPin,
   Phone,
   Palette,
   Save,
@@ -29,7 +28,7 @@ import {
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { withDefaultBranding } from "@/lib/brand-assets";
-import { DEFAULT_CONTACT_EMAILS, DEFAULT_SITE_LOCATIONS } from "@/lib/contact-directory";
+import { DEFAULT_CONTACT_EMAILS } from "@/lib/contact-directory";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
   AdminButton,
@@ -48,7 +47,7 @@ import {
   uploadMedia,
   type SettingsResponse,
 } from "@/lib/admin-api";
-import type { CodeSnippet, SiteLocation, SocialProfile } from "@/lib/logicsify-api";
+import type { CodeSnippet, SocialProfile } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
@@ -259,57 +258,7 @@ function SiteSettings({ values, update }: SettingsProps) {
 }
 
 function ContactDirectoryEditor({ values, update }: SettingsProps) {
-  const locations = normalizeLocations(values.locations);
   const socialLinks = normalizeSocialProfiles(values.social_links);
-
-  function patchLocation(index: number, patch: Partial<SiteLocation>) {
-    update(
-      "locations",
-      locations.map((location, itemIndex) =>
-        itemIndex === index ? { ...location, ...patch } : location,
-      ),
-    );
-  }
-
-  function addLocation() {
-    update("locations", [
-      ...locations,
-      {
-        id: `location-${Date.now()}`,
-        name: "New location",
-        city: "",
-        country: "",
-        address: "",
-        phone: "",
-        email: "",
-        contact_name: "",
-        contact_role: "",
-        map_url: "",
-        enabled: true,
-        sort_order: locations.length,
-      },
-    ] satisfies SiteLocation[]);
-  }
-
-  function removeLocation(index: number) {
-    update(
-      "locations",
-      locations
-        .filter((_, itemIndex) => itemIndex !== index)
-        .map((location, itemIndex) => ({ ...location, sort_order: itemIndex })),
-    );
-  }
-
-  function moveLocation(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= locations.length) return;
-    const next = [...locations];
-    [next[index], next[target]] = [next[target], next[index]];
-    update(
-      "locations",
-      next.map((location, itemIndex) => ({ ...location, sort_order: itemIndex })),
-    );
-  }
 
   function patchSocial(index: number, patch: Partial<SocialProfile>) {
     update(
@@ -390,150 +339,6 @@ function ContactDirectoryEditor({ values, update }: SettingsProps) {
             placeholder="+966 54 441 5405"
           />
         </div>
-      </SettingsSection>
-
-      <SettingsSection
-        title="Business locations"
-        description="Add, reorder, disable or remove locations. Published locations appear as balanced cards on the Contact page and in the footer."
-        icon={MapPin}
-        actions={
-          <AdminButton variant="secondary" onClick={addLocation}>
-            <Plus className="h-4 w-4" /> Add location
-          </AdminButton>
-        }
-      >
-        <div className="space-y-4">
-          {!locations.length ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
-              <MapPin className="mx-auto h-8 w-8 text-slate-300" />
-              <p className="mt-4 font-semibold text-[#190A2F]">No business locations configured</p>
-              <p className="mt-2 text-sm text-slate-500">Use Add location to publish a new office or regional contact point.</p>
-            </div>
-          ) : null}
-          {locations.map((location, index) => (
-            <div key={location.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
-                    <MapPin className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <p className="font-semibold text-[#190A2F]">{location.name || `Location ${index + 1}`}</p>
-                    <p className="text-xs text-slate-400">Location {index + 1}</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <AdminButton
-                    variant="secondary"
-                    onClick={() => moveLocation(index, -1)}
-                    disabled={index === 0}
-                    ariaLabel="Move location up"
-                  >
-                    <ChevronUp className="h-4 w-4" />
-                  </AdminButton>
-                  <AdminButton
-                    variant="secondary"
-                    onClick={() => moveLocation(index, 1)}
-                    disabled={index === locations.length - 1}
-                    ariaLabel="Move location down"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </AdminButton>
-                  <AdminButton variant="danger" onClick={() => removeLocation(index)}>
-                    <Trash2 className="h-4 w-4" /> Remove
-                  </AdminButton>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <SettingInput
-                  label="Location name"
-                  value={location.name}
-                  onChange={(value) => patchLocation(index, { name: value })}
-                  placeholder="Karachi"
-                />
-                <SettingInput
-                  label="City / region"
-                  value={location.city}
-                  onChange={(value) => patchLocation(index, { city: value })}
-                  placeholder="Karachi"
-                />
-                <SettingInput
-                  label="Country"
-                  value={location.country}
-                  onChange={(value) => patchLocation(index, { country: value })}
-                  placeholder="Pakistan"
-                />
-                <SettingInput
-                  label="Phone number"
-                  value={location.phone}
-                  onChange={(value) => patchLocation(index, { phone: value })}
-                  placeholder="International format"
-                />
-                <SettingInput
-                  label="Location email (optional)"
-                  value={location.email}
-                  onChange={(value) => patchLocation(index, { email: value })}
-                  placeholder="Defaults to global contact emails"
-                  type="email"
-                />
-                <SettingInput
-                  label="Map URL (optional)"
-                  value={location.map_url}
-                  onChange={(value) => patchLocation(index, { map_url: value })}
-                  placeholder="Generated from the address when empty"
-                />
-                <SettingInput
-                  label="Contact person (optional)"
-                  value={location.contact_name}
-                  onChange={(value) => patchLocation(index, { contact_name: value })}
-                  placeholder="Name"
-                />
-                <SettingInput
-                  label="Contact role (optional)"
-                  value={location.contact_role}
-                  onChange={(value) => patchLocation(index, { contact_role: value })}
-                  placeholder="Business Development Manager"
-                />
-                <div className="md:col-span-2">
-                  <FieldLabel>Street address</FieldLabel>
-                  <textarea
-                    rows={4}
-                    value={location.address || ""}
-                    onChange={(event) => patchLocation(index, { address: event.target.value })}
-                    className={adminTextareaClass}
-                    placeholder="Use one line per office address when a city has more than one office."
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <ToggleSetting
-                    label="Publish this location"
-                    description="Disabled locations remain saved but are hidden from the website."
-                    checked={location.enabled !== false}
-                    onChange={(value) => patchLocation(index, { enabled: value })}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <details className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-          <summary className="cursor-pointer text-sm font-semibold text-[#190A2F]">
-            Legacy single-address fallback
-          </summary>
-          <p className="mt-2 text-xs leading-5 text-slate-400">
-            These fields remain for backward compatibility and schema fallbacks. New public layouts use the location cards above.
-          </p>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <SettingInput label="Address line 1" value={values.address_line_1} onChange={(value) => update("address_line_1", value)} />
-            <SettingInput label="Address line 2" value={values.address_line_2} onChange={(value) => update("address_line_2", value)} />
-            <SettingInput label="City" value={values.city} onChange={(value) => update("city", value)} />
-            <SettingInput label="State / Province" value={values.state} onChange={(value) => update("state", value)} />
-            <SettingInput label="Postal code" value={values.postal_code} onChange={(value) => update("postal_code", value)} />
-            <SettingInput label="Country" value={values.country} onChange={(value) => update("country", value)} />
-          </div>
-        </details>
       </SettingsSection>
 
       <SettingsSection
@@ -651,29 +456,6 @@ const socialPlatforms: Array<[string, string]> = [
 
 function socialPlatformLabel(value: string) {
   return socialPlatforms.find(([platform]) => platform === value)?.[1] || "External profile";
-}
-
-function normalizeLocations(value: unknown): SiteLocation[] {
-  if (!Array.isArray(value)) {
-    return DEFAULT_SITE_LOCATIONS.map((location) => ({ ...location }));
-  }
-  return value
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
-    .map((item, index): SiteLocation => ({
-      id: String(item.id || `location-${index}`),
-      name: String(item.name || `Location ${index + 1}`),
-      city: String(item.city || ""),
-      country: String(item.country || ""),
-      address: String(item.address || ""),
-      phone: String(item.phone || ""),
-      email: String(item.email || ""),
-      contact_name: String(item.contact_name || ""),
-      contact_role: String(item.contact_role || ""),
-      map_url: String(item.map_url || ""),
-      enabled: item.enabled === undefined ? true : boolValue(item.enabled),
-      sort_order: Number(item.sort_order ?? index),
-    }))
-    .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
 }
 
 function normalizeSocialProfiles(value: unknown): SocialProfile[] {

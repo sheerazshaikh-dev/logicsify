@@ -37,10 +37,10 @@ import { useEffect, useState } from "react";
 import { PageHero } from "@/components/page-hero";
 import { SiteLayout } from "@/components/site-layout";
 import {
-  getCmsContentList,
+  getPublicTeamMembers,
   getPublicSiteSettings,
-  type CmsContentItem,
   type PublicSiteSettings,
+  type PublicTeamMember,
 } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/about")({
@@ -290,16 +290,16 @@ const qaPractices = [
 ];
 
 function AboutPage() {
-  const [team, setTeam] = useState<CmsContentItem[]>([]);
+  const [team, setTeam] = useState<PublicTeamMember[]>([]);
   const [settings, setSettings] = useState<PublicSiteSettings>({});
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
     let active = true;
-    Promise.all([getCmsContentList("team"), getPublicSiteSettings()])
+    Promise.all([getPublicTeamMembers("about"), getPublicSiteSettings()])
       .then(([members, site]) => {
         if (!active) return;
-        setTeam(members.filter((member) => member.title && member.content_json?.role));
+        setTeam(members);
         setSettings(site);
       })
       .catch(() => undefined);
@@ -543,53 +543,50 @@ function AboutPage() {
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {team.map((member) => {
-                const skills = Array.isArray(member.content_json?.skills)
-                  ? member.content_json.skills.map(String)
-                  : [];
-                const linkedIn = String(member.content_json?.linkedin_url || "");
                 return (
                   <article
                     key={member.slug}
                     data-reveal
                     className="rounded-2xl border border-black/5 bg-white p-5"
                   >
-                    {member.featured_image ? (
+                    {member.avatar_url ? (
                       <img
-                        src={member.featured_image}
-                        alt={member.title}
+                        src={member.avatar_url}
+                        alt={member.display_name}
                         loading="lazy"
-                        className="mb-5 aspect-square w-full rounded-xl object-cover"
+                        className="mb-5 aspect-square w-full rounded-xl object-cover object-top"
                       />
                     ) : null}
-                    <h3 className="text-xl font-semibold">{member.title}</h3>
-                    <p className="mt-1 text-sm text-brand-red">
-                      {String(member.content_json?.role || "")}
-                    </p>
-                    {member.content_json?.body ? (
-                      <div
-                        className="public-prose mt-4 text-sm"
-                        dangerouslySetInnerHTML={{ __html: String(member.content_json.body) }}
-                      />
+                    <h3 className="text-xl font-semibold">{member.display_name}</h3>
+                    {member.headline ? (
+                      <p className="mt-1 text-sm text-brand-red">{member.headline}</p>
                     ) : null}
-                    {skills.length ? (
+                    {member.bio ? (
+                      <p className="mt-4 whitespace-pre-line text-sm leading-6 text-ink-soft">
+                        {member.bio}
+                      </p>
+                    ) : null}
+                    {member.skills_json.length ? (
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {skills.map((skill) => (
+                        {member.skills_json.map((skill) => (
                           <span key={skill} className="rounded-full bg-lavender px-2.5 py-1 text-xs">
                             {skill}
                           </span>
                         ))}
                       </div>
                     ) : null}
-                    {linkedIn ? (
-                      <a
-                        href={linkedIn}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-5 inline-flex items-center gap-1 text-sm font-semibold"
-                      >
-                        LinkedIn <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
+                    {member.locations.length ? (
+                      <p className="mt-4 text-xs text-ink-soft">
+                        {member.locations.map((location) => location.name).join(" · ")}
+                      </p>
                     ) : null}
+                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
+                      {member.email ? <a href={`mailto:${member.email}`}>Email</a> : null}
+                      {member.phone ? <a href={`tel:${member.phone}`}>Call</a> : null}
+                      {member.whatsapp ? <a href={`https://wa.me/${member.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a> : null}
+                      {member.links_json.map((link) => <a key={`${link.label}-${link.url}`} href={link.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1">{link.label}<ExternalLink className="h-3.5 w-3.5" /></a>)}
+                      {member.connect_enabled ? <Link to="/connect/$slug" params={{ slug: member.slug }} className="inline-flex items-center gap-1">Connect <ArrowRight className="h-3.5 w-3.5" /></Link> : null}
+                    </div>
                   </article>
                 );
               })}

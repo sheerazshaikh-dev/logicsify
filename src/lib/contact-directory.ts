@@ -50,7 +50,10 @@ export function getContactEmails(settings: PublicSiteSettings) {
   };
 }
 
-export function getSiteLocations(settings: PublicSiteSettings): SiteLocation[] {
+export function getSiteLocations(
+  settings: PublicSiteSettings,
+  placement?: "contact" | "footer" | "connect",
+): SiteLocation[] {
   const configured = Array.isArray(settings.locations)
     ? settings.locations
         .filter((location): location is SiteLocation => Boolean(location && typeof location === "object"))
@@ -61,7 +64,13 @@ export function getSiteLocations(settings: PublicSiteSettings): SiteLocation[] {
           enabled: location.enabled !== false,
           sort_order: Number(location.sort_order ?? index),
         }))
-        .filter((location) => location.enabled !== false)
+        .filter((location) => {
+          if (location.enabled === false) return false;
+          if (placement === "contact") return location.show_on_contact !== false;
+          if (placement === "footer") return location.show_in_footer !== false;
+          if (placement === "connect") return location.show_on_connect !== false;
+          return true;
+        })
         .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
     : [];
 

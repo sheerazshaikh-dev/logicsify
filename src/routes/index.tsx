@@ -23,7 +23,12 @@ import {
   Megaphone,
 } from "lucide-react";
 import { coreServices, otherServices } from "@/lib/site-data";
-import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
+import {
+  getCmsContentList,
+  getPublicTeamMembers,
+  type CmsContentItem,
+  type PublicTeamMember,
+} from "@/lib/logicsify-api";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
 import { trackAnalytics } from "@/lib/analytics";
@@ -915,10 +920,10 @@ function EstimatorPreview() {
 }
 
 function TeamCredibility() {
-  const [team, setTeam] = useState<CmsContentItem[]>([]);
-  useEffect(() => { let active = true; getCmsContentList("team").then((items) => active && setTeam(items.filter((item) => item.title && item.content_json?.role))).catch(() => undefined); return () => { active = false; }; }, []);
+  const [team, setTeam] = useState<PublicTeamMember[]>([]);
+  useEffect(() => { let active = true; getPublicTeamMembers("home").then((items) => active && setTeam(items)).catch(() => undefined); return () => { active = false; }; }, []);
   if (!team.length) return null;
-  return <section id="team" className="py-24 md:py-32"><div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow mb-4">Operating credibility</p><h2 className="fluid-h2">The people responsible for the work.</h2></div><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{team.slice(0, 4).map((member) => <article key={member.slug} className="rounded-2xl border border-black/5 bg-white p-5">{member.featured_image ? <img src={member.featured_image} alt={member.title} loading="lazy" className="mb-5 aspect-square w-full rounded-xl object-cover" /> : null}<h3 className="text-lg font-semibold">{member.title}</h3><p className="mt-1 text-sm text-ink-soft">{String(member.content_json?.role || "")}</p></article>)}</div><Link to="/about" hash="team" className="mt-8 inline-flex items-center gap-2 font-semibold">Meet the team <ArrowRight className="h-4 w-4" /></Link></div></section>;
+  return <section id="team" className="py-24 md:py-32"><div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow mb-4">Operating credibility</p><h2 className="fluid-h2">The people responsible for the work.</h2></div><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{team.slice(0, 4).map((member) => <article key={member.slug} className="rounded-2xl border border-black/5 bg-white p-5">{member.avatar_url ? <img src={member.avatar_url} alt={member.display_name} loading="lazy" className="mb-5 aspect-square w-full rounded-xl object-cover object-top" /> : null}<h3 className="text-lg font-semibold">{member.display_name}</h3>{member.headline ? <p className="mt-1 text-sm text-ink-soft">{member.headline}</p> : null}{member.locations.length ? <p className="mt-3 text-xs text-ink-soft">{member.locations.map((location) => location.name).join(" · ")}</p> : null}{member.connect_enabled ? <Link to="/connect/$slug" params={{ slug: member.slug }} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold">Connect <ArrowRight className="h-4 w-4" /></Link> : null}</article>)}</div><Link to="/about" hash="team" className="mt-8 inline-flex items-center gap-2 font-semibold">Meet the team <ArrowRight className="h-4 w-4" /></Link></div></section>;
 }
 
 function ResourcesPreview() {

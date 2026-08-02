@@ -7,6 +7,7 @@ import {
   connectProfilePlatformMark,
   resolveConnectProfilePlatform,
 } from "@/lib/connect-profile-links";
+import { fieldVisible } from "@/lib/team-connect";
 
 export type ConnectProfileExportFormat = "jpg" | "pdf";
 
@@ -239,7 +240,8 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   if (!context) throw new Error("Your browser could not create the downloadable card.");
 
   const coverSource = profile.global_cover_url || profile.cover_url;
-  const avatarSource = profile.avatar_url;
+  const showAvatar = fieldVisible(profile, "avatar", "export");
+  const avatarSource = showAvatar ? profile.avatar_url : null;
   const [coverResource, avatarResource, qrResource] = await Promise.all([
     loadImage(exportMediaUrl(coverSource)),
     loadImage(exportMediaUrl(avatarSource)),
@@ -295,45 +297,49 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   }
   context.restore();
 
-  context.save();
-  context.beginPath();
-  context.arc(226, 474, 134, 0, Math.PI * 2);
-  context.fillStyle = "#FFFFFF";
-  context.fill();
-  context.beginPath();
-  context.arc(226, 474, 122, 0, Math.PI * 2);
-  context.clip();
-  if (avatar) {
-    drawImageCover(context, avatar, 104, 352, 244, 244);
-  } else {
-    const avatarGradient = context.createLinearGradient(104, 352, 348, 596);
-    avatarGradient.addColorStop(0, RED);
-    avatarGradient.addColorStop(1, GOLD);
-    context.fillStyle = avatarGradient;
-    context.fillRect(104, 352, 244, 244);
+  if (showAvatar) {
+    context.save();
+    context.beginPath();
+    context.arc(226, 474, 134, 0, Math.PI * 2);
     context.fillStyle = "#FFFFFF";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.font = "800 94px Sora, Arial, sans-serif";
-    context.fillText(profile.display_name.slice(0, 1).toUpperCase(), 226, 480);
+    context.fill();
+    context.beginPath();
+    context.arc(226, 474, 122, 0, Math.PI * 2);
+    context.clip();
+    if (avatar) {
+      drawImageCover(context, avatar, 104, 352, 244, 244);
+    } else {
+      const avatarGradient = context.createLinearGradient(104, 352, 348, 596);
+      avatarGradient.addColorStop(0, RED);
+      avatarGradient.addColorStop(1, GOLD);
+      context.fillStyle = avatarGradient;
+      context.fillRect(104, 352, 244, 244);
+      context.fillStyle = "#FFFFFF";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = "800 94px Sora, Arial, sans-serif";
+      context.fillText(profile.display_name.slice(0, 1).toUpperCase(), 226, 480);
+    }
+    context.restore();
   }
-  context.restore();
 
+  const identityX = showAvatar ? 390 : 88;
+  const identityWidth = showAvatar ? 700 : 1064;
   context.fillStyle = INK;
-  const nameSize = fitText(context, profile.display_name, 690, 58, 38, 800);
+  const nameSize = fitText(context, profile.display_name, identityWidth, 58, 38, 800);
   context.font = `800 ${nameSize}px Sora, Inter, Arial, sans-serif`;
-  context.fillText(profile.display_name, 390, 548, 700);
-  if (profile.headline) {
+  context.fillText(profile.display_name, identityX, 548, identityWidth);
+  if (profile.headline && fieldVisible(profile, "headline", "export")) {
     context.fillStyle = "#6F6679";
-    const headlineSize = fitText(context, profile.headline, 700, 29, 20, 500);
+    const headlineSize = fitText(context, profile.headline, identityWidth, 29, 20, 500);
     context.font = `500 ${headlineSize}px Inter, Arial, sans-serif`;
-    context.fillText(profile.headline, 390, 596, 700);
+    context.fillText(profile.headline, identityX, 596, identityWidth);
   }
-  const accentGradient = context.createLinearGradient(390, 629, 650, 629);
+  const accentGradient = context.createLinearGradient(identityX, 629, identityX + 260, 629);
   accentGradient.addColorStop(0, RED);
   accentGradient.addColorStop(1, GOLD);
   context.fillStyle = accentGradient;
-  roundedRect(context, 390, 628, 235, 10, 5);
+  roundedRect(context, identityX, 628, 235, 10, 5);
   context.fill();
 
   context.fillStyle = INK;
@@ -344,26 +350,32 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.fillText("Direct ways to reach me", 88, 739);
 
   let contactY = 772;
-  const phone = profile.phone || profile.whatsapp;
+  const phone = fieldVisible(profile, "phone", "export")
+    ? profile.phone
+    : fieldVisible(profile, "whatsapp", "export")
+      ? profile.whatsapp
+      : null;
   if (phone) {
     drawContactRow(context, "phone", "Phone", phone, 88, contactY, 1064);
     contactY += 110;
   }
-  if (profile.email) {
+  if (profile.email && fieldVisible(profile, "email", "export")) {
     drawContactRow(context, "email", "Email", profile.email, 88, contactY, 1064);
     contactY += 110;
   }
-  if (profile.address) {
+  if (profile.address && fieldVisible(profile, "address", "export")) {
     drawContactRow(context, "address", "Address", profile.address, 88, contactY, 1064);
     contactY += 130;
   }
 
-  const savedSocialLinks = profile.links_json.filter((link) => link.label && link.url);
+  const savedSocialLinks = fieldVisible(profile, "social_links", "export")
+    ? profile.links_json.filter((link) => link.label && link.url)
+    : [];
   const hasWhatsappLink = savedSocialLinks.some(
     (link) => resolveConnectProfilePlatform(link) === "whatsapp",
   );
   const socialLinks =
-    profile.whatsapp && !hasWhatsappLink
+    profile.whatsapp && fieldVisible(profile, "whatsapp", "export") && !hasWhatsappLink
       ? [
           {
             label: "WhatsApp",

@@ -157,6 +157,28 @@ function ConnectProfilePage() {
             </div>
           ) : null}
 
+          {profile.assigned_locations?.length ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {profile.assigned_locations.map((location) => (
+                <span
+                  key={location.id}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm"
+                >
+                  <MapPin className="h-3.5 w-3.5 text-[#FE3434]" />
+                  {location.name}
+                  {location.phone ? (
+                    <a
+                      href={`tel:${location.phone.replace(/[^+\d]/g, "")}`}
+                      className="text-[#190A2F] hover:text-[#FE3434]"
+                    >
+                      {location.phone}
+                    </a>
+                  ) : null}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             {actions.map(({ label, href, Icon }) => (
               <a
@@ -221,6 +243,73 @@ function ConnectProfilePage() {
                       </span>
                       <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-[#190A2F]" />
                     </a>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
+
+          {profile.other_locations?.length ? (
+            <section className="mt-8 border-t border-slate-100 pt-7">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-slate-400">
+                  Other locations
+                </p>
+                <h2 className="mt-1 text-lg font-semibold">Connect with another Logicsify office</h2>
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {profile.other_locations.map((location) => {
+                  const mapUrl =
+                    location.map_url ||
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      [location.address, location.city, location.country]
+                        .filter(Boolean)
+                        .join(", ")
+                        .replace(/\n/g, ", "),
+                    )}`;
+                  return (
+                    <article
+                      key={location.id}
+                      className="rounded-2xl border border-slate-200 bg-[#faf8fc] p-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
+                          <MapPin className="h-4 w-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-[#190A2F]">{location.name}</h3>
+                          {[location.city, location.country].filter(Boolean).length ? (
+                            <p className="mt-1 text-xs text-slate-400">
+                              {[location.city, location.country].filter(Boolean).join(", ")}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                      {location.phone ? (
+                        <a
+                          href={`tel:${location.phone.replace(/[^+\d]/g, "")}`}
+                          className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#190A2F]"
+                        >
+                          <Phone className="h-4 w-4 text-[#FE3434]" />
+                          {location.phone}
+                        </a>
+                      ) : null}
+                      {location.address ? (
+                        <p className="mt-3 whitespace-pre-line text-xs leading-5 text-slate-500">
+                          {location.address}
+                        </p>
+                      ) : null}
+                      {location.address || location.map_url ? (
+                        <a
+                          href={mapUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FE3434]"
+                        >
+                          Open map <ArrowUpRight className="h-3.5 w-3.5" />
+                        </a>
+                      ) : null}
+                    </article>
                   );
                 })}
               </div>

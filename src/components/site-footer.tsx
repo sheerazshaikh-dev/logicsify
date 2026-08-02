@@ -62,7 +62,7 @@ export function SiteFooter() {
   }, []);
 
   const emails = getContactEmails(settings);
-  const locations = getSiteLocations(settings);
+  const locations = getSiteLocations(settings, "footer");
   const socialProfiles = getSocialProfiles(settings);
   const phone = settings.phone || "+966 54 441 5405";
   const description =

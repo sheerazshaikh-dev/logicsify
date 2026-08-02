@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  ChevronDown,
+  ChevronUp,
   Copy,
   Download,
   ExternalLink,
@@ -7,11 +9,14 @@ import {
   FileText,
   ImagePlus,
   Loader2,
+  MapPin,
+  Palette,
   Plus,
   QrCode as QrIcon,
   Trash2,
+  Users,
 } from "lucide-react";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { toast } from "sonner";
 import { MediaPicker } from "@/components/cms/media-picker";
 import {
@@ -32,15 +37,25 @@ import type { ConnectProfileExportFormat } from "@/lib/connect-profile-export";
 import { CONNECT_PROFILE_PLATFORM_OPTIONS } from "@/lib/connect-profile-links";
 import { downloadQrCode } from "@/lib/qr-code";
 import {
+  DEFAULT_CONNECT_PROFILE_VISIBILITY,
+  normalizeConnectProfileVisibility,
+  TEAM_CONNECT_DESTINATIONS,
+  TEAM_CONNECT_FIELDS,
+  TEAM_CONNECT_FIELD_LABELS,
+} from "@/lib/team-connect";
+import {
   createConnectProfile,
   deleteConnectProfile,
   getConnectProfileSettings,
+  getTeamConnectLocations,
   listConnectProfiles,
   saveConnectProfileSettings,
+  saveTeamConnectLocations,
   updateConnectProfile,
   type ConnectProfile,
   type ConnectProfileLink,
 } from "@/lib/admin-api";
+import type { SiteLocation } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/admin/connect-profiles")({ component: ConnectProfilesPage });
 const emptyProfile: Partial<ConnectProfile> = {
@@ -55,6 +70,10 @@ const emptyProfile: Partial<ConnectProfile> = {
   whatsapp: "",
   address: "",
   links_json: [],
+  skills_json: [],
+  location_ids_json: [],
+  visibility_json: DEFAULT_CONNECT_PROFILE_VISIBILITY,
+  sort_order: 0,
   theme_json: { accent: "#FE3434" },
   status: "draft",
   is_unlisted: true,
@@ -81,8 +100,11 @@ function createAvailableSlug(value: string, existingSlugs: string[]) {
   return `${base}-${suffix}`;
 }
 
-function ConnectProfilesPage() {
+export function ConnectProfilesPage() {
+  const [tab, setTab] = useState<"people" | "locations" | "appearance">("people");
   const [items, setItems] = useState<ConnectProfile[]>([]);
+  const [locations, setLocations] = useState<SiteLocation[]>([]);
+  const [savingLocations, setSavingLocations] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<ConnectProfile> | null>(null);
   const [saving, setSaving] = useState(false);
@@ -93,7 +115,14 @@ function ConnectProfilesPage() {
   const [savingGlobalCover, setSavingGlobalCover] = useState(false);
   const refresh = () =>
     listConnectProfiles()
-      .then((r) => setItems(r.data))
+      .then((r) =>
+        setItems(
+          r.data.map((item) => ({
+            ...item,
+            visibility_json: normalizeConnectProfileVisibility(item.visibility_json),
+          })),
+        ),
+      )
       .catch((e) => toast.error(e instanceof Error ? e.message : "Could not load profiles."))
       .finally(() => setLoading(false));
   useEffect(() => {
@@ -103,7 +132,35 @@ function ConnectProfilesPage() {
       .catch((error) =>
         toast.error(error instanceof Error ? error.message : "Could not load the global cover."),
       );
+    void getTeamConnectLocations()
+      .then(setLocations)
+      .catch((error) =>
+        toast.error(error instanceof Error ? error.message : "Could not load locations."),
+      );
   }, []);
+
+  async function saveLocations() {
+    setSavingLocations(true);
+    try {
+      const result = await saveTeamConnectLocations(locations);
+      setLocations(result.locations);
+      toast.success("Location visibility and contact details saved.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save locations.");
+    } finally {
+      setSavingLocations(false);
+    }
+  }
+
+  function openNewProfile() {
+    setEditing({
+      ...emptyProfile,
+      visibility_json: normalizeConnectProfileVisibility(DEFAULT_CONNECT_PROFILE_VISIBILITY),
+      location_ids_json: [],
+      skills_json: [],
+      links_json: [],
+    });
+  }
 
   async function updateGlobalCover(url: string) {
     setSavingGlobalCover(true);
@@ -150,17 +207,39 @@ function ConnectProfilesPage() {
   return (
     <AdminShell>
       <AdminPageHeader
-        eyebrow="Reusable module"
-        title="Connect Profiles"
-        description="Create shareable digital profiles. Avatars and the shared cover are managed through the Media Library."
+        eyebrow="People and offices"
+        title="Team / Connect"
+        description="Manage each person once, assign locations, and control exactly where every member and field appears."
         actions={
-          <AdminButton onClick={() => setEditing({ ...emptyProfile })}>
+          tab === "people" ? <AdminButton onClick={openNewProfile}>
             <Plus className="h-4 w-4" />
-            New profile
-          </AdminButton>
+            New team member
+          </AdminButton> : tab === "locations" ? (
+            <AdminButton onClick={() => void saveLocations()} disabled={savingLocations}>
+              {savingLocations ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {savingLocations ? "Saving…" : "Save locations"}
+            </AdminButton>
+          ) : undefined
         }
       />
-      <AdminCard className="mb-7 overflow-hidden">
+      <div className="mb-7 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+        {([
+          ["people", "People & visibility", Users],
+          ["locations", "Locations", MapPin],
+          ["appearance", "Global cover", Palette],
+        ] as const).map(([id, label, Icon]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setTab(id)}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${tab === id ? "bg-[#190A2F] text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+          >
+            <Icon className={`h-4 w-4 ${tab === id ? "text-[#FDBE02]" : "text-slate-400"}`} />
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === "appearance" ? <AdminCard className="mb-7 overflow-hidden">
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
           <div
             className="relative min-h-56 overflow-hidden bg-[#190A2F] bg-cover bg-center"
@@ -215,14 +294,17 @@ function ConnectProfilesPage() {
             </div>
           </div>
         </div>
-      </AdminCard>
-      <AdminCard>
+      </AdminCard> : null}
+      {tab === "locations" ? (
+        <LocationsEditor locations={locations} setLocations={setLocations} />
+      ) : null}
+      {tab === "people" ? <AdminCard>
         {loading ? (
           <AdminLoading />
         ) : items.length === 0 ? (
           <EmptyState
-            title="No connect profiles yet"
-            description="Create a profile, publish it, and share its QR code."
+            title="No team members yet"
+            description="Create one person record, then choose whether it appears on Team pages, a Connect page, or both."
           />
         ) : (
           <div className="divide-y divide-slate-100">
@@ -251,21 +333,39 @@ function ConnectProfilesPage() {
                       ) : null}
                     </div>
                     <p className="mt-1 truncate text-sm text-slate-500">/connect/{item.slug}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {item.visibility_json.placements.home ? <MiniBadge>Homepage</MiniBadge> : null}
+                      {item.visibility_json.placements.about ? <MiniBadge>About team</MiniBadge> : null}
+                      {item.visibility_json.placements.connect ? <MiniBadge>Connect page</MiniBadge> : null}
+                      {item.location_ids_json.length ? (
+                        <MiniBadge>
+                          {item.location_ids_json.length} location{item.location_ids_json.length === 1 ? "" : "s"}
+                        </MiniBadge>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <AdminButton variant="secondary" onClick={() => setEditing(item)}>
+                  <AdminButton
+                    variant="secondary"
+                    onClick={() =>
+                      setEditing({
+                        ...item,
+                        visibility_json: normalizeConnectProfileVisibility(item.visibility_json),
+                      })
+                    }
+                  >
                     Edit
                   </AdminButton>
-                  <AdminButton variant="secondary" onClick={() => setQr(item)}>
+                  {item.visibility_json.placements.connect ? <AdminButton variant="secondary" onClick={() => setQr(item)}>
                     <QrIcon className="h-4 w-4" />
                     QR code
-                  </AdminButton>
-                  <AdminButton variant="secondary" onClick={() => setDownloadProfile(item)}>
+                  </AdminButton> : null}
+                  {item.visibility_json.placements.connect ? <AdminButton variant="secondary" onClick={() => setDownloadProfile(item)}>
                     <Download className="h-4 w-4" />
                     Download
-                  </AdminButton>
-                  {item.status === "published" ? (
+                  </AdminButton> : null}
+                  {item.status === "published" && item.visibility_json.placements.connect ? (
                     <a
                       href={`/connect/${item.slug}`}
                       target="_blank"
@@ -288,13 +388,14 @@ function ConnectProfilesPage() {
             ))}
           </div>
         )}
-      </AdminCard>
+      </AdminCard> : null}
       <ProfileEditor
         value={editing}
         setValue={setEditing}
         save={save}
         saving={saving}
         existingSlugs={items.filter((item) => item.id !== editing?.id).map((item) => item.slug)}
+        locations={locations}
       />
       <QrModal profile={qr} close={() => setQr(null)} />
       <DownloadModal profile={downloadProfile} close={() => setDownloadProfile(null)} />
@@ -319,12 +420,14 @@ function ProfileEditor({
   save,
   saving,
   existingSlugs,
+  locations,
 }: {
   value: Partial<ConnectProfile> | null;
   setValue: Dispatch<SetStateAction<Partial<ConnectProfile> | null>>;
   save: () => void;
   saving: boolean;
   existingSlugs: string[];
+  locations: SiteLocation[];
 }) {
   if (!value) return null;
   const set = (key: keyof ConnectProfile, v: unknown) =>
@@ -345,6 +448,25 @@ function ProfileEditor({
       };
     });
   const links = value.links_json || [];
+  const visibility = normalizeConnectProfileVisibility(value.visibility_json);
+  const assignedLocationIds = value.location_ids_json || [];
+  const setPlacement = (placement: keyof ConnectProfile["visibility_json"]["placements"], checked: boolean) =>
+    set("visibility_json", {
+      ...visibility,
+      placements: { ...visibility.placements, [placement]: checked },
+    });
+  const setFieldVisibility = (
+    field: keyof ConnectProfile["visibility_json"]["fields"],
+    destination: "team" | "connect" | "export",
+    checked: boolean,
+  ) =>
+    set("visibility_json", {
+      ...visibility,
+      fields: {
+        ...visibility.fields,
+        [field]: { ...visibility.fields[field], [destination]: checked },
+      },
+    });
   const setLink = (i: number, key: keyof ConnectProfileLink, v: string) =>
     set(
       "links_json",
@@ -353,8 +475,8 @@ function ProfileEditor({
   return (
     <AdminModal
       open
-      title={value.id ? "Edit connect profile" : "New connect profile"}
-      description="Blank optional fields are hidden automatically. Logicsify branding and the company website are added for you."
+      title={value.id ? "Edit team member" : "New team member"}
+      description="Enter the person once, then use the visibility controls to choose where each detail appears."
       onClose={() => setValue(null)}
       width="max-w-5xl"
     >
@@ -398,6 +520,24 @@ function ProfileEditor({
             onChange={(e) => set("bio", e.target.value)}
           />
         </div>
+        <div className="md:col-span-2">
+          <FieldLabel>Skills</FieldLabel>
+          <textarea
+            className={adminTextareaClass}
+            rows={3}
+            value={(value.skills_json || []).join("\n")}
+            onChange={(event) =>
+              set(
+                "skills_json",
+                event.target.value
+                  .split("\n")
+                  .map((skill) => skill.trim())
+                  .filter(Boolean),
+              )
+            }
+            placeholder="One skill per line"
+          />
+        </div>
         <div>
           <FieldLabel>Status</FieldLabel>
           <select
@@ -409,6 +549,17 @@ function ProfileEditor({
             <option value="published">Published</option>
             <option value="archived">Archived</option>
           </select>
+        </div>
+        <div>
+          <FieldLabel>Team display order</FieldLabel>
+          <input
+            className={adminInputClass}
+            type="number"
+            min={0}
+            max={9999}
+            value={value.sort_order || 0}
+            onChange={(event) => set("sort_order", Number(event.target.value || 0))}
+          />
         </div>
         <div className="space-y-3">
           <Check
@@ -428,6 +579,111 @@ function ProfileEditor({
             disabled={Boolean(value.is_unlisted)}
             onChange={(v) => set("noindex", v)}
           />
+        </div>
+      </div>
+      <div className="mt-7 border-t border-slate-200 pt-6">
+        <h3 className="font-semibold text-[#190A2F]">Where this person appears</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Publishing controls availability. These toggles control the exact public placements.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <PlacementToggle
+            label="Homepage team"
+            description="Eligible for the homepage team preview."
+            checked={visibility.placements.home}
+            onChange={(checked) => setPlacement("home", checked)}
+          />
+          <PlacementToggle
+            label="About team"
+            description="Shown in the full team section."
+            checked={visibility.placements.about}
+            onChange={(checked) => setPlacement("about", checked)}
+          />
+          <PlacementToggle
+            label="Connect page"
+            description="Enables the direct URL, QR and exports."
+            checked={visibility.placements.connect}
+            onChange={(checked) => setPlacement("connect", checked)}
+          />
+        </div>
+      </div>
+
+      <div className="mt-7 border-t border-slate-200 pt-6">
+        <h3 className="font-semibold text-[#190A2F]">Assigned locations</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Assigned offices can appear with the member. Every other enabled office is shown under
+          “Other locations” on their live Connect page only.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {locations.map((location) => (
+            <PlacementToggle
+              key={location.id}
+              label={location.name}
+              description={[location.city, location.country].filter(Boolean).join(", ") || "Business location"}
+              checked={assignedLocationIds.includes(location.id)}
+              onChange={(checked) =>
+                set(
+                  "location_ids_json",
+                  checked
+                    ? [...assignedLocationIds, location.id]
+                    : assignedLocationIds.filter((id) => id !== location.id),
+                )
+              }
+            />
+          ))}
+          {!locations.length ? (
+            <p className="text-sm text-slate-400">Add locations from the Locations tab first.</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-7 border-t border-slate-200 pt-6">
+        <h3 className="font-semibold text-[#190A2F]">Field visibility</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Name is always visible. Bio, skills, and the location directory remain web-only and are
+          intentionally excluded from downloads.
+        </p>
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead className="bg-slate-50 text-left text-xs uppercase tracking-[.12em] text-slate-400">
+              <tr>
+                <th className="px-4 py-3">Field</th>
+                {TEAM_CONNECT_DESTINATIONS.map((destination) => (
+                  <th key={destination.id} className="px-4 py-3 text-center">
+                    {destination.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {TEAM_CONNECT_FIELDS.map((field) => (
+                <tr key={field}>
+                  <td className="px-4 py-3 font-medium text-[#190A2F]">
+                    {TEAM_CONNECT_FIELD_LABELS[field]}
+                  </td>
+                  {TEAM_CONNECT_DESTINATIONS.map((destination) => {
+                    const forcedOff =
+                      destination.id === "export" &&
+                      (field === "bio" || field === "skills" || field === "locations");
+                    return (
+                      <td key={destination.id} className="px-4 py-3 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`${TEAM_CONNECT_FIELD_LABELS[field]} on ${destination.label}`}
+                          checked={!forcedOff && visibility.fields[field][destination.id]}
+                          disabled={forcedOff}
+                          onChange={(event) =>
+                            setFieldVisibility(field, destination.id, event.target.checked)
+                          }
+                          className="h-4 w-4 accent-[#FE3434] disabled:opacity-30"
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
       <div className="mt-7 border-t border-slate-200 pt-6">
@@ -496,10 +752,201 @@ function ProfileEditor({
           Cancel
         </AdminButton>
         <AdminButton disabled={saving || !value.display_name || !value.slug} onClick={save}>
-          {saving ? "Saving…" : "Save profile"}
+          {saving ? "Saving…" : "Save team member"}
         </AdminButton>
       </div>
     </AdminModal>
+  );
+}
+
+function MiniBadge({ children }: { children: ReactNode }) {
+  return (
+    <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500">
+      {children}
+    </span>
+  );
+}
+
+function PlacementToggle({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label
+      className={`flex cursor-pointer items-start justify-between gap-4 rounded-2xl border p-4 transition ${checked ? "border-[#FE3434]/30 bg-[#FE3434]/5" : "border-slate-200 bg-white"}`}
+    >
+      <span>
+        <span className="block text-sm font-semibold text-[#190A2F]">{label}</span>
+        <span className="mt-1 block text-xs leading-5 text-slate-400">{description}</span>
+      </span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="mt-1 h-4 w-4 shrink-0 accent-[#FE3434]"
+      />
+    </label>
+  );
+}
+
+function LocationsEditor({
+  locations,
+  setLocations,
+}: {
+  locations: SiteLocation[];
+  setLocations: Dispatch<SetStateAction<SiteLocation[]>>;
+}) {
+  const patchLocation = (index: number, patch: Partial<SiteLocation>) =>
+    setLocations((current) =>
+      current.map((location, itemIndex) =>
+        itemIndex === index ? { ...location, ...patch } : location,
+      ),
+    );
+  const addLocation = () =>
+    setLocations((current) => [
+      ...current,
+      {
+        id: `location-${Date.now()}`,
+        name: "New location",
+        city: "",
+        country: "",
+        address: "",
+        phone: "",
+        email: "",
+        map_url: "",
+        enabled: true,
+        show_on_contact: true,
+        show_in_footer: true,
+        show_on_connect: true,
+        sort_order: current.length,
+      },
+    ]);
+  const removeLocation = (index: number) => {
+    if (!confirm("Remove this location? Team-member assignments to it will stop displaying.")) return;
+    setLocations((current) =>
+      current
+        .filter((_, itemIndex) => itemIndex !== index)
+        .map((location, itemIndex) => ({ ...location, sort_order: itemIndex })),
+    );
+  };
+  const moveLocation = (index: number, direction: -1 | 1) =>
+    setLocations((current) => {
+      const target = index + direction;
+      if (target < 0 || target >= current.length) return current;
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next.map((location, itemIndex) => ({ ...location, sort_order: itemIndex }));
+    });
+
+  return (
+    <AdminCard>
+      <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-[#190A2F]">Business locations</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage office details and choose independently whether each appears on Contact, Footer,
+            or Connect pages.
+          </p>
+        </div>
+        <AdminButton variant="secondary" onClick={addLocation}>
+          <Plus className="h-4 w-4" /> Add location
+        </AdminButton>
+      </div>
+      <div className="space-y-4 p-5">
+        {!locations.length ? (
+          <EmptyState
+            title="No locations configured"
+            description="Add the first office or regional contact point."
+          />
+        ) : null}
+        {locations.map((location, index) => (
+          <div key={location.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
+                  <MapPin className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="font-semibold text-[#190A2F]">{location.name || `Location ${index + 1}`}</p>
+                  <p className="text-xs text-slate-400">Location {index + 1}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <AdminButton
+                  variant="secondary"
+                  disabled={index === 0}
+                  ariaLabel="Move location up"
+                  onClick={() => moveLocation(index, -1)}
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </AdminButton>
+                <AdminButton
+                  variant="secondary"
+                  disabled={index === locations.length - 1}
+                  ariaLabel="Move location down"
+                  onClick={() => moveLocation(index, 1)}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </AdminButton>
+                <AdminButton variant="danger" onClick={() => removeLocation(index)}>
+                  <Trash2 className="h-4 w-4" /> Remove
+                </AdminButton>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Location name" value={location.name} onChange={(name) => patchLocation(index, { name })} />
+              <Field label="City / region" value={location.city} onChange={(city) => patchLocation(index, { city })} />
+              <Field label="Country" value={location.country} onChange={(country) => patchLocation(index, { country })} />
+              <Field label="Phone number" value={location.phone} onChange={(phone) => patchLocation(index, { phone })} />
+              <Field label="Location email" value={location.email} onChange={(email) => patchLocation(index, { email })} />
+              <Field label="Map URL" value={location.map_url} onChange={(map_url) => patchLocation(index, { map_url })} />
+              <div className="md:col-span-2">
+                <FieldLabel>Street address</FieldLabel>
+                <textarea
+                  rows={3}
+                  value={location.address || ""}
+                  onChange={(event) => patchLocation(index, { address: event.target.value })}
+                  className={adminTextareaClass}
+                />
+              </div>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <PlacementToggle
+                label="Location enabled"
+                description="Master switch for all public uses."
+                checked={location.enabled !== false}
+                onChange={(enabled) => patchLocation(index, { enabled })}
+              />
+              <PlacementToggle
+                label="Contact page"
+                description="Show this office on Contact."
+                checked={location.show_on_contact !== false}
+                onChange={(show_on_contact) => patchLocation(index, { show_on_contact })}
+              />
+              <PlacementToggle
+                label="Footer"
+                description="Show this office in the footer."
+                checked={location.show_in_footer !== false}
+                onChange={(show_in_footer) => patchLocation(index, { show_in_footer })}
+              />
+              <PlacementToggle
+                label="Connect pages"
+                description="Allow it under Other locations."
+                checked={location.show_on_connect !== false}
+                onChange={(show_on_connect) => patchLocation(index, { show_on_connect })}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </AdminCard>
   );
 }
 

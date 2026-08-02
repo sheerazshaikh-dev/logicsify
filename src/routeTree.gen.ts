@@ -50,6 +50,7 @@ import { Route as AdminSecurityRouteImport } from './routes/admin/security'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminTeamConnectRouteImport } from './routes/admin/team-connect'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
 import { Route as AdminTrashRouteImport } from './routes/admin/trash'
 import { Route as ComparisonsIndexRouteImport } from './routes/comparisons/index'
@@ -274,6 +275,11 @@ const AdminTeamRoute = AdminTeamRouteImport.update({
   path: '/admin/team',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTeamConnectRoute = AdminTeamConnectRouteImport.update({
+  id: '/admin/team-connect',
+  path: '/admin/team-connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
   id: '/admin/testimonials',
   path: '/admin/testimonials',
@@ -406,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/team-connect': typeof AdminTeamConnectRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
@@ -467,6 +474,7 @@ export interface FileRoutesByTo {
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/team-connect': typeof AdminTeamConnectRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
@@ -529,6 +537,7 @@ export interface FileRoutesById {
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
+  '/admin/team-connect': typeof AdminTeamConnectRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/admin/trash': typeof AdminTrashRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
@@ -592,6 +601,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
+    | '/admin/team-connect'
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
@@ -653,6 +663,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
+    | '/admin/team-connect'
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
@@ -714,6 +725,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/settings'
     | '/admin/team'
+    | '/admin/team-connect'
     | '/admin/testimonials'
     | '/admin/trash'
     | '/comparisons/$slug'
@@ -776,6 +788,7 @@ export interface RootRouteChildren {
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
+  AdminTeamConnectRoute: typeof AdminTeamConnectRoute
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   AdminTrashRoute: typeof AdminTrashRoute
   ComparisonsSlugRoute: typeof ComparisonsSlugRoute
@@ -1086,6 +1099,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/team-connect': {
+      id: '/admin/team-connect'
+      path: '/admin/team-connect'
+      fullPath: '/admin/team-connect'
+      preLoaderRoute: typeof AdminTeamConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/testimonials': {
       id: '/admin/testimonials'
       path: '/admin/testimonials'
@@ -1256,6 +1276,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminServicesRoute: AdminServicesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
+  AdminTeamConnectRoute: AdminTeamConnectRoute,
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   AdminTrashRoute: AdminTrashRoute,
   ComparisonsSlugRoute: ComparisonsSlugRoute,

@@ -155,6 +155,10 @@ export type PublicConnectProfile = {
   address?: string | null;
   global_cover_url?: string | null;
   links_json: Array<{ label: string; url: string; icon?: string }>;
+  skills_json: string[];
+  location_ids_json: string[];
+  assigned_locations: SiteLocation[];
+  other_locations: SiteLocation[];
   theme_json: { accent?: string };
   is_unlisted: boolean;
   noindex: boolean;
@@ -162,6 +166,28 @@ export type PublicConnectProfile = {
 
 export function getConnectProfile(slug: string) {
   return request<PublicConnectProfile>(`public/connect/${encodeURIComponent(slug)}`);
+}
+
+export type PublicTeamMember = {
+  id: number;
+  slug: string;
+  display_name: string;
+  headline?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  address?: string | null;
+  links_json: Array<{ label: string; url: string; icon?: string }>;
+  skills_json: string[];
+  locations: SiteLocation[];
+  connect_enabled: boolean;
+  sort_order: number;
+};
+
+export function getPublicTeamMembers(placement: "home" | "about") {
+  return request<PublicTeamMember[]>(`public/team-directory?placement=${placement}`);
 }
 
 export type PublicMenuItem = {
@@ -348,6 +374,9 @@ export type SiteLocation = {
   contact_role?: string;
   map_url?: string;
   enabled?: boolean;
+  show_on_contact?: boolean;
+  show_in_footer?: boolean;
+  show_on_connect?: boolean;
   sort_order?: number;
 };
 

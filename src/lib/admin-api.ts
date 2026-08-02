@@ -1,4 +1,4 @@
-import { API_BASE, type CodeSnippet } from "@/lib/logicsify-api";
+import { API_BASE, type CodeSnippet, type SiteLocation } from "@/lib/logicsify-api";
 
 export const ADMIN_TOKEN_KEY = "logicsify_admin_token";
 
@@ -307,6 +307,22 @@ export type TrashItem = {
 };
 
 export type ConnectProfileLink = { label: string; url: string; icon?: string };
+export type ConnectProfileDestination = "team" | "connect" | "export";
+export type ConnectProfileField =
+  | "avatar"
+  | "headline"
+  | "bio"
+  | "email"
+  | "phone"
+  | "whatsapp"
+  | "address"
+  | "social_links"
+  | "locations"
+  | "skills";
+export type ConnectProfileVisibility = {
+  placements: { home: boolean; about: boolean; connect: boolean };
+  fields: Record<ConnectProfileField, Record<ConnectProfileDestination, boolean>>;
+};
 export type ConnectProfile = {
   id: number;
   slug: string;
@@ -324,6 +340,10 @@ export type ConnectProfile = {
   global_cover_url?: string | null;
   links_json: ConnectProfileLink[];
   theme_json: { accent?: string };
+  skills_json: string[];
+  location_ids_json: string[];
+  visibility_json: ConnectProfileVisibility;
+  sort_order: number;
   status: "draft" | "published" | "archived";
   is_unlisted: boolean;
   noindex: boolean;
@@ -376,6 +396,17 @@ export function saveConnectProfileSettings(values: ConnectProfileSettings) {
     method: "PUT",
     body: JSON.stringify(values),
   }) as Promise<{ saved: boolean; global_cover_url: string }>;
+}
+
+export function getTeamConnectLocations() {
+  return adminRequest<SiteLocation[]>("connect-profiles/locations") as Promise<SiteLocation[]>;
+}
+
+export function saveTeamConnectLocations(locations: SiteLocation[]) {
+  return adminRequest<{ saved: boolean; locations: SiteLocation[] }>(
+    "connect-profiles/locations",
+    { method: "PUT", body: JSON.stringify({ locations }) },
+  ) as Promise<{ saved: boolean; locations: SiteLocation[] }>;
 }
 
 export type AuditLog = {

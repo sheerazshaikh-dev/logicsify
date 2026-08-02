@@ -97,7 +97,7 @@ function ContactPage() {
   }, []);
 
   const emails = getContactEmails(settings);
-  const locations = getSiteLocations(settings);
+  const locations = getSiteLocations(settings, "contact");
   const socialProfiles = getSocialProfiles(settings);
   const primaryPhone = settings.phone || locations.find((location) => location.phone)?.phone || "";
 
