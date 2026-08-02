@@ -50,26 +50,6 @@ function drawImageCover(
   context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
 }
 
-function drawImageContain(
-  context: CanvasRenderingContext2D,
-  image: HTMLImageElement,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
-  const renderedWidth = image.naturalWidth * scale;
-  const renderedHeight = image.naturalHeight * scale;
-  context.drawImage(
-    image,
-    x + (width - renderedWidth) / 2,
-    y + (height - renderedHeight) / 2,
-    renderedWidth,
-    renderedHeight,
-  );
-}
-
 type LoadedImage = {
   image: HTMLImageElement;
   release: () => void;
@@ -127,43 +107,25 @@ function drawContactIcon(
   x: number,
   y: number,
 ) {
+  const paths = {
+    phone: [
+      "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z",
+    ],
+    email: [
+      "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z",
+      "m22 6-10 7L2 6",
+    ],
+    address: ["M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z", "M12 10h.01"],
+  } as const;
+
   context.save();
+  context.translate(x - 20, y - 20);
+  context.scale(40 / 24, 40 / 24);
   context.strokeStyle = RED;
-  context.lineWidth = 4;
+  context.lineWidth = 2;
   context.lineCap = "round";
   context.lineJoin = "round";
-  if (kind === "email") {
-    roundedRect(context, x - 16, y - 12, 32, 24, 4);
-    context.stroke();
-    context.beginPath();
-    context.moveTo(x - 14, y - 9);
-    context.lineTo(x, y + 2);
-    context.lineTo(x + 14, y - 9);
-    context.stroke();
-  } else if (kind === "phone") {
-    context.beginPath();
-    context.arc(x, y, 15, 0.72, 2.42);
-    context.stroke();
-    context.beginPath();
-    context.moveTo(x + 12, y + 10);
-    context.lineTo(x + 18, y + 16);
-    context.moveTo(x - 12, y - 10);
-    context.lineTo(x - 18, y - 16);
-    context.stroke();
-  } else {
-    context.beginPath();
-    context.arc(x, y - 5, 13, 0, Math.PI * 2);
-    context.stroke();
-    context.beginPath();
-    context.moveTo(x - 9, y + 4);
-    context.lineTo(x, y + 20);
-    context.lineTo(x + 9, y + 4);
-    context.stroke();
-    context.beginPath();
-    context.arc(x, y - 5, 3, 0, Math.PI * 2);
-    context.fillStyle = RED;
-    context.fill();
-  }
+  paths[kind].forEach((path) => context.stroke(new Path2D(path)));
   context.restore();
 }
 
@@ -278,10 +240,9 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
 
   const coverSource = profile.global_cover_url || profile.cover_url;
   const avatarSource = profile.avatar_url;
-  const [coverResource, avatarResource, logoResource, qrResource] = await Promise.all([
+  const [coverResource, avatarResource, qrResource] = await Promise.all([
     loadImage(exportMediaUrl(coverSource)),
     loadImage(exportMediaUrl(avatarSource)),
-    loadImage("/logicsify-logo-dark.png"),
     QRCode.toDataURL(profileUrl, {
       width: 420,
       margin: 2,
@@ -290,12 +251,11 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     }).then(loadImage),
   ]);
 
-  const loadedResources = [coverResource, avatarResource, logoResource, qrResource].filter(
+  const loadedResources = [coverResource, avatarResource, qrResource].filter(
     (resource): resource is LoadedImage => Boolean(resource),
   );
   const cover = coverResource?.image || null;
   const avatar = avatarResource?.image || null;
-  const logo = logoResource?.image || null;
   const qr = qrResource?.image || null;
   if (coverSource && !cover) {
     loadedResources.forEach((resource) => resource.release());
@@ -332,15 +292,8 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.fillRect(45, 38, 1150, 446);
   if (cover) {
     drawImageCover(context, cover, 45, 38, 1150, 446);
-    context.fillStyle = "rgba(25, 10, 47, 0.30)";
-    context.fillRect(45, 38, 1150, 446);
   }
   context.restore();
-
-  roundedRect(context, 82, 76, 386, 92, 27);
-  context.fillStyle = "rgba(255,255,255,0.94)";
-  context.fill();
-  if (logo) drawImageContain(context, logo, 112, 96, 326, 52);
 
   context.save();
   context.beginPath();
