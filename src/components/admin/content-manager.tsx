@@ -607,6 +607,7 @@ function ContentEditor({
   } = useUndoHistory<Partial<ContentItem>>(20);
   const form = historyValue || item;
   const formRef = useRef<Partial<ContentItem>>(form);
+  const originalRef = useRef("");
   formRef.current = form;
   const setForm = useCallback(
     (next: Partial<ContentItem> | ((current: Partial<ContentItem>) => Partial<ContentItem>)) => {
@@ -617,6 +618,7 @@ function ContentEditor({
     [changeHistory],
   );
   const [saving, setSaving] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const [tab, setTab] = useState<"visual" | "content" | "seo" | "history">(
     isVisualEditableType(item.content_type) ? "visual" : "content",
   );
@@ -629,11 +631,14 @@ function ContentEditor({
     "featured" | "client_image" | "video" | "video_poster" | "structured"
   >("featured");
   const [structuredMediaKey, setStructuredMediaKey] = useState("");
-  const [structuredMediaKind, setStructuredMediaKind] = useState<"images" | "videos" | "documents" | "all">("images");
+  const [structuredMediaKind, setStructuredMediaKind] = useState<
+    "images" | "videos" | "documents" | "all"
+  >("images");
   const [structuredMediaAppend, setStructuredMediaAppend] = useState(false);
 
   useEffect(() => {
     formRef.current = item;
+    originalRef.current = JSON.stringify(item);
     resetHistory(item);
     setTab(isVisualEditableType(item.content_type) ? "visual" : "content");
     setRevisions([]);
@@ -693,6 +698,7 @@ function ContentEditor({
       };
       const saved = form.id ? await updateContent(form.id, payload) : await createContent(payload);
       formRef.current = saved;
+      originalRef.current = JSON.stringify(saved);
       resetHistory(saved);
       toast.success(`${singular} saved successfully. You can continue editing.`);
       await onSaved(saved);
@@ -702,6 +708,45 @@ function ContentEditor({
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function saveDraftAndClose() {
+    if (saving || savingDraft) return;
+    if (JSON.stringify(formRef.current) === originalRef.current) {
+      onClose();
+      return;
+    }
+    setSavingDraft(true);
+    try {
+      const current = formRef.current;
+      const fallbackTitle = `Untitled ${singular}`;
+      const title = current.title?.trim() || fallbackTitle;
+      const payload = {
+        ...current,
+        title,
+        slug: current.slug || `${slugify(title)}-${Date.now().toString(36)}`,
+        status: "draft" as const,
+        featured: Boolean(current.featured),
+        sort_order: Number(current.sort_order || 0),
+      };
+      const saved = current.id
+        ? await updateContent(current.id, payload)
+        : await createContent(payload);
+      formRef.current = saved;
+      originalRef.current = JSON.stringify(saved);
+      resetHistory(saved);
+      await onSaved(saved);
+      toast.success(`${singular} saved as a draft.`);
+      onClose();
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : `Could not preserve the ${singular.toLowerCase()} draft.`,
+      );
+    } finally {
+      setSavingDraft(false);
     }
   }
 
@@ -742,7 +787,7 @@ function ContentEditor({
     <>
       <AdminModal
         open={open}
-        onClose={onClose}
+        onClose={() => void saveDraftAndClose()}
         title={form.id ? `Edit ${singular}` : `Add ${singular}`}
         description="Save stays on the same screen, so you can continue editing after updates."
         width={isVisualEditableType(form.content_type) ? "max-w-[96vw]" : "max-w-6xl"}
@@ -835,7 +880,9 @@ function ContentEditor({
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-5">
               <div>
-                <FieldLabel>{form.content_type === "testimonial" ? "Client name" : "Title"}</FieldLabel>
+                <FieldLabel>
+                  {form.content_type === "testimonial" ? "Client name" : "Title"}
+                </FieldLabel>
                 <input
                   value={form.title || ""}
                   onChange={(event) => {
@@ -851,7 +898,11 @@ function ContentEditor({
                     }));
                   }}
                   className={`${adminInputClass} h-14 text-lg font-semibold`}
-                  placeholder={form.content_type === "testimonial" ? "Client or company name" : `${singular} title`}
+                  placeholder={
+                    form.content_type === "testimonial"
+                      ? "Client or company name"
+                      : `${singular} title`
+                  }
                 />
               </div>
               <div>
@@ -877,7 +928,9 @@ function ContentEditor({
                     <FieldLabel>Testimonial type</FieldLabel>
                     <select
                       value={String(contentJson.testimonial_type || "text")}
-                      onChange={(event) => updateContentJson("testimonial_type", event.target.value)}
+                      onChange={(event) =>
+                        updateContentJson("testimonial_type", event.target.value)
+                      }
                       className={adminInputClass}
                     >
                       <option value="text">Written testimonial</option>
@@ -959,11 +1012,16 @@ function ContentEditor({
                         <div className="flex gap-2">
                           <input
                             value={String(contentJson.video_poster || "")}
-                            onChange={(event) => updateContentJson("video_poster", event.target.value)}
+                            onChange={(event) =>
+                              updateContentJson("video_poster", event.target.value)
+                            }
                             className={adminInputClass}
                             placeholder="https://…"
                           />
-                          <AdminButton variant="secondary" onClick={() => chooseMedia("video_poster")}>
+                          <AdminButton
+                            variant="secondary"
+                            onClick={() => chooseMedia("video_poster")}
+                          >
                             <ImageIcon className="h-4 w-4" /> Browse
                           </AdminButton>
                         </div>
@@ -1067,7 +1125,9 @@ function ContentEditor({
 
               <AdminCard className="p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#190A2F]">{form.content_type === "testimonial" ? "Fallback image" : "Featured image"}</h3>
+                  <h3 className="text-sm font-semibold text-[#190A2F]">
+                    {form.content_type === "testimonial" ? "Fallback image" : "Featured image"}
+                  </h3>
                   <button
                     onClick={() => chooseMedia("featured")}
                     className="text-xs font-semibold text-[#FE3434]"
@@ -1266,10 +1326,15 @@ function ContentEditor({
             )}
           </div>
           <div className="flex gap-2">
-            <AdminButton variant="secondary" onClick={onClose}>
-              Cancel
+            <AdminButton
+              variant="secondary"
+              disabled={saving || savingDraft}
+              onClick={() => void saveDraftAndClose()}
+            >
+              {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {savingDraft ? "Saving draft…" : "Save draft & close"}
             </AdminButton>
-            <AdminButton onClick={() => void save()} disabled={saving}>
+            <AdminButton onClick={() => void save()} disabled={saving || savingDraft}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save {singular}
             </AdminButton>
           </div>
@@ -1279,13 +1344,29 @@ function ContentEditor({
       <MediaPicker
         open={mediaOpen}
         onClose={() => setMediaOpen(false)}
-        kind={mediaTarget === "structured" ? structuredMediaKind : mediaTarget === "video" ? "videos" : "images"}
-        title={mediaTarget === "structured" ? "Choose media or document" : mediaTarget === "video" ? "Choose testimonial video" : "Choose image"}
+        kind={
+          mediaTarget === "structured"
+            ? structuredMediaKind
+            : mediaTarget === "video"
+              ? "videos"
+              : "images"
+        }
+        title={
+          mediaTarget === "structured"
+            ? "Choose media or document"
+            : mediaTarget === "video"
+              ? "Choose testimonial video"
+              : "Choose image"
+        }
         selectedUrl={
           mediaTarget === "featured"
             ? form.featured_image || ""
             : mediaTarget === "structured"
-              ? String(Array.isArray(contentJson[structuredMediaKey]) ? "" : contentJson[structuredMediaKey] || "")
+              ? String(
+                  Array.isArray(contentJson[structuredMediaKey])
+                    ? ""
+                    : contentJson[structuredMediaKey] || "",
+                )
               : String(contentJson[mediaTarget === "video" ? "video_url" : mediaTarget] || "")
         }
         onSelect={(url) => {
@@ -1305,7 +1386,6 @@ function ContentEditor({
     </>
   );
 }
-
 
 function textList(value: unknown) {
   return Array.isArray(value)
@@ -1398,7 +1478,11 @@ function StructuredContentFields({
       <div>
         <div className="mb-2 flex items-center justify-between gap-3">
           <FieldLabel>{label}</FieldLabel>
-          <AdminButton type="button" variant="secondary" onClick={() => chooseMedia(key, kind, true)}>
+          <AdminButton
+            type="button"
+            variant="secondary"
+            onClick={() => chooseMedia(key, kind, true)}
+          >
             <Plus className="h-4 w-4" /> Add media
           </AdminButton>
         </div>
@@ -1409,7 +1493,10 @@ function StructuredContentFields({
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
             {values.map((url, index) => (
-              <div key={`${url}-${index}`} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
+              <div
+                key={`${url}-${index}`}
+                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2"
+              >
                 {kind === "images" ? (
                   <img src={url} alt="" className="h-12 w-16 rounded-lg object-cover" />
                 ) : (
@@ -1420,7 +1507,12 @@ function StructuredContentFields({
                 <span className="min-w-0 flex-1 truncate text-xs text-slate-500">{url}</span>
                 <button
                   type="button"
-                  onClick={() => update(key, values.filter((_, itemIndex) => itemIndex !== index))}
+                  onClick={() =>
+                    update(
+                      key,
+                      values.filter((_, itemIndex) => itemIndex !== index),
+                    )
+                  }
                   className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
                   aria-label={`Remove ${label} item ${index + 1}`}
                 >
@@ -1484,17 +1576,43 @@ function StructuredContentFields({
       <AdminCard className="space-y-5 p-5">
         <div>
           <h3 className="text-base font-semibold text-[#190A2F]">Service page details</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">Core and Other service placement is controlled by the approved service slug. All page copy remains editable here.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Core and Other service placement is controlled by the approved service slug. All page
+            copy remains editable here.
+          </p>
         </div>
-        {textField("Main positioning / value proposition", "body", "Explain the connected business outcome.", true)}
+        {textField(
+          "Main positioning / value proposition",
+          "body",
+          "Explain the connected business outcome.",
+          true,
+        )}
         <div className="grid gap-4 md:grid-cols-2">
           {listField("Business problems solved", "problems", "Problem one\nProblem two")}
-          {listField("Use cases", "use_cases", "Appointment booking\nLead routing\nCustomer portal")}
-          {listField("Workflow steps", "workflow", "Lead captured\nQualified\nCRM updated\nFollow-up")}
+          {listField(
+            "Use cases",
+            "use_cases",
+            "Appointment booking\nLead routing\nCustomer portal",
+          )}
+          {listField(
+            "Workflow steps",
+            "workflow",
+            "Lead captured\nQualified\nCRM updated\nFollow-up",
+          )}
           {listField("Platforms and technologies", "technologies", "HubSpot\nGoHighLevel\nTwilio")}
-          {listField("Related service slugs", "related", "ai-automation-voice-agents\ncrm-revenue-operations")}
+          {listField(
+            "Related service slugs",
+            "related",
+            "ai-automation-voice-agents\ncrm-revenue-operations",
+          )}
         </div>
-        {structuredListField("Capabilities", "capabilities", "Capability title", "Capability description", 7)}
+        {structuredListField(
+          "Capabilities",
+          "capabilities",
+          "Capability title",
+          "Capability description",
+          7,
+        )}
         {structuredListField("FAQs", "faqs", "Question", "Answer", 6)}
       </AdminCard>
     );
@@ -1505,7 +1623,9 @@ function StructuredContentFields({
       <AdminCard className="space-y-5 p-5">
         <div>
           <h3 className="text-base font-semibold text-[#190A2F]">Case study details</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">Only publish claims and results supported by the client.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Only publish claims and results supported by the client.
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Client name", "client_name")}
@@ -1527,8 +1647,17 @@ function StructuredContentFields({
         {mediaList("Desktop screenshots", "desktop_screenshots")}
         {mediaList("Mobile screenshots", "mobile_screenshots")}
         {mediaList("Gallery", "gallery")}
-        {listField("Measurable or qualitative results", "measurable_results", "Reduced manual processing\nImproved mobile usability")}
-        {textField("Client testimonial", "testimonial", "Leave empty unless supplied by the client.", true)}
+        {listField(
+          "Measurable or qualitative results",
+          "measurable_results",
+          "Reduced manual processing\nImproved mobile usability",
+        )}
+        {textField(
+          "Client testimonial",
+          "testimonial",
+          "Leave empty unless supplied by the client.",
+          true,
+        )}
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Testimonial name", "testimonial_name")}
           {textField("Testimonial role", "testimonial_role")}
@@ -1542,7 +1671,9 @@ function StructuredContentFields({
       <AdminCard className="space-y-5 p-5">
         <div>
           <h3 className="text-base font-semibold text-[#190A2F]">Insight and news details</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">Use a source link for third-party technology updates and write an original summary.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Use a source link for third-party technology updates and write an original summary.
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Author", "author")}
@@ -1550,7 +1681,11 @@ function StructuredContentFields({
           {textField("Reading time", "reading_time", "6 min read")}
           <div>
             <FieldLabel>Article type</FieldLabel>
-            <select value={String(content.article_type || "article")} onChange={(e) => update("article_type", e.target.value)} className={adminInputClass}>
+            <select
+              value={String(content.article_type || "article")}
+              onChange={(e) => update("article_type", e.target.value)}
+              className={adminInputClass}
+            >
               <option value="article">Educational article</option>
               <option value="technology_update">Technology update</option>
               <option value="company_news">Company news</option>
@@ -1574,7 +1709,9 @@ function StructuredContentFields({
       <AdminCard className="space-y-5 p-5">
         <div>
           <h3 className="text-base font-semibold text-[#190A2F]">Guide file and access</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">The public API hides the guide file URL until a valid download form is submitted.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            The public API hides the guide file URL until a valid download form is submitted.
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {mediaField("Download file", "download_file", "documents")}
@@ -1583,7 +1720,11 @@ function StructuredContentFields({
           {textField("File size", "file_size", "2.4 MB")}
           {textField("Related service slug", "related_service")}
         </div>
-        {listField("What is included", "includes", "Checklist\nPlanning worksheet\nImplementation notes")}
+        {listField(
+          "What is included",
+          "includes",
+          "Checklist\nPlanning worksheet\nImplementation notes",
+        )}
         {textField("Who it is for", "audience", "Describe the intended reader.", true)}
       </AdminCard>
     );
@@ -1594,7 +1735,9 @@ function StructuredContentFields({
       <AdminCard className="space-y-5 p-5">
         <div>
           <h3 className="text-base font-semibold text-[#190A2F]">Team profile</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">Incomplete or draft profiles are not shown publicly.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Incomplete or draft profiles are not shown publicly.
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Role", "role")}
@@ -1612,12 +1755,31 @@ function StructuredContentFields({
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Option A", "option_a")}
           {textField("Option B", "option_b")}
-          {textField("Best use case for option A", "best_a", "Describe when option A is the better fit.", true)}
-          {textField("Best use case for option B", "best_b", "Describe when option B is the better fit.", true)}
+          {textField(
+            "Best use case for option A",
+            "best_a",
+            "Describe when option A is the better fit.",
+            true,
+          )}
+          {textField(
+            "Best use case for option B",
+            "best_b",
+            "Describe when option B is the better fit.",
+            true,
+          )}
         </div>
-        {listField("Comparison table rows", "comparison_rows", "Setup speed | Option A explanation | Option B explanation\nFlexibility | Option A explanation | Option B explanation")}
+        {listField(
+          "Comparison table rows",
+          "comparison_rows",
+          "Setup speed | Option A explanation | Option B explanation\nFlexibility | Option A explanation | Option B explanation",
+        )}
         <div className="grid gap-4 md:grid-cols-2">
-          {textField("Cost considerations", "cost_considerations", "Balanced cost considerations for both options.", true)}
+          {textField(
+            "Cost considerations",
+            "cost_considerations",
+            "Balanced cost considerations for both options.",
+            true,
+          )}
           {textField("Setup time", "setup_time", "Balanced setup-time considerations.", true)}
           {textField("Flexibility", "flexibility", "Balanced flexibility considerations.", true)}
           {textField("Maintenance", "maintenance", "Balanced maintenance considerations.", true)}
@@ -1625,10 +1787,23 @@ function StructuredContentFields({
           {textField("Ownership", "ownership", "Balanced ownership considerations.", true)}
           {textField("Scalability", "scalability", "Balanced scalability considerations.", true)}
         </div>
-        {textField("Decision framework", "decision_framework", "Explain when each option is the better fit.", true)}
-        {listField("Risks and assumptions", "risks", "Risk or assumption one\nRisk or assumption two")}
+        {textField(
+          "Decision framework",
+          "decision_framework",
+          "Explain when each option is the better fit.",
+          true,
+        )}
+        {listField(
+          "Risks and assumptions",
+          "risks",
+          "Risk or assumption one\nRisk or assumption two",
+        )}
         {listField("FAQs", "faqs", "Question | Answer\nQuestion | Answer")}
-        {listField("Related service slugs", "related_services", "web-design-development\ncrm-automation")}
+        {listField(
+          "Related service slugs",
+          "related_services",
+          "web-design-development\ncrm-automation",
+        )}
       </AdminCard>
     );
   }
@@ -1644,10 +1819,25 @@ function StructuredContentFields({
           {textField("Communication format", "communication_format")}
           {textField("Optional starting price", "starting_price", "Leave empty when not approved")}
         </div>
-        {textField("How work is scoped", "scope", "Explain scope, capacity, milestones, and change control.", true)}
+        {textField(
+          "How work is scoped",
+          "scope",
+          "Explain scope, capacity, milestones, and change control.",
+          true,
+        )}
         <div className="grid gap-4 md:grid-cols-2">
-          {textField("Client responsibilities", "client_responsibilities", "Access, feedback, approvals, product ownership…", true)}
-          {textField("Logicsify responsibilities", "logicsify_responsibilities", "Delivery planning, design, engineering, QA…", true)}
+          {textField(
+            "Client responsibilities",
+            "client_responsibilities",
+            "Access, feedback, approvals, product ownership…",
+            true,
+          )}
+          {textField(
+            "Logicsify responsibilities",
+            "logicsify_responsibilities",
+            "Delivery planning, design, engineering, QA…",
+            true,
+          )}
         </div>
         {listField("Advantages", "advantages", "Advantage one\nAdvantage two")}
         {listField("Tradeoffs", "tradeoffs", "Tradeoff one\nTradeoff two")}
@@ -1665,8 +1855,16 @@ function StructuredContentFields({
           {textField("Official platform URL", "platform_url", "https://…")}
         </div>
         <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <input type="checkbox" checked={Boolean(content.formal_partnership)} onChange={(e) => update("formal_partnership", e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#FE3434]" />
-          <span><strong>Formal partnership verified.</strong> Keep unchecked unless Logicsify has documented authorization to make that claim.</span>
+          <input
+            type="checkbox"
+            checked={Boolean(content.formal_partnership)}
+            onChange={(e) => update("formal_partnership", e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[#FE3434]"
+          />
+          <span>
+            <strong>Formal partnership verified.</strong> Keep unchecked unless Logicsify has
+            documented authorization to make that claim.
+          </span>
         </label>
       </AdminCard>
     );

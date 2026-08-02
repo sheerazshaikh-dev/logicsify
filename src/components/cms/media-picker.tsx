@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SquareImageCropper } from "@/components/cms/square-image-cropper";
 import { listMedia as fetchMediaRaw, uploadMedia, type MediaItem } from "@/lib/admin-api";
 
 async function fetchMedia(_deleted = false) {
@@ -24,6 +25,7 @@ type Props = {
   selectedUrl?: string;
   title?: string;
   kind?: MediaKind;
+  requireSquareCrop?: boolean;
 };
 
 function isImage(item: MediaItem) {
@@ -41,6 +43,7 @@ export function MediaPicker({
   selectedUrl = "",
   title = "Choose from Media",
   kind = "images",
+  requireSquareCrop = false,
 }: Props) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,6 +51,7 @@ export function MediaPicker({
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [cropCandidate, setCropCandidate] = useState<MediaItem | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -66,17 +70,20 @@ export function MediaPicker({
     if (!open) return;
     setSearch("");
     setNotice("");
+    setCropCandidate(null);
     void load();
   }, [load, open]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !uploading) onClose();
+      if (event.key !== "Escape" || uploading) return;
+      if (cropCandidate) setCropCandidate(null);
+      else onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose, open, uploading]);
+  }, [cropCandidate, onClose, open, uploading]);
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -100,6 +107,15 @@ export function MediaPicker({
     return true;
   }
 
+  function choose(item: MediaItem) {
+    if (requireSquareCrop && isImage(item)) {
+      setCropCandidate(item);
+      return;
+    }
+    onSelect(item.url, item);
+    onClose();
+  }
+
   async function upload(selected?: FileList | null) {
     const files = Array.from(selected || []);
     if (inputRef.current) inputRef.current.value = "";
@@ -121,8 +137,7 @@ export function MediaPicker({
       );
       await load();
       if (uploaded.length === 1 && files.length === 1) {
-        onSelect(uploaded[0].url, uploaded[0]);
-        onClose();
+        choose(uploaded[0]);
         return;
       }
       if (uploaded.length) {
@@ -260,10 +275,7 @@ export function MediaPicker({
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => {
-                      onSelect(item.url, item);
-                      onClose();
-                    }}
+                    onClick={() => choose(item)}
                     className={`group overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${selected ? "border-violet-500 ring-2 ring-violet-200" : "border-black/10"}`}
                   >
                     <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#eee]">
@@ -312,6 +324,18 @@ export function MediaPicker({
           )}
         </div>
       </section>
+      {cropCandidate ? (
+        <SquareImageCropper
+          sourceUrl={cropCandidate.url}
+          sourceName={cropCandidate.original_name}
+          onCancel={() => setCropCandidate(null)}
+          onComplete={(item) => {
+            setCropCandidate(null);
+            onSelect(item.url, item);
+            onClose();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

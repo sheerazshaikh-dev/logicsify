@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Copy, FileText, Loader2, Search, Trash2, UploadCloud, Video, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
@@ -22,6 +22,8 @@ function MediaPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [dropUploading, setDropUploading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,6 +66,37 @@ function MediaPage() {
     toast.success("Media URL copied.");
   }
 
+  async function uploadDroppedFiles(files: File[]) {
+    const supported = files.filter(isSupportedMediaFile);
+    if (!supported.length) {
+      toast.error("Drop supported images, videos, PDFs, or DOCX files.");
+      return;
+    }
+    if (supported.length !== files.length) {
+      toast.error(
+        `${files.length - supported.length} unsupported file${files.length - supported.length === 1 ? " was" : "s were"} skipped.`,
+      );
+    }
+    setDropUploading(true);
+    try {
+      const results = await Promise.allSettled(supported.map((file) => uploadMedia(file)));
+      const uploaded = results.filter((result) => result.status === "fulfilled").length;
+      if (uploaded) toast.success(`${uploaded} file${uploaded === 1 ? "" : "s"} uploaded.`);
+      const failed = supported.length - uploaded;
+      if (failed) toast.error(`${failed} file${failed === 1 ? "" : "s"} could not be uploaded.`);
+      await load();
+    } finally {
+      setDropUploading(false);
+    }
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragActive(false);
+    if (dropUploading) return;
+    void uploadDroppedFiles(Array.from(event.dataTransfer.files || []));
+  }
+
   return (
     <AdminShell>
       <AdminPageHeader
@@ -77,94 +110,140 @@ function MediaPage() {
         }
       />
 
-      <AdminCard>
-        <div className="border-b border-slate-200 p-4">
-          <div className="relative max-w-lg">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className={`${adminInputClass} pl-10`}
-              placeholder="Search media…"
+      <div
+        className="relative"
+        onDragEnter={(event) => {
+          event.preventDefault();
+          if (event.dataTransfer.types.includes("Files")) setDragActive(true);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+        }}
+        onDragLeave={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+            setDragActive(false);
+        }}
+        onDrop={handleDrop}
+      >
+        <AdminCard>
+          <button
+            type="button"
+            onClick={() => setUploadOpen(true)}
+            className="m-4 mb-0 flex w-[calc(100%-2rem)] items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-500 transition hover:border-[#FE3434]/35 hover:bg-[#FE3434]/[0.025] hover:text-[#190A2F]"
+          >
+            {dropUploading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-[#FE3434]" />
+            ) : (
+              <UploadCloud className="h-5 w-5 text-[#FE3434]" />
+            )}
+            {dropUploading
+              ? "Uploading dropped files…"
+              : "Drag and drop files here, or click to choose files"}
+          </button>
+          <div className="border-b border-slate-200 p-4">
+            <div className="relative max-w-lg">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className={`${adminInputClass} pl-10`}
+                placeholder="Search media…"
+              />
+            </div>
+          </div>
+          {loading ? (
+            <AdminLoading label="Loading media…" />
+          ) : !filtered.length ? (
+            <EmptyState
+              title="Media library is empty"
+              description="Upload images, testimonial videos, PDFs or documents to start building your website library."
+              action={
+                <AdminButton onClick={() => setUploadOpen(true)}>
+                  <UploadCloud className="h-4 w-4" /> Upload media
+                </AdminButton>
+              }
             />
-          </div>
-        </div>
-        {loading ? (
-          <AdminLoading label="Loading media…" />
-        ) : !filtered.length ? (
-          <EmptyState
-            title="Media library is empty"
-            description="Upload images, testimonial videos, PDFs or documents to start building your website library."
-            action={
-              <AdminButton onClick={() => setUploadOpen(true)}>
-                <UploadCloud className="h-4 w-4" /> Upload media
-              </AdminButton>
-            }
-          />
-        ) : (
-          <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-            {filtered.map((item) => (
-              <article
-                key={item.id}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-[#FE3434]/30 hover:shadow-lg"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                  {item.mime_type.startsWith("image/") ? (
-                    <img
-                      src={item.url}
-                      alt={item.alt_text || item.original_name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  ) : item.mime_type.startsWith("video/") ? (
-                    <div className="relative h-full w-full">
-                      <video
+          ) : (
+            <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+              {filtered.map((item) => (
+                <article
+                  key={item.id}
+                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-[#FE3434]/30 hover:shadow-lg"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                    {item.mime_type.startsWith("image/") ? (
+                      <img
                         src={item.url}
-                        className="h-full w-full object-cover"
-                        muted
-                        preload="metadata"
+                        alt={item.alt_text || item.original_name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                       />
-                      <span className="absolute inset-0 grid place-items-center bg-black/25 text-white">
-                        <Video className="h-10 w-10" />
-                      </span>
+                    ) : item.mime_type.startsWith("video/") ? (
+                      <div className="relative h-full w-full">
+                        <video
+                          src={item.url}
+                          className="h-full w-full object-cover"
+                          muted
+                          preload="metadata"
+                        />
+                        <span className="absolute inset-0 grid place-items-center bg-black/25 text-white">
+                          <Video className="h-10 w-10" />
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="grid h-full place-items-center text-slate-300">
+                        <FileText className="h-10 w-10" />
+                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 flex translate-y-full justify-end gap-1 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 transition group-hover:translate-y-0">
+                      <button
+                        onClick={() => void copyUrl(item.url)}
+                        className="rounded-lg bg-white/90 p-2 text-[#190A2F]"
+                        title="Copy URL"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => void remove(item)}
+                        className="rounded-lg bg-white/90 p-2 text-red-600"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                  ) : (
-                    <div className="grid h-full place-items-center text-slate-300">
-                      <FileText className="h-10 w-10" />
-                    </div>
-                  )}
-                  <div className="absolute inset-x-0 bottom-0 flex translate-y-full justify-end gap-1 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 transition group-hover:translate-y-0">
-                    <button
-                      onClick={() => void copyUrl(item.url)}
-                      className="rounded-lg bg-white/90 p-2 text-[#190A2F]"
-                      title="Copy URL"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => void remove(item)}
-                      className="rounded-lg bg-white/90 p-2 text-red-600"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
-                </div>
-                <div className="p-3">
-                  <p className="truncate text-xs font-semibold text-[#190A2F]">
-                    {item.original_name}
-                  </p>
-                  <p className="mt-1 text-[10px] text-slate-400">
-                    {formatBytes(item.size_bytes)} · {item.mime_type}
-                  </p>
-                  {item.alt_text ? (
-                    <p className="mt-2 line-clamp-2 text-[11px] text-slate-500">{item.alt_text}</p>
-                  ) : null}
-                </div>
-              </article>
-            ))}
+                  <div className="p-3">
+                    <p className="truncate text-xs font-semibold text-[#190A2F]">
+                      {item.original_name}
+                    </p>
+                    <p className="mt-1 text-[10px] text-slate-400">
+                      {formatBytes(item.size_bytes)} · {item.mime_type}
+                    </p>
+                    {item.alt_text ? (
+                      <p className="mt-2 line-clamp-2 text-[11px] text-slate-500">
+                        {item.alt_text}
+                      </p>
+                    ) : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </AdminCard>
+        {dragActive ? (
+          <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center rounded-3xl border-2 border-dashed border-[#FE3434] bg-white/90 p-8 backdrop-blur-sm">
+            <div className="text-center">
+              <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#FE3434]/10 text-[#FE3434]">
+                <UploadCloud className="h-7 w-7" />
+              </span>
+              <p className="mt-4 text-lg font-semibold text-[#190A2F]">Drop files to upload</p>
+              <p className="mt-1 text-sm text-slate-500">
+                Original image dimensions are preserved.
+              </p>
+            </div>
           </div>
-        )}
-      </AdminCard>
+        ) : null}
+      </div>
 
       <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={load} />
     </AdminShell>
@@ -353,4 +432,13 @@ function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   return `${(bytes / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`;
+}
+
+function isSupportedMediaFile(file: File) {
+  return (
+    file.type.startsWith("image/") ||
+    file.type.startsWith("video/") ||
+    file.type === "application/pdf" ||
+    file.name.toLowerCase().endsWith(".docx")
+  );
 }

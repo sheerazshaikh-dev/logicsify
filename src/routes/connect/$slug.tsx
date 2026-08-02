@@ -19,6 +19,12 @@ import {
 } from "lucide-react";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 import {
+  getLocationAddresses,
+  getLocationPhones,
+  locationMapUrl,
+  telHref,
+} from "@/lib/contact-directory";
+import {
   CONNECT_PROFILE_PLATFORM_LABELS,
   resolveConnectProfilePlatform,
   type ConnectProfilePlatform,
@@ -76,9 +82,9 @@ function ConnectProfilePage() {
   const whatsapp = profile.whatsapp?.replace(/\D/g, "");
   const actions = [
     profile.email && { label: "Email me", href: `mailto:${profile.email}`, Icon: Mail },
-    profile.phone && { label: "Call me", href: `tel:${profile.phone}`, Icon: Phone },
+    profile.phone && { label: "Direct call", href: `tel:${profile.phone}`, Icon: Phone },
     whatsapp && {
-      label: "WhatsApp",
+      label: "Direct WhatsApp",
       href: `https://wa.me/${whatsapp}`,
       Icon: MessageCircle,
     },
@@ -160,21 +166,22 @@ function ConnectProfilePage() {
           {profile.assigned_locations?.length ? (
             <div className="mt-6 flex flex-wrap gap-2">
               {profile.assigned_locations.map((location) => (
-                <span
+                <div
                   key={location.id}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm"
+                  className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-600 shadow-sm"
                 >
                   <MapPin className="h-3.5 w-3.5 text-[#FE3434]" />
-                  {location.name}
-                  {location.phone ? (
+                  <span className="font-semibold text-[#190A2F]">{location.name} office</span>
+                  {getLocationPhones(location).map((phone) => (
                     <a
-                      href={`tel:${location.phone.replace(/[^+\d]/g, "")}`}
-                      className="text-[#190A2F] hover:text-[#FE3434]"
+                      key={phone}
+                      href={telHref(phone)}
+                      className="border-l border-slate-200 pl-2 font-medium hover:text-[#FE3434]"
                     >
-                      {location.phone}
+                      Office: {phone}
                     </a>
-                  ) : null}
-                </span>
+                  ))}
+                </div>
               ))}
             </div>
           ) : null}
@@ -203,7 +210,12 @@ function ConnectProfilePage() {
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f5eff8] text-[#190A2F]">
                 <MapPin className="h-4 w-4" />
               </span>
-              <span className="pt-1.5">{profile.address}</span>
+              <span className="pt-1">
+                <span className="block text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">
+                  Assigned office address
+                </span>
+                <span className="mt-1 block whitespace-pre-line">{profile.address}</span>
+              </span>
             </div>
           ) : null}
 
@@ -255,18 +267,15 @@ function ConnectProfilePage() {
                 <p className="text-[10px] font-bold uppercase tracking-[.2em] text-slate-400">
                   Other locations
                 </p>
-                <h2 className="mt-1 text-lg font-semibold">Connect with another Logicsify office</h2>
+                <h2 className="mt-1 text-lg font-semibold">
+                  Connect with another Logicsify office
+                </h2>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {profile.other_locations.map((location) => {
-                  const mapUrl =
-                    location.map_url ||
-                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      [location.address, location.city, location.country]
-                        .filter(Boolean)
-                        .join(", ")
-                        .replace(/\n/g, ", "),
-                    )}`;
+                  const mapUrl = locationMapUrl(location);
+                  const addresses = getLocationAddresses(location);
+                  const phones = getLocationPhones(location);
                   return (
                     <article
                       key={location.id}
@@ -285,21 +294,24 @@ function ConnectProfilePage() {
                           ) : null}
                         </div>
                       </div>
-                      {location.phone ? (
+                      {phones.map((phone) => (
                         <a
-                          href={`tel:${location.phone.replace(/[^+\d]/g, "")}`}
+                          key={phone}
+                          href={telHref(phone)}
                           className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#190A2F]"
                         >
                           <Phone className="h-4 w-4 text-[#FE3434]" />
-                          {location.phone}
+                          Office: {phone}
                         </a>
+                      ))}
+                      {addresses.length ? (
+                        <div className="mt-3 space-y-2 text-xs leading-5 text-slate-500">
+                          {addresses.map((address) => (
+                            <p key={address}>{address}</p>
+                          ))}
+                        </div>
                       ) : null}
-                      {location.address ? (
-                        <p className="mt-3 whitespace-pre-line text-xs leading-5 text-slate-500">
-                          {location.address}
-                        </p>
-                      ) : null}
-                      {location.address || location.map_url ? (
+                      {addresses.length || location.map_url ? (
                         <a
                           href={mapUrl}
                           target="_blank"

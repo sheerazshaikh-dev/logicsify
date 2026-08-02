@@ -11,6 +11,7 @@ import {
   Loader2,
   MapPin,
   Palette,
+  Pencil,
   Plus,
   QrCode as QrIcon,
   Trash2,
@@ -53,8 +54,10 @@ import {
   saveTeamConnectLocations,
   updateConnectProfile,
   type ConnectProfile,
+  type ConnectProfileDestination,
   type ConnectProfileLink,
 } from "@/lib/admin-api";
+import { getLocationAddresses, getLocationPhones } from "@/lib/contact-directory";
 import type { SiteLocation } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/admin/connect-profiles")({ component: ConnectProfilesPage });
@@ -106,6 +109,7 @@ export function ConnectProfilesPage() {
   const [savingLocations, setSavingLocations] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<ConnectProfile> | null>(null);
+  const [editingBaseline, setEditingBaseline] = useState("");
   const [saving, setSaving] = useState(false);
   const [qr, setQr] = useState<ConnectProfile | null>(null);
   const [downloadProfile, setDownloadProfile] = useState<ConnectProfile | null>(null);
@@ -152,13 +156,15 @@ export function ConnectProfilesPage() {
   }
 
   function openNewProfile() {
-    setEditing({
+    const profile = {
       ...emptyProfile,
       visibility_json: normalizeConnectProfileVisibility(DEFAULT_CONNECT_PROFILE_VISIBILITY),
       location_ids_json: [],
       skills_json: [],
       links_json: [],
-    });
+    };
+    setEditing(profile);
+    setEditingBaseline(JSON.stringify(profile));
   }
 
   async function updateGlobalCover(url: string) {
@@ -176,22 +182,51 @@ export function ConnectProfilesPage() {
       setSavingGlobalCover(false);
     }
   }
-  async function save() {
+  async function save(asDraft = false) {
     if (!editing) return;
     setSaving(true);
     try {
+      const fallbackName = "Untitled team member";
+      const displayName = editing.display_name?.trim() || fallbackName;
+      const payload = {
+        ...editing,
+        display_name: displayName,
+        slug:
+          editing.slug ||
+          createAvailableSlug(
+            `${displayName}-${Date.now().toString(36)}`,
+            items.map((item) => item.slug),
+          ),
+        ...(asDraft ? { status: "draft" as const } : {}),
+      };
       const saved = editing.id
-        ? await updateConnectProfile(editing.id, editing)
-        : await createConnectProfile(editing);
-      toast.success(editing.id ? "Profile updated." : "Profile created.");
+        ? await updateConnectProfile(editing.id, payload)
+        : await createConnectProfile(payload);
+      toast.success(
+        asDraft
+          ? "Team member saved as a draft."
+          : editing.id
+            ? "Profile updated."
+            : "Profile created.",
+      );
       setEditing(null);
+      setEditingBaseline("");
       await refresh();
-      if (saved.status === "published") setQr(saved);
+      if (!asDraft && saved.status === "published") setQr(saved);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save profile.");
     } finally {
       setSaving(false);
     }
+  }
+  async function closeProfileEditor() {
+    if (!editing || saving) return;
+    if (JSON.stringify(editing) === editingBaseline) {
+      setEditing(null);
+      setEditingBaseline("");
+      return;
+    }
+    await save(true);
   }
   async function remove(item: ConnectProfile) {
     if (!confirm(`Move ${item.display_name} to the Recycle Bin?`)) return;
@@ -210,10 +245,12 @@ export function ConnectProfilesPage() {
         title="Team / Connect"
         description="Manage each person once, assign locations, and control exactly where every member and field appears."
         actions={
-          tab === "people" ? <AdminButton onClick={openNewProfile}>
-            <Plus className="h-4 w-4" />
-            New team member
-          </AdminButton> : tab === "locations" ? (
+          tab === "people" ? (
+            <AdminButton onClick={openNewProfile}>
+              <Plus className="h-4 w-4" />
+              New team member
+            </AdminButton>
+          ) : tab === "locations" ? (
             <AdminButton onClick={() => void saveLocations()} disabled={savingLocations}>
               {savingLocations ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {savingLocations ? "Saving…" : "Save locations"}
@@ -222,11 +259,13 @@ export function ConnectProfilesPage() {
         }
       />
       <div className="mb-7 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-        {([
-          ["people", "People & visibility", Users],
-          ["locations", "Locations", MapPin],
-          ["appearance", "Global cover", Palette],
-        ] as const).map(([id, label, Icon]) => (
+        {(
+          [
+            ["people", "People & visibility", Users],
+            ["locations", "Locations", MapPin],
+            ["appearance", "Global cover", Palette],
+          ] as const
+        ).map(([id, label, Icon]) => (
           <button
             key={id}
             type="button"
@@ -238,160 +277,181 @@ export function ConnectProfilesPage() {
           </button>
         ))}
       </div>
-      {tab === "appearance" ? <AdminCard className="mb-7 overflow-hidden">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
-          <div
-            className="relative min-h-56 overflow-hidden bg-[#190A2F] bg-cover bg-center"
-            style={
-              globalCover
-                ? { backgroundImage: `url(${globalCover})` }
-                : {
-                    backgroundImage:
-                      "radial-gradient(circle at 15% 20%, #FE3434cc, transparent 43%), radial-gradient(circle at 82% 70%, #FDBE0299, transparent 42%), linear-gradient(135deg, #190A2F, #361141)",
-                  }
-            }
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#190A2F]/45 via-transparent to-[#190A2F]/15" />
-            <span className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-[#190A2F]/60 px-4 py-2 text-xs font-bold text-white backdrop-blur">
-              Shared profile cover
-            </span>
-          </div>
-          <div className="flex flex-col justify-center p-6 lg:p-8">
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-[#FE3434]">
-              Global cover
-            </p>
-            <h2 className="mt-2 text-xl font-semibold text-[#190A2F]">
-              One cover for every profile
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Select it once from Media Library. It is used on every public connect page and in all
-              JPG/PDF downloads.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <AdminButton
-                variant="secondary"
-                disabled={savingGlobalCover}
-                onClick={() => setGlobalCoverPickerOpen(true)}
-              >
-                {savingGlobalCover ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ImagePlus className="h-4 w-4" />
-                )}
-                {globalCover ? "Change in Media Library" : "Choose from Media Library"}
-              </AdminButton>
-              {globalCover ? (
+      {tab === "appearance" ? (
+        <AdminCard className="mb-7 overflow-hidden">
+          <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
+            <div
+              className="relative min-h-56 overflow-hidden bg-[#190A2F] bg-cover bg-center"
+              style={
+                globalCover
+                  ? { backgroundImage: `url(${globalCover})` }
+                  : {
+                      backgroundImage:
+                        "radial-gradient(circle at 15% 20%, #FE3434cc, transparent 43%), radial-gradient(circle at 82% 70%, #FDBE0299, transparent 42%), linear-gradient(135deg, #190A2F, #361141)",
+                    }
+              }
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-[#190A2F]/45 via-transparent to-[#190A2F]/15" />
+              <span className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-[#190A2F]/60 px-4 py-2 text-xs font-bold text-white backdrop-blur">
+                Shared profile cover
+              </span>
+            </div>
+            <div className="flex flex-col justify-center p-6 lg:p-8">
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-[#FE3434]">
+                Global cover
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-[#190A2F]">
+                One cover for every profile
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Select it once from Media Library. It is used on every public connect page and in
+                all JPG/PDF downloads.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
                 <AdminButton
-                  variant="danger"
+                  variant="secondary"
                   disabled={savingGlobalCover}
-                  onClick={() => void updateGlobalCover("")}
+                  onClick={() => setGlobalCoverPickerOpen(true)}
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Remove
+                  {savingGlobalCover ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4" />
+                  )}
+                  {globalCover ? "Change in Media Library" : "Choose from Media Library"}
                 </AdminButton>
-              ) : null}
+                {globalCover ? (
+                  <AdminButton
+                    variant="danger"
+                    disabled={savingGlobalCover}
+                    onClick={() => void updateGlobalCover("")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Remove
+                  </AdminButton>
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
-      </AdminCard> : null}
+        </AdminCard>
+      ) : null}
       {tab === "locations" ? (
         <LocationsEditor locations={locations} setLocations={setLocations} />
       ) : null}
-      {tab === "people" ? <AdminCard>
-        {loading ? (
-          <AdminLoading />
-        ) : items.length === 0 ? (
-          <EmptyState
-            title="No team members yet"
-            description="Create one person record, then choose whether it appears on Team pages, a Connect page, or both."
-          />
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {items.map((item) => (
-              <div key={item.id} className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center">
-                <div className="flex min-w-0 flex-1 items-center gap-4">
-                  {item.avatar_url ? (
-                    <img
-                      src={item.avatar_url}
-                      alt=""
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="grid h-12 w-12 place-items-center rounded-full bg-[#190A2F] font-bold text-white">
-                      {item.display_name.slice(0, 1)}
-                    </span>
-                  )}
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-[#190A2F]">{item.display_name}</p>
-                      <StatusBadge status={item.status} />
-                      {item.is_unlisted ? (
-                        <span className="text-xs text-slate-400">Unlisted · noindex</span>
-                      ) : item.noindex ? (
-                        <span className="text-xs text-slate-400">Noindex</span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 truncate text-sm text-slate-500">/connect/{item.slug}</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {item.visibility_json.placements.home ? <MiniBadge>Homepage</MiniBadge> : null}
-                      {item.visibility_json.placements.about ? <MiniBadge>About team</MiniBadge> : null}
-                      {item.visibility_json.placements.connect ? <MiniBadge>Connect page</MiniBadge> : null}
-                      {item.location_ids_json.length ? (
-                        <MiniBadge>
-                          {item.location_ids_json.length} location{item.location_ids_json.length === 1 ? "" : "s"}
-                        </MiniBadge>
-                      ) : null}
+      {tab === "people" ? (
+        <AdminCard>
+          {loading ? (
+            <AdminLoading />
+          ) : items.length === 0 ? (
+            <EmptyState
+              title="No team members yet"
+              description="Create one person record, then choose whether it appears on Team pages, a Connect page, or both."
+            />
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {items.map((item) => (
+                <div key={item.id} className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center">
+                  <div className="flex min-w-0 flex-1 items-center gap-4">
+                    {item.avatar_url ? (
+                      <img
+                        src={item.avatar_url}
+                        alt=""
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-[#190A2F] font-bold text-white">
+                        {item.display_name.slice(0, 1)}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-[#190A2F]">{item.display_name}</p>
+                        <StatusBadge status={item.status} />
+                        {item.is_unlisted ? (
+                          <span className="text-xs text-slate-400">Unlisted · noindex</span>
+                        ) : item.noindex ? (
+                          <span className="text-xs text-slate-400">Noindex</span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 truncate text-sm text-slate-500">/connect/{item.slug}</p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {item.visibility_json.placements.home ? (
+                          <MiniBadge>Homepage</MiniBadge>
+                        ) : null}
+                        {item.visibility_json.placements.about ? (
+                          <MiniBadge>About team</MiniBadge>
+                        ) : null}
+                        {item.visibility_json.placements.contact ? (
+                          <MiniBadge>Contact page</MiniBadge>
+                        ) : null}
+                        {item.visibility_json.placements.connect ? (
+                          <MiniBadge>Connect page</MiniBadge>
+                        ) : null}
+                        {item.location_ids_json.length ? (
+                          <MiniBadge>
+                            {item.location_ids_json.length} location
+                            {item.location_ids_json.length === 1 ? "" : "s"}
+                          </MiniBadge>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <AdminButton
-                    variant="secondary"
-                    onClick={() =>
-                      setEditing({
-                        ...item,
-                        visibility_json: normalizeConnectProfileVisibility(item.visibility_json),
-                      })
-                    }
-                  >
-                    Edit
-                  </AdminButton>
-                  {item.visibility_json.placements.connect ? <AdminButton variant="secondary" onClick={() => setQr(item)}>
-                    <QrIcon className="h-4 w-4" />
-                    QR code
-                  </AdminButton> : null}
-                  {item.visibility_json.placements.connect ? <AdminButton variant="secondary" onClick={() => setDownloadProfile(item)}>
-                    <Download className="h-4 w-4" />
-                    Download
-                  </AdminButton> : null}
-                  {item.status === "published" && item.visibility_json.placements.connect ? (
-                    <a
-                      href={`/connect/${item.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold"
+                  <div className="flex flex-wrap gap-2">
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() => {
+                        const profile = {
+                          ...item,
+                          visibility_json: normalizeConnectProfileVisibility(item.visibility_json),
+                        };
+                        setEditing(profile);
+                        setEditingBaseline(JSON.stringify(profile));
+                      }}
                     >
-                      <ExternalLink className="h-4 w-4" />
-                      Open
-                    </a>
-                  ) : null}
-                  <AdminButton
-                    variant="danger"
-                    ariaLabel={`Delete ${item.display_name}`}
-                    onClick={() => void remove(item)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </AdminButton>
+                      Edit
+                    </AdminButton>
+                    {item.visibility_json.placements.connect ? (
+                      <AdminButton variant="secondary" onClick={() => setQr(item)}>
+                        <QrIcon className="h-4 w-4" />
+                        QR code
+                      </AdminButton>
+                    ) : null}
+                    {item.visibility_json.placements.connect ? (
+                      <AdminButton variant="secondary" onClick={() => setDownloadProfile(item)}>
+                        <Download className="h-4 w-4" />
+                        Download
+                      </AdminButton>
+                    ) : null}
+                    {item.status === "published" && item.visibility_json.placements.connect ? (
+                      <a
+                        href={`/connect/${item.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Open
+                      </a>
+                    ) : null}
+                    <AdminButton
+                      variant="danger"
+                      ariaLabel={`Delete ${item.display_name}`}
+                      onClick={() => void remove(item)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </AdminButton>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </AdminCard> : null}
+              ))}
+            </div>
+          )}
+        </AdminCard>
+      ) : null}
       <ProfileEditor
         value={editing}
         setValue={setEditing}
-        save={save}
+        save={() => void save()}
+        close={() => void closeProfileEditor()}
         saving={saving}
         existingSlugs={items.filter((item) => item.id !== editing?.id).map((item) => item.slug)}
         locations={locations}
@@ -417,6 +477,7 @@ function ProfileEditor({
   value,
   setValue,
   save,
+  close,
   saving,
   existingSlugs,
   locations,
@@ -424,6 +485,7 @@ function ProfileEditor({
   value: Partial<ConnectProfile> | null;
   setValue: Dispatch<SetStateAction<Partial<ConnectProfile> | null>>;
   save: () => void;
+  close: () => void;
   saving: boolean;
   existingSlugs: string[];
   locations: SiteLocation[];
@@ -449,14 +511,17 @@ function ProfileEditor({
   const links = value.links_json || [];
   const visibility = normalizeConnectProfileVisibility(value.visibility_json);
   const assignedLocationIds = value.location_ids_json || [];
-  const setPlacement = (placement: keyof ConnectProfile["visibility_json"]["placements"], checked: boolean) =>
+  const setPlacement = (
+    placement: keyof ConnectProfile["visibility_json"]["placements"],
+    checked: boolean,
+  ) =>
     set("visibility_json", {
       ...visibility,
       placements: { ...visibility.placements, [placement]: checked },
     });
   const setFieldVisibility = (
     field: keyof ConnectProfile["visibility_json"]["fields"],
-    destination: "team" | "connect" | "export",
+    destination: ConnectProfileDestination,
     checked: boolean,
   ) =>
     set("visibility_json", {
@@ -476,7 +541,7 @@ function ProfileEditor({
       open
       title={value.id ? "Edit team member" : "New team member"}
       description="Enter the person once, then use the visibility controls to choose where each detail appears."
-      onClose={() => setValue(null)}
+      onClose={close}
       width="max-w-5xl"
     >
       <div className="grid gap-5 md:grid-cols-2">
@@ -584,7 +649,7 @@ function ProfileEditor({
         <p className="mt-1 text-sm text-slate-500">
           Publishing controls availability. These toggles control the exact public placements.
         </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <PlacementToggle
             label="Homepage team"
             description="Eligible for the homepage team preview."
@@ -598,6 +663,12 @@ function ProfileEditor({
             onChange={(checked) => setPlacement("about", checked)}
           />
           <PlacementToggle
+            label="Contact page"
+            description="Shows this person with their assigned office contact card."
+            checked={visibility.placements.contact}
+            onChange={(checked) => setPlacement("contact", checked)}
+          />
+          <PlacementToggle
             label="Connect page"
             description="Enables the direct URL, QR and exports."
             checked={visibility.placements.connect}
@@ -609,16 +680,18 @@ function ProfileEditor({
       <div className="mt-7 border-t border-slate-200 pt-6">
         <h3 className="font-semibold text-[#190A2F]">Assigned locations</h3>
         <p className="mt-1 text-sm text-slate-500">
-          Select the office or offices this person belongs to. Their address is pulled
-          automatically from these locations, so it only needs to be maintained once. Every other
-          enabled office is shown under “Other locations” on their live Connect page only.
+          Select the office or offices this person belongs to. Their address is pulled automatically
+          from these locations, so it only needs to be maintained once. Every other enabled office
+          is shown under “Other locations” on their live Connect page only.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {locations.map((location) => (
             <PlacementToggle
               key={location.id}
               label={location.name}
-              description={[location.city, location.country].filter(Boolean).join(", ") || "Business location"}
+              description={
+                [location.city, location.country].filter(Boolean).join(", ") || "Business location"
+              }
               checked={assignedLocationIds.includes(location.id)}
               onChange={(checked) =>
                 set(
@@ -644,7 +717,7 @@ function ProfileEditor({
           excluded from downloads.
         </p>
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[760px] text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-[.12em] text-slate-400">
               <tr>
                 <th className="px-4 py-3">Field</th>
@@ -748,8 +821,8 @@ function ProfileEditor({
         </div>
       </div>
       <div className="mt-7 flex justify-end gap-2">
-        <AdminButton variant="secondary" onClick={() => setValue(null)}>
-          Cancel
+        <AdminButton variant="secondary" disabled={saving} onClick={close}>
+          Save draft & close
         </AdminButton>
         <AdminButton disabled={saving || !value.display_name || !value.slug} onClick={save}>
           {saving ? "Saving…" : "Save team member"}
@@ -803,22 +876,26 @@ function LocationsEditor({
   locations: SiteLocation[];
   setLocations: Dispatch<SetStateAction<SiteLocation[]>>;
 }) {
+  const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
   const patchLocation = (index: number, patch: Partial<SiteLocation>) =>
     setLocations((current) =>
       current.map((location, itemIndex) =>
         itemIndex === index ? { ...location, ...patch } : location,
       ),
     );
-  const addLocation = () =>
+  const addAndEditLocation = () => {
+    const id = `location-${Date.now()}`;
     setLocations((current) => [
       ...current,
       {
-        id: `location-${Date.now()}`,
+        id,
         name: "New location",
         city: "",
         country: "",
         address: "",
+        addresses: [],
         phone: "",
+        phones: [],
         email: "",
         map_url: "",
         enabled: true,
@@ -828,13 +905,17 @@ function LocationsEditor({
         sort_order: current.length,
       },
     ]);
+    setEditingLocationId(id);
+  };
   const removeLocation = (index: number) => {
-    if (!confirm("Remove this location? Team-member assignments to it will stop displaying.")) return;
+    if (!confirm("Remove this location? Team-member assignments to it will stop displaying."))
+      return;
     setLocations((current) =>
       current
         .filter((_, itemIndex) => itemIndex !== index)
         .map((location, itemIndex) => ({ ...location, sort_order: itemIndex })),
     );
+    if (locations[index]?.id === editingLocationId) setEditingLocationId(null);
   };
   const moveLocation = (index: number, direction: -1 | 1) =>
     setLocations((current) => {
@@ -855,7 +936,7 @@ function LocationsEditor({
             or Connect pages.
           </p>
         </div>
-        <AdminButton variant="secondary" onClick={addLocation}>
+        <AdminButton variant="secondary" onClick={addAndEditLocation}>
           <Plus className="h-4 w-4" /> Add location
         </AdminButton>
       </div>
@@ -866,87 +947,209 @@ function LocationsEditor({
             description="Add the first office or regional contact point."
           />
         ) : null}
-        {locations.map((location, index) => (
-          <div key={location.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
-                  <MapPin className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="font-semibold text-[#190A2F]">{location.name || `Location ${index + 1}`}</p>
-                  <p className="text-xs text-slate-400">Location {index + 1}</p>
+        {locations.map((location, index) => {
+          const open = editingLocationId === location.id;
+          const addresses = getLocationAddresses(location);
+          const phones = getLocationPhones(location);
+          const addressRows = Array.isArray(location.addresses) ? location.addresses : addresses;
+          const phoneRows = Array.isArray(location.phones) ? location.phones : phones;
+          return (
+            <div
+              key={location.id}
+              className={`rounded-2xl border transition ${open ? "border-[#FE3434]/25 bg-slate-50 shadow-sm" : "border-slate-200 bg-white"}`}
+            >
+              <div
+                className={`flex flex-wrap items-center justify-between gap-3 ${open ? "border-b border-slate-200 p-5" : "p-4 sm:p-5"}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
+                    <MapPin className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-[#190A2F]">
+                      {location.name || `Location ${index + 1}`}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      {[location.city, location.country].filter(Boolean).join(", ") ||
+                        `Location ${index + 1}`}
+                      {` · ${addresses.length} address${addresses.length === 1 ? "" : "es"}`}
+                      {` · ${phones.length} phone${phones.length === 1 ? "" : "s"}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <AdminButton
+                    variant="secondary"
+                    disabled={index === 0}
+                    ariaLabel="Move location up"
+                    onClick={() => moveLocation(index, -1)}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </AdminButton>
+                  <AdminButton
+                    variant="secondary"
+                    disabled={index === locations.length - 1}
+                    ariaLabel="Move location down"
+                    onClick={() => moveLocation(index, 1)}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </AdminButton>
+                  <AdminButton
+                    variant={open ? "primary" : "secondary"}
+                    onClick={() => setEditingLocationId(open ? null : location.id)}
+                  >
+                    {open ? <ChevronUp className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                    {open ? "Close" : "Edit"}
+                  </AdminButton>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <AdminButton
-                  variant="secondary"
-                  disabled={index === 0}
-                  ariaLabel="Move location up"
-                  onClick={() => moveLocation(index, -1)}
-                >
-                  <ChevronUp className="h-4 w-4" />
-                </AdminButton>
-                <AdminButton
-                  variant="secondary"
-                  disabled={index === locations.length - 1}
-                  ariaLabel="Move location down"
-                  onClick={() => moveLocation(index, 1)}
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </AdminButton>
-                <AdminButton variant="danger" onClick={() => removeLocation(index)}>
-                  <Trash2 className="h-4 w-4" /> Remove
-                </AdminButton>
-              </div>
+              {open ? (
+                <div className="p-5">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field
+                      label="Location name"
+                      value={location.name}
+                      onChange={(name) => patchLocation(index, { name })}
+                    />
+                    <Field
+                      label="City / region"
+                      value={location.city}
+                      onChange={(city) => patchLocation(index, { city })}
+                    />
+                    <Field
+                      label="Country"
+                      value={location.country}
+                      onChange={(country) => patchLocation(index, { country })}
+                    />
+                    <Field
+                      label="Location email"
+                      value={location.email}
+                      onChange={(email) => patchLocation(index, { email })}
+                    />
+                    <div className="md:col-span-2">
+                      <MultiValueEditor
+                        label="Street addresses"
+                        singularLabel="street address"
+                        values={addressRows}
+                        placeholder="Enter a complete street address"
+                        onChange={(next) =>
+                          patchLocation(index, { addresses: next, address: next.join("\n") })
+                        }
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <MultiValueEditor
+                        label="Phone numbers"
+                        singularLabel="phone number"
+                        values={phoneRows}
+                        placeholder="+92 333 3718191"
+                        onChange={(next) =>
+                          patchLocation(index, { phones: next, phone: next[0] || "" })
+                        }
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Field
+                        label="Map URL"
+                        value={location.map_url}
+                        onChange={(map_url) => patchLocation(index, { map_url })}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <PlacementToggle
+                      label="Location enabled"
+                      description="Master switch for all public uses."
+                      checked={location.enabled !== false}
+                      onChange={(enabled) => patchLocation(index, { enabled })}
+                    />
+                    <PlacementToggle
+                      label="Contact page"
+                      description="Show this office on Contact."
+                      checked={location.show_on_contact !== false}
+                      onChange={(show_on_contact) => patchLocation(index, { show_on_contact })}
+                    />
+                    <PlacementToggle
+                      label="Footer"
+                      description="Show this office in the footer."
+                      checked={location.show_in_footer !== false}
+                      onChange={(show_in_footer) => patchLocation(index, { show_in_footer })}
+                    />
+                    <PlacementToggle
+                      label="Connect pages"
+                      description="Allow it under Other locations."
+                      checked={location.show_on_connect !== false}
+                      onChange={(show_on_connect) => patchLocation(index, { show_on_connect })}
+                    />
+                  </div>
+                  <div className="mt-5 flex justify-end border-t border-slate-200 pt-5">
+                    <AdminButton variant="danger" onClick={() => removeLocation(index)}>
+                      <Trash2 className="h-4 w-4" /> Remove location
+                    </AdminButton>
+                  </div>
+                </div>
+              ) : null}
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Location name" value={location.name} onChange={(name) => patchLocation(index, { name })} />
-              <Field label="City / region" value={location.city} onChange={(city) => patchLocation(index, { city })} />
-              <Field label="Country" value={location.country} onChange={(country) => patchLocation(index, { country })} />
-              <Field label="Phone number" value={location.phone} onChange={(phone) => patchLocation(index, { phone })} />
-              <Field label="Location email" value={location.email} onChange={(email) => patchLocation(index, { email })} />
-              <Field label="Map URL" value={location.map_url} onChange={(map_url) => patchLocation(index, { map_url })} />
-              <div className="md:col-span-2">
-                <FieldLabel>Street address</FieldLabel>
-                <textarea
-                  rows={3}
-                  value={location.address || ""}
-                  onChange={(event) => patchLocation(index, { address: event.target.value })}
-                  className={adminTextareaClass}
-                />
-              </div>
-            </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <PlacementToggle
-                label="Location enabled"
-                description="Master switch for all public uses."
-                checked={location.enabled !== false}
-                onChange={(enabled) => patchLocation(index, { enabled })}
-              />
-              <PlacementToggle
-                label="Contact page"
-                description="Show this office on Contact."
-                checked={location.show_on_contact !== false}
-                onChange={(show_on_contact) => patchLocation(index, { show_on_contact })}
-              />
-              <PlacementToggle
-                label="Footer"
-                description="Show this office in the footer."
-                checked={location.show_in_footer !== false}
-                onChange={(show_in_footer) => patchLocation(index, { show_in_footer })}
-              />
-              <PlacementToggle
-                label="Connect pages"
-                description="Allow it under Other locations."
-                checked={location.show_on_connect !== false}
-                onChange={(show_on_connect) => patchLocation(index, { show_on_connect })}
-              />
-            </div>
+          );
+        })}
+      </div>
+    </AdminCard>
+  );
+}
+
+function MultiValueEditor({
+  label,
+  singularLabel,
+  values,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  singularLabel: string;
+  values: string[];
+  placeholder: string;
+  onChange: (values: string[]) => void;
+}) {
+  const rows = values.length ? values : [""];
+  const commit = (next: string[]) => onChange(next.map((item) => item.trim()).filter(Boolean));
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <FieldLabel>{label}</FieldLabel>
+        <button
+          type="button"
+          onClick={() => onChange([...values, ""])}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-[#FE3434]"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add {singularLabel}
+        </button>
+      </div>
+      <div className="space-y-2">
+        {rows.map((item, itemIndex) => (
+          <div key={`${singularLabel}-${itemIndex}`} className="flex gap-2">
+            <input
+              className={adminInputClass}
+              value={item}
+              placeholder={placeholder}
+              onChange={(event) => {
+                const next = [...rows];
+                next[itemIndex] = event.target.value;
+                onChange(next);
+              }}
+              onBlur={() => commit(rows)}
+            />
+            <AdminButton
+              variant="danger"
+              ariaLabel={`Remove ${singularLabel} ${itemIndex + 1}`}
+              onClick={() => commit(rows.filter((_, index) => index !== itemIndex))}
+            >
+              <Trash2 className="h-4 w-4" />
+            </AdminButton>
           </div>
         ))}
       </div>
-    </AdminCard>
+    </div>
   );
 }
 
@@ -999,6 +1202,7 @@ function ProfileImageField({
         open={pickerOpen}
         title="Choose a profile avatar"
         kind="images"
+        requireSquareCrop
         selectedUrl={value || ""}
         onClose={() => setPickerOpen(false)}
         onSelect={(url) => {

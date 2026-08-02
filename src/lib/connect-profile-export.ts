@@ -144,7 +144,10 @@ function drawContactRow(
   let addressLines: string[] = [];
   if (kind === "address") {
     context.font = "600 22px Inter, Arial, sans-serif";
-    const paragraphs = value.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+    const paragraphs = value
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
     for (const paragraph of paragraphs) {
       let line = "";
       for (const word of paragraph.split(/\s+/)) {
@@ -391,16 +394,22 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
       ? profile.whatsapp
       : null;
   if (phone) {
-    contactY += drawContactRow(context, "phone", "Phone", phone, 88, contactY, 1064) + 16;
+    contactY += drawContactRow(context, "phone", "Direct phone", phone, 88, contactY, 1064) + 16;
   }
   if (profile.email && fieldVisible(profile, "email", "export")) {
-    contactY +=
-      drawContactRow(context, "email", "Email", profile.email, 88, contactY, 1064) + 16;
+    contactY += drawContactRow(context, "email", "Email", profile.email, 88, contactY, 1064) + 16;
   }
   if (profile.address && fieldVisible(profile, "address", "export")) {
     contactY +=
-      drawContactRow(context, "address", "Assigned location", profile.address, 88, contactY, 1064) +
-      18;
+      drawContactRow(
+        context,
+        "address",
+        "Assigned office address",
+        profile.address,
+        88,
+        contactY,
+        1064,
+      ) + 18;
   }
 
   const savedSocialLinks = fieldVisible(profile, "social_links", "export")

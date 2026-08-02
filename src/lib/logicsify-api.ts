@@ -181,12 +181,13 @@ export type PublicTeamMember = {
   address?: string | null;
   links_json: Array<{ label: string; url: string; icon?: string }>;
   skills_json: string[];
+  location_ids_json: string[];
   locations: SiteLocation[];
   connect_enabled: boolean;
   sort_order: number;
 };
 
-export function getPublicTeamMembers(placement: "home" | "about") {
+export function getPublicTeamMembers(placement: "home" | "about" | "contact") {
   return request<PublicTeamMember[]>(`public/team-directory?placement=${placement}`);
 }
 
@@ -368,7 +369,9 @@ export type SiteLocation = {
   city?: string;
   country?: string;
   address?: string;
+  addresses?: string[];
   phone?: string;
+  phones?: string[];
   email?: string;
   contact_name?: string;
   contact_role?: string;

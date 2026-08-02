@@ -10,6 +10,7 @@ import {
   MapPin,
   Phone,
   Shield,
+  UserRound,
 } from "lucide-react";
 import { z } from "zod";
 import { PageHero } from "@/components/page-hero";
@@ -18,6 +19,8 @@ import { SocialProfileLinks } from "@/components/social-profile-links";
 import { StrategyCallCalendar } from "@/components/strategy-call-calendar";
 import {
   getContactEmails,
+  getLocationAddresses,
+  getLocationPhones,
   getSiteLocations,
   getSocialProfiles,
   locationMapUrl,
@@ -25,8 +28,10 @@ import {
 } from "@/lib/contact-directory";
 import {
   getPublicSiteSettings,
+  getPublicTeamMembers,
   submitContact,
   type PublicSiteSettings,
+  type PublicTeamMember,
 } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/contact")({
@@ -85,11 +90,16 @@ function ContactPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [settings, setSettings] = useState<PublicSiteSettings>({});
+  const [contactPeople, setContactPeople] = useState<PublicTeamMember[]>([]);
 
   useEffect(() => {
     let active = true;
-    getPublicSiteSettings()
-      .then((value) => active && setSettings(value))
+    Promise.all([getPublicSiteSettings(), getPublicTeamMembers("contact")])
+      .then(([value, people]) => {
+        if (!active) return;
+        setSettings(value);
+        setContactPeople(people);
+      })
       .catch(() => undefined);
     return () => {
       active = false;
@@ -99,7 +109,7 @@ function ContactPage() {
   const emails = getContactEmails(settings);
   const locations = getSiteLocations(settings, "contact");
   const socialProfiles = getSocialProfiles(settings);
-  const primaryPhone = settings.phone || locations.find((location) => location.phone)?.phone || "";
+  const primaryPhone = settings.phone || locations.flatMap(getLocationPhones).find(Boolean) || "";
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -356,6 +366,11 @@ function ContactPage() {
           <div className="grid gap-5 lg:grid-cols-3">
             {locations.map((location) => {
               const mapUrl = locationMapUrl(location);
+              const addresses = getLocationAddresses(location);
+              const phones = getLocationPhones(location);
+              const people = contactPeople.filter((person) =>
+                (person.location_ids_json || []).includes(location.id),
+              );
               return (
                 <article
                   key={location.id}
@@ -373,30 +388,50 @@ function ContactPage() {
                   {location.city && location.city !== location.name ? (
                     <p className="mt-1 text-sm text-ink-soft">{location.city}</p>
                   ) : null}
-                  {location.address ? (
-                    <p className="mt-5 whitespace-pre-line text-sm leading-6 text-ink-soft">
-                      {location.address}
-                    </p>
+                  {addresses.length ? (
+                    <div className="mt-5 space-y-2 text-sm leading-6 text-ink-soft">
+                      {addresses.map((address) => (
+                        <p key={address}>{address}</p>
+                      ))}
+                    </div>
                   ) : null}
-                  {(location.contact_name || location.contact_role) ? (
-                    <div className="mt-6 border-t border-black/8 pt-5">
-                      {location.contact_name ? (
-                        <p className="font-semibold text-ink">{location.contact_name}</p>
-                      ) : null}
-                      {location.contact_role ? (
-                        <p className="mt-1 text-xs text-ink-soft">{location.contact_role}</p>
-                      ) : null}
+                  {people.length ? (
+                    <div className="mt-6 space-y-3 border-t border-black/8 pt-5">
+                      {people.map((person) => (
+                        <div key={person.id} className="flex items-center gap-3">
+                          {person.avatar_url ? (
+                            <img
+                              src={person.avatar_url}
+                              alt=""
+                              className="h-10 w-10 rounded-full object-cover object-top"
+                            />
+                          ) : (
+                            <span className="grid h-10 w-10 place-items-center rounded-full bg-lavender text-brand-red">
+                              <UserRound className="h-4 w-4" />
+                            </span>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-ink">{person.display_name}</p>
+                            {person.headline ? (
+                              <p className="mt-0.5 truncate text-xs text-ink-soft">
+                                {person.headline}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : null}
                   <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-6 text-sm font-semibold">
-                    {location.phone ? (
+                    {phones.map((phone) => (
                       <a
-                        href={telHref(location.phone)}
+                        key={phone}
+                        href={telHref(phone)}
                         className="inline-flex items-center gap-2 text-ink hover:text-brand-red"
                       >
-                        <Phone className="h-4 w-4" /> {location.phone}
+                        <Phone className="h-4 w-4" /> {phone}
                       </a>
-                    ) : null}
+                    ))}
                     {location.email ? (
                       <a
                         href={`mailto:${location.email}`}

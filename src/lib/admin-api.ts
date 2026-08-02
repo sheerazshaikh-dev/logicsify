@@ -307,7 +307,7 @@ export type TrashItem = {
 };
 
 export type ConnectProfileLink = { label: string; url: string; icon?: string };
-export type ConnectProfileDestination = "team" | "connect" | "export";
+export type ConnectProfileDestination = "team" | "contact" | "connect" | "export";
 export type ConnectProfileField =
   | "avatar"
   | "headline"
@@ -320,7 +320,7 @@ export type ConnectProfileField =
   | "locations"
   | "skills";
 export type ConnectProfileVisibility = {
-  placements: { home: boolean; about: boolean; connect: boolean };
+  placements: { home: boolean; about: boolean; contact: boolean; connect: boolean };
   fields: Record<ConnectProfileField, Record<ConnectProfileDestination, boolean>>;
 };
 export type ConnectProfile = {
@@ -405,10 +405,10 @@ export function getTeamConnectLocations() {
 }
 
 export function saveTeamConnectLocations(locations: SiteLocation[]) {
-  return adminRequest<{ saved: boolean; locations: SiteLocation[] }>(
-    "connect-profiles/locations",
-    { method: "PUT", body: JSON.stringify({ locations }) },
-  ) as Promise<{ saved: boolean; locations: SiteLocation[] }>;
+  return adminRequest<{ saved: boolean; locations: SiteLocation[] }>("connect-profiles/locations", {
+    method: "PUT",
+    body: JSON.stringify({ locations }),
+  }) as Promise<{ saved: boolean; locations: SiteLocation[] }>;
 }
 
 export type AuditLog = {

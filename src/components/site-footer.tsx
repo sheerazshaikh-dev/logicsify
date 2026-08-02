@@ -5,6 +5,8 @@ import { DEFAULT_BRAND_ASSETS } from "@/lib/brand-assets";
 import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
 import {
   getContactEmails,
+  getLocationAddresses,
+  getLocationPhones,
   getSiteLocations,
   getSocialProfiles,
   locationMapUrl,
@@ -99,11 +101,7 @@ export function SiteFooter() {
               {ctaLabel} <ArrowRight className="h-4 w-4" />
             </Link>
             {boolSetting(settings.show_social_links, true) ? (
-              <SocialProfileLinks
-                profiles={socialProfiles}
-                tone="dark"
-                className="mt-6"
-              />
+              <SocialProfileLinks profiles={socialProfiles} tone="dark" className="mt-6" />
             ) : null}
           </div>
 
@@ -130,10 +128,27 @@ export function SiteFooter() {
           <div>
             <p className="eyebrow mb-5 text-white/60">Contact</p>
             <div className="space-y-4 text-sm">
-              <ContactLink icon={Mail} label="General" href={`mailto:${emails.general}`} value={emails.general} />
-              <ContactLink icon={Mail} label="Sales" href={`mailto:${emails.sales}`} value={emails.sales} />
-              <ContactLink icon={Mail} label="Support" href={`mailto:${emails.support}`} value={emails.support} />
-              {phone ? <ContactLink icon={Phone} label="Phone" href={telHref(phone)} value={phone} /> : null}
+              <ContactLink
+                icon={Mail}
+                label="General"
+                href={`mailto:${emails.general}`}
+                value={emails.general}
+              />
+              <ContactLink
+                icon={Mail}
+                label="Sales"
+                href={`mailto:${emails.sales}`}
+                value={emails.sales}
+              />
+              <ContactLink
+                icon={Mail}
+                label="Support"
+                href={`mailto:${emails.support}`}
+                value={emails.support}
+              />
+              {phone ? (
+                <ContactLink icon={Phone} label="Phone" href={telHref(phone)} value={phone} />
+              ) : null}
             </div>
           </div>
 
@@ -142,6 +157,8 @@ export function SiteFooter() {
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {locations.map((location) => {
                 const mapUrl = locationMapUrl(location);
+                const addresses = getLocationAddresses(location);
+                const phones = getLocationPhones(location);
                 return (
                   <article
                     key={location.id}
@@ -161,17 +178,23 @@ export function SiteFooter() {
                         </p>
                       </div>
                     </div>
-                    {location.address ? (
-                      <p className="mt-4 whitespace-pre-line text-xs leading-5 text-white/60">
-                        {location.address}
-                      </p>
+                    {addresses.length ? (
+                      <div className="mt-4 space-y-2 text-xs leading-5 text-white/60">
+                        {addresses.map((address) => (
+                          <p key={address}>{address}</p>
+                        ))}
+                      </div>
                     ) : null}
                     <div className="mt-auto pt-5 text-xs text-white/65">
-                      {location.phone ? (
-                        <a href={telHref(location.phone)} className="block hover:text-white">
-                          {location.phone}
+                      {phones.map((locationPhone) => (
+                        <a
+                          key={locationPhone}
+                          href={telHref(locationPhone)}
+                          className="mt-1 block first:mt-0 hover:text-white"
+                        >
+                          {locationPhone}
                         </a>
-                      ) : null}
+                      ))}
                       {mapUrl ? (
                         <a
                           href={mapUrl}

@@ -18,32 +18,31 @@ export const TEAM_CONNECT_FIELD_LABELS: Record<ConnectProfileField, string> = {
   skills: "Skills",
 };
 
-export const TEAM_CONNECT_FIELDS = Object.keys(
-  TEAM_CONNECT_FIELD_LABELS,
-) as ConnectProfileField[];
+export const TEAM_CONNECT_FIELDS = Object.keys(TEAM_CONNECT_FIELD_LABELS) as ConnectProfileField[];
 
 export const TEAM_CONNECT_DESTINATIONS: Array<{
   id: ConnectProfileDestination;
   label: string;
 }> = [
   { id: "team", label: "Team cards" },
+  { id: "contact", label: "Contact page" },
   { id: "connect", label: "Connect page" },
   { id: "export", label: "JPG / PDF" },
 ];
 
 export const DEFAULT_CONNECT_PROFILE_VISIBILITY: ConnectProfileVisibility = {
-  placements: { home: false, about: false, connect: true },
+  placements: { home: false, about: false, contact: false, connect: true },
   fields: {
-    avatar: { team: true, connect: true, export: true },
-    headline: { team: true, connect: true, export: true },
-    bio: { team: true, connect: true, export: false },
-    email: { team: false, connect: true, export: true },
-    phone: { team: false, connect: true, export: true },
-    whatsapp: { team: false, connect: true, export: true },
-    address: { team: false, connect: true, export: true },
-    social_links: { team: true, connect: true, export: true },
-    locations: { team: true, connect: true, export: false },
-    skills: { team: true, connect: true, export: false },
+    avatar: { team: true, contact: true, connect: true, export: true },
+    headline: { team: true, contact: true, connect: true, export: true },
+    bio: { team: true, contact: false, connect: true, export: false },
+    email: { team: false, contact: false, connect: true, export: true },
+    phone: { team: false, contact: false, connect: true, export: true },
+    whatsapp: { team: false, contact: false, connect: true, export: true },
+    address: { team: false, contact: false, connect: true, export: true },
+    social_links: { team: true, contact: false, connect: true, export: true },
+    locations: { team: true, contact: false, connect: true, export: false },
+    skills: { team: true, contact: false, connect: true, export: false },
   },
 };
 

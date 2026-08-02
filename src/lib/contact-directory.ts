@@ -56,11 +56,19 @@ export function getSiteLocations(
 ): SiteLocation[] {
   const configured = Array.isArray(settings.locations)
     ? settings.locations
-        .filter((location): location is SiteLocation => Boolean(location && typeof location === "object"))
+        .filter((location): location is SiteLocation =>
+          Boolean(location && typeof location === "object"),
+        )
         .map((location, index) => ({
           ...location,
           id: String(location.id || `location-${index}`),
-          name: String(location.name || location.city || location.country || `Location ${index + 1}`),
+          name: String(
+            location.name || location.city || location.country || `Location ${index + 1}`,
+          ),
+          addresses: normalizeLocationValues(location.addresses, location.address),
+          phones: normalizeLocationValues(location.phones, location.phone),
+          address: normalizeLocationValues(location.addresses, location.address).join("\n"),
+          phone: normalizeLocationValues(location.phones, location.phone)[0] || "",
           enabled: location.enabled !== false,
           sort_order: Number(location.sort_order ?? index),
         }))
@@ -107,7 +115,9 @@ export function getSiteLocations(
 export function getSocialProfiles(settings: PublicSiteSettings): SocialProfile[] {
   const configured = Array.isArray(settings.social_links)
     ? settings.social_links
-        .filter((profile): profile is SocialProfile => Boolean(profile && typeof profile === "object"))
+        .filter((profile): profile is SocialProfile =>
+          Boolean(profile && typeof profile === "object"),
+        )
         .map((profile, index) => ({
           ...profile,
           id: String(profile.id || `social-${index}`),
@@ -131,15 +141,28 @@ export function getSocialProfiles(settings: PublicSiteSettings): SocialProfile[]
   ].filter((profile) => Boolean(profile.url));
 
   const configuredUrls = new Set(configured.map((profile) => normalizeUrl(profile.url)));
-  return [...configured, ...legacy.filter((profile) => !configuredUrls.has(normalizeUrl(profile.url)))];
+  return [
+    ...configured,
+    ...legacy.filter((profile) => !configuredUrls.has(normalizeUrl(profile.url))),
+  ];
 }
 
 export function locationMapUrl(location: SiteLocation) {
   if (location.map_url) return location.map_url;
-  const query = [location.address, location.city, location.country].filter(Boolean).join(", ");
+  const query = [getLocationAddresses(location)[0], location.city, location.country]
+    .filter(Boolean)
+    .join(", ");
   return query
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query.replace(/\n/g, ", "))}`
     : "";
+}
+
+export function getLocationAddresses(location: SiteLocation) {
+  return normalizeLocationValues(location.addresses, location.address);
+}
+
+export function getLocationPhones(location: SiteLocation) {
+  return normalizeLocationValues(location.phones, location.phone);
 }
 
 export function telHref(phone: string) {
@@ -164,4 +187,10 @@ function legacyProfile(
 
 function normalizeUrl(value: string) {
   return value.trim().replace(/\/$/, "").toLowerCase();
+}
+
+function normalizeLocationValues(values?: string[], legacyValue?: string) {
+  const source =
+    Array.isArray(values) && values.length ? values : String(legacyValue || "").split(/\r?\n/);
+  return Array.from(new Set(source.map((value) => String(value).trim()).filter(Boolean)));
 }
