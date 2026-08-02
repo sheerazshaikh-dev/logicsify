@@ -14,6 +14,7 @@ import {
   adminInputClass,
   adminTextareaClass,
 } from "@/components/admin/admin-ui";
+import { AdminShell } from "@/components/admin/admin-shell";
 import { QrCode } from "@/components/qr-code";
 import { downloadQrCode } from "@/lib/qr-code";
 import {
@@ -88,7 +89,7 @@ function ConnectProfilesPage() {
     }
   }
   return (
-    <>
+    <AdminShell>
       <AdminPageHeader
         eyebrow="Reusable module"
         title="Connect Profiles"
@@ -167,7 +168,7 @@ function ConnectProfilesPage() {
       </AdminCard>
       <ProfileEditor value={editing} setValue={setEditing} save={save} saving={saving} />
       <QrModal profile={qr} close={() => setQr(null)} />
-    </>
+    </AdminShell>
   );
 }
 
