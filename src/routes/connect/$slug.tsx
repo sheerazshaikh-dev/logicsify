@@ -92,9 +92,9 @@ function ConnectProfilePage() {
   ].filter(Boolean) as Array<{ label: string; href: string; Icon: LucideIcon }>;
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-[#f7f4fa] px-4 py-6 text-[#190A2F] sm:px-6 md:py-12">
-      <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#FE3434]/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -right-32 h-[30rem] w-[30rem] rounded-full bg-[#FDBE02]/12 blur-3xl" />
+    <main className="relative min-h-dvh overflow-hidden bg-[#190A2F] px-4 py-6 text-[#190A2F] sm:px-6 md:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(254,52,52,0.22),transparent_45%),radial-gradient(circle_at_82%_64%,rgba(253,190,2,0.2),transparent_44%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[44rem] w-[44rem] -translate-x-1/2 rounded-full bg-[#FDBE02]/10 blur-3xl" />
       <article className="relative mx-auto max-w-2xl overflow-hidden rounded-[2.25rem] border border-white/70 bg-white shadow-[0_38px_120px_-52px_rgba(25,10,47,.52)]">
         <div
           className="relative h-52 overflow-hidden bg-[#190A2F] bg-cover bg-center sm:h-64"
