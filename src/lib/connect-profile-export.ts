@@ -214,7 +214,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   if (!context) throw new Error("Your browser could not create the downloadable card.");
 
   const [cover, avatar, logo, qr] = await Promise.all([
-    loadImage(profile.cover_url),
+    loadImage(profile.global_cover_url || profile.cover_url),
     loadImage(profile.avatar_url),
     loadImage("/logicsify-logo-dark.png"),
     QRCode.toDataURL(profileUrl, {

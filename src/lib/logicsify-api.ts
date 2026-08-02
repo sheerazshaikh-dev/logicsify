@@ -97,9 +97,12 @@ export function submitContact(data: ContactSubmission) {
   });
 }
 
-
-
-export function submitNewsletter(data: { email: string; consent: boolean; source?: string; honey?: string }) {
+export function submitNewsletter(data: {
+  email: string;
+  consent: boolean;
+  source?: string;
+  honey?: string;
+}) {
   return request<{ message: string }>("public/newsletter", {
     method: "POST",
     body: JSON.stringify(data),
@@ -137,11 +140,24 @@ export function submitBooking(data: BookingSubmission) {
 export { API_BASE };
 
 export type PublicConnectProfile = {
-  id: number; slug: string; display_name: string; headline?: string | null; company?: string | null;
-  bio?: string | null; avatar_url?: string | null; cover_url?: string | null; email?: string | null;
-  phone?: string | null; whatsapp?: string | null; website?: string | null; address?: string | null;
+  id: number;
+  slug: string;
+  display_name: string;
+  headline?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
+  cover_url?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  website?: string | null;
+  address?: string | null;
+  global_cover_url?: string | null;
   links_json: Array<{ label: string; url: string; icon?: string }>;
-  theme_json: { accent?: string }; is_unlisted: boolean; noindex: boolean;
+  theme_json: { accent?: string };
+  is_unlisted: boolean;
+  noindex: boolean;
 };
 
 export function getConnectProfile(slug: string) {

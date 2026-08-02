@@ -11,15 +11,9 @@ import {
   QrCode as QrIcon,
   Trash2,
 } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
+import { MediaPicker } from "@/components/cms/media-picker";
 import {
   AdminButton,
   AdminCard,
@@ -40,9 +34,10 @@ import { downloadQrCode } from "@/lib/qr-code";
 import {
   createConnectProfile,
   deleteConnectProfile,
+  getConnectProfileSettings,
   listConnectProfiles,
+  saveConnectProfileSettings,
   updateConnectProfile,
-  uploadMedia,
   type ConnectProfile,
   type ConnectProfileLink,
 } from "@/lib/admin-api";
@@ -93,6 +88,9 @@ function ConnectProfilesPage() {
   const [saving, setSaving] = useState(false);
   const [qr, setQr] = useState<ConnectProfile | null>(null);
   const [downloadProfile, setDownloadProfile] = useState<ConnectProfile | null>(null);
+  const [globalCover, setGlobalCover] = useState("");
+  const [globalCoverPickerOpen, setGlobalCoverPickerOpen] = useState(false);
+  const [savingGlobalCover, setSavingGlobalCover] = useState(false);
   const refresh = () =>
     listConnectProfiles()
       .then((r) => setItems(r.data))
@@ -100,7 +98,28 @@ function ConnectProfilesPage() {
       .finally(() => setLoading(false));
   useEffect(() => {
     void refresh();
+    void getConnectProfileSettings()
+      .then((settings) => setGlobalCover(settings.global_cover_url || ""))
+      .catch((error) =>
+        toast.error(error instanceof Error ? error.message : "Could not load the global cover."),
+      );
   }, []);
+
+  async function updateGlobalCover(url: string) {
+    setSavingGlobalCover(true);
+    try {
+      const result = await saveConnectProfileSettings({ global_cover_url: url });
+      setGlobalCover(result.global_cover_url || "");
+      setItems((current) =>
+        current.map((profile) => ({ ...profile, global_cover_url: result.global_cover_url || "" })),
+      );
+      toast.success(url ? "Global cover updated for every profile." : "Global cover removed.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update the global cover.");
+    } finally {
+      setSavingGlobalCover(false);
+    }
+  }
   async function save() {
     if (!editing) return;
     setSaving(true);
@@ -133,7 +152,7 @@ function ConnectProfilesPage() {
       <AdminPageHeader
         eyebrow="Reusable module"
         title="Connect Profiles"
-        description="Create shareable digital profiles. Every field except the name and URL slug is optional."
+        description="Create shareable digital profiles. Avatars and the shared cover are managed through the Media Library."
         actions={
           <AdminButton onClick={() => setEditing({ ...emptyProfile })}>
             <Plus className="h-4 w-4" />
@@ -141,6 +160,62 @@ function ConnectProfilesPage() {
           </AdminButton>
         }
       />
+      <AdminCard className="mb-7 overflow-hidden">
+        <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
+          <div
+            className="relative min-h-56 overflow-hidden bg-[#190A2F] bg-cover bg-center"
+            style={
+              globalCover
+                ? { backgroundImage: `url(${globalCover})` }
+                : {
+                    backgroundImage:
+                      "radial-gradient(circle at 15% 20%, #FE3434cc, transparent 43%), radial-gradient(circle at 82% 70%, #FDBE0299, transparent 42%), linear-gradient(135deg, #190A2F, #361141)",
+                  }
+            }
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#190A2F]/45 via-transparent to-[#190A2F]/15" />
+            <span className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-[#190A2F]/60 px-4 py-2 text-xs font-bold text-white backdrop-blur">
+              Shared profile cover
+            </span>
+          </div>
+          <div className="flex flex-col justify-center p-6 lg:p-8">
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-[#FE3434]">
+              Global cover
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-[#190A2F]">
+              One cover for every profile
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Select it once from Media Library. It is used on every public connect page and in all
+              JPG/PDF downloads.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <AdminButton
+                variant="secondary"
+                disabled={savingGlobalCover}
+                onClick={() => setGlobalCoverPickerOpen(true)}
+              >
+                {savingGlobalCover ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="h-4 w-4" />
+                )}
+                {globalCover ? "Change in Media Library" : "Choose from Media Library"}
+              </AdminButton>
+              {globalCover ? (
+                <AdminButton
+                  variant="danger"
+                  disabled={savingGlobalCover}
+                  onClick={() => void updateGlobalCover("")}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Remove
+                </AdminButton>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </AdminCard>
       <AdminCard>
         {loading ? (
           <AdminLoading />
@@ -223,6 +298,17 @@ function ConnectProfilesPage() {
       />
       <QrModal profile={qr} close={() => setQr(null)} />
       <DownloadModal profile={downloadProfile} close={() => setDownloadProfile(null)} />
+      <MediaPicker
+        open={globalCoverPickerOpen}
+        title="Choose the global Connect Profiles cover"
+        kind="images"
+        selectedUrl={globalCover}
+        onClose={() => setGlobalCoverPickerOpen(false)}
+        onSelect={(url) => {
+          setGlobalCoverPickerOpen(false);
+          void updateGlobalCover(url);
+        }}
+      />
     </AdminShell>
   );
 }
@@ -240,7 +326,6 @@ function ProfileEditor({
   saving: boolean;
   existingSlugs: string[];
 }) {
-  const [imageUploads, setImageUploads] = useState({ avatar: false, cover: false });
   if (!value) return null;
   const set = (key: keyof ConnectProfile, v: unknown) =>
     setValue((current) => (current ? { ...current, [key]: v } : current));
@@ -259,9 +344,6 @@ function ProfileEditor({
         ...(shouldGenerateSlug ? { slug: createAvailableSlug(displayName, existingSlugs) } : {}),
       };
     });
-  const setImageUploading = (kind: "avatar" | "cover", uploading: boolean) =>
-    setImageUploads((current) => ({ ...current, [kind]: uploading }));
-  const isUploadingImage = imageUploads.avatar || imageUploads.cover;
   const links = value.links_json || [];
   const setLink = (i: number, key: keyof ConnectProfileLink, v: string) =>
     set(
@@ -273,13 +355,7 @@ function ProfileEditor({
       open
       title={value.id ? "Edit connect profile" : "New connect profile"}
       description="Blank optional fields are hidden automatically. Logicsify branding and the company website are added for you."
-      onClose={() => {
-        if (isUploadingImage) {
-          toast.error("Wait for the image upload to finish before closing.");
-          return;
-        }
-        setValue(null);
-      }}
+      onClose={() => setValue(null)}
       width="max-w-5xl"
     >
       <div className="grid gap-5 md:grid-cols-2">
@@ -292,20 +368,9 @@ function ProfileEditor({
         />
         <Field label="Headline" value={value.headline} onChange={(v) => set("headline", v)} />
         <ProfileImageField
-          kind="avatar"
           label="Avatar image"
           value={value.avatar_url}
-          altText={`${value.display_name || "Connect profile"} avatar`}
           onChange={(v) => set("avatar_url", v)}
-          onUploadingChange={(uploading) => setImageUploading("avatar", uploading)}
-        />
-        <ProfileImageField
-          kind="cover"
-          label="Cover image"
-          value={value.cover_url}
-          altText={`${value.display_name || "Connect profile"} cover`}
-          onChange={(v) => set("cover_url", v)}
-          onUploadingChange={(uploading) => setImageUploading("cover", uploading)}
         />
         <Field label="Email" value={value.email} onChange={(v) => set("email", v)} />
         <Field label="Phone" value={value.phone} onChange={(v) => set("phone", v)} />
@@ -427,79 +492,38 @@ function ProfileEditor({
         </div>
       </div>
       <div className="mt-7 flex justify-end gap-2">
-        <AdminButton variant="secondary" disabled={isUploadingImage} onClick={() => setValue(null)}>
+        <AdminButton variant="secondary" onClick={() => setValue(null)}>
           Cancel
         </AdminButton>
-        <AdminButton
-          disabled={saving || isUploadingImage || !value.display_name || !value.slug}
-          onClick={save}
-        >
-          {saving ? "Saving…" : isUploadingImage ? "Uploading image…" : "Save profile"}
+        <AdminButton disabled={saving || !value.display_name || !value.slug} onClick={save}>
+          {saving ? "Saving…" : "Save profile"}
         </AdminButton>
       </div>
     </AdminModal>
   );
 }
 
-const PROFILE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const PROFILE_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
-
 function ProfileImageField({
-  kind,
   label,
   value,
-  altText,
   onChange,
-  onUploadingChange,
 }: {
-  kind: "avatar" | "cover";
   label: string;
   value?: string | null;
-  altText: string;
   onChange: (v: string) => void;
-  onUploadingChange: (uploading: boolean) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-
-  async function chooseImage(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-
-    if (!PROFILE_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Choose a JPG, PNG, WebP or GIF image.");
-      return;
-    }
-    if (file.size > PROFILE_IMAGE_MAX_BYTES) {
-      toast.error("The image must be 12 MB or smaller.");
-      return;
-    }
-
-    setUploading(true);
-    onUploadingChange(true);
-    try {
-      const media = await uploadMedia(file, altText);
-      onChange(media.url);
-      toast.success(`${kind === "avatar" ? "Avatar" : "Cover"} image uploaded.`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Image upload failed.");
-    } finally {
-      setUploading(false);
-      onUploadingChange(false);
-    }
-  }
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div>
       <FieldLabel>{label}</FieldLabel>
-      <div
-        className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 ${
-          kind === "avatar" ? "aspect-square max-w-48" : "aspect-[16/7] w-full"
-        }`}
-      >
+      <div className="relative aspect-square max-w-48 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
         {value ? (
-          <img src={value} alt={`${label} preview`} className="h-full w-full object-cover" />
+          <img
+            src={value}
+            alt={`${label} preview`}
+            className="h-full w-full object-cover object-[center_18%]"
+          />
         ) : (
           <div className="grid h-full place-items-center px-4 text-center text-slate-400">
             <div>
@@ -508,55 +532,33 @@ function ProfileImageField({
             </div>
           </div>
         )}
-        {uploading ? (
-          <div className="absolute inset-0 grid place-items-center bg-[#190A2F]/70 text-white">
-            <div className="text-center">
-              <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-              <p className="mt-2 text-xs font-semibold">Uploading…</p>
-            </div>
-          </div>
-        ) : null}
       </div>
-      <input
-        ref={inputRef}
-        type="file"
-        className="hidden"
-        accept={PROFILE_IMAGE_TYPES.join(",")}
-        disabled={uploading}
-        onChange={(event) => void chooseImage(event)}
-      />
       <div className="mt-3 flex flex-wrap gap-2">
-        <AdminButton
-          variant="secondary"
-          disabled={uploading}
-          onClick={() => inputRef.current?.click()}
-        >
-          {uploading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <ImagePlus className="h-4 w-4" />
-          )}
-          {value ? "Replace image" : "Upload image"}
+        <AdminButton variant="secondary" onClick={() => setPickerOpen(true)}>
+          <ImagePlus className="h-4 w-4" />
+          {value ? "Change in Media Library" : "Choose from Media Library"}
         </AdminButton>
         {value ? (
-          <AdminButton variant="danger" disabled={uploading} onClick={() => onChange("")}>
+          <AdminButton variant="danger" onClick={() => onChange("")}>
             <Trash2 className="h-4 w-4" />
             Remove
           </AdminButton>
         ) : null}
       </div>
-      <p className="mt-2 text-xs text-slate-400">JPG, PNG, WebP or GIF · maximum 12 MB</p>
-      <div className="mt-3">
-        <FieldLabel>Or use an image URL</FieldLabel>
-        <input
-          className={adminInputClass}
-          type="url"
-          placeholder="https://…"
-          value={value || ""}
-          disabled={uploading}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      </div>
+      <p className="mt-2 text-xs text-slate-400">
+        Select an existing image or upload one or many files inside Media Library.
+      </p>
+      <MediaPicker
+        open={pickerOpen}
+        title="Choose a profile avatar"
+        kind="images"
+        selectedUrl={value || ""}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => {
+          onChange(url);
+          setPickerOpen(false);
+        }}
+      />
     </div>
   );
 }

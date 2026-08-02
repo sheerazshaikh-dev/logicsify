@@ -131,7 +131,18 @@ export type DashboardResponse = {
 export type ContentItem = {
   id: number;
   content_type:
-    "page" | "service" | "industry" | "case_study" | "insight" | "career" | "testimonial" | "team" | "resource" | "comparison" | "engagement_model" | "integration";
+    | "page"
+    | "service"
+    | "industry"
+    | "case_study"
+    | "insight"
+    | "career"
+    | "testimonial"
+    | "team"
+    | "resource"
+    | "comparison"
+    | "engagement_model"
+    | "integration";
   title: string;
   slug: string;
   status: "draft" | "published" | "scheduled" | "archived";
@@ -297,26 +308,74 @@ export type TrashItem = {
 
 export type ConnectProfileLink = { label: string; url: string; icon?: string };
 export type ConnectProfile = {
-  id: number; slug: string; display_name: string; headline?: string | null; company?: string | null;
-  bio?: string | null; avatar_url?: string | null; cover_url?: string | null; email?: string | null;
-  phone?: string | null; whatsapp?: string | null; website?: string | null; address?: string | null;
-  links_json: ConnectProfileLink[]; theme_json: { accent?: string };
-  status: "draft" | "published" | "archived"; is_unlisted: boolean; noindex: boolean;
-  created_at?: string; updated_at?: string;
+  id: number;
+  slug: string;
+  display_name: string;
+  headline?: string | null;
+  company?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
+  cover_url?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp?: string | null;
+  website?: string | null;
+  address?: string | null;
+  global_cover_url?: string | null;
+  links_json: ConnectProfileLink[];
+  theme_json: { accent?: string };
+  status: "draft" | "published" | "archived";
+  is_unlisted: boolean;
+  noindex: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
-export function listConnectProfiles(params: { status?: string; search?: string; page?: number } = {}) {
-  const search = new URLSearchParams({ status: params.status || "all", search: params.search || "", page: String(params.page || 1), per_page: "50" });
-  return adminRequest<ConnectProfile[]>(`connect-profiles?${search}`, {}, true) as Promise<{ data: ConnectProfile[]; meta: ApiMeta }>;
+export function listConnectProfiles(
+  params: { status?: string; search?: string; page?: number } = {},
+) {
+  const search = new URLSearchParams({
+    status: params.status || "all",
+    search: params.search || "",
+    page: String(params.page || 1),
+    per_page: "50",
+  });
+  return adminRequest<ConnectProfile[]>(`connect-profiles?${search}`, {}, true) as Promise<{
+    data: ConnectProfile[];
+    meta: ApiMeta;
+  }>;
 }
 export function createConnectProfile(payload: Partial<ConnectProfile>) {
-  return adminRequest<ConnectProfile>("connect-profiles", { method: "POST", body: JSON.stringify(payload) }) as Promise<ConnectProfile>;
+  return adminRequest<ConnectProfile>("connect-profiles", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }) as Promise<ConnectProfile>;
 }
 export function updateConnectProfile(id: number, payload: Partial<ConnectProfile>) {
-  return adminRequest<ConnectProfile>(`connect-profiles/${id}`, { method: "PUT", body: JSON.stringify(payload) }) as Promise<ConnectProfile>;
+  return adminRequest<ConnectProfile>(`connect-profiles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }) as Promise<ConnectProfile>;
 }
 export function deleteConnectProfile(id: number) {
-  return adminRequest<{ deleted: boolean }>(`connect-profiles/${id}`, { method: "DELETE" }) as Promise<{ deleted: boolean }>;
+  return adminRequest<{ deleted: boolean }>(`connect-profiles/${id}`, {
+    method: "DELETE",
+  }) as Promise<{ deleted: boolean }>;
+}
+
+export type ConnectProfileSettings = { global_cover_url: string };
+
+export function getConnectProfileSettings() {
+  return adminRequest<ConnectProfileSettings>(
+    "connect-profiles/settings",
+  ) as Promise<ConnectProfileSettings>;
+}
+
+export function saveConnectProfileSettings(values: ConnectProfileSettings) {
+  return adminRequest<{ saved: boolean; global_cover_url: string }>("connect-profiles/settings", {
+    method: "PUT",
+    body: JSON.stringify(values),
+  }) as Promise<{ saved: boolean; global_cover_url: string }>;
 }
 
 export type AuditLog = {
@@ -362,13 +421,27 @@ export function adminLogin(email: string, password: string) {
 }
 
 export function sendAdminEmailTwoFactor(challenge_token: string) {
-  return adminRequest<{ sent: boolean; masked_email: string; expires_at: string; resend_after_seconds: number }>(
-    "auth/send-email-2fa",
-    { method: "POST", body: JSON.stringify({ challenge_token }) },
-  ) as Promise<{ sent: boolean; masked_email: string; expires_at: string; resend_after_seconds: number }>;
+  return adminRequest<{
+    sent: boolean;
+    masked_email: string;
+    expires_at: string;
+    resend_after_seconds: number;
+  }>("auth/send-email-2fa", {
+    method: "POST",
+    body: JSON.stringify({ challenge_token }),
+  }) as Promise<{
+    sent: boolean;
+    masked_email: string;
+    expires_at: string;
+    resend_after_seconds: number;
+  }>;
 }
 
-export function verifyAdminTwoFactor(challenge_token: string, code: string, method: TwoFactorMethod) {
+export function verifyAdminTwoFactor(
+  challenge_token: string,
+  code: string,
+  method: TwoFactorMethod,
+) {
   return adminRequest<{ token: string; expires_at: string; administrator: Administrator }>(
     "auth/verify-2fa",
     { method: "POST", body: JSON.stringify({ challenge_token, code, method }) },
@@ -728,16 +801,18 @@ export function getSecurityOverview() {
   return adminRequest<SecurityOverview>("security/overview") as Promise<SecurityOverview>;
 }
 
-export function listSecurityEvents(params: {
-  search?: string;
-  category?: string;
-  severity?: string;
-  status?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  page?: number;
-  perPage?: number;
-} = {}) {
+export function listSecurityEvents(
+  params: {
+    search?: string;
+    category?: string;
+    severity?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    page?: number;
+    perPage?: number;
+  } = {},
+) {
   const search = new URLSearchParams({
     search: params.search || "",
     category: params.category || "",
@@ -853,7 +928,8 @@ export function unlockAdministrator(id: number) {
 export async function getPublicAdminAccessPolicy() {
   const response = await fetch(`${API_BASE}/public/security/access-policy`);
   const payload = (await response.json()) as ApiEnvelope<{ legacy_admin_path_enabled: boolean }>;
-  if (!response.ok || !payload.success) throw new Error(payload.message || "Could not check admin access policy.");
+  if (!response.ok || !payload.success)
+    throw new Error(payload.message || "Could not check admin access policy.");
   return payload.data;
 }
 
@@ -887,5 +963,7 @@ export type AdminRuntimeCustomization = {
 };
 
 export function getAdminRuntimeCustomization() {
-  return adminRequest<AdminRuntimeCustomization>("settings/runtime-admin") as Promise<AdminRuntimeCustomization>;
+  return adminRequest<AdminRuntimeCustomization>(
+    "settings/runtime-admin",
+  ) as Promise<AdminRuntimeCustomization>;
 }

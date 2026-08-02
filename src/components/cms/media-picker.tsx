@@ -1,4 +1,13 @@
-import { Check, FileText, Image as ImageIcon, Loader2, Search, Upload, Video, X } from "lucide-react";
+import {
+  Check,
+  FileText,
+  Image as ImageIcon,
+  Loader2,
+  Search,
+  Upload,
+  Video,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { listMedia as fetchMediaRaw, uploadMedia, type MediaItem } from "@/lib/admin-api";
 
@@ -38,6 +47,7 @@ export function MediaPicker({
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -55,17 +65,18 @@ export function MediaPicker({
   useEffect(() => {
     if (!open) return;
     setSearch("");
+    setNotice("");
     void load();
   }, [load, open]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !uploading) onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose, open]);
+  }, [onClose, open, uploading]);
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -82,24 +93,51 @@ export function MediaPicker({
     });
   }, [items, kind, search]);
 
-  async function upload(file?: File) {
-    if (!file) return;
+  function acceptsFile(file: File) {
+    if (kind === "images") return file.type.startsWith("image/");
+    if (kind === "videos") return file.type.startsWith("video/");
+    if (kind === "documents") return file.type === "application/pdf";
+    return true;
+  }
+
+  async function upload(selected?: FileList | null) {
+    const files = Array.from(selected || []);
+    if (inputRef.current) inputRef.current.value = "";
+    if (!files.length) return;
+    const rejected = files.filter((file) => !acceptsFile(file));
+    if (rejected.length) {
+      setError(
+        `Choose ${kind === "images" ? "image" : kind === "videos" ? "video" : kind === "documents" ? "PDF" : "supported"} files only.`,
+      );
+      return;
+    }
     setUploading(true);
     setError("");
+    setNotice("");
     try {
-      const result = await uploadMedia(file);
-      if (kind === "documents" && result.mime_type !== "application/pdf") {
-        throw new Error("Please upload a PDF document.");
-      }
-      if (kind === "images" && !result.mime_type.startsWith("image/")) {
-        throw new Error("Please upload an image file.");
-      }
-      if (kind === "videos" && !result.mime_type.startsWith("video/")) {
-        throw new Error("Please upload an MP4, WebM, MOV, or OGV video.");
-      }
+      const results = await Promise.allSettled(files.map((file) => uploadMedia(file)));
+      const uploaded = results.flatMap((result) =>
+        result.status === "fulfilled" ? [result.value] : [],
+      );
       await load();
-      onSelect(result.url, result);
-      onClose();
+      if (uploaded.length === 1 && files.length === 1) {
+        onSelect(uploaded[0].url, uploaded[0]);
+        onClose();
+        return;
+      }
+      if (uploaded.length) {
+        setNotice(
+          `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded. Select the one you want to use.`,
+        );
+      }
+      const firstFailure = results.find((result) => result.status === "rejected");
+      if (firstFailure?.status === "rejected") {
+        setError(
+          firstFailure.reason instanceof Error
+            ? firstFailure.reason.message
+            : `${files.length - uploaded.length} file${files.length - uploaded.length === 1 ? "" : "s"} could not be uploaded.`,
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "File upload failed.");
     } finally {
@@ -110,7 +148,13 @@ export function MediaPicker({
 
   if (!open) return null;
   const label =
-    kind === "documents" ? "PDF" : kind === "images" ? "image" : kind === "videos" ? "video" : "file";
+    kind === "documents"
+      ? "PDF"
+      : kind === "images"
+        ? "image"
+        : kind === "videos"
+          ? "video"
+          : "file";
   const accept =
     kind === "documents"
       ? "application/pdf,.pdf"
@@ -122,7 +166,12 @@ export function MediaPicker({
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
-      <button className="absolute inset-0" aria-label="Close media picker" onClick={onClose} />
+      <button
+        className="absolute inset-0"
+        aria-label="Close media picker"
+        disabled={uploading}
+        onClick={onClose}
+      />
       <section className="relative z-10 flex max-h-[88vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.75rem] border border-black/10 bg-white shadow-2xl">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-black/8 px-5 py-4 sm:px-7">
           <div>
@@ -138,19 +187,22 @@ export function MediaPicker({
               ) : (
                 <Upload className="size-4" />
               )}
-              Upload new
+              Upload files
               <input
                 ref={inputRef}
                 type="file"
+                multiple
                 accept={accept}
                 className="hidden"
                 disabled={uploading}
-                onChange={(event) => void upload(event.target.files?.[0])}
+                onChange={(event) => void upload(event.target.files)}
               />
             </label>
             <button
               className="rounded-xl border border-black/10 p-2.5 hover:bg-black hover:text-white"
+              disabled={uploading}
               onClick={onClose}
+              aria-label="Close media picker"
             >
               <X className="size-5" />
             </button>
@@ -170,6 +222,11 @@ export function MediaPicker({
           </label>
           {error ? (
             <div className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+          ) : null}
+          {notice ? (
+            <div className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              {notice}
+            </div>
           ) : null}
         </div>
 
@@ -218,7 +275,12 @@ export function MediaPicker({
                         />
                       ) : isVideo(item) ? (
                         <div className="relative h-full w-full">
-                          <video src={item.url} className="h-full w-full object-cover" muted preload="metadata" />
+                          <video
+                            src={item.url}
+                            className="h-full w-full object-cover"
+                            muted
+                            preload="metadata"
+                          />
                           <span className="absolute inset-0 grid place-items-center bg-black/25 text-white">
                             <Video className="size-10" />
                           </span>

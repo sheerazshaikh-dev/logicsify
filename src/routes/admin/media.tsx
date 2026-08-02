@@ -1,13 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Copy,
-  FileText,
-  Loader2,
-  Search,
-  Trash2,
-  UploadCloud,
-  Video,
-} from "lucide-react";
+import { Copy, FileText, Loader2, Search, Trash2, UploadCloud, Video, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -125,7 +117,12 @@ function MediaPage() {
                     />
                   ) : item.mime_type.startsWith("video/") ? (
                     <div className="relative h-full w-full">
-                      <video src={item.url} className="h-full w-full object-cover" muted preload="metadata" />
+                      <video
+                        src={item.url}
+                        className="h-full w-full object-cover"
+                        muted
+                        preload="metadata"
+                      />
                       <span className="absolute inset-0 grid place-items-center bg-black/25 text-white">
                         <Video className="h-10 w-10" />
                       </span>
@@ -169,14 +166,7 @@ function MediaPage() {
         )}
       </AdminCard>
 
-      <UploadModal
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onUploaded={async () => {
-          setUploadOpen(false);
-          await load();
-        }}
-      />
+      <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={load} />
     </AdminShell>
   );
 }
@@ -190,91 +180,167 @@ function UploadModal({
   onClose: () => void;
   onUploaded: () => Promise<void>;
 }) {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [alt, setAlt] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [completed, setCompleted] = useState(0);
 
   useEffect(() => {
     if (!open) {
-      setFile(null);
+      setFiles([]);
       setAlt("");
+      setCompleted(0);
     }
   }, [open]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!file) return;
+    if (!files.length) return;
     setUploading(true);
+    setCompleted(0);
     try {
-      await uploadMedia(file, alt);
-      toast.success("Media uploaded.");
+      const results = await Promise.allSettled(
+        files.map((file) =>
+          uploadMedia(file, files.length === 1 ? alt : "").finally(() =>
+            setCompleted((current) => current + 1),
+          ),
+        ),
+      );
+      const failedFiles = files.filter((_, index) => results[index].status === "rejected");
+      const uploadedCount = files.length - failedFiles.length;
+      if (uploadedCount) {
+        toast.success(`${uploadedCount} file${uploadedCount === 1 ? "" : "s"} uploaded.`);
+      }
       await onUploaded();
+      if (failedFiles.length) {
+        setFiles(failedFiles);
+        const firstFailure = results.find((result) => result.status === "rejected");
+        toast.error(
+          firstFailure?.status === "rejected" && firstFailure.reason instanceof Error
+            ? `${failedFiles.length} file${failedFiles.length === 1 ? "" : "s"} failed: ${firstFailure.reason.message}`
+            : `${failedFiles.length} file${failedFiles.length === 1 ? "" : "s"} could not be uploaded.`,
+        );
+      } else {
+        onClose();
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed.");
     } finally {
       setUploading(false);
+      setCompleted(0);
     }
+  }
+
+  function addFiles(selected: FileList | null) {
+    if (!selected?.length) return;
+    setFiles((current) => {
+      const byIdentity = new Map(
+        current.map((file) => [`${file.name}:${file.size}:${file.lastModified}`, file]),
+      );
+      Array.from(selected).forEach((file) =>
+        byIdentity.set(`${file.name}:${file.size}:${file.lastModified}`, file),
+      );
+      return Array.from(byIdentity.values());
+    });
   }
 
   return (
     <AdminModal
       open={open}
-      onClose={onClose}
+      onClose={() => {
+        if (uploading) {
+          toast.error("Wait for the uploads to finish before closing.");
+          return;
+        }
+        onClose();
+      }}
       title="Upload media"
-      description="Images and documents up to 12 MB. Testimonial videos support MP4, WebM, MOV and OGV; hosting limits still apply."
-      width="max-w-xl"
+      description="Choose one or many files from your computer. Images and documents support up to 12 MB each; video hosting limits still apply."
+      width="max-w-2xl"
     >
       <form onSubmit={submit} className="space-y-5">
         <label className="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition hover:border-[#FE3434]/50 hover:bg-[#FE3434]/[0.025]">
-          {file?.type.startsWith("image/") ? (
-            <img
-              src={URL.createObjectURL(file)}
-              alt="Preview"
-              className="mb-4 max-h-36 max-w-full rounded-xl object-contain"
-            />
-          ) : file?.type.startsWith("video/") ? (
-            <video
-              src={URL.createObjectURL(file)}
-              className="mb-4 max-h-36 max-w-full rounded-xl object-contain"
-              muted
-              controls
-            />
-          ) : (
-            <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white text-[#FE3434] shadow-sm">
-              <UploadCloud className="h-6 w-6" />
-            </span>
-          )}
-          <span className="text-sm font-semibold text-[#190A2F]">
-            {file ? file.name : "Choose a file or drop it here"}
+          <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white text-[#FE3434] shadow-sm">
+            <UploadCloud className="h-6 w-6" />
           </span>
-          <span className="mt-2 text-xs text-slate-400">JPG, PNG, WebP, GIF, MP4, WebM, MOV, OGV, PDF or DOCX</span>
+          <span className="text-sm font-semibold text-[#190A2F]">
+            {files.length
+              ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
+              : "Choose files or drop them here"}
+          </span>
+          <span className="mt-2 text-xs text-slate-400">
+            JPG, PNG, WebP, GIF, MP4, WebM, MOV, OGV, PDF or DOCX
+          </span>
           <input
             type="file"
             className="hidden"
+            multiple
+            disabled={uploading}
             accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,video/ogg,application/pdf,.docx,.mp4,.webm,.mov,.ogv"
-            onChange={(event) => setFile(event.target.files?.[0] || null)}
+            onChange={(event) => {
+              addFiles(event.target.files);
+              event.target.value = "";
+            }}
           />
         </label>
+        {files.length ? (
+          <div className="max-h-48 space-y-2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3">
+            {files.map((file) => (
+              <div
+                key={`${file.name}:${file.size}:${file.lastModified}`}
+                className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2.5"
+              >
+                {file.type.startsWith("video/") ? (
+                  <Video className="h-4 w-4 shrink-0 text-violet-500" />
+                ) : (
+                  <FileText className="h-4 w-4 shrink-0 text-[#FE3434]" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-[#190A2F]">{file.name}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">{formatBytes(file.size)}</p>
+                </div>
+                <button
+                  type="button"
+                  disabled={uploading}
+                  onClick={() =>
+                    setFiles((current) =>
+                      current.filter(
+                        (candidate) =>
+                          `${candidate.name}:${candidate.size}:${candidate.lastModified}` !==
+                          `${file.name}:${file.size}:${file.lastModified}`,
+                      ),
+                    )
+                  }
+                  className="rounded-lg p-1.5 text-slate-400 transition hover:bg-white hover:text-red-600 disabled:opacity-50"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <div>
-          <FieldLabel>Alt text</FieldLabel>
+          <FieldLabel>Alt text {files.length > 1 ? "(single-file uploads only)" : ""}</FieldLabel>
           <input
             value={alt}
             onChange={(event) => setAlt(event.target.value)}
             className={adminInputClass}
             placeholder="Describe the image/video for accessibility and internal reference"
+            disabled={uploading || files.length > 1}
           />
         </div>
         <div className="flex justify-end gap-2">
-          <AdminButton variant="secondary" onClick={onClose}>
+          <AdminButton variant="secondary" disabled={uploading} onClick={onClose}>
             Cancel
           </AdminButton>
-          <AdminButton type="submit" disabled={!file || uploading}>
+          <AdminButton type="submit" disabled={!files.length || uploading}>
             {uploading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <UploadCloud className="h-4 w-4" />
             )}{" "}
-            Upload
+            {uploading ? `Uploading ${completed}/${files.length}` : `Upload ${files.length || ""}`}
           </AdminButton>
         </div>
       </form>

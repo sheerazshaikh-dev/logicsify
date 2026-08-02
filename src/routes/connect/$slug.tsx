@@ -72,6 +72,7 @@ const SOCIAL_ICONS: Record<ConnectProfilePlatform, LucideIcon> = {
 function ConnectProfilePage() {
   const profile = Route.useLoaderData();
   const accent = profile.theme_json?.accent || "#FE3434";
+  const coverUrl = profile.global_cover_url || profile.cover_url;
   const whatsapp = profile.whatsapp?.replace(/\D/g, "");
   const actions = [
     profile.email && { label: "Email me", href: `mailto:${profile.email}`, Icon: Mail },
@@ -92,25 +93,16 @@ function ConnectProfilePage() {
         <div
           className="relative h-52 overflow-hidden bg-[#190A2F] bg-cover bg-center sm:h-64"
           style={
-            profile.cover_url
-              ? { backgroundImage: `url(${profile.cover_url})` }
+            coverUrl
+              ? { backgroundImage: `url(${coverUrl})` }
               : {
                   backgroundImage: `radial-gradient(circle at 15% 20%, ${accent}cc, transparent 43%), radial-gradient(circle at 82% 70%, #FDBE0299, transparent 42%), linear-gradient(135deg, #190A2F, #361141)`,
                 }
           }
         >
-          {profile.cover_url ? (
+          {coverUrl ? (
             <div className="absolute inset-0 bg-gradient-to-t from-[#190A2F]/55 via-transparent to-[#190A2F]/15" />
           ) : null}
-          <a
-            href="https://logicsify.com"
-            target="_blank"
-            rel="noreferrer"
-            className="absolute left-5 top-5 rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur sm:left-7 sm:top-7"
-            aria-label="Visit Logicsify"
-          >
-            <img src="/logicsify-logo-dark.png" alt="Logicsify" className="h-7 w-auto sm:h-8" />
-          </a>
           <span className="absolute bottom-5 right-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-[#190A2F]/55 px-4 py-2 text-xs font-bold text-white backdrop-blur-md sm:bottom-7 sm:right-7">
             <Sparkles className="h-3.5 w-3.5 text-[#FDBE02]" />
             Logicsify team
@@ -118,12 +110,12 @@ function ConnectProfilePage() {
         </div>
 
         <div className="px-6 pb-8 sm:px-10 sm:pb-10">
-          <div className="-mt-16 flex items-end justify-between sm:-mt-20">
+          <div className="relative z-10 -mt-12 flex items-end justify-between sm:-mt-16">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.display_name}
-                className="h-32 w-32 rounded-[2rem] border-[5px] border-white object-cover shadow-xl sm:h-40 sm:w-40 sm:rounded-[2.4rem]"
+                className="h-32 w-32 rounded-[2rem] border-[5px] border-white bg-white object-cover object-[center_18%] shadow-xl sm:h-40 sm:w-40 sm:rounded-[2.4rem]"
               />
             ) : (
               <span
