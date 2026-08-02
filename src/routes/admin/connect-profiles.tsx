@@ -3,6 +3,8 @@ import {
   Copy,
   Download,
   ExternalLink,
+  FileImage,
+  FileText,
   ImagePlus,
   Loader2,
   Plus,
@@ -32,6 +34,8 @@ import {
 } from "@/components/admin/admin-ui";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { QrCode } from "@/components/qr-code";
+import type { ConnectProfileExportFormat } from "@/lib/connect-profile-export";
+import { CONNECT_PROFILE_PLATFORM_OPTIONS } from "@/lib/connect-profile-links";
 import { downloadQrCode } from "@/lib/qr-code";
 import {
   createConnectProfile,
@@ -48,14 +52,12 @@ const emptyProfile: Partial<ConnectProfile> = {
   display_name: "",
   slug: "",
   headline: "",
-  company: "",
   bio: "",
   avatar_url: "",
   cover_url: "",
   email: "",
   phone: "",
   whatsapp: "",
-  website: "",
   address: "",
   links_json: [],
   theme_json: { accent: "#FE3434" },
@@ -64,12 +66,33 @@ const emptyProfile: Partial<ConnectProfile> = {
   noindex: true,
 };
 
+function createSlug(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function createAvailableSlug(value: string, existingSlugs: string[]) {
+  const base = createSlug(value);
+  if (!base || !existingSlugs.includes(base)) return base;
+
+  let suffix = 2;
+  while (existingSlugs.includes(`${base}-${suffix}`)) suffix += 1;
+  return `${base}-${suffix}`;
+}
+
 function ConnectProfilesPage() {
   const [items, setItems] = useState<ConnectProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<ConnectProfile> | null>(null);
   const [saving, setSaving] = useState(false);
   const [qr, setQr] = useState<ConnectProfile | null>(null);
+  const [downloadProfile, setDownloadProfile] = useState<ConnectProfile | null>(null);
   const refresh = () =>
     listConnectProfiles()
       .then((r) => setItems(r.data))
@@ -163,6 +186,10 @@ function ConnectProfilesPage() {
                     <QrIcon className="h-4 w-4" />
                     QR code
                   </AdminButton>
+                  <AdminButton variant="secondary" onClick={() => setDownloadProfile(item)}>
+                    <Download className="h-4 w-4" />
+                    Download
+                  </AdminButton>
                   {item.status === "published" ? (
                     <a
                       href={`/connect/${item.slug}`}
@@ -174,7 +201,11 @@ function ConnectProfilesPage() {
                       Open
                     </a>
                   ) : null}
-                  <AdminButton variant="danger" onClick={() => void remove(item)}>
+                  <AdminButton
+                    variant="danger"
+                    ariaLabel={`Delete ${item.display_name}`}
+                    onClick={() => void remove(item)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </AdminButton>
                 </div>
@@ -183,8 +214,15 @@ function ConnectProfilesPage() {
           </div>
         )}
       </AdminCard>
-      <ProfileEditor value={editing} setValue={setEditing} save={save} saving={saving} />
+      <ProfileEditor
+        value={editing}
+        setValue={setEditing}
+        save={save}
+        saving={saving}
+        existingSlugs={items.filter((item) => item.id !== editing?.id).map((item) => item.slug)}
+      />
       <QrModal profile={qr} close={() => setQr(null)} />
+      <DownloadModal profile={downloadProfile} close={() => setDownloadProfile(null)} />
     </AdminShell>
   );
 }
@@ -194,16 +232,33 @@ function ProfileEditor({
   setValue,
   save,
   saving,
+  existingSlugs,
 }: {
   value: Partial<ConnectProfile> | null;
   setValue: Dispatch<SetStateAction<Partial<ConnectProfile> | null>>;
   save: () => void;
   saving: boolean;
+  existingSlugs: string[];
 }) {
   const [imageUploads, setImageUploads] = useState({ avatar: false, cover: false });
   if (!value) return null;
   const set = (key: keyof ConnectProfile, v: unknown) =>
     setValue((current) => (current ? { ...current, [key]: v } : current));
+  const setDisplayName = (displayName: string) =>
+    setValue((current) => {
+      if (!current) return current;
+
+      const currentSlug = current.slug || "";
+      const previousAutomaticSlug = createAvailableSlug(current.display_name || "", existingSlugs);
+      const shouldGenerateSlug =
+        !current.id && (!currentSlug || currentSlug === previousAutomaticSlug);
+
+      return {
+        ...current,
+        display_name: displayName,
+        ...(shouldGenerateSlug ? { slug: createAvailableSlug(displayName, existingSlugs) } : {}),
+      };
+    });
   const setImageUploading = (kind: "avatar" | "cover", uploading: boolean) =>
     setImageUploads((current) => ({ ...current, [kind]: uploading }));
   const isUploadingImage = imageUploads.avatar || imageUploads.cover;
@@ -217,7 +272,7 @@ function ProfileEditor({
     <AdminModal
       open
       title={value.id ? "Edit connect profile" : "New connect profile"}
-      description="Blank optional fields are hidden automatically on the public page."
+      description="Blank optional fields are hidden automatically. Logicsify branding and the company website are added for you."
       onClose={() => {
         if (isUploadingImage) {
           toast.error("Wait for the image upload to finish before closing.");
@@ -228,18 +283,14 @@ function ProfileEditor({
       width="max-w-5xl"
     >
       <div className="grid gap-5 md:grid-cols-2">
-        <Field
-          label="Display name *"
-          value={value.display_name}
-          onChange={(v) => set("display_name", v)}
-        />
+        <Field label="Display name *" value={value.display_name} onChange={setDisplayName} />
         <Field
           label="URL slug *"
           value={value.slug}
-          onChange={(v) => set("slug", v.toLowerCase().replace(/[^a-z0-9-]+/g, "-"))}
+          hint="Generated automatically from the display name. You can edit it if needed."
+          onChange={(v) => set("slug", createSlug(v))}
         />
         <Field label="Headline" value={value.headline} onChange={(v) => set("headline", v)} />
-        <Field label="Company" value={value.company} onChange={(v) => set("company", v)} />
         <ProfileImageField
           kind="avatar"
           label="Avatar image"
@@ -263,7 +314,6 @@ function ProfileEditor({
           value={value.whatsapp}
           onChange={(v) => set("whatsapp", v)}
         />
-        <Field label="Website" value={value.website} onChange={(v) => set("website", v)} />
         <Field label="Address" value={value.address} onChange={(v) => set("address", v)} />
         <div>
           <FieldLabel>Accent color</FieldLabel>
@@ -333,21 +383,36 @@ function ProfileEditor({
         </div>
         <div className="mt-4 space-y-3">
           {links.map((link, i) => (
-            <div key={i} className="grid gap-2 md:grid-cols-[1fr_2fr_auto]">
+            <div key={i} className="grid gap-2 md:grid-cols-[1fr_1fr_2fr_auto]">
+              <select
+                className={adminInputClass}
+                aria-label={`Link ${i + 1} icon`}
+                value={link.icon || "auto"}
+                onChange={(e) => setLink(i, "icon", e.target.value)}
+              >
+                {CONNECT_PROFILE_PLATFORM_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               <input
                 className={adminInputClass}
                 placeholder="Label"
+                aria-label={`Link ${i + 1} label`}
                 value={link.label}
                 onChange={(e) => setLink(i, "label", e.target.value)}
               />
               <input
                 className={adminInputClass}
                 placeholder="https://…"
+                aria-label={`Link ${i + 1} URL`}
                 value={link.url}
                 onChange={(e) => setLink(i, "url", e.target.value)}
               />
               <AdminButton
                 variant="danger"
+                ariaLabel={`Remove link ${i + 1}`}
                 onClick={() =>
                   set(
                     "links_json",
@@ -499,10 +564,12 @@ function ProfileImageField({
 function Field({
   label,
   value,
+  hint,
   onChange,
 }: {
   label: string;
   value?: string | null;
+  hint?: string;
   onChange: (v: string) => void;
 }) {
   return (
@@ -513,6 +580,7 @@ function Field({
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
       />
+      {hint ? <p className="mt-2 text-xs text-slate-400">{hint}</p> : null}
     </div>
   );
 }
@@ -570,6 +638,108 @@ function QrModal({ profile, close }: { profile: ConnectProfile | null; close: ()
           </AdminButton>
         </div>
       </div>
+    </AdminModal>
+  );
+}
+
+function DownloadModal({ profile, close }: { profile: ConnectProfile | null; close: () => void }) {
+  const [exporting, setExporting] = useState<ConnectProfileExportFormat | null>(null);
+  if (!profile) return null;
+  const url = `${window.location.origin}/connect/${profile.slug}`;
+
+  async function download(format: ConnectProfileExportFormat) {
+    if (profile?.status !== "published") {
+      toast.error("Publish this profile before downloading it so the QR code opens correctly.");
+      return;
+    }
+    setExporting(format);
+    try {
+      const { downloadConnectProfileCard } = await import("@/lib/connect-profile-export");
+      await downloadConnectProfileCard(profile, format, url);
+      toast.success(`${format.toUpperCase()} profile downloaded.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "The profile could not be downloaded.");
+    } finally {
+      setExporting(null);
+    }
+  }
+
+  return (
+    <AdminModal
+      open
+      title={`Download: ${profile.display_name}`}
+      description="Choose a portrait format. Both versions include the Logicsify logo, contact details, social links and a scannable QR code."
+      onClose={close}
+      width="max-w-xl"
+    >
+      <div className="rounded-2xl border border-slate-200 bg-[#faf8fc] p-4">
+        <div className="flex items-center gap-4">
+          {profile.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt=""
+              className="h-16 w-16 rounded-2xl object-cover shadow-sm"
+            />
+          ) : (
+            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[#190A2F] text-xl font-bold text-white">
+              {profile.display_name.slice(0, 1)}
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="font-semibold text-[#190A2F]">{profile.display_name}</p>
+            <p className="mt-1 text-sm text-slate-500">A4 portrait · high-resolution export</p>
+          </div>
+        </div>
+      </div>
+
+      {profile.status !== "published" ? (
+        <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Publish this profile first. Otherwise its QR code would open a page that visitors cannot
+          see.
+        </p>
+      ) : null}
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <button
+          type="button"
+          disabled={Boolean(exporting) || profile.status !== "published"}
+          onClick={() => void download("jpg")}
+          className="group rounded-3xl border border-slate-200 p-5 text-left transition hover:-translate-y-0.5 hover:border-[#FE3434]/40 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50"
+        >
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#190A2F] text-white">
+            {exporting === "jpg" ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <FileImage className="h-5 w-5" />
+            )}
+          </span>
+          <span className="mt-4 block font-semibold text-[#190A2F]">Download JPG</span>
+          <span className="mt-1 block text-xs leading-5 text-slate-500">
+            Best for WhatsApp, social posts and quick sharing.
+          </span>
+        </button>
+        <button
+          type="button"
+          disabled={Boolean(exporting) || profile.status !== "published"}
+          onClick={() => void download("pdf")}
+          className="group rounded-3xl border border-slate-200 p-5 text-left transition hover:-translate-y-0.5 hover:border-[#FE3434]/40 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50"
+        >
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#FE3434] to-[#FDBE02] text-white">
+            {exporting === "pdf" ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <FileText className="h-5 w-5" />
+            )}
+          </span>
+          <span className="mt-4 block font-semibold text-[#190A2F]">Download PDF</span>
+          <span className="mt-1 block text-xs leading-5 text-slate-500">
+            Best for printing, email attachments and documents.
+          </span>
+        </button>
+      </div>
+      <p className="mt-5 text-center text-xs leading-5 text-slate-400">
+        Bio and action buttons are intentionally excluded from the downloadable version.
+      </p>
     </AdminModal>
   );
 }
