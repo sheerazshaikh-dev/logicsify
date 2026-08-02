@@ -8,6 +8,7 @@ import { Route as BookingsRoute } from "@/routes/admin/bookings";
 import { Route as CareersRoute } from "@/routes/admin/careers";
 import { Route as CaseStudiesRoute } from "@/routes/admin/case-studies";
 import { Route as ComparisonsRoute } from "@/routes/admin/comparisons";
+import { Route as ConnectProfilesRoute } from "@/routes/admin/connect-profiles";
 import { Route as DashboardRoute } from "@/routes/admin/dashboard";
 import { Route as EngagementModelsRoute } from "@/routes/admin/engagement-models";
 import { Route as GlobalStylingRoute } from "@/routes/admin/global-styling";
@@ -33,7 +34,7 @@ const routes: Record<string, unknown> = {
   "case-studies": CaseStudiesRoute, insights: InsightsRoute, careers: CareersRoute,
   testimonials: TestimonialsRoute, team: TeamRoute, guides: GuidesRoute,
   comparisons: ComparisonsRoute, "engagement-models": EngagementModelsRoute,
-  integrations: IntegrationsRoute, leads: LeadsRoute, bookings: BookingsRoute, media: MediaRoute,
+  integrations: IntegrationsRoute, "connect-profiles": ConnectProfilesRoute, leads: LeadsRoute, bookings: BookingsRoute, media: MediaRoute,
   menus: MenusRoute, settings: SettingsRoute, "global-styling": GlobalStylingRoute,
   administrators: AdministratorsRoute, trash: TrashRoute, security: SecurityRoute, "audit-logs": SecurityRoute, account: AccountRoute,
 };
