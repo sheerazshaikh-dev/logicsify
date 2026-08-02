@@ -1,6 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, Download, ExternalLink, Plus, QrCode as QrIcon, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Copy,
+  Download,
+  ExternalLink,
+  ImagePlus,
+  Loader2,
+  Plus,
+  QrCode as QrIcon,
+  Trash2,
+} from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { toast } from "sonner";
 import {
   AdminButton,
@@ -22,6 +38,7 @@ import {
   deleteConnectProfile,
   listConnectProfiles,
   updateConnectProfile,
+  uploadMedia,
   type ConnectProfile,
   type ConnectProfileLink,
 } from "@/lib/admin-api";
@@ -179,12 +196,17 @@ function ProfileEditor({
   saving,
 }: {
   value: Partial<ConnectProfile> | null;
-  setValue: (v: Partial<ConnectProfile> | null) => void;
+  setValue: Dispatch<SetStateAction<Partial<ConnectProfile> | null>>;
   save: () => void;
   saving: boolean;
 }) {
+  const [imageUploads, setImageUploads] = useState({ avatar: false, cover: false });
   if (!value) return null;
-  const set = (key: keyof ConnectProfile, v: unknown) => setValue({ ...value, [key]: v });
+  const set = (key: keyof ConnectProfile, v: unknown) =>
+    setValue((current) => (current ? { ...current, [key]: v } : current));
+  const setImageUploading = (kind: "avatar" | "cover", uploading: boolean) =>
+    setImageUploads((current) => ({ ...current, [kind]: uploading }));
+  const isUploadingImage = imageUploads.avatar || imageUploads.cover;
   const links = value.links_json || [];
   const setLink = (i: number, key: keyof ConnectProfileLink, v: string) =>
     set(
@@ -196,7 +218,13 @@ function ProfileEditor({
       open
       title={value.id ? "Edit connect profile" : "New connect profile"}
       description="Blank optional fields are hidden automatically on the public page."
-      onClose={() => setValue(null)}
+      onClose={() => {
+        if (isUploadingImage) {
+          toast.error("Wait for the image upload to finish before closing.");
+          return;
+        }
+        setValue(null);
+      }}
       width="max-w-5xl"
     >
       <div className="grid gap-5 md:grid-cols-2">
@@ -212,15 +240,21 @@ function ProfileEditor({
         />
         <Field label="Headline" value={value.headline} onChange={(v) => set("headline", v)} />
         <Field label="Company" value={value.company} onChange={(v) => set("company", v)} />
-        <Field
-          label="Avatar image URL"
+        <ProfileImageField
+          kind="avatar"
+          label="Avatar image"
           value={value.avatar_url}
+          altText={`${value.display_name || "Connect profile"} avatar`}
           onChange={(v) => set("avatar_url", v)}
+          onUploadingChange={(uploading) => setImageUploading("avatar", uploading)}
         />
-        <Field
-          label="Cover image URL"
+        <ProfileImageField
+          kind="cover"
+          label="Cover image"
           value={value.cover_url}
+          altText={`${value.display_name || "Connect profile"} cover`}
           onChange={(v) => set("cover_url", v)}
+          onUploadingChange={(uploading) => setImageUploading("cover", uploading)}
         />
         <Field label="Email" value={value.email} onChange={(v) => set("email", v)} />
         <Field label="Phone" value={value.phone} onChange={(v) => set("phone", v)} />
@@ -266,7 +300,11 @@ function ProfileEditor({
             label="Unlisted (accessible only by direct URL)"
             checked={Boolean(value.is_unlisted)}
             onChange={(v) => {
-              setValue({ ...value, is_unlisted: v, noindex: v ? true : value.noindex });
+              setValue((current) =>
+                current
+                  ? { ...current, is_unlisted: v, noindex: v ? true : current.noindex }
+                  : current,
+              );
             }}
           />
           <Check
@@ -324,16 +362,140 @@ function ProfileEditor({
         </div>
       </div>
       <div className="mt-7 flex justify-end gap-2">
-        <AdminButton variant="secondary" onClick={() => setValue(null)}>
+        <AdminButton variant="secondary" disabled={isUploadingImage} onClick={() => setValue(null)}>
           Cancel
         </AdminButton>
-        <AdminButton disabled={saving || !value.display_name || !value.slug} onClick={save}>
-          {saving ? "Saving…" : "Save profile"}
+        <AdminButton
+          disabled={saving || isUploadingImage || !value.display_name || !value.slug}
+          onClick={save}
+        >
+          {saving ? "Saving…" : isUploadingImage ? "Uploading image…" : "Save profile"}
         </AdminButton>
       </div>
     </AdminModal>
   );
 }
+
+const PROFILE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const PROFILE_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
+
+function ProfileImageField({
+  kind,
+  label,
+  value,
+  altText,
+  onChange,
+  onUploadingChange,
+}: {
+  kind: "avatar" | "cover";
+  label: string;
+  value?: string | null;
+  altText: string;
+  onChange: (v: string) => void;
+  onUploadingChange: (uploading: boolean) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function chooseImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!PROFILE_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Choose a JPG, PNG, WebP or GIF image.");
+      return;
+    }
+    if (file.size > PROFILE_IMAGE_MAX_BYTES) {
+      toast.error("The image must be 12 MB or smaller.");
+      return;
+    }
+
+    setUploading(true);
+    onUploadingChange(true);
+    try {
+      const media = await uploadMedia(file, altText);
+      onChange(media.url);
+      toast.success(`${kind === "avatar" ? "Avatar" : "Cover"} image uploaded.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Image upload failed.");
+    } finally {
+      setUploading(false);
+      onUploadingChange(false);
+    }
+  }
+
+  return (
+    <div>
+      <FieldLabel>{label}</FieldLabel>
+      <div
+        className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 ${
+          kind === "avatar" ? "aspect-square max-w-48" : "aspect-[16/7] w-full"
+        }`}
+      >
+        {value ? (
+          <img src={value} alt={`${label} preview`} className="h-full w-full object-cover" />
+        ) : (
+          <div className="grid h-full place-items-center px-4 text-center text-slate-400">
+            <div>
+              <ImagePlus className="mx-auto h-7 w-7" />
+              <p className="mt-2 text-xs">No image selected</p>
+            </div>
+          </div>
+        )}
+        {uploading ? (
+          <div className="absolute inset-0 grid place-items-center bg-[#190A2F]/70 text-white">
+            <div className="text-center">
+              <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+              <p className="mt-2 text-xs font-semibold">Uploading…</p>
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        accept={PROFILE_IMAGE_TYPES.join(",")}
+        disabled={uploading}
+        onChange={(event) => void chooseImage(event)}
+      />
+      <div className="mt-3 flex flex-wrap gap-2">
+        <AdminButton
+          variant="secondary"
+          disabled={uploading}
+          onClick={() => inputRef.current?.click()}
+        >
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ImagePlus className="h-4 w-4" />
+          )}
+          {value ? "Replace image" : "Upload image"}
+        </AdminButton>
+        {value ? (
+          <AdminButton variant="danger" disabled={uploading} onClick={() => onChange("")}>
+            <Trash2 className="h-4 w-4" />
+            Remove
+          </AdminButton>
+        ) : null}
+      </div>
+      <p className="mt-2 text-xs text-slate-400">JPG, PNG, WebP or GIF · maximum 12 MB</p>
+      <div className="mt-3">
+        <FieldLabel>Or use an image URL</FieldLabel>
+        <input
+          className={adminInputClass}
+          type="url"
+          placeholder="https://…"
+          value={value || ""}
+          disabled={uploading}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
+
 function Field({
   label,
   value,
