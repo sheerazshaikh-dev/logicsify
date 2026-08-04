@@ -25,9 +25,11 @@ import {
 import { coreServices, otherServices } from "@/lib/site-data";
 import {
   getCmsContentList,
+  getPublicSiteSettings,
   getPublicTeamMembers,
   type CmsContentItem,
   type PublicTeamMember,
+  type Partner,
 } from "@/lib/logicsify-api";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
@@ -62,6 +64,7 @@ function HomePage() {
     <SiteLayout>
       <Hero />
       <TrustStrip />
+      <PartnersSection />
       <Introduction />
       <HomeServices />
       <FeaturedWork />
@@ -77,6 +80,68 @@ function HomePage() {
       <ResourcesPreview />
       <CTASection />
     </SiteLayout>
+  );
+}
+
+function PartnersSection() {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  useEffect(() => {
+    let active = true;
+    getPublicSiteSettings()
+      .then((settings) => {
+        if (active)
+          setPartners(
+            (settings.partners || []).filter(
+              (partner) => partner.status === "published" && partner.name && partner.logo_url,
+            ),
+          );
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!partners.length) return null;
+  return (
+    <section className="border-b border-black/5 bg-white py-14">
+      <div className="container-page">
+        <div className="text-center">
+          <p className="eyebrow">Partners</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">
+            Organizations we work alongside
+          </h2>
+        </div>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+          {partners.map((partner) => {
+            const logo = (
+              <img
+                src={partner.logo_url}
+                alt={`${partner.name} logo`}
+                className="max-h-12 max-w-[170px] object-contain grayscale transition duration-300 group-hover:grayscale-0"
+              />
+            );
+            const classes =
+              "group grid h-24 min-w-[180px] place-items-center rounded-2xl border border-black/5 bg-[#faf8fc] px-7 transition hover:-translate-y-0.5 hover:border-brand-red/20 hover:bg-white hover:shadow-lg";
+            return partner.link_enabled && partner.website_url ? (
+              <a
+                key={partner.id}
+                href={partner.website_url}
+                target="_blank"
+                rel="noreferrer"
+                className={classes}
+                aria-label={`Visit ${partner.name}`}
+              >
+                {logo}
+              </a>
+            ) : (
+              <div key={partner.id} className={classes}>
+                {logo}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -118,14 +183,21 @@ function Hero() {
             style={{ ["--reveal-delay" as string]: "360ms" }}
             className="mt-8 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed"
           >
-            We build AI-powered sales, customer service, and business operations systems that reduce manual work, improve lead response, and keep customer data connected.
+            We build AI-powered sales, customer service, and business operations systems that reduce
+            manual work, improve lead response, and keep customer data connected.
           </p>
           <div
             data-reveal
             style={{ ["--reveal-delay" as string]: "480ms" }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <Link to="/contact" onClick={() => trackAnalytics("technical_roadmap_cta_clicked", { placement: "homepage_hero" })} className="btn-primary">
+            <Link
+              to="/contact"
+              onClick={() =>
+                trackAnalytics("technical_roadmap_cta_clicked", { placement: "homepage_hero" })
+              }
+              className="btn-primary"
+            >
               Discuss Your Project <ArrowRight className="w-4 h-4" />
             </Link>
             <Link to="/services" className="btn-ghost-dark">
@@ -193,7 +265,10 @@ function HeroVisual() {
               strokeWidth="1.5"
               opacity="0.62"
               strokeDasharray="5 7"
-              style={{ animation: "draw-line 2.2s ease-out forwards", animationDelay: `${i * 0.08}s` }}
+              style={{
+                animation: "draw-line 2.2s ease-out forwards",
+                animationDelay: `${i * 0.08}s`,
+              }}
             />
             <circle cx={x} cy={y} r="6" fill="url(#node-line)" opacity="0.95" />
             <circle cx={x} cy={y} r="12" fill="none" stroke="url(#node-line)" opacity="0.45" />
@@ -239,7 +314,9 @@ function TrustStrip() {
       <div className="container-page">
         <p className="text-center text-ink-soft text-sm mb-8">
           AI conversations, CRM workflows, digital platforms, payments, and reporting —{" "}
-          <span className="text-ink font-semibold">connected around the same customer journey.</span>
+          <span className="text-ink font-semibold">
+            connected around the same customer journey.
+          </span>
         </p>
       </div>
       <div className="relative">
@@ -270,10 +347,13 @@ function Introduction() {
         </div>
         <div className="lg:col-span-5 lg:pt-24 space-y-6 text-ink-soft leading-relaxed">
           <p data-reveal>
-            Missed opportunities usually come from disconnected conversations, lead records, websites, calendars, payments, and internal handoffs. The software exists, but the operating system between the tools does not.
+            Missed opportunities usually come from disconnected conversations, lead records,
+            websites, calendars, payments, and internal handoffs. The software exists, but the
+            operating system between the tools does not.
           </p>
           <p data-reveal style={{ ["--reveal-delay" as string]: "120ms" }}>
-            Logicsify maps the customer and operational workflow first, then builds the AI, CRM, website, portal, integration, and reporting layers required to make it work.
+            Logicsify maps the customer and operational workflow first, then builds the AI, CRM,
+            website, portal, integration, and reporting layers required to make it work.
           </p>
           <Link
             to="/about"
@@ -294,11 +374,20 @@ function HomeServices() {
   const [services, setServices] = useState<CmsContentItem[]>([]);
   useEffect(() => {
     let active = true;
-    getCmsContentList("service").then((result) => active && setServices(result)).catch(() => undefined);
-    return () => { active = false; };
+    getCmsContentList("service")
+      .then((result) => active && setServices(result))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
   }, []);
   const cmsBySlug = new Map(services.map((item) => [item.slug, item]));
-  return <><CoreServicesSection cmsBySlug={cmsBySlug} /><OtherServicesSection cmsBySlug={cmsBySlug} /></>;
+  return (
+    <>
+      <CoreServicesSection cmsBySlug={cmsBySlug} />
+      <OtherServicesSection cmsBySlug={cmsBySlug} />
+    </>
+  );
 }
 
 function CoreServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContentItem> }) {
@@ -309,30 +398,52 @@ function CoreServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContentI
         <div className="mb-16 max-w-3xl">
           <p className="eyebrow mb-4">Core services</p>
           <h2 className="fluid-h2">AI-Powered Systems Built for Business Growth</h2>
-          <p className="mt-5 text-lg leading-8 text-ink-soft">From AI agents and CRM automation to custom websites and business platforms, we build connected systems that improve sales, service, and operations.</p>
+          <p className="mt-5 text-lg leading-8 text-ink-soft">
+            From AI agents and CRM automation to custom websites and business platforms, we build
+            connected systems that improve sales, service, and operations.
+          </p>
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
           {coreServices.map((service, index) => {
             const Icon = icons[index];
             return (
-              <Link key={service.slug} to={service.route} hash={service.hash} data-reveal className="group relative min-h-[430px] overflow-hidden rounded-3xl bg-ink p-8 text-white transition duration-500 hover:-translate-y-1 md:p-9">
+              <Link
+                key={service.slug}
+                to={service.route}
+                hash={service.hash}
+                data-reveal
+                className="group relative min-h-[430px] overflow-hidden rounded-3xl bg-ink p-8 text-white transition duration-500 hover:-translate-y-1 md:p-9"
+              >
                 <div className="absolute inset-0 grid-noise opacity-60" />
                 <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-brand-gold/20 blur-3xl" />
                 <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-brand-red/20 blur-3xl" />
                 <div className="relative flex h-full flex-col">
-                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand"><Icon className="h-6 w-6" /></div>
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand">
+                    <Icon className="h-6 w-6" />
+                  </div>
                   <p className="eyebrow mt-10 text-white/50">Core service {index + 1}</p>
-                  <h3 className="mt-4 text-3xl font-semibold leading-tight">{cmsBySlug.get(service.slug)?.title || service.name}</h3>
-                  <p className="mt-5 leading-7 text-white/70">{cmsBySlug.get(service.slug)?.excerpt || service.short}</p>
-                  <span className="mt-auto inline-flex items-center gap-2 pt-10 font-semibold">Discuss this system <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+                  <h3 className="mt-4 text-3xl font-semibold leading-tight">
+                    {cmsBySlug.get(service.slug)?.title || service.name}
+                  </h3>
+                  <p className="mt-5 leading-7 text-white/70">
+                    {cmsBySlug.get(service.slug)?.excerpt || service.short}
+                  </p>
+                  <span className="mt-auto inline-flex items-center gap-2 pt-10 font-semibold">
+                    Discuss this system{" "}
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
                 </div>
               </Link>
             );
           })}
         </div>
         <div className="mt-10 flex flex-wrap gap-3">
-          <Link to="/contact" className="btn-primary">Discuss Your Project <ArrowRight className="h-4 w-4" /></Link>
-          <Link to="/services" className="btn-ghost-light">Explore Our Services <ArrowRight className="h-4 w-4" /></Link>
+          <Link to="/contact" className="btn-primary">
+            Discuss Your Project <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link to="/services" className="btn-ghost-light">
+            Explore Our Services <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>
@@ -341,21 +452,46 @@ function CoreServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContentI
 
 /* ---------- OTHER SERVICES ---------- */
 function OtherServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContentItem> }) {
-  const display = otherServices.filter((service) => ["mobile-app-development", "ui-ux-design", "seo-digital-marketing", "branding", "ecommerce-development", "cloud-deployment", "website-maintenance", "cybersecurity", "staff-augmentation"].includes(service.slug));
+  const display = otherServices.filter((service) =>
+    [
+      "mobile-app-development",
+      "ui-ux-design",
+      "seo-digital-marketing",
+      "branding",
+      "ecommerce-development",
+      "cloud-deployment",
+      "website-maintenance",
+      "cybersecurity",
+      "staff-augmentation",
+    ].includes(service.slug),
+  );
   return (
     <section className="py-24 md:py-32">
       <div className="container-page">
         <div className="mb-12 max-w-3xl">
           <p className="eyebrow mb-4">Other services</p>
           <h2 className="fluid-h2">Specialist support around the core systems.</h2>
-          <p className="mt-5 text-lg text-ink-soft">These services support a wider engagement when the operating problem requires them.</p>
+          <p className="mt-5 text-lg text-ink-soft">
+            These services support a wider engagement when the operating problem requires them.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {display.map((service) => (
-            <Link key={service.slug} to={service.route} hash={service.hash} className="group rounded-2xl border border-black/10 bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-lg">
-              <h3 className="text-lg font-semibold">{cmsBySlug.get(service.slug)?.title || service.name}</h3>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">{cmsBySlug.get(service.slug)?.excerpt || service.short}</p>
-              <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold">Learn more <ArrowRight className="h-3.5 w-3.5" /></span>
+            <Link
+              key={service.slug}
+              to={service.route}
+              hash={service.hash}
+              className="group rounded-2xl border border-black/10 bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              <h3 className="text-lg font-semibold">
+                {cmsBySlug.get(service.slug)?.title || service.name}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
+                {cmsBySlug.get(service.slug)?.excerpt || service.short}
+              </p>
+              <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold">
+                Learn more <ArrowRight className="h-3.5 w-3.5" />
+              </span>
             </Link>
           ))}
         </div>
@@ -369,8 +505,12 @@ function FeaturedWork() {
   const [items, setItems] = useState<CmsContentItem[]>([]);
   useEffect(() => {
     let active = true;
-    getCmsContentList("case_study").then((result) => active && setItems(result.filter((item) => item.featured))).catch(() => undefined);
-    return () => { active = false; };
+    getCmsContentList("case_study")
+      .then((result) => active && setItems(result.filter((item) => item.featured)))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
   }, []);
   if (!items.length) return null;
 
@@ -395,13 +535,41 @@ function FeaturedWork() {
                 className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-white transition-transform duration-500 hover:scale-[1.01] md:p-10"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-red/25 via-transparent to-brand-gold/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                {item.featured_image ? <img src={item.featured_image} alt="" loading="lazy" className="relative mb-8 aspect-[16/9] w-full rounded-2xl object-cover" /> : <MockupVisual index={index} />}
+                {item.featured_image ? (
+                  <img
+                    src={item.featured_image}
+                    alt=""
+                    loading="lazy"
+                    className="relative mb-8 aspect-[16/9] w-full rounded-2xl object-cover"
+                  />
+                ) : (
+                  <MockupVisual index={index} />
+                )}
                 <div className="relative">
-                  <p className="eyebrow text-white/60">{[String(content.industry || ""), String(content.client_name || "")].filter(Boolean).join(" · ")}</p>
-                  <h3 className="mt-3 text-2xl font-semibold leading-tight md:text-3xl">{item.title}</h3>
+                  <p className="eyebrow text-white/60">
+                    {[String(content.industry || ""), String(content.client_name || "")]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold leading-tight md:text-3xl">
+                    {item.title}
+                  </h3>
                   <p className="mt-3 max-w-md text-sm text-white/70">{item.excerpt}</p>
-                  {services.length ? <div className="mt-6 flex flex-wrap gap-2">{services.slice(0, 4).map((service) => <span key={service} className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] uppercase tracking-wider">{service.replace(/-/g, " ")}</span>)}</div> : null}
-                  <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold group-hover:text-gradient">Read case study <ArrowUpRight className="h-4 w-4" /></div>
+                  {services.length ? (
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {services.slice(0, 4).map((service) => (
+                        <span
+                          key={service}
+                          className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] uppercase tracking-wider"
+                        >
+                          {service.replace(/-/g, " ")}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold group-hover:text-gradient">
+                    Read case study <ArrowUpRight className="h-4 w-4" />
+                  </div>
                 </div>
               </Link>
             );
@@ -506,7 +674,9 @@ function AutomationSpotlight() {
           <Link to="/automation-lab" className="btn-primary">
             Try the Automation Lab <ArrowRight className="w-4 h-4" />
           </Link>
-          <Link to="/services/$slug" params={{ slug: "ai-automations" }} className="btn-ghost-dark">Explore AI Automations</Link>
+          <Link to="/services/$slug" params={{ slug: "ai-automations" }} className="btn-ghost-dark">
+            Explore AI Automations
+          </Link>
         </div>
       </div>
     </section>
@@ -651,15 +821,39 @@ function ConnectedSystemsVisual() {
         />
         {nodes.map(({ x, y, label }) => (
           <g key={label}>
-            <line x1="200" y1="200" x2={x} y2={y} stroke="url(#cs-line)" strokeWidth="1.4" opacity="0.48" />
+            <line
+              x1="200"
+              y1="200"
+              x2={x}
+              y2={y}
+              stroke="url(#cs-line)"
+              strokeWidth="1.4"
+              opacity="0.48"
+            />
             <circle cx={x} cy={y} r="27" fill="var(--theme-dark)" />
-            <circle cx={x} cy={y} r="27" fill="none" stroke="url(#cs-line)" strokeWidth="1.2" opacity="0.7" />
+            <circle
+              cx={x}
+              cy={y}
+              r="27"
+              fill="none"
+              stroke="url(#cs-line)"
+              strokeWidth="1.2"
+              opacity="0.7"
+            />
             <text x={x} y={y + 4} textAnchor="middle" fontSize="10" fill="#fff" fontFamily="Inter">
               {label}
             </text>
           </g>
         ))}
-        <circle cx="200" cy="200" r="61" fill="#f1edff" stroke="url(#cs-line)" strokeWidth="1" opacity="0.98" />
+        <circle
+          cx="200"
+          cy="200"
+          r="61"
+          fill="#f1edff"
+          stroke="url(#cs-line)"
+          strokeWidth="1"
+          opacity="0.98"
+        />
         <circle cx="200" cy="200" r="43" fill="url(#cs-line)" />
       </svg>
       <div className="absolute left-1/2 top-1/2 z-10 grid h-[66px] w-[66px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full">
@@ -782,7 +976,8 @@ function videoEmbedUrl(url: string) {
       const id = parsed.searchParams.get("v");
       return id ? `https://www.youtube.com/embed/${id}` : url;
     }
-    if (parsed.hostname === "youtu.be") return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
+    if (parsed.hostname === "youtu.be")
+      return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
     if (parsed.hostname.includes("vimeo.com")) {
       const id = parsed.pathname.split("/").filter(Boolean).pop();
       return id ? `https://player.vimeo.com/video/${id}` : url;
@@ -806,7 +1001,10 @@ function TestimonialSection() {
     };
   }, []);
 
-  const testimonials = useMemo(() => items.map(testimonialData).filter((item) => item.quote || item.videoUrl), [items]);
+  const testimonials = useMemo(
+    () => items.map(testimonialData).filter((item) => item.quote || item.videoUrl),
+    [items],
+  );
   if (!testimonials.length) return null;
 
   return (
@@ -815,14 +1013,19 @@ function TestimonialSection() {
         <div className="max-w-3xl mb-16">
           <p className="eyebrow mb-4">Voices</p>
           <h2 className="fluid-h2">What clients say after the work ships.</h2>
-          <p className="mt-4 text-ink-soft">Published testimonials are managed from the Logicsify admin panel.</p>
+          <p className="mt-4 text-ink-soft">
+            Published testimonials are managed from the Logicsify admin panel.
+          </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial, index) => {
             const embedUrl = videoEmbedUrl(testimonial.videoUrl);
             const hostedVideo = testimonial.videoUrl && !embedUrl;
             return (
-              <article key={`${testimonial.clientName}-${index}`} className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[0_22px_60px_-45px_rgba(25,10,47,0.45)]">
+              <article
+                key={`${testimonial.clientName}-${index}`}
+                className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[0_22px_60px_-45px_rgba(25,10,47,0.45)]"
+              >
                 {testimonial.type === "video" && testimonial.videoUrl ? (
                   <div className="relative aspect-video overflow-hidden bg-ink">
                     {embedUrl ? (
@@ -835,19 +1038,34 @@ function TestimonialSection() {
                         allowFullScreen
                       />
                     ) : hostedVideo ? (
-                      <video className="h-full w-full object-cover" controls preload="metadata" poster={testimonial.poster || undefined}>
+                      <video
+                        className="h-full w-full object-cover"
+                        controls
+                        preload="metadata"
+                        poster={testimonial.poster || undefined}
+                      >
                         <source src={testimonial.videoUrl} />
                       </video>
                     ) : null}
-                    {!embedUrl && !hostedVideo && testimonial.poster ? <img src={testimonial.poster} alt="" className="h-full w-full object-cover" /> : null}
+                    {!embedUrl && !hostedVideo && testimonial.poster ? (
+                      <img src={testimonial.poster} alt="" className="h-full w-full object-cover" />
+                    ) : null}
                   </div>
                 ) : null}
                 <div className="p-7 md:p-8">
                   <Quote className="mb-5 h-7 w-7 text-brand-red" />
-                  {testimonial.quote ? <blockquote className="text-lg leading-relaxed text-ink">“{testimonial.quote}”</blockquote> : null}
+                  {testimonial.quote ? (
+                    <blockquote className="text-lg leading-relaxed text-ink">
+                      “{testimonial.quote}”
+                    </blockquote>
+                  ) : null}
                   <footer className="mt-7 flex items-center gap-3">
                     {testimonial.image ? (
-                      <img src={testimonial.image} alt={testimonial.clientName} className="h-12 w-12 rounded-full object-cover" />
+                      <img
+                        src={testimonial.image}
+                        alt={testimonial.clientName}
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
                     ) : (
                       <span className="grid h-12 w-12 place-items-center rounded-full bg-gradient-brand text-sm font-bold text-white">
                         {testimonial.clientName.slice(0, 1).toUpperCase()}
@@ -855,7 +1073,11 @@ function TestimonialSection() {
                     )}
                     <div>
                       <p className="font-semibold text-ink">{testimonial.clientName}</p>
-                      <p className="text-sm text-ink-soft">{[testimonial.role, testimonial.company, testimonial.projectType].filter(Boolean).join(" · ")}</p>
+                      <p className="text-sm text-ink-soft">
+                        {[testimonial.role, testimonial.company, testimonial.projectType]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
                     </div>
                   </footer>
                   {testimonial.type === "video" && testimonial.videoUrl ? (
@@ -878,22 +1100,62 @@ function InsightsSection() {
   const [items, setItems] = useState<CmsContentItem[]>([]);
   useEffect(() => {
     let active = true;
-    getCmsContentList("insight").then((result) => active && setItems(result)).catch(() => undefined);
-    return () => { active = false; };
+    getCmsContentList("insight")
+      .then((result) => active && setItems(result))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
   }, []);
   if (!items.length) return null;
   return (
     <section className="bg-lavender py-24 md:py-32">
       <div className="container-page">
         <div className="mb-16 flex flex-wrap items-end justify-between gap-6">
-          <div className="max-w-2xl"><p className="eyebrow mb-4">Insights</p><h2 className="fluid-h2">Practical thinking on software, automation, and growth.</h2></div>
-          <Link to="/insights" className="inline-flex items-center gap-2 text-sm font-semibold text-ink">All insights <ArrowRight className="h-4 w-4" /></Link>
+          <div className="max-w-2xl">
+            <p className="eyebrow mb-4">Insights</p>
+            <h2 className="fluid-h2">Practical thinking on software, automation, and growth.</h2>
+          </div>
+          <Link
+            to="/insights"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-ink"
+          >
+            All insights <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {items.slice(0, 3).map((post) => (
-            <Link to="/insights/$slug" params={{ slug: post.slug }} key={post.slug} data-reveal className="group overflow-hidden rounded-2xl border border-black/5 bg-white transition-all duration-500 hover:-translate-y-1">
-              <div className="aspect-[16/10] bg-ink">{post.featured_image ? <img src={post.featured_image} alt="" loading="lazy" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center"><Zap className="h-14 w-14 text-white/20" /></div>}</div>
-              <div className="p-6"><div className="mb-3 flex items-center gap-3 text-xs text-ink-soft"><span className="rounded-full bg-lavender px-2.5 py-1 text-ink">{String(post.content_json?.category || "Insight")}</span><span>{String(post.content_json?.reading_time || "")}</span></div><h3 className="text-lg font-semibold group-hover:text-gradient">{post.title}</h3><p className="mt-2 text-sm leading-relaxed text-ink-soft">{post.excerpt}</p></div>
+            <Link
+              to="/insights/$slug"
+              params={{ slug: post.slug }}
+              key={post.slug}
+              data-reveal
+              className="group overflow-hidden rounded-2xl border border-black/5 bg-white transition-all duration-500 hover:-translate-y-1"
+            >
+              <div className="aspect-[16/10] bg-ink">
+                {post.featured_image ? (
+                  <img
+                    src={post.featured_image}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="grid h-full place-items-center">
+                    <Zap className="h-14 w-14 text-white/20" />
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <div className="mb-3 flex items-center gap-3 text-xs text-ink-soft">
+                  <span className="rounded-full bg-lavender px-2.5 py-1 text-ink">
+                    {String(post.content_json?.category || "Insight")}
+                  </span>
+                  <span>{String(post.content_json?.reading_time || "")}</span>
+                </div>
+                <h3 className="text-lg font-semibold group-hover:text-gradient">{post.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{post.excerpt}</p>
+              </div>
             </Link>
           ))}
         </div>
@@ -906,8 +1168,28 @@ function EngagementModelsPreview() {
   return (
     <section className="py-24 md:py-32">
       <div className="container-page">
-        <div className="mb-12 max-w-3xl"><p className="eyebrow mb-4">Engagement models</p><h2 className="fluid-h2">Choose a delivery model that matches the work.</h2></div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">{engagementModels.map((model) => <article id={model.slug} key={model.slug} className="rounded-2xl border border-black/5 bg-white p-6"><h3 className="text-xl font-semibold text-ink">{model.title}</h3><p className="mt-3 text-sm leading-6 text-ink-soft">{model.bestFor}</p><Link to="/engagement-models" className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-ink">View model <ArrowRight className="h-4 w-4" /></Link></article>)}</div>
+        <div className="mb-12 max-w-3xl">
+          <p className="eyebrow mb-4">Engagement models</p>
+          <h2 className="fluid-h2">Choose a delivery model that matches the work.</h2>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {engagementModels.map((model) => (
+            <article
+              id={model.slug}
+              key={model.slug}
+              className="rounded-2xl border border-black/5 bg-white p-6"
+            >
+              <h3 className="text-xl font-semibold text-ink">{model.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-ink-soft">{model.bestFor}</p>
+              <Link
+                to="/engagement-models"
+                className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-ink"
+              >
+                View model <ArrowRight className="h-4 w-4" />
+              </Link>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -915,20 +1197,137 @@ function EngagementModelsPreview() {
 
 function EstimatorPreview() {
   return (
-    <section className="bg-cream py-24 md:py-32"><div className="container-page"><div className="grid items-center gap-10 rounded-3xl bg-ink p-8 text-white md:grid-cols-[1.2fr_.8fr] md:p-12"><div><p className="eyebrow mb-4 text-white/60">Project estimator</p><h2 className="fluid-h2 text-white">Turn an idea into a rough scope before discovery.</h2><p className="mt-5 max-w-2xl text-white/70">Select the service, features, integrations, timeline, and budget. The result is a planning guide, not a binding quote.</p></div><div className="md:text-right"><Link to="/project-estimator" className="btn-primary">Build a rough scope <ArrowRight className="h-4 w-4" /></Link></div></div></div></section>
+    <section className="bg-cream py-24 md:py-32">
+      <div className="container-page">
+        <div className="grid items-center gap-10 rounded-3xl bg-ink p-8 text-white md:grid-cols-[1.2fr_.8fr] md:p-12">
+          <div>
+            <p className="eyebrow mb-4 text-white/60">Project estimator</p>
+            <h2 className="fluid-h2 text-white">
+              Turn an idea into a rough scope before discovery.
+            </h2>
+            <p className="mt-5 max-w-2xl text-white/70">
+              Select the service, features, integrations, timeline, and budget. The result is a
+              planning guide, not a binding quote.
+            </p>
+          </div>
+          <div className="md:text-right">
+            <Link to="/project-estimator" className="btn-primary">
+              Build a rough scope <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
 function TeamCredibility() {
   const [team, setTeam] = useState<PublicTeamMember[]>([]);
-  useEffect(() => { let active = true; getPublicTeamMembers("home").then((items) => active && setTeam(items)).catch(() => undefined); return () => { active = false; }; }, []);
+  useEffect(() => {
+    let active = true;
+    getPublicTeamMembers("home")
+      .then((items) => active && setTeam(items))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
   if (!team.length) return null;
-  return <section id="team" className="py-24 md:py-32"><div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow mb-4">Operating credibility</p><h2 className="fluid-h2">The people responsible for the work.</h2></div><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{team.slice(0, 4).map((member) => <article key={member.slug} className="rounded-2xl border border-black/5 bg-white p-5">{member.avatar_url ? <img src={member.avatar_url} alt={member.display_name} loading="lazy" className="mb-5 aspect-square w-full rounded-xl object-cover object-top" /> : null}<h3 className="text-lg font-semibold">{member.display_name}</h3>{member.headline ? <p className="mt-1 text-sm text-ink-soft">{member.headline}</p> : null}{member.locations.length ? <p className="mt-3 text-xs text-ink-soft">{member.locations.map((location) => location.name).join(" · ")}</p> : null}{member.address ? <p className="mt-3 whitespace-pre-line text-xs leading-5 text-ink-soft">{member.address}</p> : null}{member.connect_enabled ? <Link to="/connect/$slug" params={{ slug: member.slug }} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold">Connect <ArrowRight className="h-4 w-4" /></Link> : null}</article>)}</div><Link to="/about" hash="team" className="mt-8 inline-flex items-center gap-2 font-semibold">Meet the team <ArrowRight className="h-4 w-4" /></Link></div></section>;
+  return (
+    <section id="team" className="py-24 md:py-32">
+      <div className="container-page">
+        <div className="mb-12 max-w-3xl">
+          <p className="eyebrow mb-4">Operating credibility</p>
+          <h2 className="fluid-h2">The people responsible for the work.</h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {team.slice(0, 4).map((member) => (
+            <article key={member.slug} className="rounded-2xl border border-black/5 bg-white p-5">
+              {member.avatar_url ? (
+                <img
+                  src={member.avatar_url}
+                  alt={member.display_name}
+                  loading="lazy"
+                  className="mb-5 aspect-square w-full rounded-xl object-cover object-top"
+                />
+              ) : null}
+              <h3 className="text-lg font-semibold">{member.display_name}</h3>
+              {member.headline ? (
+                <p className="mt-1 text-sm text-ink-soft">{member.headline}</p>
+              ) : null}
+              {member.locations.length ? (
+                <p className="mt-3 text-xs text-ink-soft">
+                  {member.locations.map((location) => location.name).join(" · ")}
+                </p>
+              ) : null}
+              {member.address ? (
+                <p className="mt-3 whitespace-pre-line text-xs leading-5 text-ink-soft">
+                  {member.address}
+                </p>
+              ) : null}
+              {member.connect_enabled ? (
+                <Link
+                  to="/connect/$slug"
+                  params={{ slug: member.slug }}
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold"
+                >
+                  Connect <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : null}
+            </article>
+          ))}
+        </div>
+        <Link to="/about" hash="team" className="mt-8 inline-flex items-center gap-2 font-semibold">
+          Meet the team <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </section>
+  );
 }
 
 function ResourcesPreview() {
   const [items, setItems] = useState<CmsContentItem[]>([]);
-  useEffect(() => { let active = true; getCmsContentList("resource").then((value) => active && setItems(value)).catch(() => undefined); return () => { active = false; }; }, []);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("resource")
+      .then((value) => active && setItems(value))
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
   if (!items.length) return null;
-  return <section className="py-24 md:py-32"><div className="container-page"><div className="mb-12 flex items-end justify-between gap-6"><div><p className="eyebrow mb-4">Guides</p><h2 className="fluid-h2">Downloadable planning tools for better technical decisions.</h2></div><Link to="/guides" className="hidden items-center gap-2 font-semibold md:inline-flex">View guides <ArrowRight className="h-4 w-4" /></Link></div><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">{items.slice(0,4).map((item) => <Link to="/guides/$slug" params={{ slug: item.slug }} key={item.slug} className="rounded-2xl border border-black/5 bg-white p-6 hover:shadow-lg"><span className="text-xs uppercase tracking-widest text-brand-red">{String(item.content_json?.file_type || "Resource")}</span><h3 className="mt-3 text-xl font-semibold">{item.title}</h3><p className="mt-3 text-sm leading-6 text-ink-soft">{item.excerpt}</p></Link>)}</div></div></section>;
+  return (
+    <section className="py-24 md:py-32">
+      <div className="container-page">
+        <div className="mb-12 flex items-end justify-between gap-6">
+          <div>
+            <p className="eyebrow mb-4">Guides</p>
+            <h2 className="fluid-h2">
+              Downloadable planning tools for better technical decisions.
+            </h2>
+          </div>
+          <Link to="/guides" className="hidden items-center gap-2 font-semibold md:inline-flex">
+            View guides <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {items.slice(0, 4).map((item) => (
+            <Link
+              to="/guides/$slug"
+              params={{ slug: item.slug }}
+              key={item.slug}
+              className="rounded-2xl border border-black/5 bg-white p-6 hover:shadow-lg"
+            >
+              <span className="text-xs uppercase tracking-widest text-brand-red">
+                {String(item.content_json?.file_type || "Resource")}
+              </span>
+              <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-ink-soft">{item.excerpt}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 }

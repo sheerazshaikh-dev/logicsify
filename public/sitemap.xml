@@ -18,8 +18,6 @@
   <url><loc>https://logicsify.com/guides/crm-migration-checklist</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/guides/saas-mvp-scope-template</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/guides/website-planning-checklist</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/home</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/industries</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/insights</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/insights/connect-marketing-data-with-operations</loc><changefreq>monthly</changefreq></url>
   <url><loc>https://logicsify.com/insights/website-vs-web-app-vs-saas</loc><changefreq>monthly</changefreq></url>
@@ -28,7 +26,6 @@
   <url><loc>https://logicsify.com/privacy</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/process</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/project-estimator</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/resources</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/services</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/services/ai-automation-voice-agents</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/services/ai-calling-agents</loc><changefreq>weekly</changefreq></url>
@@ -69,9 +66,5 @@
   <url><loc>https://logicsify.com/technology</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/terms</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://logicsify.com/work</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/work/ai-powered-lead-qualification</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/work/ecommerce-growth-system</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/work/healthcare-operations-portal</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/work/multi-location-marketing-platform</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://logicsify.com/work/saas-intelligence-platform</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://logicsify.com/work/bluepeak-ai-calling-agent-lead-response</loc><changefreq>weekly</changefreq></url>
 </urlset>

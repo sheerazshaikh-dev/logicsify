@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Clock3,
   Copy,
+  Download,
   Edit3,
   Eye,
   FilePlus2,
@@ -20,6 +21,7 @@ import {
   Search,
   Star,
   Trash2,
+  Upload,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -29,11 +31,14 @@ import {
   createContent,
   deleteContent,
   duplicateContent,
+  exportContent,
   getContentRevisions,
+  importContent,
   listContent,
   restoreContentRevision,
   updateContent,
   type ContentItem,
+  type ContentImportReport,
   type ContentSection,
 } from "@/lib/admin-api";
 import {
@@ -84,6 +89,7 @@ const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => (
     reading_time: "",
     source_name: "",
     source_url: "",
+    sources: [],
     industry: "",
     client_logo: "",
     challenge: "",
@@ -158,6 +164,16 @@ export function ContentManagerPage({
   const [selected, setSelected] = useState<number[]>([]);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<ContentItem>>(emptyItem(type));
+  const [transferring, setTransferring] = useState(false);
+  const [importReport, setImportReport] = useState<ContentImportReport | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const supportsJsonTransfer = [
+    "insight",
+    "case_study",
+    "resource",
+    "comparison",
+    "engagement_model",
+  ].includes(type);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -213,6 +229,7 @@ export function ContentManagerPage({
         reading_time: "",
         source_name: "",
         source_url: "",
+        sources: [],
         industry: "",
         client_logo: "",
         challenge: "",
@@ -293,6 +310,70 @@ export function ContentManagerPage({
     }
   }
 
+  async function downloadJson() {
+    setTransferring(true);
+    try {
+      const payload = await exportContent(type);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `logicsify-${type.replaceAll("_", "-")}-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success(`${title} exported as JSON.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not export JSON.");
+    } finally {
+      setTransferring(false);
+    }
+  }
+
+  async function uploadJson(file: File) {
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Choose a JSON file smaller than 5 MB.");
+      return;
+    }
+    setTransferring(true);
+    try {
+      const parsed = JSON.parse(await file.text()) as unknown;
+      const record =
+        parsed && typeof parsed === "object" && !Array.isArray(parsed)
+          ? (parsed as Record<string, unknown>)
+          : null;
+      if (record?.content_type && record.content_type !== type) {
+        throw new Error(
+          `This file contains ${String(record.content_type).replaceAll("_", " ")} records, not ${title.toLowerCase()}.`,
+        );
+      }
+      const items = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(record?.items)
+          ? record.items
+          : record
+            ? [record]
+            : [];
+      if (!items.length) throw new Error("The JSON file does not contain any importable items.");
+      const report = await importContent(type, { items });
+      setImportReport(report);
+      toast.success(`${report.imported} of ${report.total} items imported as drafts.`);
+      await load();
+    } catch (error) {
+      toast.error(
+        error instanceof SyntaxError
+          ? "The selected file is not valid JSON."
+          : error instanceof Error
+            ? error.message
+            : "Could not import JSON.",
+      );
+    } finally {
+      setTransferring(false);
+      if (importInputRef.current) importInputRef.current.value = "";
+    }
+  }
+
   const allChecked = items.length > 0 && items.every((item) => selected.includes(item.id));
   const counters = meta.counters || {};
 
@@ -303,9 +384,39 @@ export function ContentManagerPage({
         title={title}
         description={description}
         actions={
-          <AdminButton onClick={openNew}>
-            <FilePlus2 className="h-4 w-4" /> Add {singular}
-          </AdminButton>
+          <div className="flex flex-wrap gap-2">
+            {supportsJsonTransfer ? (
+              <>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void uploadJson(file);
+                  }}
+                />
+                <AdminButton
+                  variant="secondary"
+                  disabled={transferring}
+                  onClick={() => importInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4" /> Import JSON
+                </AdminButton>
+                <AdminButton
+                  variant="secondary"
+                  disabled={transferring}
+                  onClick={() => void downloadJson()}
+                >
+                  <Download className="h-4 w-4" /> Export JSON
+                </AdminButton>
+              </>
+            ) : null}
+            <AdminButton onClick={openNew}>
+              <FilePlus2 className="h-4 w-4" /> Add {singular}
+            </AdminButton>
+          </div>
         }
       />
 
@@ -579,7 +690,84 @@ export function ContentManagerPage({
           await load();
         }}
       />
+      <AdminModal
+        open={Boolean(importReport)}
+        onClose={() => setImportReport(null)}
+        title="JSON import details"
+        description="Every valid JSON item is stored as a draft. Review field completeness before publishing."
+        width="max-w-6xl"
+      >
+        {importReport ? (
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+              <strong>{importReport.imported}</strong> of <strong>{importReport.total}</strong>{" "}
+              items imported as drafts.
+            </div>
+            <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
+              {importReport.items.map((row) => (
+                <article
+                  key={`${row.index}-${row.slug}`}
+                  className="rounded-2xl border border-slate-200 p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold text-[#190A2F]">{row.title}</h3>
+                      <p className="mt-1 text-xs text-slate-400">/{row.slug} · Draft</p>
+                    </div>
+                    <StatusBadge status={row.imported ? "draft" : "error"} />
+                  </div>
+                  {row.error ? (
+                    <p className="mt-3 rounded-xl bg-red-50 p-3 text-xs text-red-700">
+                      {row.error}
+                    </p>
+                  ) : null}
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <FieldSummary label="Filled fields" fields={row.filled_fields} tone="filled" />
+                    <FieldSummary
+                      label="Missing fields"
+                      fields={row.missing_fields}
+                      tone="missing"
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </AdminModal>
     </AdminShell>
+  );
+}
+
+function FieldSummary({
+  label,
+  fields,
+  tone,
+}: {
+  label: string;
+  fields: string[];
+  tone: "filled" | "missing";
+}) {
+  const filled = tone === "filled";
+  return (
+    <div
+      className={`rounded-xl border p-3 ${filled ? "border-emerald-100 bg-emerald-50/60" : "border-amber-100 bg-amber-50/70"}`}
+    >
+      <p
+        className={`text-[10px] font-bold uppercase tracking-[0.14em] ${filled ? "text-emerald-700" : "text-amber-700"}`}
+      >
+        {label} · {fields.length}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-slate-600">
+        {fields.length
+          ? fields
+              .map((field) => field.replace(/^content_json\.|^seo_json\./, "").replaceAll("_", " "))
+              .join(", ")
+          : filled
+            ? "No required fields are filled yet."
+            : "All required fields are filled."}
+      </p>
+    </div>
   );
 }
 
@@ -1369,6 +1557,16 @@ function ContentEditor({
                 )
               : String(contentJson[mediaTarget === "video" ? "video_url" : mediaTarget] || "")
         }
+        multiple={mediaTarget === "structured" && structuredMediaAppend}
+        selectedUrls={
+          mediaTarget === "structured" && structuredMediaAppend
+            ? textList(contentJson[structuredMediaKey])
+            : []
+        }
+        onSelectMany={(urls) => {
+          if (mediaTarget === "structured") updateContentJson(structuredMediaKey, urls);
+          setMediaOpen(false);
+        }}
         onSelect={(url) => {
           if (mediaTarget === "featured") setField("featured_image", url);
           else if (mediaTarget === "video") updateContentJson("video_url", url);
@@ -1697,8 +1895,32 @@ function StructuredContentFields({
           {textField("Related service slug", "related_service")}
           {textField("Related case study slug", "related_case_study")}
           {textField("Related resource slugs", "related_resources", "slug-one, slug-two")}
-          {textField("Source name", "source_name")}
-          {textField("Source URL", "source_url", "https://…")}
+          <div className="md:col-span-2">
+            <FieldLabel>Source links</FieldLabel>
+            <textarea
+              rows={5}
+              value={normalizeSources(content.sources, content.source_name, content.source_url)
+                .map((source) => `${source.name} | ${source.url}`)
+                .join("\n")}
+              onChange={(event) => {
+                const sources = event.target.value
+                  .split(/\r?\n/)
+                  .map((line) => {
+                    const [name, ...urlParts] = line.split("|");
+                    return { name: name.trim(), url: urlParts.join("|").trim() };
+                  })
+                  .filter((source) => source.name || source.url);
+                update("sources", sources);
+                update("source_name", sources[0]?.name || "");
+                update("source_url", sources[0]?.url || "");
+              }}
+              className={adminTextareaClass}
+              placeholder={"OpenAI release notes | https://…\nResearch paper | https://…"}
+            />
+            <p className="mt-1 text-[11px] text-slate-400">
+              One source per line: source name | URL. Add as many verified sources as needed.
+            </p>
+          </div>
         </div>
       </AdminCard>
     );
@@ -1871,6 +2093,19 @@ function StructuredContentFields({
   }
 
   return null;
+}
+
+function normalizeSources(value: unknown, legacyName: unknown, legacyUrl: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+      .map((item) => ({
+        name: String(item.name || item.label || "Source"),
+        url: String(item.url || ""),
+      }))
+      .filter((item) => item.url);
+  }
+  return legacyUrl ? [{ name: String(legacyName || "Source"), url: String(legacyUrl) }] : [];
 }
 
 function SectionBuilder({

@@ -29,33 +29,44 @@ import {
   resolveConnectProfilePlatform,
   type ConnectProfilePlatform,
 } from "@/lib/connect-profile-links";
-import { getConnectProfile } from "@/lib/logicsify-api";
+import { getConnectProfile, getPublicSiteSettings } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/connect/$slug")({
   pendingComponent: PublicRouteLoading,
   loader: async ({ params }) => {
     try {
-      return await getConnectProfile(params.slug);
+      const [profile, settings] = await Promise.all([
+        getConnectProfile(params.slug),
+        getPublicSiteSettings(),
+      ]);
+      return { profile, settings };
     } catch {
       throw notFound();
     }
   },
   head: ({ loaderData, params }) => ({
     meta: [
-      { title: loaderData ? `${loaderData.display_name} | Connect` : "Connect | Logicsify" },
+      {
+        title: loaderData ? `${loaderData.profile.display_name} | Connect` : "Connect | Logicsify",
+      },
       {
         name: "description",
         content:
-          loaderData?.bio ||
-          loaderData?.headline ||
-          `Connect with ${loaderData?.display_name || "Logicsify"}.`,
+          loaderData?.profile.bio ||
+          loaderData?.profile.headline ||
+          `Connect with ${loaderData?.profile.display_name || "Logicsify"}.`,
       },
-      ...(loaderData?.noindex || loaderData?.is_unlisted
+      ...(loaderData?.profile.noindex || loaderData?.profile.is_unlisted
         ? [{ name: "robots", content: "noindex, nofollow, noarchive" }]
         : [{ name: "robots", content: "index, follow" }]),
-      { property: "og:title", content: loaderData?.display_name || "Connect" },
-      { property: "og:description", content: loaderData?.headline || loaderData?.bio || "" },
-      ...(loaderData?.avatar_url ? [{ property: "og:image", content: loaderData.avatar_url }] : []),
+      { property: "og:title", content: loaderData?.profile.display_name || "Connect" },
+      {
+        property: "og:description",
+        content: loaderData?.profile.headline || loaderData?.profile.bio || "",
+      },
+      ...(loaderData?.profile.avatar_url
+        ? [{ property: "og:image", content: loaderData.profile.avatar_url }]
+        : []),
     ],
     links: [{ rel: "canonical", href: `https://logicsify.com/connect/${params.slug}` }],
   }),
@@ -76,7 +87,10 @@ const SOCIAL_ICONS: Record<ConnectProfilePlatform, LucideIcon> = {
 };
 
 function ConnectProfilePage() {
-  const profile = Route.useLoaderData();
+  const { profile, settings } = Route.useLoaderData();
+  const globalSocials = (settings.social_links || []).filter(
+    (social) => social.enabled !== false && social.url,
+  );
   const accent = profile.theme_json?.accent || "#FE3434";
   const coverUrl = profile.global_cover_url || profile.cover_url;
   const whatsapp = profile.whatsapp?.replace(/\D/g, "");
@@ -322,6 +336,38 @@ function ConnectProfilePage() {
                         </a>
                       ) : null}
                     </article>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
+
+          {globalSocials.length ? (
+            <section className="mt-8 border-t border-slate-100 pt-7">
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[.2em] text-slate-400">
+                  Logicsify online
+                </p>
+                <h2 className="mt-1 text-lg font-semibold">Follow our global channels</h2>
+              </div>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                {globalSocials.map((social) => {
+                  const platform = (
+                    social.platform === "twitter" ? "x" : social.platform
+                  ) as ConnectProfilePlatform;
+                  const Icon = SOCIAL_ICONS[platform] || Link;
+                  return (
+                    <a
+                      key={social.id}
+                      href={social.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      title={social.label}
+                      aria-label={social.label}
+                      className="grid h-12 w-12 place-items-center rounded-2xl bg-[#190A2F] text-white transition hover:-translate-y-0.5 hover:bg-[#FE3434]"
+                    >
+                      <Icon className="h-5 w-5" />
+                    </a>
                   );
                 })}
               </div>

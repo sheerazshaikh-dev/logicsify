@@ -51,6 +51,10 @@
   ],
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "https://backend.logicsify.com/api/public/sitemap.xml"
+    },
+    {
       "source": "/((?!api/|admin(?:/|$)).*)",
       "destination": "/index.html"
     }

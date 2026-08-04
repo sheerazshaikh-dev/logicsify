@@ -26,6 +26,9 @@ type Props = {
   title?: string;
   kind?: MediaKind;
   requireSquareCrop?: boolean;
+  multiple?: boolean;
+  selectedUrls?: string[];
+  onSelectMany?: (urls: string[], items: MediaItem[]) => void;
 };
 
 function isImage(item: MediaItem) {
@@ -44,6 +47,9 @@ export function MediaPicker({
   title = "Choose from Media",
   kind = "images",
   requireSquareCrop = false,
+  multiple = false,
+  selectedUrls = [],
+  onSelectMany,
 }: Props) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -52,7 +58,9 @@ export function MediaPicker({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [cropCandidate, setCropCandidate] = useState<MediaItem | null>(null);
+  const [multiSelection, setMultiSelection] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedUrlsKey = selectedUrls.join("\u0001");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,8 +79,9 @@ export function MediaPicker({
     setSearch("");
     setNotice("");
     setCropCandidate(null);
+    setMultiSelection(selectedUrlsKey ? selectedUrlsKey.split("\u0001") : []);
     void load();
-  }, [load, open]);
+  }, [load, open, selectedUrlsKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -108,6 +117,14 @@ export function MediaPicker({
   }
 
   function choose(item: MediaItem) {
+    if (multiple) {
+      setMultiSelection((current) =>
+        current.includes(item.url)
+          ? current.filter((url) => url !== item.url)
+          : [...current, item.url],
+      );
+      return;
+    }
     if (requireSquareCrop && isImage(item)) {
       setCropCandidate(item);
       return;
@@ -141,8 +158,13 @@ export function MediaPicker({
         return;
       }
       if (uploaded.length) {
+        if (multiple) {
+          setMultiSelection((current) =>
+            Array.from(new Set([...current, ...uploaded.map((item) => item.url)])),
+          );
+        }
         setNotice(
-          `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded. Select the one you want to use.`,
+          `${uploaded.length} file${uploaded.length === 1 ? "" : "s"} uploaded${multiple ? " and selected" : ". Select the one you want to use"}.`,
         );
       }
       const firstFailure = results.find((result) => result.status === "rejected");
@@ -192,7 +214,8 @@ export function MediaPicker({
           <div>
             <h2 className="text-xl font-bold tracking-tight">{title}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Select an existing {label} or upload a new one to the shared library.
+              {multiple ? `Select one or more ${label}s together` : `Select an existing ${label}`}{" "}
+              or upload new files to the shared library.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -221,6 +244,20 @@ export function MediaPicker({
             >
               <X className="size-5" />
             </button>
+            {multiple ? (
+              <button
+                type="button"
+                disabled={!multiSelection.length || uploading}
+                onClick={() => {
+                  const selectedItems = items.filter((item) => multiSelection.includes(item.url));
+                  onSelectMany?.(multiSelection, selectedItems);
+                  onClose();
+                }}
+                className="admin-primary-button disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Check className="size-4" /> Use {multiSelection.length} selected
+              </button>
+            ) : null}
           </div>
         </header>
 
@@ -270,7 +307,9 @@ export function MediaPicker({
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filtered.map((item) => {
-                const selected = item.url === selectedUrl;
+                const selected = multiple
+                  ? multiSelection.includes(item.url)
+                  : item.url === selectedUrl;
                 return (
                   <button
                     key={item.id}

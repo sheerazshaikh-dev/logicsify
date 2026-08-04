@@ -292,6 +292,7 @@ const qaPractices = [
 function AboutPage() {
   const [team, setTeam] = useState<PublicTeamMember[]>([]);
   const [settings, setSettings] = useState<PublicSiteSettings>({});
+  const activeCompanyProfile = settings.company_profiles?.find((profile) => profile.active);
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
@@ -315,7 +316,8 @@ function AboutPage() {
         breadcrumbs={[{ label: "Home", to: "/" }, { label: "Who We Are" }]}
         title={
           <>
-            Building Smarter Digital Systems for <span className="text-gradient">Growing Businesses</span>
+            Building Smarter Digital Systems for{" "}
+            <span className="text-gradient">Growing Businesses</span>
           </>
         }
         intro="Logicsify helps businesses improve how they attract customers, manage operations, and scale through modern software, AI automation, high-performance websites, and connected digital systems."
@@ -328,13 +330,28 @@ function AboutPage() {
         <div className="container-page grid items-center gap-10 lg:grid-cols-12">
           <div className="lg:col-span-6" data-reveal>
             <p className="eyebrow mb-4">Technology built around the business</p>
-            <h2 className="fluid-h2">A technology and digital solutions company focused on connected operations.</h2>
+            <h2 className="fluid-h2">
+              A technology and digital solutions company focused on connected operations.
+            </h2>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-soft">
-              Logicsify helps businesses improve how they attract customers, manage operations, and scale through modern software, AI automation, and high-performance digital platforms.
+              Logicsify helps businesses improve how they attract customers, manage operations, and
+              scale through modern software, AI automation, and high-performance digital platforms.
             </p>
             <p className="mt-4 max-w-2xl leading-relaxed text-ink-soft">
-              We design and develop websites, mobile applications, custom software, CRM systems, AI-powered workflows, and digital marketing solutions built around real business goals.
+              We design and develop websites, mobile applications, custom software, CRM systems,
+              AI-powered workflows, and digital marketing solutions built around real business
+              goals.
             </p>
+            {activeCompanyProfile ? (
+              <a
+                href={activeCompanyProfile.url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-primary mt-7"
+              >
+                View Company Profile <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : null}
           </div>
           <div className="lg:col-span-6" data-reveal>
             <div className="border-gradient relative overflow-hidden rounded-3xl bg-ink p-8 text-white md:p-10">
@@ -342,7 +359,8 @@ function AboutPage() {
               <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-brand-gold/20 blur-3xl" />
               <Network className="relative h-10 w-10 text-brand-gold" />
               <p className="relative mt-8 text-2xl font-semibold leading-snug md:text-3xl">
-                We do not build disconnected digital products. We create systems where websites, CRM platforms, automation, software, and marketing work together.
+                We do not build disconnected digital products. We create systems where websites, CRM
+                platforms, automation, software, and marketing work together.
               </p>
               <div className="relative mt-8 flex flex-wrap gap-2">
                 {["Web", "CRM", "AI", "Payments", "Marketing", "Analytics"].map((item) => (
@@ -363,9 +381,12 @@ function AboutPage() {
         <div className="container-page">
           <div className="max-w-3xl" data-reveal>
             <p className="eyebrow mb-4">What we do</p>
-            <h2 className="fluid-h2">Specialist capabilities connected around one operating system.</h2>
+            <h2 className="fluid-h2">
+              Specialist capabilities connected around one operating system.
+            </h2>
             <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-              Each capability can solve a focused problem. The strongest results happen when the relevant parts share data, workflows, and clear ownership.
+              Each capability can solve a focused problem. The strongest results happen when the
+              relevant parts share data, workflows, and clear ownership.
             </p>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -401,7 +422,8 @@ function AboutPage() {
             <p className="eyebrow mb-4">Our approach</p>
             <h2 className="fluid-h2">A clear path from business problem to working system.</h2>
             <p className="mt-5 text-lg leading-relaxed text-ink-soft">
-              Select a stage to see how strategy, design, engineering, quality assurance, and support fit together.
+              Select a stage to see how strategy, design, engineering, quality assurance, and
+              support fit together.
             </p>
           </div>
 
@@ -449,7 +471,10 @@ function AboutPage() {
 
           <div className="mt-10 space-y-3 lg:hidden">
             {processSteps.map((step, index) => (
-              <details key={step.title} className="group rounded-2xl border border-black/10 bg-white p-5">
+              <details
+                key={step.title}
+                className="group rounded-2xl border border-black/10 bg-white p-5"
+              >
                 <summary className="flex cursor-pointer list-none items-center gap-4 font-semibold text-ink">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-lavender text-xs">
                     {String(index + 1).padStart(2, "0")}
@@ -470,10 +495,13 @@ function AboutPage() {
             <p className="eyebrow mb-4 text-white/60">Connected systems</p>
             <h2 className="fluid-h2 text-white">One Partner. One Connected Digital System.</h2>
             <p className="mt-6 text-lg leading-relaxed text-white/65">
-              Instead of coordinating multiple vendors, businesses can work with one team that understands design, development, automation, CRM, and digital growth.
+              Instead of coordinating multiple vendors, businesses can work with one team that
+              understands design, development, automation, CRM, and digital growth.
             </p>
             <p className="mt-4 leading-relaxed text-white/55">
-              A website should generate leads. A CRM should organize and follow up with those leads. Automation should reduce repetitive work. Marketing should produce measurable growth. Our role is to connect these parts into one reliable system.
+              A website should generate leads. A CRM should organize and follow up with those leads.
+              Automation should reduce repetitive work. Marketing should produce measurable growth.
+              Our role is to connect these parts into one reliable system.
             </p>
           </div>
           <div className="lg:col-span-7" data-reveal>
@@ -486,7 +514,9 @@ function AboutPage() {
         <div className="container-page">
           <div className="max-w-3xl" data-reveal>
             <p className="eyebrow mb-4">Why Logicsify</p>
-            <h2 className="fluid-h2">Built for useful outcomes, dependable delivery, and long-term operation.</h2>
+            <h2 className="fluid-h2">
+              Built for useful outcomes, dependable delivery, and long-term operation.
+            </h2>
           </div>
           <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
             {whyCards.map(({ title, body, icon: Icon, outcome }) => (
@@ -514,10 +544,13 @@ function AboutPage() {
           <div className="grid items-end gap-8 lg:grid-cols-12">
             <div className="lg:col-span-7" data-reveal>
               <p className="eyebrow mb-4">Industries and business contexts</p>
-              <h2 className="fluid-h2">The workflow matters more than a generic industry template.</h2>
+              <h2 className="fluid-h2">
+                The workflow matters more than a generic industry template.
+              </h2>
             </div>
             <p className="text-lg leading-relaxed text-ink-soft lg:col-span-5" data-reveal>
-              Every solution is planned around the client’s workflow, customers, team structure, and growth goals.
+              Every solution is planned around the client’s workflow, customers, team structure, and
+              growth goals.
             </p>
           </div>
           <div className="mt-10 flex snap-x gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-5 md:overflow-visible md:pb-0">
@@ -569,7 +602,10 @@ function AboutPage() {
                     {member.skills_json.length ? (
                       <div className="mt-4 flex flex-wrap gap-2">
                         {member.skills_json.map((skill) => (
-                          <span key={skill} className="rounded-full bg-lavender px-2.5 py-1 text-xs">
+                          <span
+                            key={skill}
+                            className="rounded-full bg-lavender px-2.5 py-1 text-xs"
+                          >
                             {skill}
                           </span>
                         ))}
@@ -588,9 +624,36 @@ function AboutPage() {
                     <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
                       {member.email ? <a href={`mailto:${member.email}`}>Email</a> : null}
                       {member.phone ? <a href={`tel:${member.phone}`}>Call</a> : null}
-                      {member.whatsapp ? <a href={`https://wa.me/${member.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">WhatsApp</a> : null}
-                      {member.links_json.map((link) => <a key={`${link.label}-${link.url}`} href={link.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1">{link.label}<ExternalLink className="h-3.5 w-3.5" /></a>)}
-                      {member.connect_enabled ? <Link to="/connect/$slug" params={{ slug: member.slug }} className="inline-flex items-center gap-1">Connect <ArrowRight className="h-3.5 w-3.5" /></Link> : null}
+                      {member.whatsapp ? (
+                        <a
+                          href={`https://wa.me/${member.whatsapp.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          WhatsApp
+                        </a>
+                      ) : null}
+                      {member.links_json.map((link) => (
+                        <a
+                          key={`${link.label}-${link.url}`}
+                          href={link.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1"
+                        >
+                          {link.label}
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ))}
+                      {member.connect_enabled ? (
+                        <Link
+                          to="/connect/$slug"
+                          params={{ slug: member.slug }}
+                          className="inline-flex items-center gap-1"
+                        >
+                          Connect <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      ) : null}
                     </div>
                   </article>
                 );
@@ -612,7 +675,8 @@ function AboutPage() {
               Make advanced technology practical for growing businesses.
             </h2>
             <p className="relative mt-5 leading-relaxed text-white/65">
-              We replace disconnected tools and manual processes with efficient digital systems that teams can understand, operate, and improve.
+              We replace disconnected tools and manual processes with efficient digital systems that
+              teams can understand, operate, and improve.
             </p>
           </article>
           <article
@@ -625,7 +689,8 @@ function AboutPage() {
               Become a trusted global technology partner for smarter business operations.
             </h2>
             <p className="relative mt-5 leading-relaxed text-ink-soft">
-              We want growing businesses to have clearer systems for serving customers, managing work, making decisions, and scaling responsibly.
+              We want growing businesses to have clearer systems for serving customers, managing
+              work, making decisions, and scaling responsibly.
             </p>
           </article>
         </div>
@@ -633,7 +698,10 @@ function AboutPage() {
 
       <section className="bg-cream py-20 md:py-28">
         <div className="container-page max-w-5xl">
-          <details className="group rounded-3xl border border-black/5 bg-white p-6 md:p-9" data-reveal>
+          <details
+            className="group rounded-3xl border border-black/5 bg-white p-6 md:p-9"
+            data-reveal
+          >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-6">
               <div>
                 <p className="eyebrow mb-3">Company profile and technology approach</p>
@@ -647,22 +715,44 @@ function AboutPage() {
             <div className="mt-8 border-t border-black/8 pt-8">
               <div className="grid gap-8 md:grid-cols-2">
                 <SeoContentBlock title="The company">
-                  Logicsify is a technology and digital solutions company helping startups, small businesses, agencies, and established companies improve how they attract customers, manage operations, and scale. From strategy and user experience to development, integration, deployment, and ongoing improvement, we manage the complete digital delivery process.
+                  Logicsify is a technology and digital solutions company helping startups, small
+                  businesses, agencies, and established companies improve how they attract
+                  customers, manage operations, and scale. From strategy and user experience to
+                  development, integration, deployment, and ongoing improvement, we manage the
+                  complete digital delivery process.
                 </SeoContentBlock>
                 <SeoContentBlock title="Services and connected delivery">
-                  Our work includes custom software development, website development, mobile app development, CRM automation, AI automation, business automation solutions, digital marketing, portals, dashboards, admin systems, integrations, and ongoing technical support. These capabilities are planned as parts of one operating system rather than isolated deliverables.
+                  Our work includes custom software development, website development, mobile app
+                  development, CRM automation, AI automation, business automation solutions, digital
+                  marketing, portals, dashboards, admin systems, integrations, and ongoing technical
+                  support. These capabilities are planned as parts of one operating system rather
+                  than isolated deliverables.
                 </SeoContentBlock>
                 <SeoContentBlock title="Technology approach">
-                  We select architecture, platforms, integrations, and deployment patterns according to the workflow, data, users, constraints, ownership requirements, and expected growth of each project. The goal is not to add more software. It is to create a reliable system that reduces friction and supports the business over time.
+                  We select architecture, platforms, integrations, and deployment patterns according
+                  to the workflow, data, users, constraints, ownership requirements, and expected
+                  growth of each project. The goal is not to add more software. It is to create a
+                  reliable system that reduces friction and supports the business over time.
                 </SeoContentBlock>
                 <SeoContentBlock title="Business automation">
-                  AI automation and CRM automation can improve lead response, appointment booking, customer communication, document processing, internal handoffs, reporting, and follow-up. We design these workflows with clear rules, human escalation, data validation, permissions, and visibility into what the automation is doing.
+                  AI automation and CRM automation can improve lead response, appointment booking,
+                  customer communication, document processing, internal handoffs, reporting, and
+                  follow-up. We design these workflows with clear rules, human escalation, data
+                  validation, permissions, and visibility into what the automation is doing.
                 </SeoContentBlock>
                 <SeoContentBlock title="Software development">
-                  As a software development company, Logicsify builds custom websites, portals, mobile applications, dashboards, CMS platforms, CRM systems, and integrations around defined business requirements. Work is delivered through discovery, planning, interface design, development, testing, security review, deployment, and support.
+                  As a software development company, Logicsify builds custom websites, portals,
+                  mobile applications, dashboards, CMS platforms, CRM systems, and integrations
+                  around defined business requirements. Work is delivered through discovery,
+                  planning, interface design, development, testing, security review, deployment, and
+                  support.
                 </SeoContentBlock>
                 <SeoContentBlock title="Digital transformation without vague promises">
-                  Digital transformation should produce practical improvements: faster lead response, fewer missed opportunities, reduced manual work, better customer communication, centralized business data, improved booking rates, automated follow-up, and connected business operations. We focus on those outcomes instead of adding tools without a clear operating purpose.
+                  Digital transformation should produce practical improvements: faster lead
+                  response, fewer missed opportunities, reduced manual work, better customer
+                  communication, centralized business data, improved booking rates, automated
+                  follow-up, and connected business operations. We focus on those outcomes instead
+                  of adding tools without a clear operating purpose.
                 </SeoContentBlock>
               </div>
 
@@ -700,7 +790,10 @@ function AboutPage() {
                     />
                   ) : null}
                   {settings.emergency_support_policy ? (
-                    <OperatingNote title="Emergency support" body={settings.emergency_support_policy} />
+                    <OperatingNote
+                      title="Emergency support"
+                      body={settings.emergency_support_policy}
+                    />
                   ) : null}
                   {settings.maintenance_exclusions ? (
                     <OperatingNote
@@ -721,9 +814,12 @@ function AboutPage() {
             <div className="absolute left-1/2 top-0 h-48 w-48 -translate-x-1/2 rounded-full bg-brand-red/15 blur-3xl" />
             <div className="relative mx-auto max-w-3xl">
               <p className="eyebrow mb-5 text-white/60">Start with the operating problem</p>
-              <h2 className="fluid-h2 text-white">Let’s Build a Smarter System for Your Business</h2>
+              <h2 className="fluid-h2 text-white">
+                Let’s Build a Smarter System for Your Business
+              </h2>
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/65">
-                Tell us where your current system is failing, what you want to improve, and what success should look like.
+                Tell us where your current system is failing, what you want to improve, and what
+                success should look like.
               </p>
               <div className="mt-9 flex flex-wrap justify-center gap-4">
                 <Link to="/contact" className="btn-primary">
@@ -793,13 +889,19 @@ function HeroTechnologyEcosystem() {
           style={{ left: `${(x / 500) * 100}%`, top: `${(y / 500) * 100}%` }}
         >
           <Icon className="h-4 w-4 shrink-0 text-brand-gold" />
-          <span className="mt-2 block text-[10px] font-semibold leading-tight sm:text-xs">{label}</span>
+          <span className="mt-2 block text-[10px] font-semibold leading-tight sm:text-xs">
+            {label}
+          </span>
         </div>
       ))}
 
       <div className="absolute left-1/2 top-1/2 z-20 grid h-32 w-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white shadow-[0_0_80px_rgba(253,190,2,0.18)] sm:h-40 sm:w-40">
         <div className="absolute inset-3 rounded-full border border-dashed border-black/10 animate-spin-slow" />
-        <img src="/logicsify-mark.png" alt="Logicsify" className="relative h-14 w-14 sm:h-16 sm:w-16" />
+        <img
+          src="/logicsify-mark.png"
+          alt="Logicsify"
+          className="relative h-14 w-14 sm:h-16 sm:w-16"
+        />
       </div>
     </div>
   );
@@ -856,7 +958,11 @@ function ConnectedSystemsVisual() {
 
       <div className="absolute left-1/2 top-1/2 z-20 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white sm:h-40 sm:w-40">
         <div className="absolute inset-3 rounded-full border border-dashed border-black/10 animate-spin-slow" />
-        <img src="/logicsify-mark.png" alt="Logicsify" className="relative h-12 w-12 sm:h-16 sm:w-16" />
+        <img
+          src="/logicsify-mark.png"
+          alt="Logicsify"
+          className="relative h-12 w-12 sm:h-16 sm:w-16"
+        />
       </div>
     </div>
   );

@@ -7,7 +7,9 @@ import {
   Code2,
   Copy,
   ExternalLink,
+  FileDown,
   Globe2,
+  Handshake,
   Image as ImageIcon,
   LayoutPanelTop,
   Plus,
@@ -48,11 +50,22 @@ import {
   type SettingsResponse,
 } from "@/lib/admin-api";
 import type { CodeSnippet, SocialProfile } from "@/lib/logicsify-api";
+import type { CompanyProfile, Partner } from "@/lib/logicsify-api";
+import { MediaPicker } from "@/components/cms/media-picker";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
 type Tab =
-  "site" | "header" | "footer" | "seo" | "email" | "integrations" | "calendar" | "administrators";
+  | "site"
+  | "profiles"
+  | "partners"
+  | "header"
+  | "footer"
+  | "seo"
+  | "email"
+  | "integrations"
+  | "calendar"
+  | "administrators";
 
 type SettingGroup = "site" | "email" | "integrations" | "calendar";
 
@@ -63,6 +76,8 @@ const tabConfig: Array<{
   group?: SettingGroup;
 }> = [
   { id: "site", label: "Site Settings", icon: Globe2, group: "site" },
+  { id: "profiles", label: "Company Profiles", icon: FileDown, group: "site" },
+  { id: "partners", label: "Partners", icon: Handshake, group: "site" },
   { id: "header", label: "Header & Branding", icon: LayoutPanelTop, group: "site" },
   { id: "footer", label: "Footer", icon: Palette, group: "site" },
   { id: "seo", label: "SEO & Sharing", icon: SearchCheck, group: "site" },
@@ -163,6 +178,18 @@ function SettingsPage() {
                 update={(key, value) => update("site", key, value)}
               />
             ) : null}
+            {tab === "profiles" ? (
+              <CompanyProfilesSettings
+                values={siteValues}
+                update={(key, value) => update("site", key, value)}
+              />
+            ) : null}
+            {tab === "partners" ? (
+              <PartnersSettings
+                values={siteValues}
+                update={(key, value) => update("site", key, value)}
+              />
+            ) : null}
             {tab === "footer" ? (
               <FooterSettings
                 values={siteValues}
@@ -242,13 +269,58 @@ function SiteSettings({ values, update }: SettingsProps) {
         description="Verified organization details and editable support expectations used across About, schema, and customer-facing pages."
       >
         <div className="grid gap-5 md:grid-cols-2">
-          <SettingInput label="Legal business name" value={values.legal_name} onChange={(value) => update("legal_name", value)} placeholder="Leave empty until verified" />
-          <SettingInput label="Service areas" value={values.service_areas} onChange={(value) => update("service_areas", value)} placeholder="Only add verified service areas" />
-          <SettingInput label="Support working hours" value={values.support_hours} onChange={(value) => update("support_hours", value)} placeholder="For example: Monday–Friday, 9am–5pm" />
-          <SettingInput label="Response expectations" value={values.support_response_expectation} onChange={(value) => update("support_response_expectation", value)} placeholder="Use the expectation your team can consistently meet" />
-          <div className="md:col-span-2"><FieldLabel>Emergency support policy</FieldLabel><textarea rows={3} value={stringValue(values.emergency_support_policy)} onChange={(event) => update("emergency_support_policy", event.target.value)} className={adminTextareaClass} /></div>
-          <div className="md:col-span-2"><FieldLabel>Maintenance exclusions</FieldLabel><textarea rows={3} value={stringValue(values.maintenance_exclusions)} onChange={(event) => update("maintenance_exclusions", event.target.value)} className={adminTextareaClass} /></div>
-          <div className="md:col-span-2"><FieldLabel>Post-launch support or warranty period</FieldLabel><textarea rows={3} value={stringValue(values.post_launch_period)} onChange={(event) => update("post_launch_period", event.target.value)} className={adminTextareaClass} placeholder="Leave empty until the policy is approved." /></div>
+          <SettingInput
+            label="Legal business name"
+            value={values.legal_name}
+            onChange={(value) => update("legal_name", value)}
+            placeholder="Leave empty until verified"
+          />
+          <SettingInput
+            label="Service areas"
+            value={values.service_areas}
+            onChange={(value) => update("service_areas", value)}
+            placeholder="Only add verified service areas"
+          />
+          <SettingInput
+            label="Support working hours"
+            value={values.support_hours}
+            onChange={(value) => update("support_hours", value)}
+            placeholder="For example: Monday–Friday, 9am–5pm"
+          />
+          <SettingInput
+            label="Response expectations"
+            value={values.support_response_expectation}
+            onChange={(value) => update("support_response_expectation", value)}
+            placeholder="Use the expectation your team can consistently meet"
+          />
+          <div className="md:col-span-2">
+            <FieldLabel>Emergency support policy</FieldLabel>
+            <textarea
+              rows={3}
+              value={stringValue(values.emergency_support_policy)}
+              onChange={(event) => update("emergency_support_policy", event.target.value)}
+              className={adminTextareaClass}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <FieldLabel>Maintenance exclusions</FieldLabel>
+            <textarea
+              rows={3}
+              value={stringValue(values.maintenance_exclusions)}
+              onChange={(event) => update("maintenance_exclusions", event.target.value)}
+              className={adminTextareaClass}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <FieldLabel>Post-launch support or warranty period</FieldLabel>
+            <textarea
+              rows={3}
+              value={stringValue(values.post_launch_period)}
+              onChange={(event) => update("post_launch_period", event.target.value)}
+              className={adminTextareaClass}
+              placeholder="Leave empty until the policy is approved."
+            />
+          </div>
         </div>
       </SettingsSection>
 
@@ -389,13 +461,27 @@ function ContactDirectoryEditor({ values, update }: SettingsProps) {
                     type="url"
                   />
                   <div className="flex flex-wrap gap-2">
-                    <AdminButton variant="secondary" onClick={() => moveSocial(index, -1)} disabled={index === 0} ariaLabel="Move social link up">
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() => moveSocial(index, -1)}
+                      disabled={index === 0}
+                      ariaLabel="Move social link up"
+                    >
                       <ChevronUp className="h-4 w-4" />
                     </AdminButton>
-                    <AdminButton variant="secondary" onClick={() => moveSocial(index, 1)} disabled={index === socialLinks.length - 1} ariaLabel="Move social link down">
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() => moveSocial(index, 1)}
+                      disabled={index === socialLinks.length - 1}
+                      ariaLabel="Move social link down"
+                    >
                       <ChevronDown className="h-4 w-4" />
                     </AdminButton>
-                    <AdminButton variant="danger" onClick={() => removeSocial(index)} ariaLabel="Remove social link">
+                    <AdminButton
+                      variant="danger"
+                      onClick={() => removeSocial(index)}
+                      ariaLabel="Remove social link"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </AdminButton>
                   </div>
@@ -415,7 +501,10 @@ function ContactDirectoryEditor({ values, update }: SettingsProps) {
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
             <Share2 className="mx-auto h-8 w-8 text-slate-300" />
             <p className="mt-4 font-semibold text-[#190A2F]">No social links added yet</p>
-            <p className="mt-2 text-sm text-slate-500">Add only official Logicsify profiles. Empty or disabled links are never shown publicly.</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Add only official Logicsify profiles. Empty or disabled links are never shown
+              publicly.
+            </p>
           </div>
         )}
 
@@ -424,12 +513,36 @@ function ContactDirectoryEditor({ values, update }: SettingsProps) {
             Legacy fixed social fields
           </summary>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <SettingInput label="LinkedIn URL" value={values.linkedin_url} onChange={(value) => update("linkedin_url", value)} />
-            <SettingInput label="Instagram URL" value={values.instagram_url} onChange={(value) => update("instagram_url", value)} />
-            <SettingInput label="Facebook URL" value={values.facebook_url} onChange={(value) => update("facebook_url", value)} />
-            <SettingInput label="X / Twitter URL" value={values.x_url} onChange={(value) => update("x_url", value)} />
-            <SettingInput label="YouTube URL" value={values.youtube_url} onChange={(value) => update("youtube_url", value)} />
-            <SettingInput label="Portfolio URL" value={values.portfolio_url} onChange={(value) => update("portfolio_url", value)} />
+            <SettingInput
+              label="LinkedIn URL"
+              value={values.linkedin_url}
+              onChange={(value) => update("linkedin_url", value)}
+            />
+            <SettingInput
+              label="Instagram URL"
+              value={values.instagram_url}
+              onChange={(value) => update("instagram_url", value)}
+            />
+            <SettingInput
+              label="Facebook URL"
+              value={values.facebook_url}
+              onChange={(value) => update("facebook_url", value)}
+            />
+            <SettingInput
+              label="X / Twitter URL"
+              value={values.x_url}
+              onChange={(value) => update("x_url", value)}
+            />
+            <SettingInput
+              label="YouTube URL"
+              value={values.youtube_url}
+              onChange={(value) => update("youtube_url", value)}
+            />
+            <SettingInput
+              label="Portfolio URL"
+              value={values.portfolio_url}
+              onChange={(value) => update("portfolio_url", value)}
+            />
           </div>
         </details>
       </SettingsSection>
@@ -471,6 +584,269 @@ function normalizeSocialProfiles(value: unknown): SocialProfile[] {
       sort_order: Number(item.sort_order ?? index),
     }))
     .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+}
+
+function CompanyProfilesSettings({ values, update }: SettingsProps) {
+  const profiles = Array.isArray(values.company_profiles)
+    ? (values.company_profiles as CompanyProfile[])
+    : [];
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  function replace(next: CompanyProfile[]) {
+    update(
+      "company_profiles",
+      next.map((item, index) => ({ ...item, sort_order: index })),
+    );
+  }
+
+  return (
+    <>
+      <SettingsSection
+        title="PDF company profiles"
+        description="Upload and retain multiple company-profile PDFs, then choose exactly one active version for the About page."
+        icon={FileDown}
+        actions={
+          <AdminButton variant="secondary" onClick={() => setPickerOpen(true)}>
+            <UploadCloud className="h-4 w-4" /> Add PDFs
+          </AdminButton>
+        }
+      >
+        {profiles.length ? (
+          <div className="space-y-3">
+            {profiles.map((profile, index) => (
+              <article
+                key={profile.id}
+                className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[auto_1fr_auto] md:items-center"
+              >
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-[#190A2F]">
+                  <input
+                    type="radio"
+                    name="active-company-profile"
+                    checked={profile.active}
+                    onChange={() =>
+                      replace(
+                        profiles.map((item, itemIndex) => ({
+                          ...item,
+                          active: itemIndex === index,
+                        })),
+                      )
+                    }
+                    className="accent-[#FE3434]"
+                  />{" "}
+                  Active
+                </label>
+                <div>
+                  <FieldLabel>Profile title</FieldLabel>
+                  <input
+                    value={profile.name}
+                    onChange={(event) =>
+                      replace(
+                        profiles.map((item, itemIndex) =>
+                          itemIndex === index ? { ...item, name: event.target.value } : item,
+                        ),
+                      )
+                    }
+                    className={adminInputClass}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <a
+                    href={profile.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-[#190A2F]"
+                  >
+                    <ExternalLink className="h-4 w-4" /> View
+                  </a>
+                  <AdminButton
+                    variant="danger"
+                    ariaLabel="Remove company profile"
+                    onClick={() =>
+                      replace(
+                        profiles
+                          .filter((_, itemIndex) => itemIndex !== index)
+                          .map((item, itemIndex) => ({
+                            ...item,
+                            active: item.active || (profile.active && itemIndex === 0),
+                          })),
+                      )
+                    }
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </AdminButton>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+            <FileDown className="mx-auto h-9 w-9 text-slate-300" />
+            <p className="mt-3 font-semibold text-[#190A2F]">No company profiles uploaded</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Add one or more PDF files from Media Library.
+            </p>
+          </div>
+        )}
+      </SettingsSection>
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        kind="documents"
+        multiple
+        selectedUrls={profiles.map((item) => item.url)}
+        onSelect={() => undefined}
+        onSelectMany={(urls, items) => {
+          const existing = new Set(profiles.map((item) => item.url));
+          const additions = urls
+            .filter((url) => !existing.has(url))
+            .map((url, offset) => {
+              const media = items.find((item) => item.url === url);
+              return {
+                id: `company-profile-${Date.now()}-${offset}`,
+                name:
+                  media?.original_name?.replace(/\.pdf$/i, "") ||
+                  `Company Profile ${profiles.length + offset + 1}`,
+                url,
+                active: profiles.length === 0 && offset === 0,
+                sort_order: profiles.length + offset,
+              } satisfies CompanyProfile;
+            });
+          replace([...profiles, ...additions]);
+        }}
+        title="Choose company profile PDFs"
+      />
+    </>
+  );
+}
+
+function PartnersSettings({ values, update }: SettingsProps) {
+  const partners = Array.isArray(values.partners) ? (values.partners as Partner[]) : [];
+  const [logoTarget, setLogoTarget] = useState<number | null>(null);
+  const replace = (next: Partner[]) =>
+    update(
+      "partners",
+      next.map((item, index) => ({ ...item, sort_order: index })),
+    );
+  const patch = (index: number, value: Partial<Partner>) =>
+    replace(
+      partners.map((item, itemIndex) => (itemIndex === index ? { ...item, ...value } : item)),
+    );
+  function addPartner() {
+    replace([
+      ...partners,
+      {
+        id: `partner-${Date.now()}`,
+        name: "",
+        logo_url: "",
+        website_url: "",
+        link_enabled: false,
+        status: "draft",
+        sort_order: partners.length,
+      },
+    ]);
+  }
+
+  return (
+    <>
+      <SettingsSection
+        title="Homepage partners"
+        description="Manage partner names, logos, website links, link behavior and publication status."
+        icon={Handshake}
+        actions={
+          <AdminButton variant="secondary" onClick={addPartner}>
+            <Plus className="h-4 w-4" /> Add partner
+          </AdminButton>
+        }
+      >
+        {partners.length ? (
+          <div className="space-y-4">
+            {partners.map((partner, index) => (
+              <article
+                key={partner.id}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+              >
+                <div className="grid gap-4 lg:grid-cols-[120px_1fr_1.4fr_150px_auto] lg:items-end">
+                  <button
+                    type="button"
+                    onClick={() => setLogoTarget(index)}
+                    className="grid h-[86px] place-items-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white p-3"
+                  >
+                    {partner.logo_url ? (
+                      <img
+                        src={partner.logo_url}
+                        alt=""
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <>
+                        <ImageIcon className="h-6 w-6 text-slate-300" />
+                        <span className="text-[10px] text-slate-400">Choose logo</span>
+                      </>
+                    )}
+                  </button>
+                  <SettingInput
+                    label="Partner name"
+                    value={partner.name}
+                    onChange={(value) => patch(index, { name: value })}
+                  />
+                  <SettingInput
+                    label="Website URL"
+                    value={partner.website_url}
+                    onChange={(value) => patch(index, { website_url: value })}
+                    placeholder="https://…"
+                    type="url"
+                  />
+                  <div>
+                    <FieldLabel>Status</FieldLabel>
+                    <select
+                      value={partner.status}
+                      onChange={(event) =>
+                        patch(index, { status: event.target.value as Partner["status"] })
+                      }
+                      className={adminInputClass}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </div>
+                  <AdminButton
+                    variant="danger"
+                    ariaLabel="Remove partner"
+                    onClick={() => replace(partners.filter((_, itemIndex) => itemIndex !== index))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </AdminButton>
+                </div>
+                <div className="mt-4">
+                  <ToggleSetting
+                    label="Link logo to partner website"
+                    description="When off, the logo is displayed without a clickable link."
+                    checked={partner.link_enabled}
+                    onChange={(value) => patch(index, { link_enabled: value })}
+                  />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+            <Handshake className="mx-auto h-9 w-9 text-slate-300" />
+            <p className="mt-3 font-semibold text-[#190A2F]">No partners added</p>
+          </div>
+        )}
+      </SettingsSection>
+      <MediaPicker
+        open={logoTarget !== null}
+        onClose={() => setLogoTarget(null)}
+        kind="images"
+        onSelect={(url) => {
+          if (logoTarget !== null) patch(logoTarget, { logo_url: url });
+          setLogoTarget(null);
+        }}
+        title="Choose partner logo"
+      />
+    </>
+  );
 }
 
 function HeaderSettings({ values, update }: SettingsProps) {
@@ -647,7 +1023,8 @@ function FooterSettings({ values, update }: SettingsProps) {
           </div>
         </div>
         <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
-          The footer now uses the global contact emails, phone, business locations and social links configured in the Site Settings tab. This keeps the Contact page and footer synchronized.
+          The footer now uses the global contact emails, phone, business locations and social links
+          configured in the Site Settings tab. This keeps the Contact page and footer synchronized.
         </div>
       </SettingsSection>
 
@@ -946,7 +1323,11 @@ function IntegrationSettings({
   }
 
   function patchSnippet(index: number, patch: Partial<CodeSnippet>) {
-    setSnippets(snippets.map((snippet, itemIndex) => (itemIndex === index ? { ...snippet, ...patch } : snippet)));
+    setSnippets(
+      snippets.map((snippet, itemIndex) =>
+        itemIndex === index ? { ...snippet, ...patch } : snippet,
+      ),
+    );
   }
 
   function moveSnippet(index: number, direction: -1 | 1) {
@@ -992,6 +1373,45 @@ function IntegrationSettings({
           }
           onChange={(value) => update("tracking_enabled", value)}
         />
+      </SettingsSection>
+
+      <SettingsSection
+        title="Google reCAPTCHA v3"
+        description="Protect every public form—contact, estimator, technical roadmap, newsletter, guide downloads, and bookings. When disabled, all forms continue working normally."
+      >
+        <ToggleSetting
+          label="Enable reCAPTCHA on all forms"
+          description="Enable only after both keys are saved. Visitors are verified invisibly when they submit a form."
+          checked={boolValue(values.recaptcha_enabled)}
+          onChange={(value) => update("recaptcha_enabled", value)}
+        />
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <SettingInput
+            label="reCAPTCHA site key"
+            value={values.recaptcha_site_key}
+            onChange={(value) => update("recaptcha_site_key", value)}
+            placeholder="Public site key"
+          />
+          <SettingInput
+            label="reCAPTCHA secret key"
+            value={values.recaptcha_secret_key}
+            onChange={(value) => update("recaptcha_secret_key", value)}
+            placeholder="Server secret key"
+            type="password"
+          />
+          <SettingInput
+            label="Minimum score (0.1–1.0)"
+            value={values.recaptcha_min_score ?? 0.5}
+            onChange={(value) =>
+              update("recaptcha_min_score", Math.max(0.1, Math.min(1, Number(value) || 0.5)))
+            }
+            type="number"
+          />
+        </div>
+        <p className="mt-4 text-xs leading-5 text-slate-500">
+          Recommended starting score: 0.5. The secret key is used only by the backend and is never
+          exposed to website visitors.
+        </p>
       </SettingsSection>
 
       <SettingsSection
@@ -1092,9 +1512,9 @@ function IntegrationSettings({
               <p className="font-semibold">Frontend code only</p>
               <p className="mt-1 leading-6">
                 Never place API secrets, database credentials, private tokens, or server keys here.
-                Snippets run in the visitor’s browser. Use <code>?safe-runtime=1</code> on the public
-                site or <code>?safe-admin=1</code> in the admin panel to temporarily bypass custom
-                code during recovery.
+                Snippets run in the visitor’s browser. Use <code>?safe-runtime=1</code> on the
+                public site or <code>?safe-admin=1</code> in the admin panel to temporarily bypass
+                custom code during recovery.
               </p>
             </div>
           </div>
@@ -1282,7 +1702,7 @@ function IntegrationSettings({
                     disabled={!canManageCustomCode}
                     onChange={(event) => patchSnippet(index, { code: event.target.value })}
                     className={`${adminTextareaClass} font-mono text-xs disabled:cursor-not-allowed disabled:bg-slate-100`}
-                    placeholder={'<script>\n  // Your browser-side integration code\n</script>'}
+                    placeholder={"<script>\n  // Your browser-side integration code\n</script>"}
                     spellCheck={false}
                   />
                 </div>
@@ -1313,11 +1733,8 @@ function normalizeSnippets(value: unknown): CodeSnippet[] {
       title: String(item.title || "Untitled snippet"),
       snippet_type: item.snippet_type === "integration" ? "integration" : "custom_code",
       placement:
-        item.placement === "head" || item.placement === "body_start"
-          ? item.placement
-          : "body_end",
-      target:
-        item.target === "admin" || item.target === "both" ? item.target : "public",
+        item.placement === "head" || item.placement === "body_start" ? item.placement : "body_end",
+      target: item.target === "admin" || item.target === "both" ? item.target : "public",
       code: String(item.code || ""),
       enabled: boolValue(item.enabled),
       sort_order: Number(item.sort_order || index),

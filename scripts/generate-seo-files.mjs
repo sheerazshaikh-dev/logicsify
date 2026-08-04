@@ -60,6 +60,7 @@ const paths = new Set([
   ...serviceSlugs.map((slug) => `/services/${slug}`),
   ...comparisonSlugs.map((slug) => `/comparisons/${slug}`),
 ]);
+const redirectedPaths = new Set(["/industries", "/resources", "/home"]);
 const fetched = {};
 for (const [type, toPath] of dynamicTypes) {
   const items = await list(type);
@@ -70,6 +71,7 @@ for (const [type, toPath] of dynamicTypes) {
     paths.add(toPath(item.slug));
   }
 }
+for (const redirectedPath of redirectedPaths) paths.delete(redirectedPath);
 // Resource placeholders stay out of the sitemap until the CMS publishes them.
 if ((fetched.resource || []).length === 0) resourceSlugs.forEach(() => undefined);
 

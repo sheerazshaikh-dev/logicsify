@@ -62,6 +62,7 @@ export type ContactSubmission = {
   description: string;
   source?: string;
   honey?: string;
+  recaptcha_token?: string;
 };
 
 export type AvailabilitySlot = {
@@ -88,24 +89,27 @@ export type BookingSubmission = {
   timezone: string;
   notes?: string;
   honey?: string;
+  recaptcha_token?: string;
 };
 
-export function submitContact(data: ContactSubmission) {
+export async function submitContact(data: ContactSubmission) {
+  const recaptcha_token = await getRecaptchaToken("contact");
   return request<{ id: number; message: string }>("public/contact", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, recaptcha_token }),
   });
 }
 
-export function submitNewsletter(data: {
+export async function submitNewsletter(data: {
   email: string;
   consent: boolean;
   source?: string;
   honey?: string;
 }) {
+  const recaptcha_token = await getRecaptchaToken("newsletter");
   return request<{ message: string }>("public/newsletter", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, recaptcha_token }),
   });
 }
 
@@ -117,12 +121,14 @@ export type ResourceDownloadSubmission = {
   phone?: string;
   consent: boolean;
   honey?: string;
+  recaptcha_token?: string;
 };
 
-export function requestResourceDownload(data: ResourceDownloadSubmission) {
+export async function requestResourceDownload(data: ResourceDownloadSubmission) {
+  const recaptcha_token = await getRecaptchaToken("resource_download");
   return request<{ download_url: string; message: string }>("public/resource-download", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, recaptcha_token }),
   });
 }
 
@@ -130,10 +136,11 @@ export function getAvailability(date: string) {
   return request<AvailabilityResponse>(`public/availability?date=${encodeURIComponent(date)}`);
 }
 
-export function submitBooking(data: BookingSubmission) {
+export async function submitBooking(data: BookingSubmission) {
+  const recaptcha_token = await getRecaptchaToken("booking");
   return request<{ id: number; message: string }>("public/bookings", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, recaptcha_token }),
   });
 }
 
@@ -309,6 +316,9 @@ export type PublicIntegrations = {
   head_code?: string;
   body_code?: string;
   snippets?: CodeSnippet[];
+  recaptcha_enabled?: boolean;
+  recaptcha_site_key?: string;
+  recaptcha_min_score?: number;
 };
 
 export async function getPublicIntegrations(): Promise<PublicIntegrations> {
@@ -317,6 +327,50 @@ export async function getPublicIntegrations(): Promise<PublicIntegrations> {
   } catch {
     return {};
   }
+}
+
+type RecaptchaRuntime = {
+  ready: (callback: () => void) => void;
+  execute: (siteKey: string, options: { action: string }) => Promise<string>;
+};
+
+let recaptchaScriptPromise: Promise<void> | null = null;
+
+async function getRecaptchaToken(action: string) {
+  if (typeof window === "undefined") return "";
+  const settings = await getPublicIntegrations();
+  if (!settings.recaptcha_enabled || !settings.recaptcha_site_key) return "";
+  const siteKey = settings.recaptcha_site_key;
+  const runtimeWindow = window as Window & { grecaptcha?: RecaptchaRuntime };
+  if (!runtimeWindow.grecaptcha) {
+    recaptchaScriptPromise ||= new Promise<void>((resolve, reject) => {
+      const existing = document.querySelector<HTMLScriptElement>(
+        'script[data-logicsify-recaptcha="true"]',
+      );
+      if (existing) {
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener(
+          "error",
+          () => reject(new Error("Anti-spam verification could not load.")),
+          { once: true },
+        );
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`;
+      script.async = true;
+      script.defer = true;
+      script.dataset.logicsifyRecaptcha = "true";
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Anti-spam verification could not load."));
+      document.head.appendChild(script);
+    });
+    await recaptchaScriptPromise;
+  }
+  const grecaptcha = runtimeWindow.grecaptcha;
+  if (!grecaptcha) throw new Error("Anti-spam verification is unavailable. Refresh and try again.");
+  await new Promise<void>((resolve) => grecaptcha.ready(resolve));
+  return grecaptcha.execute(siteKey, { action });
 }
 
 export type PublicThemeSettings = {
@@ -446,6 +500,8 @@ export type PublicSiteSettings = {
   portfolio_url?: string;
   locations?: SiteLocation[];
   social_links?: SocialProfile[];
+  company_profiles?: CompanyProfile[];
+  partners?: Partner[];
   default_seo_title?: string;
   default_seo_description?: string;
   default_og_image?: string;
@@ -459,6 +515,24 @@ export type PublicSiteSettings = {
   emergency_support_policy?: string;
   maintenance_exclusions?: string;
   post_launch_period?: string;
+};
+
+export type CompanyProfile = {
+  id: string;
+  name: string;
+  url: string;
+  active: boolean;
+  sort_order?: number;
+};
+
+export type Partner = {
+  id: string;
+  name: string;
+  logo_url: string;
+  website_url?: string;
+  link_enabled: boolean;
+  status: "draft" | "published";
+  sort_order?: number;
 };
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
   try {

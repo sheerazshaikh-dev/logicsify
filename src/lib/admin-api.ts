@@ -446,10 +446,10 @@ export type AdminLoginResult =
       resend_after_seconds?: number;
     };
 
-export function adminLogin(email: string, password: string) {
+export function adminLogin(email: string, password: string, rememberLogin = false) {
   return adminRequest<AdminLoginResult>("auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, remember_login: rememberLogin }),
   }) as Promise<AdminLoginResult>;
 }
 
@@ -474,10 +474,14 @@ export function verifyAdminTwoFactor(
   challenge_token: string,
   code: string,
   method: TwoFactorMethod,
+  rememberLogin = false,
 ) {
   return adminRequest<{ token: string; expires_at: string; administrator: Administrator }>(
     "auth/verify-2fa",
-    { method: "POST", body: JSON.stringify({ challenge_token, code, method }) },
+    {
+      method: "POST",
+      body: JSON.stringify({ challenge_token, code, method, remember_login: rememberLogin }),
+    },
   ) as Promise<{ token: string; expires_at: string; administrator: Administrator }>;
 }
 
@@ -530,6 +534,49 @@ export function listContent(params: {
     data: ContentItem[];
     meta: ApiMeta;
   }>;
+}
+
+export type ContentImportItemReport = {
+  index: number;
+  id: number | null;
+  title: string;
+  slug: string;
+  status: "draft";
+  imported: boolean;
+  filled_fields: string[];
+  missing_fields: string[];
+  error?: string;
+};
+
+export type ContentImportReport = {
+  content_type: ContentItem["content_type"];
+  imported: number;
+  total: number;
+  items: ContentImportItemReport[];
+};
+
+export type ContentExportPackage = {
+  format: "logicsify-content-json";
+  version: number;
+  content_type: ContentItem["content_type"];
+  exported_at: string;
+  items: ContentItem[];
+};
+
+export function exportContent(type: ContentItem["content_type"]) {
+  return adminRequest<ContentExportPackage>(
+    `content/export?type=${encodeURIComponent(type)}`,
+  ) as Promise<ContentExportPackage>;
+}
+
+export function importContent(
+  type: ContentItem["content_type"],
+  contentPackage: { items: unknown[] },
+) {
+  return adminRequest<ContentImportReport>("content/import", {
+    method: "POST",
+    body: JSON.stringify({ content_type: type, items: contentPackage.items }),
+  }) as Promise<ContentImportReport>;
 }
 
 export function getContent(id: number) {
