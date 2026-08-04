@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchAdminPage, fetchAdminPages, saveAdminPage, uploadMedia } from "@/lib/visual-page-api";
-import type { VisualAdminPage as AdminPage } from "@/lib/cms-visual";
+import { cmsTemplateVersionForPath, type VisualAdminPage as AdminPage } from "@/lib/cms-visual";
 import { CMS_ICON_OPTIONS, CmsIconPreview } from "@/lib/cms-icons";
 import { MediaPicker } from "@/components/cms/media-picker";
 import type {
@@ -287,7 +287,9 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
         const next: CmsNativeContent = {
           ...base,
           template_path: pageRef.current.full_path ? `/${pageRef.current.full_path}` : "/",
-          template_version: 1,
+          template_version: cmsTemplateVersionForPath(
+            pageRef.current.full_path ? `/${pageRef.current.full_path}` : "/",
+          ),
           fields: mergedFields,
           field_meta: mergedMeta,
           section_order: sectionOrder,

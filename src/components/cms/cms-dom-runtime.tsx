@@ -3,10 +3,11 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import { CMS_ICON_MARKUP } from "@/lib/cms-icons";
 import { getCmsContentItem } from "@/lib/logicsify-api";
 import { getContent } from "@/lib/admin-api";
-import type {
-  CmsNativeContent,
-  CmsNativeField,
-  VisualAdminPage as CmsPage,
+import {
+  cmsTemplateVersionForPath,
+  type CmsNativeContent,
+  type CmsNativeField,
+  type VisualAdminPage as CmsPage,
 } from "@/lib/cms-visual";
 import { toVisualPage } from "@/lib/visual-page-api";
 import { normalizePublicHref, resolveContentFromPath } from "@/lib/content-routes";
@@ -65,6 +66,10 @@ function expectedPagePath(page: CmsPage): string {
   return normalizeRuntimePath(page.full_path ? `/${page.full_path}` : "/");
 }
 
+function expectedTemplateVersion(page: CmsPage): number {
+  return cmsTemplateVersionForPath(expectedPagePath(page));
+}
+
 /**
  * Visual snapshots are DOM-template-specific. Earlier hotfixes did not record
  * the route a snapshot came from, which allowed a homepage snapshot to be
@@ -77,11 +82,13 @@ function prepareNativeContent(
 ): CmsNativeContent {
   const raw = content && typeof content === "object" ? content : {};
   const expectedPath = expectedPagePath(page);
+  const expectedVersion = expectedTemplateVersion(page);
   const savedPath = raw.template_path ? normalizeRuntimePath(raw.template_path) : "";
-  if (!savedPath || savedPath !== expectedPath) {
-    return { template_path: expectedPath, template_version: 1 };
+  const savedVersion = Number(raw.template_version || 0);
+  if (!savedPath || savedPath !== expectedPath || savedVersion !== expectedVersion) {
+    return { template_path: expectedPath, template_version: expectedVersion };
   }
-  return { ...raw, template_path: expectedPath, template_version: 1 };
+  return { ...raw, template_path: expectedPath, template_version: expectedVersion };
 }
 
 function isCmsExcludedPath(pathname: string): boolean {
@@ -927,7 +934,7 @@ function RuntimeSurface({
         let next: CmsNativeContent = {
           ...nativeContentRef.current,
           template_path: expectedPagePath(page),
-          template_version: 1,
+          template_version: expectedTemplateVersion(page),
           section_html: {
             ...(nativeContentRef.current.section_html || {}),
             [context.section_key]: html,

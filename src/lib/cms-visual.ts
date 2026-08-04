@@ -50,3 +50,18 @@ export type VisualAdminPage = {
   native_content?: CmsNativeContent;
   native_content_json?: string;
 };
+
+/**
+ * Visual-editor snapshots use DOM paths, so they must be invalidated whenever
+ * a route template changes structure. Keep versions scoped by public route so
+ * unrelated pages retain their saved visual customizations.
+ */
+export function cmsTemplateVersionForPath(pathValue: string): number {
+  const path = `/${String(pathValue || "")
+    .trim()
+    .split(/[?#]/, 1)[0]
+    .replace(/^\/+|\/+$/g, "")}`;
+
+  // Case-study gallery markup was consolidated into one navigable gallery.
+  return /^\/work\/[^/]+/.test(path) ? 2 : 1;
+}
