@@ -109,7 +109,6 @@ export function ConnectProfilesPage() {
   const [savingLocations, setSavingLocations] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<ConnectProfile> | null>(null);
-  const [editingBaseline, setEditingBaseline] = useState("");
   const [saving, setSaving] = useState(false);
   const [qr, setQr] = useState<ConnectProfile | null>(null);
   const [downloadProfile, setDownloadProfile] = useState<ConnectProfile | null>(null);
@@ -164,7 +163,6 @@ export function ConnectProfilesPage() {
       links_json: [],
     };
     setEditing(profile);
-    setEditingBaseline(JSON.stringify(profile));
   }
 
   async function updateGlobalCover(url: string) {
@@ -210,7 +208,6 @@ export function ConnectProfilesPage() {
             : "Profile created.",
       );
       setEditing(null);
-      setEditingBaseline("");
       await refresh();
       if (!asDraft && saved.status === "published") setQr(saved);
     } catch (e) {
@@ -221,12 +218,14 @@ export function ConnectProfilesPage() {
   }
   async function closeProfileEditor() {
     if (!editing || saving) return;
-    if (JSON.stringify(editing) === editingBaseline) {
-      setEditing(null);
-      setEditingBaseline("");
+    if (!editing.id) {
+      await save(true);
       return;
     }
-    await save(true);
+
+    // Existing people already have a persisted source of truth. Closing the
+    // editor must discard local edits and preserve their original status.
+    setEditing(null);
   }
   async function remove(item: ConnectProfile) {
     if (!confirm(`Move ${item.display_name} to the Recycle Bin?`)) return;
@@ -405,7 +404,6 @@ export function ConnectProfilesPage() {
                           visibility_json: normalizeConnectProfileVisibility(item.visibility_json),
                         };
                         setEditing(profile);
-                        setEditingBaseline(JSON.stringify(profile));
                       }}
                     >
                       Edit
@@ -451,6 +449,7 @@ export function ConnectProfilesPage() {
         value={editing}
         setValue={setEditing}
         save={() => void save()}
+        saveDraft={() => void save(true)}
         close={() => void closeProfileEditor()}
         saving={saving}
         existingSlugs={items.filter((item) => item.id !== editing?.id).map((item) => item.slug)}
@@ -477,6 +476,7 @@ function ProfileEditor({
   value,
   setValue,
   save,
+  saveDraft,
   close,
   saving,
   existingSlugs,
@@ -485,6 +485,7 @@ function ProfileEditor({
   value: Partial<ConnectProfile> | null;
   setValue: Dispatch<SetStateAction<Partial<ConnectProfile> | null>>;
   save: () => void;
+  saveDraft: () => void;
   close: () => void;
   saving: boolean;
   existingSlugs: string[];
@@ -540,7 +541,11 @@ function ProfileEditor({
     <AdminModal
       open
       title={value.id ? "Edit team member" : "New team member"}
-      description="Enter the person once, then use the visibility controls to choose where each detail appears."
+      description={
+        value.id
+          ? "Close cancels unsaved changes and keeps the member's current status."
+          : "Closing a new member preserves the current fields as a draft."
+      }
       onClose={close}
       width="max-w-5xl"
     >
@@ -821,8 +826,8 @@ function ProfileEditor({
         </div>
       </div>
       <div className="mt-7 flex justify-end gap-2">
-        <AdminButton variant="secondary" disabled={saving} onClick={close}>
-          Save draft & close
+        <AdminButton variant="secondary" disabled={saving} onClick={saveDraft}>
+          {value.id ? "Save as draft & close" : "Save draft & close"}
         </AdminButton>
         <AdminButton disabled={saving || !value.display_name || !value.slug} onClick={save}>
           {saving ? "Saving…" : "Save team member"}

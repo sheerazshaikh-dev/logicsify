@@ -74,6 +74,11 @@ function CaseStudyPage() {
   const desktop = arr(c.desktop_screenshots);
   const mobile = arr(c.mobile_screenshots);
   const gallery = arr(c.gallery);
+  const galleryGroups = [
+    { title: "Desktop screenshots", items: desktop, mobile: false },
+    { title: "Mobile screenshots", items: mobile, mobile: true },
+    { title: "Additional images", items: gallery, mobile: false },
+  ].filter((group) => group.items.length);
   const results = arr(c.measurable_results || c.results);
   const toc = [
     ["problem", "Problem", Boolean(c.challenge)],
@@ -82,7 +87,7 @@ function CaseStudyPage() {
     ["solution", "Solution", Boolean(c.solution || c.body)],
     ["technology-stack", "Technology stack", Boolean(stack.length)],
     ["systems-integrated", "Systems integrated", Boolean(integrations.length)],
-    ["screenshots", "Screenshots", Boolean(desktop.length || mobile.length || gallery.length)],
+    ["screenshots", "Project gallery", Boolean(galleryGroups.length)],
     ["process", "Process", Boolean(arr(c.process).length || c.process)],
     ["results", "Results", Boolean(results.length)],
   ] as const;
@@ -146,11 +151,7 @@ function CaseStudyPage() {
             {integrations.length ? (
               <TagBlock id="systems-integrated" title="Systems integrated" items={integrations} />
             ) : null}
-            <div id="screenshots" className="scroll-mt-28 space-y-14">
-              <Gallery title="Desktop screenshots" items={desktop} />
-              <Gallery title="Mobile screenshots" items={mobile} mobile />
-              <Gallery title="Project gallery" items={gallery} />
-            </div>
+            <CaseStudyGallery id="screenshots" groups={galleryGroups} />
             {arr(c.process).length ? (
               <ListBlock id="process" title="Process" items={arr(c.process)} />
             ) : (
@@ -292,51 +293,64 @@ function TagBlock({ id, title, items }: { id?: string; title: string; items: str
     </section>
   );
 }
-function Gallery({
-  title,
-  items,
-  mobile = false,
+function CaseStudyGallery({
+  id,
+  groups,
 }: {
-  title: string;
-  items: string[];
-  mobile?: boolean;
+  id: string;
+  groups: Array<{ title: string; items: string[]; mobile: boolean }>;
 }) {
   const [active, setActive] = useState<number | null>(null);
   const change = useCallback((next: number) => setActive(next), []);
-  if (!items.length) return null;
+  if (!groups.length) return null;
+  const images = groups.flatMap((group) => group.items);
+  let imageOffset = 0;
   return (
-    <section>
-      <h2 className="fluid-h3">{title}</h2>
-      <div
-        className={`mt-6 grid gap-4 ${mobile ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-2"}`}
-      >
-        {items.map((src, index) => (
-          <button
-            type="button"
-            onClick={() => setActive(index)}
-            key={`${src}-${index}`}
-            className="group overflow-hidden rounded-2xl border border-black/10 bg-cream text-left focus:outline-none focus:ring-4 focus:ring-brand-red/20"
-          >
-            {src ? (
-              <img
-                src={src}
-                alt={`${title} ${index + 1}`}
-                loading="lazy"
-                className={`w-full object-cover transition duration-300 group-hover:scale-[1.02] ${mobile ? "aspect-[9/16]" : "aspect-[16/10]"}`}
-              />
-            ) : (
-              <div className="grid aspect-video place-items-center">
-                <ImageIcon className="h-8 w-8 text-ink-soft" />
+    <section id={id} className="scroll-mt-28">
+      <h2 className="fluid-h3">Project gallery</h2>
+      <div className="mt-6 space-y-10">
+        {groups.map((group) => {
+          const offset = imageOffset;
+          imageOffset += group.items.length;
+          return (
+            <div key={group.title}>
+              {groups.length > 1 ? (
+                <h3 className="text-lg font-semibold text-ink">{group.title}</h3>
+              ) : null}
+              <div
+                className={`grid gap-4 ${groups.length > 1 ? "mt-4" : ""} ${group.mobile ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-2"}`}
+              >
+                {group.items.map((src, index) => (
+                  <button
+                    type="button"
+                    onClick={() => setActive(offset + index)}
+                    key={`${group.title}-${src}-${index}`}
+                    className="group overflow-hidden rounded-2xl border border-black/10 bg-cream text-left focus:outline-none focus:ring-4 focus:ring-brand-red/20"
+                  >
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={`${group.title} ${index + 1}`}
+                        loading="lazy"
+                        className={`w-full object-cover transition duration-300 group-hover:scale-[1.02] ${group.mobile ? "aspect-[9/16]" : "aspect-[16/10]"}`}
+                      />
+                    ) : (
+                      <div className="grid aspect-video place-items-center">
+                        <ImageIcon className="h-8 w-8 text-ink-soft" />
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
-            )}
-          </button>
-        ))}
+            </div>
+          );
+        })}
       </div>
       {active !== null ? (
         <NavigableLightbox
-          images={items}
+          images={images}
           index={active}
-          title={title}
+          title="Project gallery"
           onIndexChange={change}
           onClose={() => setActive(null)}
         />

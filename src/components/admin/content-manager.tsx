@@ -901,10 +901,6 @@ function ContentEditor({
 
   async function saveDraftAndClose() {
     if (saving || savingDraft) return;
-    if (JSON.stringify(formRef.current) === originalRef.current) {
-      onClose();
-      return;
-    }
     setSavingDraft(true);
     try {
       const current = formRef.current;
@@ -938,6 +934,25 @@ function ContentEditor({
     }
   }
 
+  function closeEditor() {
+    if (saving || savingDraft) return;
+
+    // Existing records are only edited in local state until a save action is
+    // chosen. Closing the modal is therefore a true cancel: restore the exact
+    // server-backed snapshot and leave both its content and status untouched.
+    if (formRef.current.id) {
+      const original = JSON.parse(originalRef.current) as Partial<ContentItem>;
+      formRef.current = original;
+      resetHistory(original);
+      onClose();
+      return;
+    }
+
+    // A newly-created record has no server copy to return to, so preserve its
+    // current fields as a draft when the editor is closed.
+    void saveDraftAndClose();
+  }
+
   const loadRevisions = useCallback(async () => {
     if (!form.id) return;
     setLoadingRevisions(true);
@@ -963,8 +978,10 @@ function ContentEditor({
     try {
       const restored = await restoreContentRevision(form.id, revisionId);
       formRef.current = restored;
+      originalRef.current = JSON.stringify(restored);
       resetHistory(restored);
       toast.success("Revision restored.");
+      await onSaved(restored);
       await loadRevisions();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not restore revision.");
@@ -975,9 +992,13 @@ function ContentEditor({
     <>
       <AdminModal
         open={open}
-        onClose={() => void saveDraftAndClose()}
+        onClose={closeEditor}
         title={form.id ? `Edit ${singular}` : `Add ${singular}`}
-        description="Save stays on the same screen, so you can continue editing after updates."
+        description={
+          form.id
+            ? "Close cancels unsaved changes. Use Save or Save as draft to keep edits."
+            : "Closing a new item preserves its current fields as a draft."
+        }
         width={isVisualEditableType(form.content_type) ? "max-w-[96vw]" : "max-w-6xl"}
       >
         <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-4">
@@ -1520,7 +1541,11 @@ function ContentEditor({
               onClick={() => void saveDraftAndClose()}
             >
               {savingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {savingDraft ? "Saving draft…" : "Save draft & close"}
+              {savingDraft
+                ? "Saving draft…"
+                : form.id
+                  ? "Save as draft & close"
+                  : "Save draft & close"}
             </AdminButton>
             <AdminButton onClick={() => void save()} disabled={saving || savingDraft}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save {singular}
