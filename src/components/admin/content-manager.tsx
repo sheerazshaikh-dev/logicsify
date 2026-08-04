@@ -847,6 +847,13 @@ function ContentEditor({
     }));
   }
 
+  function updateContentJsonFields(values: Record<string, unknown>) {
+    setForm((current) => ({
+      ...current,
+      content_json: { ...(current.content_json || {}), ...values },
+    }));
+  }
+
   function updateSeo(key: string, value: unknown) {
     setForm((current) => ({
       ...current,
@@ -1261,6 +1268,7 @@ function ContentEditor({
                     type={form.content_type}
                     content={contentJson}
                     update={updateContentJson}
+                    updateMany={updateContentJsonFields}
                     chooseMedia={chooseStructuredMedia}
                   />
                   <SectionBuilder
@@ -1623,11 +1631,13 @@ function StructuredContentFields({
   type,
   content,
   update,
+  updateMany,
   chooseMedia,
 }: {
   type?: ContentItem["content_type"];
   content: NonNullable<ContentItem["content_json"]>;
   update: (key: string, value: unknown) => void;
+  updateMany: (values: Record<string, unknown>) => void;
   chooseMedia: (
     key: string,
     kind?: "images" | "videos" | "documents" | "all",
@@ -1920,32 +1930,7 @@ function StructuredContentFields({
           {textField("Related service slug", "related_service")}
           {textField("Related case study slug", "related_case_study")}
           {textField("Related resource slugs", "related_resources", "slug-one, slug-two")}
-          <div className="md:col-span-2">
-            <FieldLabel>Source links</FieldLabel>
-            <textarea
-              rows={5}
-              value={normalizeSources(content.sources, content.source_name, content.source_url)
-                .map((source) => `${source.name} | ${source.url}`)
-                .join("\n")}
-              onChange={(event) => {
-                const sources = event.target.value
-                  .split(/\r?\n/)
-                  .map((line) => {
-                    const [name, ...urlParts] = line.split("|");
-                    return { name: name.trim(), url: urlParts.join("|").trim() };
-                  })
-                  .filter((source) => source.name || source.url);
-                update("sources", sources);
-                update("source_name", sources[0]?.name || "");
-                update("source_url", sources[0]?.url || "");
-              }}
-              className={adminTextareaClass}
-              placeholder={"OpenAI release notes | https://…\nResearch paper | https://…"}
-            />
-            <p className="mt-1 text-[11px] text-slate-400">
-              One source per line: source name | URL. Add as many verified sources as needed.
-            </p>
-          </div>
+          <SourceLinksField content={content} updateMany={updateMany} />
         </div>
       </AdminCard>
     );
@@ -2125,12 +2110,82 @@ function normalizeSources(value: unknown, legacyName: unknown, legacyUrl: unknow
     return value
       .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
       .map((item) => ({
-        name: String(item.name || item.label || "Source"),
+        name: String(item.name || item.label || ""),
         url: String(item.url || ""),
       }))
-      .filter((item) => item.url);
+      .filter((item) => item.name || item.url);
   }
   return legacyUrl ? [{ name: String(legacyName || "Source"), url: String(legacyUrl) }] : [];
+}
+
+function sourceLinksText(sources: Array<{ name: string; url: string }>) {
+  return sources
+    .map((source) => {
+      if (source.name && source.url) return `${source.name} | ${source.url}`;
+      if (source.url) return `| ${source.url}`;
+      return source.name;
+    })
+    .join("\n");
+}
+
+function parseSourceLinksText(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => {
+      const separator = line.indexOf("|");
+      if (separator === -1) return { name: line.trim(), url: "" };
+      return {
+        name: line.slice(0, separator).trim(),
+        url: line.slice(separator + 1).trim(),
+      };
+    })
+    .filter((source) => source.name || source.url);
+}
+
+function SourceLinksField({
+  content,
+  updateMany,
+}: {
+  content: NonNullable<ContentItem["content_json"]>;
+  updateMany: (values: Record<string, unknown>) => void;
+}) {
+  const storedText = sourceLinksText(
+    normalizeSources(content.sources, content.source_name, content.source_url),
+  );
+  const [draftText, setDraftText] = useState(storedText);
+  const committedTextRef = useRef(storedText);
+
+  useEffect(() => {
+    if (storedText === committedTextRef.current) return;
+    committedTextRef.current = storedText;
+    setDraftText(storedText);
+  }, [storedText]);
+
+  return (
+    <div className="md:col-span-2">
+      <FieldLabel>Source links</FieldLabel>
+      <textarea
+        rows={5}
+        value={draftText}
+        onChange={(event) => {
+          const nextText = event.target.value;
+          const sources = parseSourceLinksText(nextText);
+          setDraftText(nextText);
+          committedTextRef.current = sourceLinksText(sources);
+          updateMany({
+            sources,
+            source_name: sources[0]?.name || "",
+            source_url: sources[0]?.url || "",
+          });
+        }}
+        className={adminTextareaClass}
+        placeholder={"OpenAI release notes | https://…\nResearch paper | https://…"}
+      />
+      <p className="mt-1 text-[11px] text-slate-400">
+        One source per line: source name | URL. Add as many verified sources as needed.
+      </p>
+    </div>
+  );
 }
 
 function SectionBuilder({
