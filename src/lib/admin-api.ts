@@ -1,4 +1,9 @@
-import { API_BASE, type CodeSnippet, type SiteLocation } from "@/lib/logicsify-api";
+import {
+  API_BASE,
+  normalizePublicAssetUrls,
+  type CodeSnippet,
+  type SiteLocation,
+} from "@/lib/logicsify-api";
 
 export const ADMIN_TOKEN_KEY = "logicsify_admin_token";
 
@@ -110,7 +115,8 @@ async function adminRequest<T>(
     );
   }
 
-  return includeMeta ? { data: payload.data, meta: payload.meta || {} } : payload.data;
+  const data = normalizePublicAssetUrls(payload.data);
+  return includeMeta ? { data, meta: payload.meta || {} } : data;
 }
 
 export type DashboardResponse = {

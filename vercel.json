@@ -55,7 +55,11 @@
       "destination": "https://backend.logicsify.com/api/public/sitemap.xml"
     },
     {
-      "source": "/((?!api/|admin(?:/|$)).*)",
+      "source": "/media/:path*",
+      "destination": "https://backend.logicsify.com/api/public/media/:path*"
+    },
+    {
+      "source": "/((?!api/|admin(?:/|$)|media(?:/|$)).*)",
       "destination": "/index.html"
     }
   ],

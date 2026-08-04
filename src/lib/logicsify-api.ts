@@ -2,6 +2,41 @@ const API_BASE = (import.meta.env.VITE_API_URL || "https://backend.logicsify.com
   /\/$/,
   "",
 );
+const SITE_BASE = (import.meta.env.VITE_SITE_URL || "https://logicsify.com").replace(/\/$/, "");
+
+/**
+ * Media is uploaded by the PHP API, but public links should stay on the main
+ * website domain. Vercel forwards these URLs to the matching backend media
+ * record without redirecting the browser.
+ */
+export function publicAssetUrl(value: string): string {
+  if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
+
+  try {
+    const apiUrl = new URL(API_BASE);
+    const assetUrl = new URL(value, SITE_BASE);
+    if (assetUrl.hostname !== apiUrl.hostname || !assetUrl.pathname.startsWith("/uploads/")) {
+      return value;
+    }
+
+    const relativePath = assetUrl.pathname.slice("/uploads/".length);
+    if (!relativePath || relativePath.split("/").some((segment) => segment === "..")) return value;
+    return `${SITE_BASE}/media/${relativePath}${assetUrl.search}`;
+  } catch {
+    return value;
+  }
+}
+
+export function normalizePublicAssetUrls<T>(value: T): T {
+  if (typeof value === "string") return publicAssetUrl(value) as T;
+  if (Array.isArray(value)) return value.map(normalizePublicAssetUrls) as T;
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, normalizePublicAssetUrls(item)]),
+    ) as T;
+  }
+  return value;
+}
 
 type ApiEnvelope<T> = {
   success: boolean;
@@ -38,7 +73,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       throw new Error(payload?.message || "Something went wrong. Please try again.");
     }
 
-    return payload.data;
+    return normalizePublicAssetUrls(payload.data);
   } catch (error) {
     if (controller.signal.aborted && !init.signal?.aborted) {
       throw new Error("The content API took too long to respond.");
