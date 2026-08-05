@@ -547,6 +547,10 @@ export function ContentManagerPage({
               <tbody>
                 {items.map((item) => {
                   const checked = selected.includes(item.id);
+                  const listImage =
+                    type === "integration"
+                      ? String(item.content_json?.logo || item.featured_image || "")
+                      : item.featured_image || "";
                   return (
                     <tr
                       key={item.id}
@@ -570,11 +574,11 @@ export function ContentManagerPage({
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
                           <div className="grid h-12 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                            {item.featured_image ? (
+                            {listImage ? (
                               <img
-                                src={item.featured_image}
+                                src={listImage}
                                 alt=""
-                                className="h-full w-full object-cover"
+                                className={`h-full w-full ${type === "integration" ? "object-contain p-2" : "object-cover"}`}
                               />
                             ) : (
                               <ImageIcon className="h-4 w-4 text-slate-300" />
