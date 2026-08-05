@@ -33,6 +33,7 @@ import {
   type PublicSiteSettings,
   type PublicTeamMember,
 } from "@/lib/logicsify-api";
+import { useRegionalPhone } from "@/hooks/use-regional-phone";
 
 export const Route = createFileRoute("/contact")({
   component: ContactPage,
@@ -109,7 +110,7 @@ function ContactPage() {
   const emails = getContactEmails(settings);
   const locations = getSiteLocations(settings, "contact");
   const socialProfiles = getSocialProfiles(settings);
-  const primaryPhone = settings.phone || locations.flatMap(getLocationPhones).find(Boolean) || "";
+  const { phone: primaryPhone } = useRegionalPhone(settings);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

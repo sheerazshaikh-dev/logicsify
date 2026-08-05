@@ -14,6 +14,7 @@ export const DEFAULT_SITE_LOCATIONS: SiteLocation[] = [
     country: "Pakistan",
     address:
       "Suite No. M3, Rahat Jo Dero Building, Tariq Road, Karachi\nSuite No. C3–C4, Alkram Square, Liaqatabad, Karachi, Pakistan",
+    phone: "+92 333 3718191",
     enabled: true,
     sort_order: 0,
   },
@@ -167,6 +168,48 @@ export function getLocationPhones(location: SiteLocation) {
 
 export function telHref(phone: string) {
   return `tel:${phone.replace(/[^+\d]/g, "")}`;
+}
+
+export type PhoneRegion = "pakistan" | "saudi" | "portugal";
+
+const COUNTRY_REGION: Record<string, PhoneRegion> = {
+  PK: "pakistan",
+  SA: "saudi",
+  AE: "saudi",
+  BH: "saudi",
+  KW: "saudi",
+  OM: "saudi",
+  QA: "saudi",
+};
+
+export function phoneRegionForCountry(countryCode?: string | null): PhoneRegion {
+  const normalized = String(countryCode || "")
+    .trim()
+    .toUpperCase();
+  return COUNTRY_REGION[normalized] || "portugal";
+}
+
+export function regionalPhoneFromLocations(
+  settings: PublicSiteSettings,
+  region: PhoneRegion,
+): string {
+  const locations = getSiteLocations(settings);
+  const target =
+    region === "pakistan" ? "pakistan" : region === "saudi" ? "saudi arabia" : "portugal";
+  const matchingLocation = locations.find((location) => {
+    const searchable = `${location.country || ""} ${location.city || ""} ${location.name || ""}`
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "");
+    return searchable.includes(target);
+  });
+
+  return (
+    (matchingLocation ? getLocationPhones(matchingLocation)[0] : "") ||
+    settings.phone ||
+    locations.flatMap(getLocationPhones).find(Boolean) ||
+    ""
+  );
 }
 
 function legacyProfile(

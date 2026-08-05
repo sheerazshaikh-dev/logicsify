@@ -2,7 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
 import { DEFAULT_BRAND_ASSETS, optimizedBrandAsset } from "@/lib/brand-assets";
-import { cn } from "@/lib/utils";
 import { normalizePublicHref } from "@/lib/content-routes";
 import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
 import {
@@ -122,7 +121,7 @@ export function SiteHeader() {
       <header
         data-cms-ignore="true"
         onMouseLeave={() => setMegaOpenId(null)}
-        className={cn(
+        className={cx(
           stickyHeader ? "fixed top-0" : "absolute top-0",
           "left-0 right-0 z-50 transition-all duration-500",
           scrolled || !isHome || !transparentHeaderHome
@@ -179,7 +178,7 @@ export function SiteHeader() {
                   >
                     {item.comingSoon ? (
                       <span
-                        className={cn(
+                        className={cx(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 cursor-default opacity-60",
                           onDark ? "text-white/85" : "text-ink/80",
                         )}
@@ -198,7 +197,7 @@ export function SiteHeader() {
                             destination: item.to,
                           })
                         }
-                        className={cn(
+                        className={cx(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
                           onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
                         )}
@@ -215,12 +214,12 @@ export function SiteHeader() {
                             destination: item.to,
                           })
                         }
-                        className={cn(
+                        className={cx(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
                           onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
                         )}
                         activeProps={{
-                          className: cn(
+                          className: cx(
                             "px-4 py-2 rounded-full text-sm font-semibold inline-flex items-center gap-1",
                             onDark ? "text-white" : "text-ink",
                           ),
@@ -252,7 +251,7 @@ export function SiteHeader() {
               </a>
             ) : null}
             <button
-              className={cn(
+              className={cx(
                 "lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border transition-colors",
                 onDark
                   ? "border-white/20 text-white hover:bg-white/10"
@@ -282,7 +281,7 @@ export function SiteHeader() {
       </header>
 
       <div
-        className={cn(
+        className={cx(
           "fixed inset-0 z-[60] lg:hidden transition-all duration-300",
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
         )}
@@ -293,7 +292,7 @@ export function SiteHeader() {
           onClick={() => setMobileOpen(false)}
         />
         <div
-          className={cn(
+          className={cx(
             "absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-2xl overflow-y-auto transition-transform duration-300",
             mobileOpen ? "translate-x-0" : "translate-x-full",
           )}
@@ -373,7 +372,7 @@ function DefaultMegaMenu({
         <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(25,10,47,0.35)] border border-black/5 overflow-hidden">
           <div className="grid grid-cols-12">
             <div
-              className={cn(
+              className={cx(
                 promoEnabled ? "col-span-9" : "col-span-12",
                 "grid gap-7 p-8",
                 groups.length <= 2
@@ -846,6 +845,10 @@ function fallbackLink(id: number, label: string, to: string): NavItem {
 function boolSetting(value: unknown, fallback = false) {
   if (value === undefined || value === null || value === "") return fallback;
   return value === true || value === 1 || value === "1" || value === "true";
+}
+
+function cx(...values: Array<string | false | null | undefined>) {
+  return values.filter(Boolean).join(" ");
 }
 
 function numberSetting(value: unknown, fallback: number, min: number, max: number) {

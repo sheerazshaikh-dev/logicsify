@@ -14,6 +14,7 @@ import {
 } from "@/lib/contact-directory";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
 import { SocialProfileLinks } from "@/components/social-profile-links";
+import { useRegionalPhone } from "@/hooks/use-regional-phone";
 
 const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   {
@@ -66,7 +67,7 @@ export function SiteFooter() {
   const emails = getContactEmails(settings);
   const locations = getSiteLocations(settings, "footer");
   const socialProfiles = getSocialProfiles(settings);
-  const phone = settings.phone || "+966 54 441 5405";
+  const { phone } = useRegionalPhone(settings);
   const description =
     settings.footer_description ||
     settings.tagline ||
@@ -256,7 +257,7 @@ function ContactLink({
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-white/35 transition group-hover:text-[#FDBE02]" />
       <span className="min-w-0">
         <span className="block text-[10px] uppercase tracking-[0.16em] text-white/35">{label}</span>
-        <span className="mt-0.5 block break-all text-white/70 transition group-hover:text-white">
+        <span className="mt-0.5 block min-h-5 break-all text-white/70 transition group-hover:text-white">
           {value}
         </span>
       </span>

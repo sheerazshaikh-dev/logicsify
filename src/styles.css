@@ -73,7 +73,7 @@
   --theme-body-font: "Inter", ui-sans-serif, system-ui, sans-serif;
   --theme-base-font-size: 16px;
   --theme-h1-min: 44px;
-  --theme-h1-max: 104px;
+  --theme-h1-max: 80px;
   --theme-h2-min: 32px;
   --theme-h2-max: 64px;
   --theme-h3-min: 24px;
@@ -132,6 +132,12 @@
   );
   --shadow-glow: 0 20px 60px -20px rgb(254 52 52 / calc(0.35 * var(--theme-shadow-strength)));
   --shadow-card: 0 10px 40px -20px rgb(25 10 47 / calc(0.25 * var(--theme-shadow-strength)));
+}
+
+/* Kept in the base stylesheet as well as the CMS custom-style snapshot so the
+   homepage hero has identical geometry before and after settings hydrate. */
+.hero-heading-wrap {
+  width: 100%;
 }
 
 @layer base {

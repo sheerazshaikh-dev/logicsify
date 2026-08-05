@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { RuntimeIntegrations } from "@/components/runtime-integrations";
 import { RuntimeSiteSettings } from "@/components/runtime-site-settings";
-import { Toaster } from "@/components/ui/sonner";
+import { DeferredToaster } from "@/components/deferred-toaster";
 
 function NotFoundComponent() {
   return (
@@ -164,7 +164,7 @@ function RootComponent() {
       <RuntimeSiteSettings />
       <RuntimeIntegrations />
       <Outlet />
-      <Toaster position="top-right" richColors closeButton />
+      <DeferredToaster />
     </>
   );
 }
