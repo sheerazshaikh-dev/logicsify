@@ -219,9 +219,16 @@ function mergeServiceData(
     ...defaultData,
     slug,
     name: cms?.title || defaultData.name,
-    heroTitle: { prefix: cms?.title || defaultData.name },
-    heroIntro: cms?.excerpt || defaultData.heroIntro,
-    valueProp: String(content.body || defaultData.valueProp),
+    seoTitle: String(content.seo_title || cms?.seo_json?.title || defaultData.seoTitle || ""),
+    metaDescription: String(content.meta_description || cms?.seo_json?.description || defaultData.metaDescription || ""),
+    primaryKeyword: String(content.primary_keyword || defaultData.primaryKeyword || ""),
+    heroTitle: {
+      prefix: String(content.hero_title || defaultData.heroTitle.prefix || cms?.title || defaultData.name),
+      accent: content.hero_accent ? String(content.hero_accent) : defaultData.heroTitle.accent,
+      suffix: content.hero_suffix ? String(content.hero_suffix) : defaultData.heroTitle.suffix,
+    },
+    heroIntro: String(content.hero_intro || cms?.excerpt || defaultData.heroIntro),
+    valueProp: String(content.body || content.value_prop || defaultData.valueProp),
     problems: stringArray(content.problems, defaultData.problems),
     capabilities: cmsCapabilities.length
       ? cmsCapabilities
