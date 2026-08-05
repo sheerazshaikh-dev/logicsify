@@ -12,6 +12,9 @@ import { RelatedAutomationDemo } from "@/components/related-automation-demo";
 export type ServicePageData = {
   slug: string;
   name: string;
+  seoTitle?: string;
+  metaDescription?: string;
+  primaryKeyword?: string;
   heroTitle: { prefix: string; accent?: string; suffix?: string };
   heroIntro: string;
   valueProp: string;
@@ -23,6 +26,12 @@ export type ServicePageData = {
   faqs: { q: string; a: string }[];
   related: string[];
   useCases?: string[];
+  audiences?: string[];
+  deliverables?: string[];
+  scenarios?: { title: string; body: string }[];
+  measures?: string[];
+  heroSupport?: string;
+  finalCta?: { title: string; body: string };
   icon?: ComponentType<{ className?: string }>;
 };
 
@@ -52,7 +61,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         intro={data.heroIntro}
         primaryCta={{ label: "Discuss Your Project", to: "/contact" }}
         secondaryCta={{ label: "View Our Work", to: "/work" }}
-        visual={<ServiceHeroVisual name={data.name} />}
+        visual={<ServiceHeroVisual name={data.name} workflow={data.workflow} />}
       />
 
       {/* Value prop */}
@@ -111,6 +120,23 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         </section>
       ) : null}
 
+      {data.heroSupport || data.audiences?.length ? (
+        <section className="border-y border-white/10 bg-ink py-16 text-white md:py-20">
+          <div className="container-page grid gap-10 lg:grid-cols-12 lg:items-start">
+            <div className="lg:col-span-7">
+              <p className="eyebrow !text-brand-gold">Start with the operating problem</p>
+              <p className="mt-4 max-w-3xl text-xl leading-9 text-white/80">
+                {data.heroSupport || "Logicsify maps the workflow, systems, decisions, exceptions, and ownership before selecting the implementation approach."}
+              </p>
+            </div>
+            {data.audiences?.length ? <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-white/5 p-7">
+              <p className="text-sm font-bold uppercase tracking-[.18em] text-white/50">Who this is for</p>
+              <ul className="mt-5 space-y-3">{data.audiences.map((item)=><li key={item} className="flex gap-3 text-white/80"><Check className="mt-1 h-4 w-4 shrink-0 text-brand-gold"/>{item}</li>)}</ul>
+            </div> : null}
+          </div>
+        </section>
+      ) : null}
+
       {/* Problems solved */}
       <section className="py-20 md:py-28 bg-cream">
         <div className="container-page">
@@ -158,6 +184,17 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </div>
         </div>
       </section>
+
+      <ServiceSystemMap data={data} />
+
+      {data.deliverables?.length ? (
+        <section className="py-20 md:py-28">
+          <div className="container-page grid gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-4"><p className="eyebrow mb-4">Core deliverables</p><h2 className="fluid-h2">What the engagement leaves behind.</h2></div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:col-span-8">{data.deliverables.map((item,index)=><div key={item} className="rounded-2xl border border-black/10 bg-white p-6"><span className="text-sm font-bold text-gradient">{String(index+1).padStart(2,'0')}</span><p className="mt-3 leading-7 text-ink">{item}</p></div>)}</div>
+          </div>
+        </section>
+      ) : null}
 
       {isAiAutomationFamily ? <RelatedAutomationDemo serviceSlug={data.slug} serviceName={data.name} /> : null}
 
@@ -286,6 +323,12 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         </div>
       </section>
 
+      {data.scenarios?.length ? (
+        <section className="bg-ink py-20 text-white md:py-28">
+          <div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow !text-brand-gold mb-4">Evidence structure</p><h2 className="fluid-h2">Systems designed around real operating problems.</h2></div><div className="grid gap-5 md:grid-cols-3">{data.scenarios.map((item)=><article key={item.title} className="rounded-3xl border border-white/10 bg-white/5 p-7"><h3 className="text-xl font-semibold">{item.title}</h3><p className="mt-4 leading-7 text-white/65">{item.body}</p></article>)}</div>{data.measures?.length?<div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-7"><p className="text-sm font-bold uppercase tracking-[.18em] text-white/50">What to measure</p><div className="mt-5 flex flex-wrap gap-3">{data.measures.map((item)=><span key={item} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">{item}</span>)}</div></div>:null}</div>
+        </section>
+      ) : null}
+
       <RelatedWork serviceSlug={data.slug} />
 
       {/* FAQs */}
@@ -350,7 +393,13 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
   );
 }
 
-function ServiceHeroVisual({ name }: { name: string }) {
+function ServiceSystemMap({ data }: { data: ServicePageData }) {
+  const nodes = data.workflow.slice(0, 6);
+  if (!nodes.length) return null;
+  return <section className="bg-ink py-20 text-white md:py-28"><div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow !text-brand-gold mb-4">Connected system map</p><h2 className="fluid-h2">One controlled journey from request to outcome.</h2><p className="mt-5 text-lg leading-8 text-white/65">The visual stays service-specific by using the actual workflow defined for this page, with fixed-height cards to prevent layout shift.</p></div><div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">{nodes.map((node,index)=><div key={`${node}-${index}`} className="relative min-h-40 rounded-2xl border border-white/10 bg-white/5 p-5"><span className="text-sm font-bold text-brand-gold">{String(index+1).padStart(2,'0')}</span><p className="mt-8 font-semibold leading-6">{node}</p>{index<nodes.length-1?<ArrowRight className="absolute -right-5 top-1/2 hidden h-5 w-5 text-brand-gold xl:block"/>:null}</div>)}</div></div></section>;
+}
+
+function ServiceHeroVisual({ name, workflow }: { name: string; workflow: string[] }) {
   return (
     <div className="relative aspect-square max-w-[440px] mx-auto">
       <div className="absolute inset-0 rounded-3xl border border-white/10 rotate-6" />
@@ -368,16 +417,8 @@ function ServiceHeroVisual({ name }: { name: string }) {
           </p>
           <p className="text-white text-2xl font-semibold mt-2 leading-tight">{name}</p>
         </div>
-        <div className="relative space-y-2">
-          <div className="h-1.5 rounded bg-white/10 overflow-hidden">
-            <div className="h-full w-4/5 bg-gradient-brand" />
-          </div>
-          <div className="h-1.5 rounded bg-white/10 overflow-hidden">
-            <div className="h-full w-3/5 bg-gradient-brand opacity-70" />
-          </div>
-          <div className="h-1.5 rounded bg-white/10 overflow-hidden">
-            <div className="h-full w-11/12 bg-gradient-brand opacity-50" />
-          </div>
+        <div className="relative grid grid-cols-2 gap-2">
+          {workflow.slice(0,6).map((step,index)=><div key={step} className="rounded-xl border border-white/10 bg-white/5 p-3"><span className="text-[10px] font-bold text-brand-gold">{String(index+1).padStart(2,'0')}</span><p className="mt-1 text-xs leading-4 text-white/70">{step}</p></div>)}
         </div>
       </div>
     </div>

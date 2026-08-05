@@ -29,8 +29,8 @@ export const Route = createFileRoute("/services/$slug")({
     const data = loaderData?.data;
     const cms = loaderData?.cms;
     const name = data?.name ?? "Service";
-    const title = cms?.seo_json?.title || `${name} | Logicsify`;
-    const description = cms?.seo_json?.description || data?.heroIntro || "Logicsify services";
+    const title = cms?.seo_json?.title || data?.seoTitle || `${name} | Logicsify`;
+    const description = cms?.seo_json?.description || data?.metaDescription || data?.heroIntro || "Logicsify services";
     const image = cms?.seo_json?.og_image || cms?.featured_image;
     return {
       meta: [
@@ -234,6 +234,12 @@ function mergeServiceData(
     faqs,
     related: stringArray(content.related, defaultData.related),
     useCases: stringArray(content.use_cases, defaultData.useCases || []),
+    audiences: stringArray(content.audiences || content.who_this_is_for, defaultData.audiences || []),
+    deliverables: stringArray(content.deliverables || content.core_deliverables, defaultData.deliverables || []),
+    scenarios: objectArray(content.scenarios || content.evidence_scenarios, defaultData.scenarios || []),
+    measures: stringArray(content.measures || content.what_to_measure, defaultData.measures || []),
+    heroSupport: String(content.hero_support || defaultData.heroSupport || ""),
+    finalCta: asRecord(content.final_cta).title || asRecord(content.final_cta).body ? { title: String(asRecord(content.final_cta).title || "Connect the workflow before adding more tools."), body: String(asRecord(content.final_cta).body || "") } : defaultData.finalCta,
   };
 }
 
