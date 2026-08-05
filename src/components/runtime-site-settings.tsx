@@ -131,7 +131,18 @@ function cacheTheme(settings: PublicThemeSettings) {
     set("--theme-gradient-angle", settings.gradient_angle, "deg");
     set("--theme-animation-speed", settings.animation_speed);
     set("--theme-shadow-strength", settings.shadow_strength);
-    localStorage.setItem("logicsify:theme:v1", JSON.stringify({ variables, savedAt: Date.now() }));
+    localStorage.setItem(
+      "logicsify:theme:v2",
+      JSON.stringify({
+        version: 2,
+        variables,
+        customCss:
+          settings.website_custom_css_enabled !== false
+            ? String(settings.website_custom_css || "")
+            : "",
+        savedAt: Date.now(),
+      }),
+    );
   } catch {
     // Storage can be unavailable in private browsing; theme application still succeeds.
   }

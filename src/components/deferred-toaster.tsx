@@ -6,12 +6,13 @@ export function DeferredToaster() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if ("requestIdleCallback" in window) {
-      const idleId = window.requestIdleCallback(() => setReady(true), { timeout: 2000 });
+    const requestIdleCallback = window.requestIdleCallback;
+    if (typeof requestIdleCallback === "function") {
+      const idleId = requestIdleCallback(() => setReady(true), { timeout: 2000 });
       return () => window.cancelIdleCallback(idleId);
     }
-    const timer = window.setTimeout(() => setReady(true), 1500);
-    return () => window.clearTimeout(timer);
+    const timer = globalThis.setTimeout(() => setReady(true), 1500);
+    return () => globalThis.clearTimeout(timer);
   }, []);
 
   return ready ? (

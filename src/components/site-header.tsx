@@ -7,6 +7,7 @@ import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
 import {
   getPublicMenu,
   getPublicSiteSettings,
+  getCachedPublicSiteSettings,
   type PublicMenuItem,
   type PublicSiteSettings,
 } from "@/lib/logicsify-api";
@@ -44,14 +45,14 @@ export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaOpenId, setMegaOpenId] = useState<number | null>(null);
   const [primaryNav, setPrimaryNav] = useState<NavItem[]>(fallbackNavigation);
-  const [siteSettings, setSiteSettings] = useState<PublicSiteSettings>({});
+  const [siteSettings, setSiteSettings] = useState<PublicSiteSettings>(getCachedPublicSiteSettings);
 
   const isHome = location.pathname === "/";
   const stickyHeader = boolSetting(siteSettings.sticky_header, true);
   const transparentHeaderHome = boolSetting(siteSettings.transparent_header_home, true);
   const showHeaderCta = boolSetting(siteSettings.show_header_cta, true);
-  const headerCtaLabel = siteSettings.header_cta_label || "Discuss Your Project";
-  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/contact");
+  const headerCtaLabel = siteSettings.header_cta_label || "Get a Free Technical Roadmap";
+  const headerCtaUrl = normalizePublicHref(siteSettings.header_cta_url || "/technical-roadmap");
   const headerCtaNewTab = boolSetting(siteSettings.header_cta_new_tab);
   const desktopLogoHeight = numberSetting(siteSettings.header_logo_height_desktop, 36, 20, 80);
   const mobileLogoHeight = numberSetting(siteSettings.header_logo_height_mobile, 28, 20, 64);

@@ -136,10 +136,10 @@ async function getThemeSnapshot() {
     if (!response.ok) throw new Error("Theme API unavailable");
     const payload = await response.json();
     return payload?.data && typeof payload.data === "object"
-      ? { ...defaultTheme, ...payload.data }
-      : defaultTheme;
+      ? { theme: { ...defaultTheme, ...payload.data }, verified: true }
+      : { theme: defaultTheme, verified: false };
   } catch {
-    return defaultTheme;
+    return { theme: defaultTheme, verified: false };
   } finally {
     clearTimeout(timer);
   }
@@ -255,9 +255,19 @@ const rss = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel
 await mkdir(publicDir, { recursive: true });
 await writeFile(new URL("sitemap.xml", publicDir), xml);
 await writeFile(new URL("rss.xml", publicDir), rss);
+const themeSnapshot = await themePromise;
 await writeFile(
   new URL("theme-snapshot.json", publicDir),
-  JSON.stringify({ variables: themeVariables(await themePromise), generatedAt: Date.now() }),
+  JSON.stringify({
+    version: 2,
+    variables: themeVariables(themeSnapshot.theme),
+    customCss:
+      themeSnapshot.theme.website_custom_css_enabled !== false
+        ? String(themeSnapshot.theme.website_custom_css || "")
+        : "",
+    generatedAt: Date.now(),
+    verified: themeSnapshot.verified,
+  }),
 );
 console.log(
   `Generated sitemap with ${paths.size} public routes and RSS with ${insights.length} published insights.`,

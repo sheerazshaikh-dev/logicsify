@@ -593,10 +593,41 @@ export type Partner = {
   status: "draft" | "published";
   sort_order?: number;
 };
-export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
+
+const PUBLIC_SITE_SETTINGS_STORAGE_KEY = "logicsify:site-settings:v1";
+
+export function getCachedPublicSiteSettings(): PublicSiteSettings {
+  if (typeof window === "undefined") return {};
   try {
-    return await cachedPublicRequest<PublicSiteSettings>("public/settings/site", 60_000);
+    const cached = JSON.parse(
+      window.localStorage.getItem(PUBLIC_SITE_SETTINGS_STORAGE_KEY) || "null",
+    );
+    return cached?.version === 1 && cached.data && typeof cached.data === "object"
+      ? (cached.data as PublicSiteSettings)
+      : {};
   } catch {
     return {};
+  }
+}
+
+function cachePublicSiteSettings(settings: PublicSiteSettings) {
+  if (typeof window === "undefined" || Object.keys(settings).length === 0) return;
+  try {
+    window.localStorage.setItem(
+      PUBLIC_SITE_SETTINGS_STORAGE_KEY,
+      JSON.stringify({ version: 1, data: settings, savedAt: Date.now() }),
+    );
+  } catch {
+    // Storage can be unavailable; the current API response is still returned.
+  }
+}
+
+export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
+  try {
+    const settings = await cachedPublicRequest<PublicSiteSettings>("public/settings/site", 60_000);
+    cachePublicSiteSettings(settings);
+    return settings;
+  } catch {
+    return getCachedPublicSiteSettings();
   }
 }

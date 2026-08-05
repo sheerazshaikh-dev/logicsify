@@ -499,18 +499,19 @@ body.cms-edit-mode [data-cms-field-keys] {
   pointer-events: auto;
 }
 
-/* Global hero measure required across the public website. */
-.hero-heading-wrap {
+/* Inner-page heroes use a shorter reading measure. The homepage has its own
+   two-column geometry and must retain the full width of its seven-column cell. */
+.page-hero-heading-wrap {
   width: 100%;
   max-width: 1120px;
 }
 @media (min-width: 768px) {
-  .hero-heading-wrap {
+  .page-hero-heading-wrap {
     width: 88%;
   }
 }
 @media (min-width: 1024px) {
-  .hero-heading-wrap {
+  .page-hero-heading-wrap {
     width: 75%;
   }
 }
