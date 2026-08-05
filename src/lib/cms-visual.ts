@@ -62,6 +62,10 @@ export function cmsTemplateVersionForPath(pathValue: string): number {
     .split(/[?#]/, 1)[0]
     .replace(/^\/+|\/+$/g, "")}`;
 
+  // Homepage sections now have permanent identities so async CMS data cannot
+  // shift numbered DOM paths and apply one section's snapshot to another.
+  if (path === "/") return 2;
+
   // Case-study gallery markup was consolidated into one navigable gallery.
   return /^\/work\/[^/]+/.test(path) ? 2 : 1;
 }

@@ -206,6 +206,8 @@ function baseDirectChildren(pageRoot: HTMLElement): HTMLElement[] {
 }
 
 function getBaseSectionKey(section: HTMLElement, index: number): string {
+  const stableKey = slugPart(section.dataset.cmsSectionId || "");
+  if (stableKey) return stableKey;
   if (section.dataset.cmsPersistedSectionKey) return section.dataset.cmsPersistedSectionKey;
   const idPart = section.id ? `id-${slugPart(section.id)}` : "";
   return idPart || `${section.tagName.toLowerCase()}-${index + 1}`;

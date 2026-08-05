@@ -62,23 +62,57 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   return (
     <SiteLayout>
-      <Hero />
-      <TrustStrip />
-      <PartnersSection />
-      <Introduction />
-      <HomeServices />
-      <FeaturedWork />
-      <AutomationSpotlight />
-      <ProcessSection />
-      <WhyLogicsify />
-      <SystemsWeIntegrate />
-      <EngagementModelsPreview />
-      <EstimatorPreview />
-      <TeamCredibility />
-      <TestimonialSection />
-      <InsightsSection />
-      <ResourcesPreview />
-      <CTASection />
+      <div className="contents" data-cms-section-id="home-hero">
+        <Hero />
+      </div>
+      <div className="contents" data-cms-section-id="home-trust-strip">
+        <TrustStrip />
+      </div>
+      <div className="contents" data-cms-section-id="home-partners">
+        <PartnersSection />
+      </div>
+      <div className="contents" data-cms-section-id="home-introduction">
+        <Introduction />
+      </div>
+      <div className="contents" data-cms-section-id="home-services">
+        <HomeServices />
+      </div>
+      <div className="contents" data-cms-section-id="home-featured-work">
+        <FeaturedWork />
+      </div>
+      <div className="contents" data-cms-section-id="home-automation">
+        <AutomationSpotlight />
+      </div>
+      <div className="contents" data-cms-section-id="home-process">
+        <ProcessSection />
+      </div>
+      <div className="contents" data-cms-section-id="home-why-logicsify">
+        <WhyLogicsify />
+      </div>
+      <div className="contents" data-cms-section-id="home-integrations">
+        <SystemsWeIntegrate />
+      </div>
+      <div className="contents" data-cms-section-id="home-engagement-models">
+        <EngagementModelsPreview />
+      </div>
+      <div className="contents" data-cms-section-id="home-estimator">
+        <EstimatorPreview />
+      </div>
+      <div className="contents" data-cms-section-id="home-team">
+        <TeamCredibility />
+      </div>
+      <div className="contents" data-cms-section-id="home-testimonials">
+        <TestimonialSection />
+      </div>
+      <div className="contents" data-cms-section-id="home-insights">
+        <InsightsSection />
+      </div>
+      <div className="contents" data-cms-section-id="home-resources">
+        <ResourcesPreview />
+      </div>
+      <div className="contents" data-cms-section-id="home-cta">
+        <CTASection />
+      </div>
     </SiteLayout>
   );
 }
