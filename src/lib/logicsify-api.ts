@@ -5,9 +5,8 @@ const API_BASE = (import.meta.env.VITE_API_URL || "https://backend.logicsify.com
 const SITE_BASE = (import.meta.env.VITE_SITE_URL || "https://logicsify.com").replace(/\/$/, "");
 
 /**
- * Media is uploaded by the PHP API, but public links should stay on the main
- * website domain. Vercel forwards these URLs to the matching backend media
- * record without redirecting the browser.
+ * Keep public Media Library links on the website domain. Vercel forwards these
+ * URLs to the matching backend record without exposing the API host.
  */
 export function publicAssetUrl(value: string): string {
   if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
@@ -83,6 +82,26 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     clearTimeout(timeout);
     init.signal?.removeEventListener("abort", abortFromCaller);
   }
+}
+
+type PublicRequestCacheEntry = {
+  expiresAt: number;
+  promise: Promise<unknown>;
+};
+
+const publicRequestCache = new Map<string, PublicRequestCacheEntry>();
+
+function cachedPublicRequest<T>(path: string, ttlMs = 30_000): Promise<T> {
+  const now = Date.now();
+  const cached = publicRequestCache.get(path);
+  if (cached && cached.expiresAt > now) return cached.promise as Promise<T>;
+
+  const promise = request<T>(path).catch((error) => {
+    if (publicRequestCache.get(path)?.promise === promise) publicRequestCache.delete(path);
+    throw error;
+  });
+  publicRequestCache.set(path, { expiresAt: now + ttlMs, promise });
+  return promise;
 }
 
 export type ContactSubmission = {
@@ -263,7 +282,10 @@ export type PublicMenuItem = {
 };
 
 export function getPublicMenu(location: "header" | "footer") {
-  return request<{ location: string; items: PublicMenuItem[] }>(`public/menus/${location}`);
+  return cachedPublicRequest<{ location: string; items: PublicMenuItem[] }>(
+    `public/menus/${location}`,
+    60_000,
+  );
 }
 
 export type CmsContentItem = {
@@ -304,7 +326,9 @@ export type CmsContentItem = {
 
 export async function getCmsContentList(type: string): Promise<CmsContentItem[]> {
   try {
-    return await request<CmsContentItem[]>(`public/content/${encodeURIComponent(type)}`);
+    return await cachedPublicRequest<CmsContentItem[]>(
+      `public/content/${encodeURIComponent(type)}`,
+    );
   } catch {
     return [];
   }
@@ -315,7 +339,7 @@ export async function getCmsContentItem(
   slug: string,
 ): Promise<CmsContentItem | null> {
   try {
-    return await request<CmsContentItem>(
+    return await cachedPublicRequest<CmsContentItem>(
       `public/content/${encodeURIComponent(type)}/${encodeURIComponent(slug)}`,
     );
   } catch {
@@ -358,7 +382,7 @@ export type PublicIntegrations = {
 
 export async function getPublicIntegrations(): Promise<PublicIntegrations> {
   try {
-    return await request<PublicIntegrations>("public/settings/integrations");
+    return await cachedPublicRequest<PublicIntegrations>("public/settings/integrations", 60_000);
   } catch {
     return {};
   }
@@ -446,7 +470,7 @@ export type PublicThemeSettings = {
 
 export async function getPublicThemeSettings(): Promise<PublicThemeSettings> {
   try {
-    return await request<PublicThemeSettings>("public/settings/theme");
+    return await cachedPublicRequest<PublicThemeSettings>("public/settings/theme", 60_000);
   } catch {
     return {};
   }
@@ -571,7 +595,7 @@ export type Partner = {
 };
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
   try {
-    return await request<PublicSiteSettings>("public/settings/site");
+    return await cachedPublicRequest<PublicSiteSettings>("public/settings/site", 60_000);
   } catch {
     return {};
   }

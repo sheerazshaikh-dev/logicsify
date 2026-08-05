@@ -117,6 +117,10 @@ function PartnersSection() {
               <img
                 src={partner.logo_url}
                 alt={`${partner.name} logo`}
+                width={170}
+                height={48}
+                loading="lazy"
+                decoding="async"
                 className="max-h-12 max-w-[170px] object-contain grayscale transition duration-300 group-hover:grayscale-0"
               />
             );
@@ -156,41 +160,20 @@ function Hero() {
 
       <div className="container-page relative grid lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7">
-          <div
-            data-reveal
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs text-white/80 mb-8"
-          >
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs text-white/80 mb-8">
             <Sparkles className="w-3.5 h-3.5 text-brand-gold" />
             AI · CRM · Platforms · Operations
           </div>
           <h1 className="fluid-display text-white hero-heading-wrap">
-            <span data-reveal style={{ ["--reveal-delay" as string]: "0ms" }} className="block">
-              Build Connected.
-            </span>
-            <span data-reveal style={{ ["--reveal-delay" as string]: "120ms" }} className="block">
-              Respond Faster.
-            </span>
-            <span
-              data-reveal
-              style={{ ["--reveal-delay" as string]: "240ms" }}
-              className="block text-gradient animate-gradient"
-            >
-              Operate Smarter.
-            </span>
+            <span className="block">Build Connected.</span>
+            <span className="block">Respond Faster.</span>
+            <span className="block text-gradient">Operate Smarter.</span>
           </h1>
-          <p
-            data-reveal
-            style={{ ["--reveal-delay" as string]: "360ms" }}
-            className="mt-8 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed"
-          >
+          <p className="mt-8 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed">
             We build AI-powered sales, customer service, and business operations systems that reduce
             manual work, improve lead response, and keep customer data connected.
           </p>
-          <div
-            data-reveal
-            style={{ ["--reveal-delay" as string]: "480ms" }}
-            className="mt-10 flex flex-wrap gap-4"
-          >
+          <div className="mt-10 flex flex-wrap gap-4">
             <Link
               to="/contact"
               onClick={() =>
@@ -204,11 +187,7 @@ function Hero() {
               Explore Our Services
             </Link>
           </div>
-          <p
-            data-reveal
-            style={{ ["--reveal-delay" as string]: "600ms" }}
-            className="mt-10 text-xs uppercase tracking-[0.2em] text-white/50"
-          >
+          <p className="mt-10 text-xs uppercase tracking-[0.2em] text-white/50">
             AI Agents · CRM Operations · Websites · Portals · CMS Platforms
           </p>
         </div>
@@ -265,10 +244,6 @@ function HeroVisual() {
               strokeWidth="1.5"
               opacity="0.62"
               strokeDasharray="5 7"
-              style={{
-                animation: "draw-line 2.2s ease-out forwards",
-                animationDelay: `${i * 0.08}s`,
-              }}
             />
             <circle cx={x} cy={y} r="6" fill="url(#node-line)" opacity="0.95" />
             <circle cx={x} cy={y} r="12" fill="none" stroke="url(#node-line)" opacity="0.45" />
@@ -278,7 +253,14 @@ function HeroVisual() {
 
       <div className="absolute inset-1/3 z-20 rounded-full bg-gradient-brand animate-pulse-glow blur-xl opacity-70" />
       <div className="absolute left-1/2 top-1/2 z-30 grid h-[86px] w-[86px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-[0_0_45px_rgba(253,190,2,0.45)]">
-        <img src="/logicsify-mark.png" alt="" className="h-12 w-12 object-contain" />
+        <img
+          src="/logicsify-mark.png"
+          alt=""
+          width={150}
+          height={169}
+          decoding="async"
+          className="h-12 w-12 object-contain"
+        />
       </div>
 
       <div className="absolute -top-4 -right-4 z-40 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float">
@@ -634,40 +616,42 @@ function AutomationSpotlight() {
         </div>
 
         <div className="relative rounded-3xl border border-white/10 bg-white/[0.02] p-6 md:p-10">
-          <ol className="grid md:grid-cols-6 gap-4 relative">
+          <div className="relative">
             <div className="hidden md:block absolute top-6 left-8 right-8 h-px bg-gradient-brand opacity-40" />
-            {steps.map((s, i) => (
-              <li
-                key={s}
-                data-reveal
-                style={{ ["--reveal-delay" as string]: `${i * 120}ms` }}
-                className="relative"
-              >
-                <div className="relative z-10 h-12 w-12 mx-auto md:mx-0 rounded-full bg-ink border border-white/20 flex items-center justify-center text-white text-sm font-semibold">
-                  <span
-                    className="absolute inset-0 rounded-full bg-gradient-brand opacity-40 blur animate-pulse-glow"
-                    style={{ animationDelay: `${i * 0.3}s` }}
-                  />
-                  <span className="relative">{i + 1}</span>
-                </div>
-                <p className="mt-4 text-sm text-white/90 font-semibold text-center md:text-left">
-                  {s}
-                </p>
-                <p className="text-xs text-white/50 mt-1 text-center md:text-left">
-                  {
-                    [
-                      "Any inbound source",
-                      "AI scoring & routing",
-                      "Enriched & synced",
-                      "Right person, right context",
-                      "Booked automatically",
-                      "Live, always",
-                    ][i]
-                  }
-                </p>
-              </li>
-            ))}
-          </ol>
+            <ol className="grid md:grid-cols-6 gap-4 relative">
+              {steps.map((s, i) => (
+                <li
+                  key={s}
+                  data-reveal
+                  style={{ ["--reveal-delay" as string]: `${i * 120}ms` }}
+                  className="relative"
+                >
+                  <div className="relative z-10 h-12 w-12 mx-auto md:mx-0 rounded-full bg-ink border border-white/20 flex items-center justify-center text-white text-sm font-semibold">
+                    <span
+                      className="absolute inset-0 rounded-full bg-gradient-brand opacity-40 blur animate-pulse-glow"
+                      style={{ animationDelay: `${i * 0.3}s` }}
+                    />
+                    <span className="relative">{i + 1}</span>
+                  </div>
+                  <p className="mt-4 text-sm text-white/90 font-semibold text-center md:text-left">
+                    {s}
+                  </p>
+                  <p className="text-xs text-white/50 mt-1 text-center md:text-left">
+                    {
+                      [
+                        "Any inbound source",
+                        "AI scoring & routing",
+                        "Enriched & synced",
+                        "Right person, right context",
+                        "Booked automatically",
+                        "Live, always",
+                      ][i]
+                    }
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
 
         <div className="mt-10 flex flex-wrap gap-4">
@@ -860,6 +844,10 @@ function ConnectedSystemsVisual() {
         <img
           src="/logicsify-mark.png"
           alt=""
+          width={150}
+          height={169}
+          loading="lazy"
+          decoding="async"
           className="h-9 w-9 object-contain brightness-0 invert"
         />
       </div>
@@ -1319,7 +1307,7 @@ function ResourcesPreview() {
               key={item.slug}
               className="rounded-2xl border border-black/5 bg-white p-6 hover:shadow-lg"
             >
-              <span className="text-xs uppercase tracking-widest text-brand-red">
+              <span className="text-xs uppercase tracking-widest text-[#C3262E]">
                 {String(item.content_json?.file_type || "Resource")}
               </span>
               <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>

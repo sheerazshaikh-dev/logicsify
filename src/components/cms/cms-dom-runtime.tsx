@@ -2,7 +2,6 @@ import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { CMS_ICON_MARKUP } from "@/lib/cms-icons";
 import { getCmsContentItem } from "@/lib/logicsify-api";
-import { getContent } from "@/lib/admin-api";
 import {
   cmsTemplateVersionForPath,
   type CmsNativeContent,
@@ -1003,7 +1002,8 @@ export function PublicCmsDomRuntime({ children }: { children: ReactNode }) {
     setEditMode(editing);
 
     if (editing && pageId > 0) {
-      void getContent(pageId)
+      void import("@/lib/admin-api")
+        .then(({ getContent }) => getContent(pageId))
         .then((item) => {
           if (active) setPage(toVisualPage(item));
         })
@@ -1027,9 +1027,9 @@ export function PublicCmsDomRuntime({ children }: { children: ReactNode }) {
     };
   }, [pathname, excluded]);
 
-  if (excluded || !page) return <>{children}</>;
-
-  const nativeContent = page.native_content || {};
+  const pageMatchesPath =
+    Boolean(page) && expectedPagePath(page as CmsPage) === normalizeRuntimePath(pathname);
+  const nativeContent = pageMatchesPath ? page?.native_content || {} : {};
   const hasSavedVisualContent =
     Object.keys(nativeContent.fields || {}).length > 0 ||
     Object.keys(nativeContent.section_html || {}).length > 0 ||
@@ -1038,10 +1038,11 @@ export function PublicCmsDomRuntime({ children }: { children: ReactNode }) {
     (nativeContent.deleted_sections || []).length > 0 ||
     Object.keys(nativeContent.element_links || {}).length > 0;
 
-  if (!editMode && !hasSavedVisualContent) return <>{children}</>;
+  const runtimePage =
+    !excluded && pageMatchesPath && page && (editMode || hasSavedVisualContent) ? page : null;
 
   return (
-    <RuntimeSurface page={page} editMode={editMode}>
+    <RuntimeSurface page={runtimePage} editMode={Boolean(runtimePage && editMode)}>
       {children}
     </RuntimeSurface>
   );

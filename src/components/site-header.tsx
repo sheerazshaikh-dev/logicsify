@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
-import { DEFAULT_BRAND_ASSETS } from "@/lib/brand-assets";
+import { DEFAULT_BRAND_ASSETS, optimizedBrandAsset } from "@/lib/brand-assets";
 import { cn } from "@/lib/utils";
 import { normalizePublicHref } from "@/lib/content-routes";
 import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
@@ -102,9 +102,10 @@ export function SiteHeader() {
     };
   }, [mobileOpen]);
 
-  const logo = onDark
-    ? siteSettings.logo_light || DEFAULT_BRAND_ASSETS.logoLight
-    : siteSettings.logo_dark || DEFAULT_BRAND_ASSETS.logoDark;
+  const logo = optimizedBrandAsset(
+    onDark ? siteSettings.logo_light : siteSettings.logo_dark,
+    onDark ? DEFAULT_BRAND_ASSETS.logoLight : DEFAULT_BRAND_ASSETS.logoDark,
+  );
   const logoStyle = {
     "--header-logo-mobile": `${mobileLogoHeight}px`,
     "--header-logo-desktop": `${desktopLogoHeight}px`,
@@ -150,6 +151,9 @@ export function SiteHeader() {
             <img
               src={logo}
               alt={siteSettings.site_name || "Logicsify"}
+              width={928}
+              height={onDark ? 224 : 225}
+              decoding="async"
               style={logoStyle}
               className="h-[var(--header-logo-mobile)] md:h-[var(--header-logo-desktop)] w-auto"
             />
@@ -188,7 +192,12 @@ export function SiteHeader() {
                         href={item.to}
                         target={item.targetBlank ? "_blank" : undefined}
                         rel={item.targetBlank ? "noreferrer" : undefined}
-                        onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
+                        onClick={() =>
+                          trackAnalytics("navigation_item_clicked", {
+                            label: item.label,
+                            destination: item.to,
+                          })
+                        }
                         className={cn(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
                           onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
@@ -200,7 +209,12 @@ export function SiteHeader() {
                     ) : (
                       <Link
                         to={item.to}
-                        onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
+                        onClick={() =>
+                          trackAnalytics("navigation_item_clicked", {
+                            label: item.label,
+                            destination: item.to,
+                          })
+                        }
                         className={cn(
                           "px-4 py-2 rounded-full text-sm font-medium inline-flex items-center gap-1 transition-colors",
                           onDark ? "text-white/85 hover:text-white" : "text-ink/80 hover:text-ink",
@@ -228,7 +242,10 @@ export function SiteHeader() {
                 href={headerCtaUrl}
                 target={headerCtaNewTab ? "_blank" : undefined}
                 rel={headerCtaNewTab ? "noreferrer" : undefined}
-                onClick={() => { rememberRoadmapSource("header"); trackAnalytics("technical_roadmap_cta_clicked", { placement: "header" }); }}
+                onClick={() => {
+                  rememberRoadmapSource("header");
+                  trackAnalytics("technical_roadmap_cta_clicked", { placement: "header" });
+                }}
                 className="hidden md:inline-flex btn-primary text-sm"
               >
                 {headerCtaLabel} <ArrowRight className="w-4 h-4" />
@@ -283,8 +300,14 @@ export function SiteHeader() {
         >
           <div className="flex items-center justify-between p-5 border-b border-black/5">
             <img
-              src={siteSettings.mobile_logo || siteSettings.logo_dark || DEFAULT_BRAND_ASSETS.logoDark}
+              src={optimizedBrandAsset(
+                siteSettings.mobile_logo || siteSettings.logo_dark,
+                DEFAULT_BRAND_ASSETS.logoDark,
+              )}
               alt={siteSettings.site_name || "Logicsify"}
+              width={928}
+              height={225}
+              decoding="async"
               style={logoStyle}
               className="h-[var(--header-logo-mobile)] w-auto"
             />
@@ -307,7 +330,10 @@ export function SiteHeader() {
                 href={headerCtaUrl}
                 target={headerCtaNewTab ? "_blank" : undefined}
                 rel={headerCtaNewTab ? "noreferrer" : undefined}
-                onClick={() => { rememberRoadmapSource("mobile_menu"); trackAnalytics("technical_roadmap_cta_clicked", { placement: "mobile_menu" }); }}
+                onClick={() => {
+                  rememberRoadmapSource("mobile_menu");
+                  trackAnalytics("technical_roadmap_cta_clicked", { placement: "mobile_menu" });
+                }}
                 className="btn-primary w-full justify-center mt-6"
               >
                 {headerCtaLabel}
@@ -350,7 +376,11 @@ function DefaultMegaMenu({
               className={cn(
                 promoEnabled ? "col-span-9" : "col-span-12",
                 "grid gap-7 p-8",
-                groups.length <= 2 ? "grid-cols-2" : groups.length === 3 ? "grid-cols-3" : "grid-cols-2 xl:grid-cols-4",
+                groups.length <= 2
+                  ? "grid-cols-2"
+                  : groups.length === 3
+                    ? "grid-cols-3"
+                    : "grid-cols-2 xl:grid-cols-4",
               )}
             >
               {groups.slice(0, 4).map((group) => (
@@ -376,7 +406,12 @@ function DefaultMegaMenu({
                               href={child.to}
                               target={child.targetBlank ? "_blank" : undefined}
                               rel={child.targetBlank ? "noreferrer" : undefined}
-                              onClick={() => trackAnalytics("navigation_item_clicked", { label: child.label, destination: child.to })}
+                              onClick={() =>
+                                trackAnalytics("navigation_item_clicked", {
+                                  label: child.label,
+                                  destination: child.to,
+                                })
+                              }
                               className="group block"
                             >
                               <span className="text-sm font-semibold text-ink group-hover:text-gradient transition-colors">
@@ -414,7 +449,9 @@ function DefaultMegaMenu({
                       href={promoUrl}
                       target={promoNewTab ? "_blank" : undefined}
                       rel={promoNewTab ? "noreferrer" : undefined}
-                      onClick={() => trackAnalytics("technical_roadmap_cta_clicked", { placement: "mega_menu" })}
+                      onClick={() =>
+                        trackAnalytics("technical_roadmap_cta_clicked", { placement: "mega_menu" })
+                      }
                       className="btn-primary text-sm"
                     >
                       {promoLabel} <ArrowRight className="w-4 h-4" />
@@ -445,7 +482,12 @@ function CompactDropdown({ items }: { items: NavItem[] }) {
               href={item.to}
               target={item.targetBlank ? "_blank" : undefined}
               rel={item.targetBlank ? "noreferrer" : undefined}
-              onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
+              onClick={() =>
+                trackAnalytics("navigation_item_clicked", {
+                  label: item.label,
+                  destination: item.to,
+                })
+              }
               className="block rounded-xl px-3 py-2.5 text-sm text-ink/75 hover:bg-lavender hover:text-ink"
             >
               <span className="font-medium">{item.label}</span>
@@ -503,7 +545,12 @@ function MobileMenuItem({ item }: { item: NavItem }) {
                       href={child.to}
                       target={child.targetBlank ? "_blank" : undefined}
                       rel={child.targetBlank ? "noreferrer" : undefined}
-                      onClick={() => trackAnalytics("navigation_item_clicked", { label: child.label, destination: child.to })}
+                      onClick={() =>
+                        trackAnalytics("navigation_item_clicked", {
+                          label: child.label,
+                          destination: child.to,
+                        })
+                      }
                       className="block px-3 py-2 text-sm text-ink hover:text-brand-red"
                     >
                       {child.label}
@@ -521,7 +568,9 @@ function MobileMenuItem({ item }: { item: NavItem }) {
       href={item.to}
       target={item.targetBlank ? "_blank" : undefined}
       rel={item.targetBlank ? "noreferrer" : undefined}
-      onClick={() => trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })}
+      onClick={() =>
+        trackAnalytics("navigation_item_clicked", { label: item.label, destination: item.to })
+      }
       className="block px-3 py-3 rounded-xl text-lg font-semibold text-ink hover:bg-lavender"
     >
       {item.label}
@@ -569,7 +618,10 @@ function mergeFallbackNavigation(items: NavItem[]): NavItem[] {
 }
 
 function navKey(item: NavItem) {
-  return item.label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return item.label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
 }
 
 function buildMenuTree(items: PublicMenuItem[]): NavItem[] {
@@ -682,13 +734,18 @@ function buildFallbackNavigation(): NavItem[] {
         ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
         ["Branding", "/services/branding"],
         ["Cloud & Maintenance", "/services/cloud-maintenance"],
-        ["Supported Integrations", "/integrations", "CRM, AI, payments, communication, development, and automation platforms."],
+        [
+          "Supported Integrations",
+          "/integrations",
+          "CRM, AI, payments, communication, development, and automation platforms.",
+        ],
       ]),
     ],
     {
       eyebrow: "Connected business systems",
       title: "Start with the operating problem",
-      description: "Choose a core service, then review the exact subservice pages that fit the workflow.",
+      description:
+        "Choose a core service, then review the exact subservice pages that fit the workflow.",
       label: "Explore All Services",
       url: "/services",
     },
@@ -702,19 +759,40 @@ function buildFallbackNavigation(): NavItem[] {
         ["Insights", "/insights", "Articles, analysis, company news, and practical guides."],
         ["Guides", "/guides", "Downloadable PDFs, checklists, audits, and templates."],
         ["Case Studies", "/work", "Published work connected to real operating problems."],
-        ["Engagement Models", "/engagement-models", "Compare project, support, team, and consulting models."],
+        [
+          "Engagement Models",
+          "/engagement-models",
+          "Compare project, support, team, and consulting models.",
+        ],
       ]),
       group("Interactive Tools", 2, [
-        ["Automation Lab", "/automation-lab", "Five controlled AI, voice, CRM, document, and support demos."],
-        ["Project Estimator", "/project-estimator", "An eight-step form for scope, timeline, and complexity."],
-        ["Comparisons", "/comparisons", "Balanced decision pages for technology and delivery choices."],
-        ["Technical Roadmap", "/technical-roadmap", "Submit the problem, systems, budget, and timeline."],
+        [
+          "Automation Lab",
+          "/automation-lab",
+          "Five controlled AI, voice, CRM, document, and support demos.",
+        ],
+        [
+          "Project Estimator",
+          "/project-estimator",
+          "An eight-step form for scope, timeline, and complexity.",
+        ],
+        [
+          "Comparisons",
+          "/comparisons",
+          "Balanced decision pages for technology and delivery choices.",
+        ],
+        [
+          "Technical Roadmap",
+          "/technical-roadmap",
+          "Submit the problem, systems, budget, and timeline.",
+        ],
       ]),
     ],
     {
       eyebrow: "Plan before you build",
       title: "Use the estimator and automation demos",
-      description: "Explore the content hub, download guides, compare options, or test a controlled workflow.",
+      description:
+        "Explore the content hub, download guides, compare options, or test a controlled workflow.",
       label: "Open Resources",
       url: "/resources",
     },

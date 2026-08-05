@@ -28,9 +28,8 @@ export function useReveal<T extends HTMLElement = HTMLElement>() {
               const element = entry.target as HTMLElement;
               if (entry.isIntersecting) {
                 element.setAttribute("data-visible", "true");
-              } else if (entry.boundingClientRect.top > 0) {
-                // Preserve the existing replay behavior when scrolling back upward.
-                element.setAttribute("data-visible", "false");
+                observer?.unobserve(element);
+                registered.delete(element);
               }
             });
           },

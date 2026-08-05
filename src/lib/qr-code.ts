@@ -1,6 +1,5 @@
-import QRCode from "qrcode";
-
 export async function downloadQrCode(value: string, filename: string) {
+  const { default: QRCode } = await import("qrcode");
   const source = await QRCode.toDataURL(value, {
     width: 1200,
     margin: 4,

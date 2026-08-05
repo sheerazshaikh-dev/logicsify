@@ -1,8 +1,7 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
-  createRootRouteWithContext,
+  createRootRoute,
   useRouter,
   HeadContent,
   notFound,
@@ -73,7 +72,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRoute({
   beforeLoad: ({ location }) => {
     if (/^\/admin(?:\/|$)/.test(location.pathname)) {
       throw notFound();
@@ -139,16 +138,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
                 { "@type": "Place", name: "Jeddah, Saudi Arabia" },
                 { "@type": "Place", name: "Leiria / Nazaré, Portugal" },
               ],
-              description: "Technology, marketing, and automation—logically built for growth."
+              description: "Technology, marketing, and automation—logically built for growth.",
             },
             {
               "@type": "WebSite",
               "@id": "https://logicsify.com/#website",
               name: "Logicsify",
               url: "https://logicsify.com/",
-              publisher: { "@id": "https://logicsify.com/#organization" }
-            }
-          ]
+              publisher: { "@id": "https://logicsify.com/#organization" },
+            },
+          ],
         }),
       },
     ],
@@ -159,14 +158,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <HeadContent />
       <RuntimeSiteSettings />
       <RuntimeIntegrations />
       <Outlet />
       <Toaster position="top-right" richColors closeButton />
-    </QueryClientProvider>
+    </>
   );
 }

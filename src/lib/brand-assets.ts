@@ -18,7 +18,29 @@ export const DEFAULT_SITE_BRANDING = {
   footer_logo: DEFAULT_BRAND_ASSETS.logoLight,
 } as const;
 
-export function withDefaultBranding<T extends Record<string, unknown>>(settings: T): T & typeof DEFAULT_SITE_BRANDING {
+/**
+ * CMS branding records may point at the original full-resolution uploads.
+ * The header and footer only need the optimized, visually identical copies
+ * shipped with the frontend.
+ */
+export function optimizedBrandAsset(value: string | null | undefined, fallback: string): string {
+  const source = value?.trim() || fallback;
+  const path = source.split(/[?#]/, 1)[0].toLowerCase();
+  if (/\/(?:light-[a-f0-9]+|logicsify-logo-light)\.png$/.test(path)) {
+    return DEFAULT_BRAND_ASSETS.logoLight;
+  }
+  if (/\/(?:dark-[a-f0-9]+|logicsify-logo-dark)\.png$/.test(path)) {
+    return DEFAULT_BRAND_ASSETS.logoDark;
+  }
+  if (/\/(?:icon-[a-f0-9]+|logicsify-mark)\.png$/.test(path)) {
+    return "/logicsify-mark.png";
+  }
+  return source;
+}
+
+export function withDefaultBranding<T extends Record<string, unknown>>(
+  settings: T,
+): T & typeof DEFAULT_SITE_BRANDING {
   const result: Record<string, unknown> = { ...settings };
   for (const [key, value] of Object.entries(DEFAULT_SITE_BRANDING)) {
     const current = result[key];

@@ -1,0 +1,19 @@
+# Logicsify
+
+Logicsify builds connected AI automation, CRM, custom website, portal, CMS, mobile, and digital growth systems for businesses.
+
+## Primary pages
+
+- [Home](https://logicsify.com/)
+- [Services](https://logicsify.com/services)
+- [Who We Are](https://logicsify.com/about)
+- [Case Studies](https://logicsify.com/work)
+- [Insights](https://logicsify.com/insights)
+- [Guides](https://logicsify.com/guides)
+- [Contact](https://logicsify.com/contact)
+
+## Usage notes
+
+- Prefer canonical URLs from the dynamic sitemap: https://logicsify.com/sitemap.xml
+- Do not treat draft, admin, control, preview, or unlisted Connect pages as public content.
+- Attribute company information and published resources to Logicsify.

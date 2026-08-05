@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
-import { DEFAULT_BRAND_ASSETS } from "@/lib/brand-assets";
+import { DEFAULT_BRAND_ASSETS, optimizedBrandAsset } from "@/lib/brand-assets";
 import { rememberRoadmapSource, trackAnalytics } from "@/lib/analytics";
 import {
   getContactEmails,
@@ -85,8 +85,15 @@ export function SiteFooter() {
         <div className="grid gap-12 lg:grid-cols-[1.35fr_repeat(3,minmax(0,1fr))]">
           <div>
             <img
-              src={settings.footer_logo || settings.logo_light || DEFAULT_BRAND_ASSETS.logoLight}
+              src={optimizedBrandAsset(
+                settings.footer_logo || settings.logo_light,
+                DEFAULT_BRAND_ASSETS.logoLight,
+              )}
               alt={settings.site_name || "Logicsify"}
+              width={928}
+              height={224}
+              loading="lazy"
+              decoding="async"
               className="mb-6 h-10 w-auto"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/70">{description}</p>

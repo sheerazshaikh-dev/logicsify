@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 import {
-  getSocialProfiles,
   getLocationAddresses,
   getLocationPhones,
   locationMapUrl,
@@ -89,7 +88,9 @@ const SOCIAL_ICONS: Record<ConnectProfilePlatform, LucideIcon> = {
 
 function ConnectProfilePage() {
   const { profile, settings } = Route.useLoaderData();
-  const globalSocials = getSocialProfiles(settings);
+  const globalSocials = (settings.social_links || []).filter(
+    (social) => social.enabled !== false && social.url,
+  );
   const accent = profile.theme_json?.accent || "#FE3434";
   const coverUrl = profile.global_cover_url || profile.cover_url;
   const whatsapp = profile.whatsapp?.replace(/\D/g, "");
