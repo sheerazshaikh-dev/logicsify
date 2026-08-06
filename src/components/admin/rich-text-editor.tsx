@@ -19,8 +19,31 @@ const RICH_TEXT_EDITOR_DOCUMENT = `<!doctype html>
     }
     body:empty::before { content: "Write content…"; color: #94a3b8; pointer-events: none; }
     p { margin: 0 0 1em; }
-    h2 { margin: 1.4em 0 .55em; font-size: 1.75rem; line-height: 1.2; }
-    h3 { margin: 1.25em 0 .5em; font-size: 1.35rem; line-height: 1.25; }
+    h2 {
+      position: relative;
+      margin: 2em 0 .7em;
+      padding-bottom: .65em;
+      border-bottom: 1px solid rgba(25, 10, 47, .12);
+      font-size: 2rem;
+      line-height: 1.18;
+      letter-spacing: -.035em;
+    }
+    h2::after {
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 56px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #FE3434, #FDBE02);
+      content: "";
+    }
+    h3 {
+      margin: 1.65em 0 .55em;
+      font-size: 1.45rem;
+      line-height: 1.28;
+      letter-spacing: -.02em;
+    }
     ul, ol { margin: 0 0 1em; padding-left: 1.5rem; }
     blockquote { margin: 1em 0; padding-left: 1rem; border-left: 3px solid #FE3434; color: #64748b; }
     a { color: #FE3434; text-decoration: underline; }
