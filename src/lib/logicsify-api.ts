@@ -52,11 +52,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   init.signal?.addEventListener("abort", abortFromCaller, { once: true });
 
   try {
+    const isPublicContentRequest = path.startsWith("public/content/");
     const response = await fetch(`${API_BASE}/${path.replace(/^\//, "")}`, {
       ...init,
+      cache: isPublicContentRequest ? "no-store" : init.cache,
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
+        ...(isPublicContentRequest ? { "Cache-Control": "no-cache" } : {}),
         ...(init.headers || {}),
       },
     });
@@ -326,8 +329,11 @@ export type CmsContentItem = {
 
 export async function getCmsContentList(type: string): Promise<CmsContentItem[]> {
   try {
-    return await cachedPublicRequest<CmsContentItem[]>(
-      `public/content/${encodeURIComponent(type)}`,
+    // CMS content changes in Content Studio must be visible immediately after
+    // reload/navigation. Do not reuse the generic in-memory public cache here.
+    return await request<CmsContentItem[]>(
+      `public/content/${encodeURIComponent(type)}?_=${Date.now()}`,
+      { cache: "no-store" },
     );
   } catch {
     return [];
@@ -339,8 +345,9 @@ export async function getCmsContentItem(
   slug: string,
 ): Promise<CmsContentItem | null> {
   try {
-    return await cachedPublicRequest<CmsContentItem>(
-      `public/content/${encodeURIComponent(type)}/${encodeURIComponent(slug)}`,
+    return await request<CmsContentItem>(
+      `public/content/${encodeURIComponent(type)}/${encodeURIComponent(slug)}?_=${Date.now()}`,
+      { cache: "no-store" },
     );
   } catch {
     return null;
