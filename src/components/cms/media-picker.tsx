@@ -289,7 +289,7 @@ export function MediaPicker({
             </div>
           ) : filtered.length === 0 ? (
             <button
-              className="flex min-h-72 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-black/15 text-center hover:bg-[#fafaf8]"
+              className="flex min-h-72 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-black/15 text-center hover:bg-cream"
               onClick={() => inputRef.current?.click()}
             >
               {kind === "documents" ? (
@@ -315,9 +315,9 @@ export function MediaPicker({
                     key={item.id}
                     type="button"
                     onClick={() => choose(item)}
-                    className={`group overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${selected ? "border-violet-500 ring-2 ring-violet-200" : "border-black/10"}`}
+                    className={`group overflow-hidden rounded-2xl border bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg ${selected ? "border-brand-red ring-2 ring-brand-red/20" : "border-black/10"}`}
                   >
-                    <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#eee]">
+                    <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-cream">
                       {isImage(item) ? (
                         <img
                           src={item.url}
@@ -345,7 +345,7 @@ export function MediaPicker({
                         </div>
                       )}
                       {selected ? (
-                        <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-violet-600 text-white">
+                        <span className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-gradient-brand text-white">
                           <Check className="size-4" />
                         </span>
                       ) : null}

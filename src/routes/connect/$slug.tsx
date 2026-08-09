@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PublicRouteLoading } from "@/components/public-route-loading";
+import { BrandMarkImage } from "@/components/brand-mark";
 import {
   getLocationAddresses,
   getLocationPhones,
@@ -91,7 +92,7 @@ function ConnectProfilePage() {
   const globalSocials = (settings.social_links || []).filter(
     (social) => social.enabled !== false && social.url,
   );
-  const accent = profile.theme_json?.accent || "#FE3434";
+  const accent = profile.theme_json?.accent || "var(--theme-primary-start)";
   const coverUrl = profile.global_cover_url || profile.cover_url;
   const whatsapp = profile.whatsapp?.replace(/\D/g, "");
   const actions = [
@@ -106,25 +107,25 @@ function ConnectProfilePage() {
   ].filter(Boolean) as Array<{ label: string; href: string; Icon: LucideIcon }>;
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-[#190A2F] px-4 py-6 text-[#190A2F] sm:px-6 md:py-12">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(254,52,52,0.22),transparent_45%),radial-gradient(circle_at_82%_64%,rgba(253,190,2,0.2),transparent_44%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[44rem] w-[44rem] -translate-x-1/2 rounded-full bg-[#FDBE02]/10 blur-3xl" />
-      <article className="relative mx-auto max-w-2xl overflow-hidden rounded-[2.25rem] border border-white/70 bg-white shadow-[0_38px_120px_-52px_rgba(25,10,47,.52)]">
+    <main className="relative min-h-dvh overflow-hidden bg-ink px-4 py-6 text-ink sm:px-6 md:py-12">
+      <div className="pointer-events-none absolute inset-0 brand-radial-glow-soft" />
+      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[44rem] w-[44rem] -translate-x-1/2 rounded-full bg-brand-gold/10 blur-3xl" />
+      <article className="relative mx-auto max-w-2xl overflow-hidden rounded-[2.25rem] border border-white/70 bg-white shadow-[var(--shadow-card)]">
         <div
-          className="relative h-52 overflow-hidden bg-[#190A2F] bg-cover bg-center sm:h-64"
+          className="relative h-52 overflow-hidden bg-ink bg-cover bg-center sm:h-64"
           style={
             coverUrl
               ? { backgroundImage: `url(${coverUrl})` }
               : {
-                  backgroundImage: `radial-gradient(circle at 15% 20%, ${accent}cc, transparent 43%), radial-gradient(circle at 82% 70%, #FDBE0299, transparent 42%), linear-gradient(135deg, #190A2F, #361141)`,
+                  backgroundImage: `radial-gradient(circle at 15% 20%, color-mix(in srgb, ${accent} 80%, transparent), transparent 43%), radial-gradient(circle at 82% 70%, color-mix(in srgb, var(--theme-primary-end) 60%, transparent), transparent 42%), linear-gradient(135deg, var(--theme-dark), color-mix(in srgb, var(--theme-dark) 82%, var(--theme-primary-start)))`,
                 }
           }
         >
           {coverUrl ? (
-            <div className="absolute inset-0 bg-gradient-to-t from-[#190A2F]/55 via-transparent to-[#190A2F]/15" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-ink/15" />
           ) : null}
-          <span className="absolute bottom-5 right-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-[#190A2F]/55 px-4 py-2 text-xs font-bold text-white backdrop-blur-md sm:bottom-7 sm:right-7">
-            <Sparkles className="h-3.5 w-3.5 text-[#FDBE02]" />
+          <span className="absolute bottom-5 right-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-ink/55 px-4 py-2 text-xs font-bold text-white backdrop-blur-md sm:bottom-7 sm:right-7">
+            <Sparkles className="h-3.5 w-3.5 text-brand-gold" />
             Logicsify team
           </span>
         </div>
@@ -140,7 +141,7 @@ function ConnectProfilePage() {
             ) : (
               <span
                 className="grid h-32 w-32 place-items-center rounded-[2rem] border-[5px] border-white text-5xl font-bold text-white shadow-xl sm:h-40 sm:w-40 sm:rounded-[2.4rem]"
-                style={{ background: `linear-gradient(135deg, ${accent}, #FDBE02)` }}
+                style={{ background: `linear-gradient(135deg, ${accent}, var(--theme-primary-end))` }}
               >
                 {profile.display_name.slice(0, 1)}
               </span>
@@ -149,7 +150,7 @@ function ConnectProfilePage() {
               href="https://logicsify.com"
               target="_blank"
               rel="noreferrer"
-              className="mb-2 hidden items-center gap-2 text-xs font-bold uppercase tracking-[.14em] text-slate-400 transition hover:text-[#190A2F] sm:inline-flex"
+              className="mb-2 hidden items-center gap-2 text-xs font-bold uppercase tracking-[.14em] text-slate-400 transition hover:text-ink sm:inline-flex"
             >
               logicsify.com
               <ArrowUpRight className="h-4 w-4" />
@@ -167,12 +168,12 @@ function ConnectProfilePage() {
             ) : null}
             <div
               className="mt-5 h-1.5 w-20 rounded-full"
-              style={{ background: `linear-gradient(90deg, ${accent}, #FDBE02)` }}
+              style={{ background: `linear-gradient(90deg, ${accent}, var(--theme-primary-end))` }}
             />
           </div>
 
           {profile.bio ? (
-            <div className="mt-7 rounded-3xl border border-slate-100 bg-[#faf8fc] p-5 sm:p-6">
+            <div className="mt-7 rounded-3xl border border-slate-100 bg-cream p-5 sm:p-6">
               <p className="whitespace-pre-line text-sm leading-7 text-slate-600">{profile.bio}</p>
             </div>
           ) : null}
@@ -184,13 +185,13 @@ function ConnectProfilePage() {
                   key={location.id}
                   className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-xs text-slate-600 shadow-sm"
                 >
-                  <MapPin className="h-3.5 w-3.5 text-[#FE3434]" />
-                  <span className="font-semibold text-[#190A2F]">{location.name} office</span>
+                  <MapPin className="h-3.5 w-3.5 text-brand-red" />
+                  <span className="font-semibold text-ink">{location.name} office</span>
                   {getLocationPhones(location).map((phone) => (
                     <a
                       key={phone}
                       href={telHref(phone)}
-                      className="border-l border-slate-200 pl-2 font-medium hover:text-[#FE3434]"
+                      className="border-l border-slate-200 pl-2 font-medium hover:text-brand-red"
                     >
                       Office: {phone}
                     </a>
@@ -207,8 +208,8 @@ function ConnectProfilePage() {
                 href={href}
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel="noreferrer"
-                className="group flex items-center justify-between rounded-2xl px-5 py-4 text-sm font-semibold text-white shadow-[0_14px_35px_-20px_rgba(25,10,47,.8)] transition hover:-translate-y-0.5 hover:shadow-lg"
-                style={{ background: `linear-gradient(115deg, ${accent}, #ff5941)` }}
+                className="group flex items-center justify-between rounded-2xl px-5 py-4 text-sm font-semibold text-white shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-lg"
+                style={{ background: `linear-gradient(115deg, ${accent}, var(--theme-primary-end))` }}
               >
                 <span className="flex items-center gap-3">
                   <Icon className="h-4 w-4" />
@@ -220,8 +221,8 @@ function ConnectProfilePage() {
           </div>
 
           {profile.address ? (
-            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_12px_34px_-28px_rgba(25,10,47,.55)]">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#f5eff8] text-[#190A2F]">
+            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-sm leading-6 text-slate-600 shadow-[var(--shadow-card)]">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-lavender text-ink">
                 <MapPin className="h-4 w-4" />
               </span>
               <span className="pt-1">
@@ -256,7 +257,7 @@ function ConnectProfilePage() {
                       rel="noreferrer"
                       className="group flex items-center gap-3 rounded-2xl border border-slate-200 p-3.5 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
                     >
-                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#190A2F] text-white shadow-sm">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-ink text-white shadow-sm">
                         <Icon className="h-5 w-5" />
                       </span>
                       <span className="min-w-0 flex-1">
@@ -267,7 +268,7 @@ function ConnectProfilePage() {
                           {CONNECT_PROFILE_PLATFORM_LABELS[platform]}
                         </span>
                       </span>
-                      <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-[#190A2F]" />
+                      <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-ink" />
                     </a>
                   );
                 })}
@@ -293,14 +294,14 @@ function ConnectProfilePage() {
                   return (
                     <article
                       key={location.id}
-                      className="rounded-2xl border border-slate-200 bg-[#faf8fc] p-4"
+                      className="rounded-2xl border border-slate-200 bg-cream p-4"
                     >
                       <div className="flex items-start gap-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-ink shadow-sm">
                           <MapPin className="h-4 w-4" />
                         </span>
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-[#190A2F]">{location.name}</h3>
+                          <h3 className="font-semibold text-ink">{location.name}</h3>
                           {[location.city, location.country].filter(Boolean).length ? (
                             <p className="mt-1 text-xs text-slate-400">
                               {[location.city, location.country].filter(Boolean).join(", ")}
@@ -312,9 +313,9 @@ function ConnectProfilePage() {
                         <a
                           key={phone}
                           href={telHref(phone)}
-                          className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#190A2F]"
+                          className="mt-4 flex items-center gap-2 text-sm font-semibold text-ink"
                         >
-                          <Phone className="h-4 w-4 text-[#FE3434]" />
+                          <Phone className="h-4 w-4 text-brand-red" />
                           Office: {phone}
                         </a>
                       ))}
@@ -330,7 +331,7 @@ function ConnectProfilePage() {
                           href={mapUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#FE3434]"
+                          className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-red"
                         >
                           Open map <ArrowUpRight className="h-3.5 w-3.5" />
                         </a>
@@ -364,7 +365,7 @@ function ConnectProfilePage() {
                       rel="noreferrer"
                       title={social.label}
                       aria-label={social.label}
-                      className="grid h-12 w-12 place-items-center rounded-2xl bg-[#190A2F] text-white transition hover:-translate-y-0.5 hover:bg-[#FE3434]"
+                      className="grid h-12 w-12 place-items-center rounded-2xl bg-ink text-white transition hover:-translate-y-0.5 hover:bg-brand-red"
                     >
                       <Icon className="h-5 w-5" />
                     </a>
@@ -375,7 +376,7 @@ function ConnectProfilePage() {
           ) : null}
 
           <div className="mt-9 flex items-center justify-center gap-3 border-t border-slate-100 pt-7">
-            <img src="/logicsify-mark.png" alt="" className="h-6 w-auto" />
+            <BrandMarkImage alt="" className="h-6 w-6 object-contain" />
             <p className="text-[10px] font-bold uppercase tracking-[.2em] text-slate-300">
               Powered by Logicsify
             </p>

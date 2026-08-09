@@ -10,7 +10,7 @@ export function AdminCard({
 }) {
   return (
     <section
-      className={`rounded-2xl border border-slate-200 bg-white shadow-[0_16px_50px_-38px_rgba(25,10,47,0.45)] ${className}`}
+      className={`admin-card rounded-2xl border border-slate-200 bg-white shadow-[var(--shadow-card)] ${className}`}
     >
       {children}
     </section>
@@ -32,13 +32,13 @@ export function AdminPageHeader({
     <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
         {eyebrow ? (
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+          <p className="admin-page-eyebrow mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-3xl font-semibold tracking-tight text-[#190A2F]">{title}</h1>
+        <h1 className="admin-page-title text-3xl font-semibold tracking-tight text-ink">{title}</h1>
         {description ? (
-          <p className="mt-2 max-w-3xl text-sm text-slate-500">{description}</p>
+          <p className="admin-page-description mt-2 max-w-3xl text-sm text-slate-500">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
@@ -65,7 +65,7 @@ export function AdminButton({
 }) {
   const styles = {
     primary:
-      "bg-[#190A2F] text-white hover:bg-[#2a1546] shadow-[0_12px_30px_-18px_rgba(25,10,47,0.9)]",
+      "bg-ink text-white hover:bg-ink/90 shadow-[var(--shadow-card)]",
     secondary:
       "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
     danger: "bg-red-50 text-red-700 hover:bg-red-100 border border-red-100",
@@ -78,7 +78,8 @@ export function AdminButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:pointer-events-none disabled:opacity-50 ${styles} ${className}`}
+      data-admin-variant={variant}
+      className={`admin-button inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:pointer-events-none disabled:opacity-50 ${styles} ${className}`}
     >
       {children}
     </button>
@@ -130,13 +131,13 @@ export function AdminModal({
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[#190A2F]/60 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm">
       <div
-        className={`max-h-[92vh] w-full overflow-hidden rounded-3xl bg-white shadow-2xl ${width}`}
+        className={`admin-modal-panel max-h-[92vh] w-full overflow-hidden rounded-3xl bg-white shadow-2xl ${width}`}
       >
         <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
           <div>
-            <h2 className="text-xl font-semibold text-[#190A2F]">{title}</h2>
+            <h2 className="text-xl font-semibold text-ink">{title}</h2>
             {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
           </div>
           <button
@@ -173,7 +174,7 @@ export function EmptyState({
   return (
     <div className="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
       <div className="mb-4 h-12 w-12 rounded-2xl bg-gradient-brand opacity-90" />
-      <h3 className="text-lg font-semibold text-[#190A2F]">{title}</h3>
+      <h3 className="text-lg font-semibold text-ink">{title}</h3>
       {description ? <p className="mt-2 max-w-md text-sm text-slate-500">{description}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
@@ -189,7 +190,7 @@ export function FieldLabel({ children }: { children: ReactNode }) {
 }
 
 export const adminInputClass =
-  "h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-[#190A2F] outline-none transition placeholder:text-slate-400 focus:border-[#FE3434] focus:ring-4 focus:ring-[#FE3434]/10";
+  "admin-input h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-red focus:ring-4 focus:ring-brand-red/10";
 
 export const adminTextareaClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-[#190A2F] outline-none transition placeholder:text-slate-400 focus:border-[#FE3434] focus:ring-4 focus:ring-[#FE3434]/10";
+  "admin-textarea w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-red focus:ring-4 focus:ring-brand-red/10";

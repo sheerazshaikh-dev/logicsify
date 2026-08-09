@@ -768,7 +768,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
             {device === "desktop" ? (
               <select
                 aria-label="Preview zoom"
-                className="rounded-lg border border-black/10 bg-white px-3 py-2 text-xs font-medium outline-none hover:bg-black/5 focus:border-violet-400"
+                className="rounded-lg border border-black/10 bg-white px-3 py-2 text-xs font-medium outline-none hover:bg-black/5 focus:border-brand-red"
                 value={String(zoomMode)}
                 onChange={(event) => {
                   const value = event.target.value;
@@ -784,7 +784,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
 
             <button
               type="button"
-              className={`rounded-lg border p-2 ${inspectorOpen ? "border-violet-200 bg-violet-50 text-violet-700" : "border-black/10 bg-white hover:bg-black/5"}`}
+              className={`rounded-lg border p-2 ${inspectorOpen ? "border-brand-red/20 bg-brand-red/5 text-brand-red" : "border-black/10 bg-white hover:bg-black/5"}`}
               title={inspectorOpen ? "Hide editor panel" : "Show editor panel"}
               onClick={() => setInspectorOpen((open) => !open)}
             >
@@ -834,7 +834,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
         >
           <div
             ref={previewHostRef}
-            className="relative min-w-0 overflow-auto bg-[#e9e9e5] p-4 sm:p-6"
+            className="relative min-w-0 overflow-auto bg-cream p-4 sm:p-6"
           >
             {loading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center gap-3 bg-white/85 text-sm">
@@ -874,7 +874,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
           </div>
 
           {inspectorOpen ? (
-            <aside className="min-h-0 overflow-y-auto border-t border-black/8 bg-[#fafaf8] xl:border-l xl:border-t-0">
+            <aside className="min-h-0 overflow-y-auto border-t border-black/8 bg-cream xl:border-l xl:border-t-0">
               <div className="border-b border-black/8 p-5">
                 <h4 className="text-sm font-semibold">Selected element</h4>
                 {selectedFields.length || elementContext ? (
@@ -893,20 +893,20 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
                       />
                     ))}
                     {repeatContext ? (
-                      <div className="rounded-xl border border-violet-200 bg-violet-50 p-3">
-                        <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-violet-700">
+                      <div className="rounded-xl border border-brand-red/20 bg-brand-red/5 p-3">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
                           Repeating card / item
                         </div>
-                        <div className="mt-1 text-xs font-semibold text-violet-950">
+                        <div className="mt-1 text-xs font-semibold text-ink">
                           {repeatContext.label}
                         </div>
-                        <div className="mt-1 text-[11px] text-violet-800/75">
+                        <div className="mt-1 text-[11px] text-ink-soft">
                           {repeatContext.item_count} items in this group
                         </div>
                         <div className="mt-3 grid grid-cols-2 gap-2">
                           <button
                             type="button"
-                            className="flex items-center justify-center gap-1.5 rounded-lg bg-violet-700 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-800"
+                            className="flex items-center justify-center gap-1.5 rounded-lg bg-gradient-brand px-3 py-2 text-xs font-semibold text-white hover:opacity-90"
                             onClick={() => mutateRepeat("duplicate")}
                           >
                             <Plus className="size-3.5" /> Add / duplicate
@@ -1022,7 +1022,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
                         >
                           {index + 1}. {section.label}
                           {section.is_clone ? (
-                            <span className="ml-1 text-[9px] uppercase text-violet-600">copy</span>
+                            <span className="ml-1 text-[9px] uppercase text-brand-red">copy</span>
                           ) : null}
                         </button>
                         <button
@@ -1051,7 +1051,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
                         </button>
                         <button
                           type="button"
-                          className="rounded-md p-1 text-violet-700 hover:bg-violet-50"
+                          className="rounded-md p-1 text-brand-red hover:bg-brand-red/5"
                           title="Duplicate section"
                           onClick={() => {
                             setDuplicateSection(section);
@@ -1098,7 +1098,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
                       type="button"
                       key={field.key}
                       onClick={() => focusField(field.key)}
-                      className={`block w-full rounded-xl border p-3 text-left transition ${selectedKeys.includes(field.key) ? "border-violet-300 bg-violet-50" : "border-black/8 bg-white hover:border-black/20"}`}
+                      className={`block w-full rounded-xl border p-3 text-left transition ${selectedKeys.includes(field.key) ? "border-brand-red/30 bg-brand-red/5" : "border-black/8 bg-white hover:border-black/20"}`}
                     >
                       <span className="block truncate text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                         {field.section_label || "Page"} ·{" "}
@@ -1136,7 +1136,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="flex size-10 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                <div className="flex size-10 items-center justify-center rounded-full bg-brand-red/10 text-brand-red">
                   <Layers3 className="size-5" />
                 </div>
                 <h3 className="mt-4 text-xl font-bold">Duplicate section</h3>
@@ -1156,7 +1156,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
                 <button
                   type="button"
                   disabled={duplicating}
-                  className="rounded-2xl border border-black/10 p-4 text-left hover:border-violet-300 hover:bg-violet-50 disabled:opacity-60"
+                  className="rounded-2xl border border-black/10 p-4 text-left hover:border-brand-red/30 hover:bg-brand-red/5 disabled:opacity-60"
                   onClick={() => void duplicateToCurrent()}
                 >
                   <div className="flex items-center gap-2 font-semibold">
@@ -1173,7 +1173,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
                 </button>
                 <button
                   type="button"
-                  className="rounded-2xl border border-black/10 p-4 text-left hover:border-violet-300 hover:bg-violet-50"
+                  className="rounded-2xl border border-black/10 p-4 text-left hover:border-brand-red/30 hover:bg-brand-red/5"
                   onClick={() => void openAnotherPageStep()}
                 >
                   <div className="flex items-center gap-2 font-semibold">
@@ -1188,7 +1188,7 @@ export function NativePageVisualEditor({ page, onChange, setNotice }: Props) {
               <div className="mt-6">
                 <label className="text-xs font-semibold">Choose destination page</label>
                 <select
-                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-3 text-sm outline-none focus:border-violet-400"
+                  className="mt-2 w-full rounded-xl border border-black/10 bg-white px-3 py-3 text-sm outline-none focus:border-brand-red"
                   value={targetPageId}
                   onChange={(event) => setTargetPageId(event.target.value)}
                 >
@@ -1383,7 +1383,7 @@ function FieldControl({
       </div>
       {field.type === "icon" ? (
         <div className="mt-3">
-          <div className="mb-3 flex items-center gap-3 rounded-lg bg-[#fafaf8] p-3">
+          <div className="mb-3 flex items-center gap-3 rounded-lg bg-cream p-3">
             <CmsIconPreview name={value} className="size-7" />
             <div>
               <div className="text-xs font-semibold">Current icon</div>
@@ -1391,7 +1391,7 @@ function FieldControl({
             </div>
           </div>
           <select
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-xs outline-none focus:border-violet-400"
+            className="w-full rounded-lg border border-black/10 px-3 py-2 text-xs outline-none focus:border-brand-red"
             value={value}
             onChange={(event) => onChange(event.target.value)}
           >

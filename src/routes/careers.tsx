@@ -109,7 +109,7 @@ function CareersPage() {
                 <a
                   href={`mailto:${role.email}?subject=${encodeURIComponent(`Application: ${role.title}`)}`}
                   key={role.slug}
-                  className="group flex items-center justify-between gap-4 rounded-2xl border border-black/10 bg-white p-6 hover:border-black/30 hover:shadow-[0_10px_30px_-15px_rgba(25,10,47,0.2)] transition-all"
+                  className="group flex items-center justify-between gap-4 rounded-2xl border border-black/10 bg-white p-6 hover:border-black/30 hover:shadow-[var(--shadow-card)] transition-all"
                 >
                   <div>
                     <h3 className="text-xl font-semibold group-hover:text-gradient transition">

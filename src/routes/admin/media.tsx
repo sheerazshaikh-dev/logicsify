@@ -130,12 +130,12 @@ function MediaPage() {
           <button
             type="button"
             onClick={() => setUploadOpen(true)}
-            className="m-4 mb-0 flex w-[calc(100%-2rem)] items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-500 transition hover:border-[#FE3434]/35 hover:bg-[#FE3434]/[0.025] hover:text-[#190A2F]"
+            className="m-4 mb-0 flex w-[calc(100%-2rem)] items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-500 transition hover:border-brand-red/35 hover:bg-brand-red/[0.025] hover:text-ink"
           >
             {dropUploading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-[#FE3434]" />
+              <Loader2 className="h-5 w-5 animate-spin text-brand-red" />
             ) : (
-              <UploadCloud className="h-5 w-5 text-[#FE3434]" />
+              <UploadCloud className="h-5 w-5 text-brand-red" />
             )}
             {dropUploading
               ? "Uploading dropped files…"
@@ -169,7 +169,7 @@ function MediaPage() {
               {filtered.map((item) => (
                 <article
                   key={item.id}
-                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-[#FE3434]/30 hover:shadow-lg"
+                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-brand-red/30 hover:shadow-lg"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                     {item.mime_type.startsWith("image/") ? (
@@ -198,7 +198,7 @@ function MediaPage() {
                     <div className="absolute inset-x-0 bottom-0 flex translate-y-full justify-end gap-1 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10 transition group-hover:translate-y-0">
                       <button
                         onClick={() => void copyUrl(item.url)}
-                        className="rounded-lg bg-white/90 p-2 text-[#190A2F]"
+                        className="rounded-lg bg-white/90 p-2 text-ink"
                         title="Copy URL"
                       >
                         <Copy className="h-4 w-4" />
@@ -213,7 +213,7 @@ function MediaPage() {
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="truncate text-xs font-semibold text-[#190A2F]">
+                    <p className="truncate text-xs font-semibold text-ink">
                       {item.original_name}
                     </p>
                     <p className="mt-1 text-[10px] text-slate-400">
@@ -231,12 +231,12 @@ function MediaPage() {
           )}
         </AdminCard>
         {dragActive ? (
-          <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center rounded-3xl border-2 border-dashed border-[#FE3434] bg-white/90 p-8 backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center rounded-3xl border-2 border-dashed border-brand-red bg-white/90 p-8 backdrop-blur-sm">
             <div className="text-center">
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#FE3434]/10 text-[#FE3434]">
+              <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-brand-red/10 text-brand-red">
                 <UploadCloud className="h-7 w-7" />
               </span>
-              <p className="mt-4 text-lg font-semibold text-[#190A2F]">Drop files to upload</p>
+              <p className="mt-4 text-lg font-semibold text-ink">Drop files to upload</p>
               <p className="mt-1 text-sm text-slate-500">
                 Original image dimensions are preserved.
               </p>
@@ -338,11 +338,11 @@ function UploadModal({
       width="max-w-2xl"
     >
       <form onSubmit={submit} className="space-y-5">
-        <label className="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition hover:border-[#FE3434]/50 hover:bg-[#FE3434]/[0.025]">
-          <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white text-[#FE3434] shadow-sm">
+        <label className="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition hover:border-brand-red/50 hover:bg-brand-red/[0.025]">
+          <span className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white text-brand-red shadow-sm">
             <UploadCloud className="h-6 w-6" />
           </span>
-          <span className="text-sm font-semibold text-[#190A2F]">
+          <span className="text-sm font-semibold text-ink">
             {files.length
               ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
               : "Choose files or drop them here"}
@@ -372,10 +372,10 @@ function UploadModal({
                 {file.type.startsWith("video/") ? (
                   <Video className="h-4 w-4 shrink-0 text-violet-500" />
                 ) : (
-                  <FileText className="h-4 w-4 shrink-0 text-[#FE3434]" />
+                  <FileText className="h-4 w-4 shrink-0 text-brand-red" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold text-[#190A2F]">{file.name}</p>
+                  <p className="truncate text-xs font-semibold text-ink">{file.name}</p>
                   <p className="mt-0.5 text-[10px] text-slate-400">{formatBytes(file.size)}</p>
                 </div>
                 <button

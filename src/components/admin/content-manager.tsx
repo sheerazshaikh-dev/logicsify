@@ -436,11 +436,11 @@ export function ContentManagerPage({
             }}
             className={`rounded-2xl border p-4 text-left transition ${
               status === value
-                ? "border-[#FE3434]/30 bg-white shadow-[0_15px_40px_-30px_rgba(254,52,52,0.7)]"
+                ? "border-brand-red/30 bg-white shadow-[var(--shadow-glow)]"
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-2xl font-semibold text-[#190A2F]">{Number(count)}</p>
+            <p className="text-2xl font-semibold text-ink">{Number(count)}</p>
             <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
               {String(label)}
             </p>
@@ -533,7 +533,7 @@ export function ContentManagerPage({
                       onChange={(event) =>
                         setSelected(event.target.checked ? items.map((item) => item.id) : [])
                       }
-                      className="h-4 w-4 cursor-pointer accent-[#FE3434]"
+                      className="h-4 w-4 cursor-pointer accent-brand-red"
                       aria-label="Select all"
                     />
                   </th>
@@ -554,7 +554,7 @@ export function ContentManagerPage({
                   return (
                     <tr
                       key={item.id}
-                      className={`border-b border-slate-100 transition hover:bg-slate-50/70 ${checked ? "bg-[#FE3434]/[0.035]" : ""}`}
+                      className={`border-b border-slate-100 transition hover:bg-slate-50/70 ${checked ? "bg-brand-red/[0.035]" : ""}`}
                     >
                       <td className="px-5 py-4">
                         <input
@@ -567,7 +567,7 @@ export function ContentManagerPage({
                                 : current.filter((id) => id !== item.id),
                             )
                           }
-                          className="h-4 w-4 cursor-pointer accent-[#FE3434]"
+                          className="h-4 w-4 cursor-pointer accent-brand-red"
                           aria-label={`Select ${item.title}`}
                         />
                       </td>
@@ -587,7 +587,7 @@ export function ContentManagerPage({
                           <div className="min-w-0">
                             <button
                               onClick={() => openEdit(item)}
-                              className="block max-w-[420px] truncate text-left text-sm font-semibold text-[#190A2F] hover:text-[#FE3434]"
+                              className="block max-w-[420px] truncate text-left text-sm font-semibold text-ink hover:text-brand-red"
                             >
                               {item.title}
                             </button>
@@ -618,7 +618,7 @@ export function ContentManagerPage({
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => openEdit(item)}
-                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#190A2F]"
+                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-ink"
                             title="Edit"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -628,7 +628,7 @@ export function ContentManagerPage({
                               href={contentPublicPath(item.content_type, item.slug) || "/"}
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#190A2F]"
+                              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-ink"
                               title="Preview"
                             >
                               <Eye className="h-4 w-4" />
@@ -636,7 +636,7 @@ export function ContentManagerPage({
                           ) : null}
                           <button
                             onClick={() => void duplicate(item.id)}
-                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#190A2F]"
+                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-ink"
                             title="Duplicate"
                           >
                             <Copy className="h-4 w-4" />
@@ -715,7 +715,7 @@ export function ContentManagerPage({
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-semibold text-[#190A2F]">{row.title}</h3>
+                      <h3 className="font-semibold text-ink">{row.title}</h3>
                       <p className="mt-1 text-xs text-slate-400">/{row.slug} · Draft</p>
                     </div>
                     <StatusBadge status={row.imported ? "draft" : "error"} />
@@ -1025,7 +1025,7 @@ function ContentEditor({
               key={String(value)}
               onClick={() => setTab(value as typeof tab)}
               disabled={value === "history" && !form.id}
-              className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:opacity-40 ${tab === value ? "bg-[#190A2F] text-white" : "bg-slate-100 text-slate-500 hover:text-[#190A2F]"}`}
+              className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:opacity-40 ${tab === value ? "bg-ink text-white" : "bg-slate-100 text-slate-500 hover:text-ink"}`}
             >
               <Icon className="h-4 w-4" /> {String(label)}
             </button>
@@ -1035,7 +1035,7 @@ function ContentEditor({
             type="button"
             onClick={undoHistory}
             disabled={!canUndo}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-sm font-semibold text-slate-500 transition hover:text-[#190A2F] disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-sm font-semibold text-slate-500 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-35"
             title="Undo"
           >
             <Undo2 className="h-4 w-4" /> Undo
@@ -1044,7 +1044,7 @@ function ContentEditor({
             type="button"
             onClick={redoHistory}
             disabled={!canRedo}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-sm font-semibold text-slate-500 transition hover:text-[#190A2F] disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-sm font-semibold text-slate-500 transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-35"
             title="Redo"
           >
             <Redo2 className="h-4 w-4" /> Redo
@@ -1088,7 +1088,7 @@ function ContentEditor({
           ) : (
             <AdminCard className="p-10 text-center">
               <Monitor className="mx-auto h-10 w-10 text-slate-300" />
-              <h3 className="mt-4 text-lg font-semibold text-[#190A2F]">Save the page first</h3>
+              <h3 className="mt-4 text-lg font-semibold text-ink">Save the page first</h3>
               <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
                 Create the page once, then reopen it to edit the real Logicsify design visually.
               </p>
@@ -1127,19 +1127,19 @@ function ContentEditor({
               </div>
               <div>
                 <FieldLabel>Slug</FieldLabel>
-                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 pl-3 text-sm text-slate-400 focus-within:border-[#FE3434] focus-within:ring-4 focus-within:ring-[#FE3434]/10">
+                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 pl-3 text-sm text-slate-400 focus-within:border-brand-red focus-within:ring-4 focus-within:ring-brand-red/10">
                   <span>/</span>
                   <input
                     value={form.slug || ""}
                     onChange={(event) => setField("slug", slugify(event.target.value))}
-                    className="h-11 flex-1 bg-transparent px-1.5 text-[#190A2F] outline-none"
+                    className="h-11 flex-1 bg-transparent px-1.5 text-ink outline-none"
                   />
                 </div>
               </div>
               {form.content_type === "testimonial" ? (
                 <AdminCard className="space-y-5 p-5">
                   <div>
-                    <h3 className="text-base font-semibold text-[#190A2F]">Testimonial details</h3>
+                    <h3 className="text-base font-semibold text-ink">Testimonial details</h3>
                     <p className="mt-1 text-xs leading-5 text-slate-400">
                       Publish a written quote or a hosted/embedded video testimonial.
                     </p>
@@ -1286,7 +1286,7 @@ function ContentEditor({
 
             <div className="space-y-5">
               <AdminCard className="p-5">
-                <h3 className="mb-4 text-sm font-semibold text-[#190A2F]">Publishing</h3>
+                <h3 className="mb-4 text-sm font-semibold text-ink">Publishing</h3>
                 <div className="space-y-4">
                   <div>
                     <FieldLabel>Status</FieldLabel>
@@ -1332,10 +1332,10 @@ function ContentEditor({
                       type="checkbox"
                       checked={Boolean(form.featured)}
                       onChange={(event) => setField("featured", event.target.checked)}
-                      className="h-4 w-4 accent-[#FE3434]"
+                      className="h-4 w-4 accent-brand-red"
                     />
                     <span>
-                      <span className="block text-sm font-semibold text-[#190A2F]">Featured</span>
+                      <span className="block text-sm font-semibold text-ink">Featured</span>
                       <span className="block text-xs text-slate-400">
                         Prioritize this item in website listings.
                       </span>
@@ -1346,12 +1346,12 @@ function ContentEditor({
 
               <AdminCard className="p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#190A2F]">
+                  <h3 className="text-sm font-semibold text-ink">
                     {form.content_type === "testimonial" ? "Fallback image" : "Featured image"}
                   </h3>
                   <button
                     onClick={() => chooseMedia("featured")}
-                    className="text-xs font-semibold text-[#FE3434]"
+                    className="text-xs font-semibold text-brand-red"
                   >
                     Media library
                   </button>
@@ -1382,7 +1382,7 @@ function ContentEditor({
               </AdminCard>
 
               <AdminCard className="p-5">
-                <h3 className="mb-4 text-sm font-semibold text-[#190A2F]">Classification</h3>
+                <h3 className="mb-4 text-sm font-semibold text-ink">Classification</h3>
                 <div className="space-y-4">
                   <div>
                     <FieldLabel>Category</FieldLabel>
@@ -1418,7 +1418,7 @@ function ContentEditor({
         {tab === "seo" ? (
           <div className="grid gap-6 lg:grid-cols-2">
             <AdminCard className="space-y-5 p-5">
-              <h3 className="text-base font-semibold text-[#190A2F]">Search metadata</h3>
+              <h3 className="text-base font-semibold text-ink">Search metadata</h3>
               <div>
                 <FieldLabel>SEO title</FieldLabel>
                 <input
@@ -1452,10 +1452,10 @@ function ContentEditor({
                   type="checkbox"
                   checked={Boolean(seoJson.noindex)}
                   onChange={(event) => updateSeo("noindex", event.target.checked)}
-                  className="h-4 w-4 accent-[#FE3434]"
+                  className="h-4 w-4 accent-brand-red"
                 />
                 <span>
-                  <span className="block text-sm font-semibold text-[#190A2F]">
+                  <span className="block text-sm font-semibold text-ink">
                     Hide from search engines
                   </span>
                   <span className="block text-xs text-slate-400">
@@ -1465,7 +1465,7 @@ function ContentEditor({
               </label>
             </AdminCard>
             <AdminCard className="space-y-5 p-5">
-              <h3 className="text-base font-semibold text-[#190A2F]">Social sharing</h3>
+              <h3 className="text-base font-semibold text-ink">Social sharing</h3>
               <div>
                 <FieldLabel>Open Graph image</FieldLabel>
                 <input
@@ -1491,7 +1491,7 @@ function ContentEditor({
                   <p className="text-[11px] uppercase tracking-[0.12em] text-slate-400">
                     logicsify.com
                   </p>
-                  <p className="mt-1 font-semibold text-[#190A2F]">
+                  <p className="mt-1 font-semibold text-ink">
                     {seoJson.title || form.title || "Page title"}
                   </p>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-500">
@@ -1517,7 +1517,7 @@ function ContentEditor({
                 {revisions.map((revision) => (
                   <div key={revision.id} className="flex items-center justify-between gap-4 p-5">
                     <div>
-                      <p className="font-semibold text-[#190A2F]">
+                      <p className="font-semibold text-ink">
                         {revision.snapshot.title || singular}
                       </p>
                       <p className="mt-1 text-xs text-slate-400">
@@ -1812,7 +1812,7 @@ function StructuredContentFields({
     return (
       <AdminCard className="space-y-5 p-5">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Service page details</h3>
+          <h3 className="text-base font-semibold text-ink">Service page details</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Core and Other service placement is controlled by the approved service slug. All page
             copy remains editable here.
@@ -1859,7 +1859,7 @@ function StructuredContentFields({
     return (
       <AdminCard className="space-y-5 p-5">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Case study details</h3>
+          <h3 className="text-base font-semibold text-ink">Case study details</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Only publish claims and results supported by the client.
           </p>
@@ -1907,7 +1907,7 @@ function StructuredContentFields({
     return (
       <AdminCard className="space-y-5 p-5">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Insight and news details</h3>
+          <h3 className="text-base font-semibold text-ink">Insight and news details</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Use a source link for third-party technology updates and write an original summary.
           </p>
@@ -1944,7 +1944,7 @@ function StructuredContentFields({
     return (
       <AdminCard className="space-y-5 p-5">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Guide file and access</h3>
+          <h3 className="text-base font-semibold text-ink">Guide file and access</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             The public API hides the guide file URL until a valid download form is submitted.
           </p>
@@ -1970,7 +1970,7 @@ function StructuredContentFields({
     return (
       <AdminCard className="space-y-5 p-5">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Team profile</h3>
+          <h3 className="text-base font-semibold text-ink">Team profile</h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Incomplete or draft profiles are not shown publicly.
           </p>
@@ -1987,7 +1987,7 @@ function StructuredContentFields({
   if (type === "comparison") {
     return (
       <AdminCard className="space-y-5 p-5">
-        <h3 className="text-base font-semibold text-[#190A2F]">Comparison details</h3>
+        <h3 className="text-base font-semibold text-ink">Comparison details</h3>
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Option A", "option_a")}
           {textField("Option B", "option_b")}
@@ -2047,7 +2047,7 @@ function StructuredContentFields({
   if (type === "engagement_model") {
     return (
       <AdminCard className="space-y-5 p-5">
-        <h3 className="text-base font-semibold text-[#190A2F]">Engagement model details</h3>
+        <h3 className="text-base font-semibold text-ink">Engagement model details</h3>
         {textField("Best for", "best_for", "Describe the right project fit.", true)}
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Typical project type", "typical_project")}
@@ -2084,7 +2084,7 @@ function StructuredContentFields({
   if (type === "integration") {
     return (
       <AdminCard className="space-y-5 p-5">
-        <h3 className="text-base font-semibold text-[#190A2F]">Integration details</h3>
+        <h3 className="text-base font-semibold text-ink">Integration details</h3>
         <div className="grid gap-4 md:grid-cols-2">
           {textField("Category", "category", "CRM, AI, Marketing…")}
           {mediaField("Platform logo", "logo")}
@@ -2095,7 +2095,7 @@ function StructuredContentFields({
             type="checkbox"
             checked={Boolean(content.formal_partnership)}
             onChange={(e) => update("formal_partnership", e.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-[#FE3434]"
+            className="mt-0.5 h-4 w-4 accent-brand-red"
           />
           <span>
             <strong>Formal partnership verified.</strong> Keep unchecked unless Logicsify has
@@ -2221,7 +2221,7 @@ function SectionBuilder({
     <AdminCard className="p-5">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-[#190A2F]">Page sections</h3>
+          <h3 className="text-base font-semibold text-ink">Page sections</h3>
           <p className="mt-1 text-xs text-slate-400">
             Create reusable visual sections below the main body.
           </p>
@@ -2257,7 +2257,7 @@ function SectionBuilder({
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#190A2F] text-xs font-bold text-white">
+                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-ink text-xs font-bold text-white">
                     {index + 1}
                   </span>
                   <select

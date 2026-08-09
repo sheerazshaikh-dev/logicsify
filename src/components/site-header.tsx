@@ -78,8 +78,14 @@ export function SiteHeader() {
         }
       })
       .catch(() => undefined);
+    const onBrandingUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<PublicSiteSettings>).detail;
+      if (detail) setSiteSettings(detail);
+    };
+    window.addEventListener("logicsify:branding-updated", onBrandingUpdated);
     return () => {
       active = false;
+      window.removeEventListener("logicsify:branding-updated", onBrandingUpdated);
     };
   }, []);
 
@@ -370,7 +376,7 @@ function DefaultMegaMenu({
       onMouseLeave={onLeave}
     >
       <div className="container-page pt-2">
-        <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(25,10,47,0.35)] border border-black/5 overflow-hidden">
+        <div className="rounded-3xl bg-white shadow-[var(--shadow-card)] border border-black/5 overflow-hidden">
           <div className="grid grid-cols-12">
             <div
               className={cx(
@@ -432,7 +438,7 @@ function DefaultMegaMenu({
             </div>
             {promoEnabled ? (
               <div className="col-span-3 p-8 bg-ink text-white relative overflow-hidden">
-                <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_20%,rgba(254,52,52,0.35),transparent_60%),radial-gradient(circle_at_80%_80%,rgba(253,190,2,0.25),transparent_60%)]" />
+                <div className="absolute inset-0 opacity-40 brand-radial-glow" />
                 <div className="relative">
                   <p className="eyebrow text-white/60 mb-3">
                     {item.megaPromoEyebrow || "Technical roadmap"}

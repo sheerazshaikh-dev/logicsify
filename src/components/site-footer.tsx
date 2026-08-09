@@ -59,8 +59,14 @@ export function SiteFooter() {
     getPublicSiteSettings()
       .then((value) => active && setSettings(value))
       .catch(() => undefined);
+    const onBrandingUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<PublicSiteSettings>).detail;
+      if (detail) setSettings(detail);
+    };
+    window.addEventListener("logicsify:branding-updated", onBrandingUpdated);
     return () => {
       active = false;
+      window.removeEventListener("logicsify:branding-updated", onBrandingUpdated);
     };
   }, []);
 
@@ -173,7 +179,7 @@ export function SiteFooter() {
                     className="flex min-h-52 flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-5"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10 text-[#FDBE02]">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10 text-brand-gold">
                         <MapPin className="h-4 w-4" />
                       </span>
                       <div>
@@ -208,7 +214,7 @@ export function SiteFooter() {
                           href={mapUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-2 inline-flex font-semibold text-white hover:text-[#FDBE02]"
+                          className="mt-2 inline-flex font-semibold text-white hover:text-brand-gold"
                         >
                           Open in maps →
                         </a>
@@ -254,7 +260,7 @@ function ContactLink({
 }) {
   return (
     <a href={href} className="group flex items-start gap-3">
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-white/35 transition group-hover:text-[#FDBE02]" />
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-white/35 transition group-hover:text-brand-gold" />
       <span className="min-w-0">
         <span className="block text-[10px] uppercase tracking-[0.16em] text-white/35">{label}</span>
         <span className="mt-0.5 block min-h-5 break-all text-white/70 transition group-hover:text-white">

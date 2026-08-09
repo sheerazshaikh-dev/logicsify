@@ -113,15 +113,15 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
             <a
               key={card.label}
               href={adminHref(card.to.replace(/^\/admin\//, ""))}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_50px_-38px_rgba(25,10,47,0.45)] transition hover:-translate-y-0.5 hover:border-[#FE3434]/30 hover:shadow-xl"
+              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-brand-red/30 hover:shadow-xl"
             >
               <div className="flex items-start justify-between">
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-[#190A2F] transition group-hover:bg-gradient-brand group-hover:text-white">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-ink transition group-hover:bg-gradient-brand group-hover:text-white">
                   <Icon className="h-5 w-5" />
                 </span>
-                <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-[#FE3434]" />
+                <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-brand-red" />
               </div>
-              <p className="mt-5 text-3xl font-semibold text-[#190A2F]">{card.value}</p>
+              <p className="mt-5 text-3xl font-semibold text-ink">{card.value}</p>
               <p className="mt-1 text-sm font-semibold text-slate-700">{card.label}</p>
               <p className="mt-2 text-xs leading-5 text-slate-400">{card.note}</p>
             </a>
@@ -133,10 +133,10 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
         <AdminCard>
           <div className="flex items-center justify-between border-b border-slate-200 p-5">
             <div>
-              <h2 className="font-semibold text-[#190A2F]">Content overview</h2>
+              <h2 className="font-semibold text-ink">Content overview</h2>
               <p className="mt-1 text-xs text-slate-400">Publication status by content type</p>
             </div>
-            <Sparkles className="h-5 w-5 text-[#FE3434]" />
+            <Sparkles className="h-5 w-5 text-brand-red" />
           </div>
           <div className="divide-y divide-slate-100">
             {Object.entries(data.summary.content).map(([type, values]) => (
@@ -145,7 +145,7 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
                 className="grid grid-cols-[1fr_repeat(4,minmax(56px,auto))] items-center gap-3 px-5 py-4 text-sm"
               >
                 <div>
-                  <p className="font-semibold capitalize text-[#190A2F]">
+                  <p className="font-semibold capitalize text-ink">
                     {type.replaceAll("_", " ")}
                   </p>
                   <p className="mt-0.5 text-xs text-slate-400">{values.total} total</p>
@@ -162,10 +162,10 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
         <AdminCard>
           <div className="flex items-center justify-between border-b border-slate-200 p-5">
             <div>
-              <h2 className="font-semibold text-[#190A2F]">Recent leads</h2>
+              <h2 className="font-semibold text-ink">Recent leads</h2>
               <p className="mt-1 text-xs text-slate-400">Latest contact-form submissions</p>
             </div>
-            <a href={adminHref("leads")} className="text-xs font-semibold text-[#FE3434]">
+            <a href={adminHref("leads")} className="text-xs font-semibold text-brand-red">
               View all
             </a>
           </div>
@@ -178,7 +178,7 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
               {data.recent_leads.map((lead) => (
                 <div key={lead.id} className="flex items-center justify-between gap-4 px-5 py-4">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[#190A2F]">{lead.name}</p>
+                    <p className="truncate text-sm font-semibold text-ink">{lead.name}</p>
                     <p className="mt-1 truncate text-xs text-slate-400">
                       {lead.email} · {lead.service || "General inquiry"}
                     </p>
@@ -194,12 +194,12 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
       <AdminCard>
         <div className="flex items-center justify-between border-b border-slate-200 p-5">
           <div>
-            <h2 className="font-semibold text-[#190A2F]">Upcoming strategy calls</h2>
+            <h2 className="font-semibold text-ink">Upcoming strategy calls</h2>
             <p className="mt-1 text-xs text-slate-400">
               Latest booking requests and confirmed sessions
             </p>
           </div>
-          <a href={adminHref("bookings")} className="text-xs font-semibold text-[#FE3434]">
+          <a href={adminHref("bookings")} className="text-xs font-semibold text-brand-red">
             Manage calendar
           </a>
         </div>
@@ -222,7 +222,7 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
                 {data.recent_bookings.map((booking) => (
                   <tr key={booking.id} className="border-b border-slate-100">
                     <td className="px-5 py-4">
-                      <p className="text-sm font-semibold text-[#190A2F]">{booking.name}</p>
+                      <p className="text-sm font-semibold text-ink">{booking.name}</p>
                       <p className="mt-1 text-xs text-slate-400">{booking.email}</p>
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-600">{booking.meeting_date}</td>
@@ -244,7 +244,7 @@ function DashboardContent({ data }: { data: DashboardResponse }) {
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="text-center">
-      <p className="font-semibold text-[#190A2F]">{value}</p>
+      <p className="font-semibold text-ink">{value}</p>
       <p className="mt-0.5 text-[10px] text-slate-400">{label}</p>
     </div>
   );

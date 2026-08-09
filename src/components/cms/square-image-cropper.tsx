@@ -98,8 +98,8 @@ export function SquareImageCropper({ sourceUrl, sourceName, onCancel, onComplete
     <div className="fixed inset-0 z-[340] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
       <section className="w-full max-w-4xl overflow-hidden rounded-[1.75rem] bg-white shadow-2xl">
         <header className="border-b border-black/8 px-6 py-5">
-          <h2 className="flex items-center gap-2 text-xl font-bold text-[#190A2F]">
-            <Crop className="h-5 w-5 text-[#FE3434]" /> Crop square image
+          <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
+            <Crop className="h-5 w-5 text-brand-red" /> Crop square image
           </h2>
           <p className="mt-1 text-sm text-slate-500">
             Adjust the image for square placements. The original Media Library file remains
@@ -152,7 +152,7 @@ export function SquareImageCropper({ sourceUrl, sourceName, onCancel, onComplete
                 setPositionX(0);
                 setPositionY(0);
               }}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#190A2F]"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-ink"
             >
               <RotateCcw className="h-4 w-4" /> Reset crop
             </button>
@@ -193,7 +193,7 @@ function CropControl({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 flex items-center justify-between text-sm font-semibold text-[#190A2F]">
+      <span className="mb-2 flex items-center justify-between text-sm font-semibold text-ink">
         {label}
         <span className="text-xs font-normal text-slate-400">
           {value.toFixed(step < 1 ? 2 : 0)}
@@ -206,7 +206,7 @@ function CropControl({
         max={max}
         step={step}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-[#FE3434]"
+        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-brand-red"
       />
     </label>
   );

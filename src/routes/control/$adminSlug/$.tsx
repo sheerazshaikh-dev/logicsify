@@ -56,7 +56,7 @@ function CustomAdminRoute() {
   }, [adminSlug]);
 
   if (valid === null) return <div className="min-h-dvh bg-slate-50"><AdminLoading label="Checking secure admin entry…" /></div>;
-  if (!valid) return <main className="grid min-h-dvh place-items-center bg-[#190A2F] p-6 text-white"><div className="text-center"><p className="text-sm uppercase tracking-[0.2em] text-white/45">404</p><h1 className="mt-4 text-4xl font-semibold">Page not found</h1></div></main>;
+  if (!valid) return <main className="grid min-h-dvh place-items-center bg-ink p-6 text-white"><div className="text-center"><p className="text-sm uppercase tracking-[0.2em] text-white/45">404</p><h1 className="mt-4 text-4xl font-semibold">Page not found</h1></div></main>;
 
   const target = routes[section] || routes.dashboard;
   const Component = routeComponent(target);

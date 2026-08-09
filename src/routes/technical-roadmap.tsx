@@ -122,7 +122,7 @@ function TechnicalRoadmapPage() {
                   <Field label="Main technical problem" required><textarea required minLength={20} rows={4} value={form.problem} onChange={(e) => update("problem", e.target.value)} className="form-input" /></Field>
                   <Field label="Project summary" required><textarea required minLength={20} rows={5} value={form.summary} onChange={(e) => update("summary", e.target.value)} className="form-input" /></Field>
                   <input tabIndex={-1} autoComplete="off" value={form.honey} onChange={(e) => update("honey", e.target.value)} className="hidden" aria-hidden />
-                  <label className="flex items-start gap-3 text-sm text-ink-soft"><input type="checkbox" checked={form.consent} onChange={(e) => update("consent", e.target.checked)} className="mt-1 h-4 w-4 accent-[#FE3434]" /><span>I agree that Logicsify may use this information to respond to my request. No sensitive form values are sent to analytics.</span></label>
+                  <label className="flex items-start gap-3 text-sm text-ink-soft"><input type="checkbox" checked={form.consent} onChange={(e) => update("consent", e.target.checked)} className="mt-1 h-4 w-4 accent-brand-red" /><span>I agree that Logicsify may use this information to respond to my request. No sensitive form values are sent to analytics.</span></label>
                   {error ? <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p> : null}
                   <button disabled={status === "submitting"} className="btn-primary disabled:opacity-60">{status === "submitting" ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting</> : "Submit roadmap request"}</button>
                 </div>

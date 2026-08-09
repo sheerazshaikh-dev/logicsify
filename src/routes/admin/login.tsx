@@ -22,7 +22,7 @@ import {
 } from "@/lib/admin-api";
 import { adminHref, legacyAdminPath } from "@/lib/admin-path";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
-import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
+import { DEFAULT_BRAND_ASSETS, optimizedBrandAsset, withDefaultBranding } from "@/lib/brand-assets";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
@@ -133,7 +133,7 @@ export function AdminLoginPage() {
 
   if (accessAllowed === false) {
     return (
-      <main className="grid min-h-dvh place-items-center bg-[#190A2F] p-6 text-white">
+      <main className="logicsify-admin grid min-h-dvh place-items-center bg-ink p-6 text-white">
         <div className="text-center">
           <p className="text-sm uppercase tracking-[0.2em] text-white/45">404</p>
           <h1 className="mt-4 text-4xl font-semibold">Page not found</h1>
@@ -143,18 +143,18 @@ export function AdminLoginPage() {
   }
   if (accessAllowed === null)
     return (
-      <main className="grid min-h-dvh place-items-center bg-[#190A2F] text-white">
+      <main className="logicsify-admin grid min-h-dvh place-items-center bg-ink text-white">
         Checking secure admin access…
       </main>
     );
 
   return (
-    <main className="relative grid min-h-dvh overflow-hidden bg-[#190A2F] lg:grid-cols-[1.1fr_0.9fr]">
+    <main className="logicsify-admin relative grid min-h-dvh overflow-hidden bg-ink lg:grid-cols-[1.1fr_0.9fr]">
       <div className="absolute inset-0 grid-noise opacity-70" />
       <section className="relative hidden min-h-dvh flex-col justify-between p-12 text-white lg:flex xl:p-16">
         <Link to="/" className="block w-fit">
           <img
-            src={siteSettings.admin_logo || DEFAULT_BRAND_ASSETS.adminLogo}
+            src={optimizedBrandAsset(siteSettings.admin_logo, DEFAULT_BRAND_ASSETS.adminLogo)}
             alt={siteSettings.site_name || "Logicsify"}
             className="h-11 w-auto max-w-[230px] object-contain object-left"
           />
@@ -185,7 +185,7 @@ export function AdminLoginPage() {
           <div className="mb-8 lg:hidden">
             <Link to="/" className="block w-fit">
               <img
-                src={siteSettings.logo_dark || DEFAULT_BRAND_ASSETS.adminLogoDark}
+                src={optimizedBrandAsset(siteSettings.logo_dark, DEFAULT_BRAND_ASSETS.adminLogoDark)}
                 alt={siteSettings.site_name || "Logicsify"}
                 className="h-9 w-auto max-w-[210px] object-contain object-left"
               />
@@ -194,7 +194,7 @@ export function AdminLoginPage() {
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
             Administrator access
           </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#190A2F]">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink">
             {challenge ? "Verify your sign-in" : "Welcome back"}
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -221,7 +221,7 @@ export function AdminLoginPage() {
                       type="email"
                       autoComplete="email"
                       required
-                      className="h-12 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm outline-none transition focus:border-[#FE3434] focus:ring-4 focus:ring-[#FE3434]/10"
+                      className="h-12 w-full rounded-xl border border-slate-200 pl-11 pr-4 text-sm outline-none transition focus:border-brand-red focus:ring-4 focus:ring-brand-red/10"
                       placeholder="admin@logicsify.com"
                     />
                   </div>
@@ -241,7 +241,7 @@ export function AdminLoginPage() {
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       required
-                      className="h-12 w-full rounded-xl border border-slate-200 pl-11 pr-12 text-sm outline-none transition focus:border-[#FE3434] focus:ring-4 focus:ring-[#FE3434]/10"
+                      className="h-12 w-full rounded-xl border border-slate-200 pl-11 pr-12 text-sm outline-none transition focus:border-brand-red focus:ring-4 focus:ring-brand-red/10"
                       placeholder="Enter your password"
                     />
                     <button
@@ -259,10 +259,10 @@ export function AdminLoginPage() {
                     type="checkbox"
                     checked={rememberLogin}
                     onChange={(event) => setRememberLogin(event.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-[#FE3434]"
+                    className="mt-0.5 h-4 w-4 accent-brand-red"
                   />
                   <span>
-                    <strong className="block text-sm text-[#190A2F]">
+                    <strong className="block text-sm text-ink">
                       Remember this trusted device for 30 days
                     </strong>
                     <span className="mt-1 block text-xs leading-5 text-slate-500">
@@ -280,13 +280,13 @@ export function AdminLoginPage() {
                     <button
                       type="button"
                       onClick={() => setMethod("authenticator")}
-                      className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-left hover:border-[#FE3434]"
+                      className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-left hover:border-brand-red"
                     >
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#190A2F] text-white">
+                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink text-white">
                         <KeyRound className="h-5 w-5" />
                       </span>
                       <span>
-                        <strong className="block text-sm text-[#190A2F]">Authenticator app</strong>
+                        <strong className="block text-sm text-ink">Authenticator app</strong>
                         <span className="mt-1 block text-xs text-slate-500">
                           Use the current six-digit code or a recovery code.
                         </span>
@@ -298,9 +298,9 @@ export function AdminLoginPage() {
                         challenge.emailSent ? setMethod("email") : void sendEmailCode()
                       }
                       disabled={sendingEmail}
-                      className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-left hover:border-[#FE3434] disabled:opacity-60"
+                      className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-left hover:border-brand-red disabled:opacity-60"
                     >
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#FFF3F0] text-[#FE3434]">
+                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-lavender text-brand-red">
                         {sendingEmail ? (
                           <Loader2 className="h-5 w-5 animate-spin" />
                         ) : (
@@ -308,7 +308,7 @@ export function AdminLoginPage() {
                         )}
                       </span>
                       <span>
-                        <strong className="block text-sm text-[#190A2F]">Email verification</strong>
+                        <strong className="block text-sm text-ink">Email verification</strong>
                         <span className="mt-1 block text-xs text-slate-500">
                           Send a one-time code to{" "}
                           {challenge.maskedEmail || "your administrator email"}.
@@ -323,7 +323,7 @@ export function AdminLoginPage() {
                     type="button"
                     onClick={() => void sendEmailCode()}
                     disabled={sendingEmail}
-                    className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 text-sm font-semibold text-[#190A2F] disabled:opacity-60"
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 text-sm font-semibold text-ink disabled:opacity-60"
                   >
                     {sendingEmail ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -350,7 +350,7 @@ export function AdminLoginPage() {
                       inputMode={method === "email" ? "numeric" : "text"}
                       autoComplete="one-time-code"
                       required
-                      className="h-12 w-full rounded-xl border border-slate-200 px-4 text-center text-lg tracking-[0.28em] outline-none transition focus:border-[#FE3434] focus:ring-4 focus:ring-[#FE3434]/10"
+                      className="h-12 w-full rounded-xl border border-slate-200 px-4 text-center text-lg tracking-[0.28em] outline-none transition focus:border-brand-red focus:ring-4 focus:ring-brand-red/10"
                       placeholder={method === "email" ? "123456" : "123456"}
                     />
                     <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -363,7 +363,7 @@ export function AdminLoginPage() {
                         type="button"
                         onClick={() => void sendEmailCode()}
                         disabled={sendingEmail}
-                        className="mt-2 text-xs font-semibold text-[#FE3434] hover:text-[#190A2F] disabled:opacity-50"
+                        className="mt-2 text-xs font-semibold text-brand-red hover:text-ink disabled:opacity-50"
                       >
                         {sendingEmail ? "Sending…" : "Resend email code"}
                       </button>
@@ -379,7 +379,7 @@ export function AdminLoginPage() {
                   <button
                     type="button"
                     onClick={resetChallenge}
-                    className="text-xs font-semibold text-slate-500 hover:text-[#190A2F]"
+                    className="text-xs font-semibold text-slate-500 hover:text-ink"
                   >
                     Use a different account
                   </button>
@@ -387,7 +387,7 @@ export function AdminLoginPage() {
                     <button
                       type="button"
                       onClick={() => setMethod(null)}
-                      className="text-xs font-semibold text-[#FE3434] hover:text-[#190A2F]"
+                      className="text-xs font-semibold text-brand-red hover:text-ink"
                     >
                       Change verification method
                     </button>
@@ -400,7 +400,7 @@ export function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading || (method === "email" && !challenge?.emailSent)}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#190A2F] text-sm font-semibold text-white transition hover:bg-[#2a1546] disabled:opacity-60"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-ink text-sm font-semibold text-white transition hover:bg-ink/90 disabled:opacity-60"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

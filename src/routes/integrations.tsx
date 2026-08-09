@@ -126,7 +126,7 @@ function IntegrationHeroVisual() {
     <div className="relative mx-auto aspect-square w-full max-w-lg" aria-hidden="true">
       <div className="absolute inset-[12%] rounded-full border border-white/10" />
       <div className="absolute inset-[26%] rounded-full border border-white/15" />
-      <div className="absolute inset-[39%] grid place-items-center rounded-3xl bg-gradient-brand shadow-[0_0_70px_rgba(254,52,52,.28)]">
+      <div className="absolute inset-[39%] grid place-items-center rounded-3xl bg-gradient-brand shadow-[var(--shadow-glow)]">
         <PlugZap className="h-10 w-10 text-white" />
       </div>
       {[
@@ -143,7 +143,7 @@ function IntegrationHeroVisual() {
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full opacity-35">
         <path d="M50 50 L9 50 M50 50 L77 22 M50 50 L88 72 M50 50 L31 11 M50 50 L22 82" stroke="url(#integration-gradient)" strokeWidth="0.5" strokeDasharray="2 2" />
         <defs>
-          <linearGradient id="integration-gradient"><stop stopColor="#FE3434"/><stop offset="1" stopColor="#FDBE02"/></linearGradient>
+          <linearGradient id="integration-gradient"><stop stopColor="var(--theme-primary-start)"/><stop offset="1" stopColor="var(--theme-primary-end)"/></linearGradient>
         </defs>
       </svg>
     </div>

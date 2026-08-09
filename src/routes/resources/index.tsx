@@ -148,7 +148,7 @@ function ResourcesHub() {
                   key={item.title}
                   to={item.to}
                   data-reveal
-                  className="group rounded-3xl border border-black/10 bg-white p-7 transition hover:-translate-y-1 hover:shadow-[0_22px_60px_-30px_rgba(25,10,47,.35)] md:p-8"
+                  className="group rounded-3xl border border-black/10 bg-white p-7 transition hover:-translate-y-1 hover:shadow-[var(--shadow-card)] md:p-8"
                 >
                   <div className="flex items-start justify-between gap-6">
                     <div className="grid h-12 w-12 place-items-center rounded-2xl bg-lavender">

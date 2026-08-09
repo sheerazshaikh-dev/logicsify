@@ -109,7 +109,7 @@ function TrashPage() {
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
                       {item.entity_type}
                     </span>
-                    <p className="truncate text-sm font-semibold text-[#190A2F]">{item.title}</p>
+                    <p className="truncate text-sm font-semibold text-ink">{item.title}</p>
                   </div>
                   <p className="mt-2 truncate text-xs text-slate-400">
                     {item.subtitle || "No additional information"} · Deleted{" "}

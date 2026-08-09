@@ -16,7 +16,7 @@ import { DeferredToaster } from "@/components/deferred-toaster";
 function NotFoundComponent() {
   return (
     <div className="min-h-dvh flex items-center justify-center bg-ink text-white grid-noise relative overflow-hidden">
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_30%,rgba(254,52,52,0.35),transparent_60%),radial-gradient(circle_at_70%_70%,rgba(253,190,2,0.25),transparent_60%)]" />
+      <div className="absolute inset-0 opacity-40 brand-radial-glow" />
       <div className="max-w-md text-center relative px-6">
         <p className="eyebrow text-white/60 mb-4">Error 404</p>
         <h1 className="fluid-display text-gradient">404</h1>
@@ -100,12 +100,11 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Logicsify" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "theme-color", content: "#190A2F" },
+      { name: "theme-color", content: "#000000" },
     ],
     links: [
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "icon", href: "/f2048ae62fb525b2c29c3e51e755cc17.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/f2048ae62fb525b2c29c3e51e755cc17.png" },
     ],
     scripts: [
       {
@@ -118,7 +117,7 @@ export const Route = createRootRoute({
               "@id": "https://logicsify.com/#organization",
               name: "Logicsify",
               url: "https://logicsify.com/",
-              logo: "https://logicsify.com/logicsify-logo-dark.png",
+              logo: "https://logicsify.com/3b4a0a2a1d78df66b5bb7dac579e144c.png",
               email: "connect@logicsify.com",
               contactPoint: [
                 {

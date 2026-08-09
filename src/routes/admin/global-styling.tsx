@@ -1,14 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Code2,
+  Image as ImageIcon,
+  Loader2,
+  Megaphone,
   Paintbrush,
+  PanelsTopLeft,
   RotateCcw,
   Save,
   ShieldAlert,
+  Trash2,
   Type,
+  UploadCloud,
   WandSparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
@@ -20,18 +26,20 @@ import {
   adminInputClass,
   adminTextareaClass,
 } from "@/components/admin/admin-ui";
-import { getCurrentAdmin, getSettings, saveSettings } from "@/lib/admin-api";
-import type { PublicThemeSettings } from "@/lib/logicsify-api";
+import { getCurrentAdmin, getSettings, saveSettings, uploadMedia } from "@/lib/admin-api";
+import type { PublicSiteSettings, PublicThemeSettings } from "@/lib/logicsify-api";
+import { DEFAULT_SITE_BRANDING } from "@/lib/brand-assets";
+import { applyThemeVariables } from "@/lib/theme-runtime";
 
 export const Route = createFileRoute("/admin/global-styling")({ component: GlobalStylingPage });
 
 const defaults: Required<PublicThemeSettings> = {
-  primary_start: "#FE3434",
-  primary_end: "#FDBE02",
-  dark: "#190A2F",
+  primary_start: "#04A6A1",
+  primary_end: "#8BCF3C",
+  dark: "#000000",
   background: "#FFFFFF",
   surface: "#FAF8FC",
-  text: "#190A2F",
+  text: "#000000",
   muted_text: "#756C7E",
   border: "#E6E1EA",
   heading_font: "Sora",
@@ -63,6 +71,7 @@ const defaults: Required<PublicThemeSettings> = {
 
 export function GlobalStylingPage() {
   const [values, setValues] = useState<PublicThemeSettings>(defaults);
+  const [siteValues, setSiteValues] = useState<PublicSiteSettings>({ ...DEFAULT_SITE_BRANDING });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -71,10 +80,11 @@ export function GlobalStylingPage() {
     Promise.all([getSettings(), getCurrentAdmin()])
       .then(([result, admin]) => {
         setValues({ ...defaults, ...(result.theme || {}) });
+        setSiteValues({ ...DEFAULT_SITE_BRANDING, ...(result.site || {}) });
         setIsSuperAdmin(admin.role === "super_admin");
       })
       .catch((error) =>
-        toast.error(error instanceof Error ? error.message : "Could not load global styling."),
+        toast.error(error instanceof Error ? error.message : "Could not load global branding."),
       )
       .finally(() => setLoading(false));
   }, []);
@@ -103,6 +113,10 @@ export function GlobalStylingPage() {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
+  function updateSite<K extends keyof PublicSiteSettings>(key: K, value: PublicSiteSettings[K]) {
+    setSiteValues((current) => ({ ...current, [key]: value }));
+  }
+
   function resetDesignTokens() {
     setValues((current) => ({
       ...defaults,
@@ -116,10 +130,20 @@ export function GlobalStylingPage() {
   async function save() {
     setSaving(true);
     try {
-      await saveSettings("theme", values as unknown as Record<string, unknown>);
-      toast.success("Global styling saved.");
+      await Promise.all([
+        saveSettings("theme", values as unknown as Record<string, unknown>),
+        saveSettings("site", siteValues as unknown as Record<string, unknown>),
+      ]);
+      applyThemeVariables(values);
+      try {
+        window.localStorage.removeItem("logicsify:site-settings:v1");
+      } catch {
+        // Storage can be unavailable; the saved API values still apply on reload.
+      }
+      window.dispatchEvent(new CustomEvent("logicsify:branding-updated", { detail: siteValues }));
+      toast.success("Global branding saved across the website and admin panel.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save global styling.");
+      toast.error(error instanceof Error ? error.message : "Could not save global branding.");
     } finally {
       setSaving(false);
     }
@@ -128,7 +152,7 @@ export function GlobalStylingPage() {
   if (loading) {
     return (
       <AdminShell>
-        <AdminLoading label="Loading global styling…" />
+        <AdminLoading label="Loading global branding…" />
       </AdminShell>
     );
   }
@@ -136,16 +160,16 @@ export function GlobalStylingPage() {
   return (
     <AdminShell>
       <AdminPageHeader
-        eyebrow="Design system"
-        title="Global Styling"
-        description="Control public website tokens and maintain separate, recoverable custom CSS for the website and admin panel."
+        eyebrow="Brand system"
+        title="Global Branding"
+        description="Manage Logicsify logos, brand mark, favicon, header, footer, colors, typography and shared interface styling from one place."
         actions={
           <div className="flex flex-wrap gap-2">
             <AdminButton variant="secondary" onClick={resetDesignTokens}>
               <RotateCcw className="h-4 w-4" /> Reset design tokens
             </AdminButton>
             <AdminButton onClick={() => void save()} disabled={saving}>
-              <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save styling"}
+              <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save branding"}
             </AdminButton>
           </div>
         }
@@ -154,9 +178,124 @@ export function GlobalStylingPage() {
       <div className="grid gap-7 2xl:grid-cols-[1fr_420px]">
         <div className="space-y-6">
           <Section
+            title="Brand identity and assets"
+            icon={ImageIcon}
+            description="These are the canonical Logicsify assets used by the website, admin panel, diagrams, browser icons and other branded surfaces."
+          >
+            <div className="grid gap-5 md:grid-cols-2">
+              <BrandImageField
+                label="Logo — light backgrounds"
+                help="Colored/dark wordmark for white and light surfaces."
+                value={siteValues.logo_dark}
+                onChange={(value) => updateSite("logo_dark", value)}
+              />
+              <BrandImageField
+                label="Logo — dark backgrounds"
+                help="White wordmark for dark hero, footer and dark branded surfaces."
+                value={siteValues.logo_light}
+                onChange={(value) => updateSite("logo_light", value)}
+              />
+              <BrandImageField
+                label="Global brand mark / icon"
+                help="Square Logicsify mark used in diagrams, collapsed admin navigation and icon-only branding."
+                value={siteValues.brand_mark}
+                onChange={(value) => updateSite("brand_mark", value)}
+              />
+              <BrandImageField
+                label="Mobile navigation logo"
+                help="Optional. Falls back to the light-background logo."
+                value={siteValues.mobile_logo}
+                onChange={(value) => updateSite("mobile_logo", value)}
+              />
+              <BrandImageField
+                label="Admin panel logo"
+                help="Used in the Content Studio sidebar and admin login."
+                value={siteValues.admin_logo}
+                onChange={(value) => updateSite("admin_logo", value)}
+              />
+              <BrandImageField
+                label="Favicon"
+                help="Square browser/tab icon. Uploads keep randomized filenames through the Media API."
+                value={siteValues.favicon}
+                onChange={(value) => updateSite("favicon", value)}
+                accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/svg+xml,image/webp"
+              />
+              <BrandImageField
+                label="Apple touch icon"
+                help="Square icon used by iPhone and iPad bookmarks."
+                value={siteValues.apple_touch_icon}
+                onChange={(value) => updateSite("apple_touch_icon", value)}
+              />
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <TextSetting label="Brand / site name" value={siteValues.site_name} onChange={(value) => updateSite("site_name", value)} placeholder="Logicsify" />
+              <TextSetting label="Brand tagline" value={siteValues.tagline} onChange={(value) => updateSite("tagline", value)} placeholder="Technology, marketing, and automation—logically built for growth." />
+              <ColorField label="Browser / app theme color" value={siteValues.theme_color || String(values.dark || "#000000")} onChange={(value) => updateSite("theme_color", value)} />
+            </div>
+          </Section>
+
+          <Section
+            title="Header branding"
+            icon={PanelsTopLeft}
+            description="Control header behavior, logo sizing and the global navigation call-to-action."
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <ToggleSetting label="Sticky header" description="Keep the header visible while visitors scroll." checked={boolSetting(siteValues.sticky_header, true)} onChange={(value) => updateSite("sticky_header", value)} />
+              <ToggleSetting label="Transparent header on home" description="Use the dark-background logo over the homepage hero before scrolling." checked={boolSetting(siteValues.transparent_header_home, true)} onChange={(value) => updateSite("transparent_header_home", value)} />
+              <ToggleSetting label="Show header CTA" description="Display the primary CTA in desktop and mobile navigation." checked={boolSetting(siteValues.show_header_cta, true)} onChange={(value) => updateSite("show_header_cta", value)} />
+              <ToggleSetting label="Open header CTA in a new tab" description="Use for external calendars or booking destinations." checked={boolSetting(siteValues.header_cta_new_tab)} onChange={(value) => updateSite("header_cta_new_tab", value)} />
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <TextSetting label="Header CTA label" value={siteValues.header_cta_label} onChange={(value) => updateSite("header_cta_label", value)} placeholder="Get a Free Technical Roadmap" />
+              <TextSetting label="Header CTA URL" value={siteValues.header_cta_url} onChange={(value) => updateSite("header_cta_url", value)} placeholder="/technical-roadmap" />
+              <NumberSetting label="Desktop logo height" value={siteValues.header_logo_height_desktop} fallback={36} suffix="px" onChange={(value) => updateSite("header_logo_height_desktop", value)} />
+              <NumberSetting label="Mobile logo height" value={siteValues.header_logo_height_mobile} fallback={28} suffix="px" onChange={(value) => updateSite("header_logo_height_mobile", value)} />
+            </div>
+          </Section>
+
+          <Section
+            title="Announcement branding"
+            icon={Megaphone}
+            description="Manage the optional branded announcement strip above the navigation."
+          >
+            <ToggleSetting label="Enable announcement bar" description="Show a compact message above the header." checked={boolSetting(siteValues.announcement_enabled)} onChange={(value) => updateSite("announcement_enabled", value)} />
+            <div className="grid gap-5 md:grid-cols-2">
+              <TextSetting label="Announcement text" value={siteValues.announcement_text} onChange={(value) => updateSite("announcement_text", value)} placeholder="Now booking new projects." />
+              <TextSetting label="Link label" value={siteValues.announcement_link_label} onChange={(value) => updateSite("announcement_link_label", value)} placeholder="Learn more" />
+              <TextSetting label="Announcement URL" value={siteValues.announcement_url} onChange={(value) => updateSite("announcement_url", value)} placeholder="/contact" />
+              <ToggleSetting label="Open link in a new tab" description="Enable when the announcement points to an external site." checked={boolSetting(siteValues.announcement_new_tab)} onChange={(value) => updateSite("announcement_new_tab", value)} />
+            </div>
+          </Section>
+
+          <Section
+            title="Footer branding"
+            icon={Paintbrush}
+            description="Control the footer identity, CTA and legal/social visibility from the same global brand system."
+          >
+            <div className="grid gap-5 md:grid-cols-2">
+              <BrandImageField label="Footer logo" help="Falls back to the dark-background logo when empty." value={siteValues.footer_logo} onChange={(value) => updateSite("footer_logo", value)} />
+              <div>
+                <FieldLabel>Footer description</FieldLabel>
+                <textarea rows={6} value={String(siteValues.footer_description || "")} onChange={(event) => updateSite("footer_description", event.target.value)} className={adminTextareaClass} />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <ToggleSetting label="Show social profiles" description="Display configured social profiles in the footer." checked={boolSetting(siteValues.show_social_links, true)} onChange={(value) => updateSite("show_social_links", value)} />
+              <ToggleSetting label="Show Privacy Policy" description="Display the privacy link in the legal row." checked={boolSetting(siteValues.show_privacy_link, true)} onChange={(value) => updateSite("show_privacy_link", value)} />
+              <ToggleSetting label="Show Terms & Conditions" description="Display the terms link in the legal row." checked={boolSetting(siteValues.show_terms_link, true)} onChange={(value) => updateSite("show_terms_link", value)} />
+              <ToggleSetting label="Open footer CTA in a new tab" description="Enable for an external booking destination." checked={boolSetting(siteValues.footer_cta_new_tab)} onChange={(value) => updateSite("footer_cta_new_tab", value)} />
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <TextSetting label="Footer CTA label" value={siteValues.footer_cta_label} onChange={(value) => updateSite("footer_cta_label", value)} placeholder="Get a Free Technical Roadmap" />
+              <TextSetting label="Footer CTA URL" value={siteValues.footer_cta_url} onChange={(value) => updateSite("footer_cta_url", value)} placeholder="/technical-roadmap" />
+              <div className="md:col-span-2"><TextSetting label="Copyright text" value={siteValues.copyright_text} onChange={(value) => updateSite("copyright_text", value)} placeholder="© {year} Logicsify. All rights reserved." /></div>
+            </div>
+          </Section>
+
+          <Section
             title="Brand colors and gradients"
             icon={Paintbrush}
-            description="These values drive the main website tokens. Existing section-specific artwork remains intact."
+            description="These tokens drive website sections, admin UI, branded icons, gradients and glow effects. No red/orange decorative glow is hardcoded."
           >
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <ColorField
@@ -213,7 +352,7 @@ export function GlobalStylingPage() {
           <Section
             title="Typography"
             icon={Type}
-            description="Use controlled font choices and responsive minimum/maximum heading sizes."
+            description="Typography choices apply across the website and Content Studio while preserving responsive safeguards."
           >
             <div className="grid gap-4 md:grid-cols-2">
               <SelectField
@@ -336,7 +475,7 @@ export function GlobalStylingPage() {
           <Section
             title="Layout and component shape"
             icon={WandSparkles}
-            description="Adjust the overall rhythm while keeping responsive safeguards in place."
+            description="Component radii, interface rhythm, motion and shadows now stay consistent across the website and admin panel."
           >
             <div className="grid gap-5 md:grid-cols-2">
               <RangeField
@@ -465,9 +604,9 @@ export function GlobalStylingPage() {
 
         <AdminCard className="h-fit overflow-hidden p-0 2xl:sticky 2xl:top-28">
           <div className="border-b border-slate-200 px-6 py-5">
-            <p className="text-sm font-semibold text-[#190A2F]">Live token preview</p>
+            <p className="text-sm font-semibold text-ink">Live token preview</p>
             <p className="mt-1 text-xs text-slate-500">
-              The public website updates after saving and refreshing.
+              The website and admin panel use the same saved design tokens. The admin interface updates immediately after saving.
             </p>
           </div>
           <div
@@ -477,6 +616,7 @@ export function GlobalStylingPage() {
             <div className="overflow-hidden border [border-color:var(--preview-border)] [border-radius:var(--preview-card-radius)] [background:var(--preview-surface)]">
               <div className="h-2 [background:linear-gradient(var(--preview-angle),var(--preview-start),var(--preview-end))]" />
               <div className="p-7 [font-family:var(--preview-body)]">
+                <img src={siteValues.logo_dark || DEFAULT_SITE_BRANDING.logo_dark} alt="Brand preview" className="mb-7 h-9 w-auto max-w-[180px] object-contain object-left" />
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] [color:var(--preview-muted)]">
                   Technology systems
                 </p>
@@ -513,11 +653,11 @@ function Section({
   return (
     <AdminCard className="p-6">
       <div className="mb-6 flex gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#190A2F] text-white">
+        <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink text-white">
           <Icon className="h-4 w-4" />
         </span>
         <div>
-          <h2 className="text-lg font-semibold text-[#190A2F]">{title}</h2>
+          <h2 className="text-lg font-semibold text-ink">{title}</h2>
           <p className="mt-1 text-sm text-slate-500">{description}</p>
         </div>
       </div>
@@ -603,7 +743,7 @@ function RangeField({
     <div>
       <div className="mb-2 flex items-center justify-between">
         <FieldLabel>{label}</FieldLabel>
-        <span className="text-xs font-semibold text-[#190A2F]">
+        <span className="text-xs font-semibold text-ink">
           {value}
           {suffix}
         </span>
@@ -615,7 +755,7 @@ function RangeField({
         step={step}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-[#FE3434]"
+        className="w-full accent-brand-red"
       />
     </div>
   );
@@ -642,7 +782,7 @@ function CustomCssEditor({
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-semibold text-[#190A2F]">{label}</p>
+          <p className="font-semibold text-ink">{label}</p>
           <p className="mt-1 text-sm text-slate-500">{description}</p>
         </div>
         <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -651,7 +791,7 @@ function CustomCssEditor({
             checked={enabled}
             disabled={disabled}
             onChange={(event) => onEnabledChange(event.target.checked)}
-            className="h-4 w-4 accent-[#FE3434]"
+            className="h-4 w-4 accent-brand-red"
           />
           Enabled
         </label>
@@ -671,4 +811,74 @@ function CustomCssEditor({
       </div>
     </div>
   );
+}
+
+
+function BrandImageField({
+  label,
+  help,
+  value,
+  onChange,
+  accept = "image/jpeg,image/png,image/webp,image/gif,image/svg+xml",
+}: {
+  label: string;
+  help: string;
+  value?: string;
+  onChange: (value: string) => void;
+  accept?: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const url = String(value || "");
+
+  async function upload(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const media = await uploadMedia(file, label);
+      onChange(media.url);
+      toast.success("Brand asset uploaded. Its stored filename is randomized automatically.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Image upload failed.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-slate-200 p-4">
+      <FieldLabel>{label}</FieldLabel>
+      <p className="mb-3 text-xs leading-5 text-slate-500">{help}</p>
+      <div className="mb-3 grid min-h-28 place-items-center overflow-hidden rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3">
+        {url ? <img src={url} alt="" className="max-h-24 max-w-full object-contain" /> : <ImageIcon className="h-8 w-8 text-slate-300" />}
+      </div>
+      <input value={url} onChange={(event) => onChange(event.target.value)} className={adminInputClass} placeholder="Paste media URL or upload an image" />
+      <div className="mt-3 flex flex-wrap gap-2">
+        <AdminButton variant="secondary" onClick={() => inputRef.current?.click()} disabled={uploading}>
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
+          {uploading ? "Uploading…" : "Upload image"}
+        </AdminButton>
+        {url ? <AdminButton variant="danger" onClick={() => onChange("")}><Trash2 className="h-4 w-4" /> Clear</AdminButton> : null}
+      </div>
+      <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={(event) => void upload(event.target.files?.[0])} />
+    </div>
+  );
+}
+
+function TextSetting({ label, value, onChange, placeholder = "" }: { label: string; value?: string; onChange: (value: string) => void; placeholder?: string }) {
+  return <div><FieldLabel>{label}</FieldLabel><input value={String(value || "")} onChange={(event) => onChange(event.target.value)} className={adminInputClass} placeholder={placeholder} /></div>;
+}
+
+function NumberSetting({ label, value, onChange, fallback, suffix }: { label: string; value?: number; onChange: (value: number) => void; fallback: number; suffix: string }) {
+  return <div><FieldLabel>{label}</FieldLabel><div className="relative"><input type="number" value={Number(value ?? fallback)} onChange={(event) => onChange(Number(event.target.value) || fallback)} className={`${adminInputClass} pr-12`} /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400">{suffix}</span></div></div>;
+}
+
+function ToggleSetting({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: (value: boolean) => void }) {
+  return <label className="flex cursor-pointer items-center justify-between gap-5 rounded-2xl border border-slate-200 p-4"><span><span className="block text-sm font-semibold text-ink">{label}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{description}</span></span><span className={`relative h-7 w-12 shrink-0 rounded-full transition ${checked ? "bg-gradient-brand" : "bg-slate-200"}`}><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="sr-only" /><span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition ${checked ? "left-6" : "left-1"}`} /></span></label>;
+}
+
+function boolSetting(value: unknown, fallback = false) {
+  if (value === undefined || value === null || value === "") return fallback;
+  return value === true || value === 1 || value === "1" || value === "true";
 }

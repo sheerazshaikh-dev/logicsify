@@ -45,13 +45,13 @@ function BookingsPage() {
           <div className="flex rounded-xl border border-slate-200 bg-white p-1">
             <button
               onClick={() => setTab("bookings")}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === "bookings" ? "bg-[#190A2F] text-white" : "text-slate-500"}`}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === "bookings" ? "bg-ink text-white" : "text-slate-500"}`}
             >
               Bookings
             </button>
             <button
               onClick={() => setTab("availability")}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === "availability" ? "bg-[#190A2F] text-white" : "text-slate-500"}`}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === "availability" ? "bg-ink text-white" : "text-slate-500"}`}
             >
               Availability
             </button>
@@ -176,7 +176,7 @@ function BookingsList() {
                   <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50/70">
                     <td className="px-5 py-4">
                       <button onClick={() => setSelected(item)} className="text-left">
-                        <p className="text-sm font-semibold text-[#190A2F] hover:text-[#FE3434]">
+                        <p className="text-sm font-semibold text-ink hover:text-brand-red">
                           {item.name}
                         </p>
                         <p className="mt-1 text-xs text-slate-400">{item.email}</p>
@@ -284,7 +284,7 @@ function BookingEditor({
                   <CalendarDays className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-semibold text-[#190A2F]">{booking.meeting_date}</p>
+                  <p className="font-semibold text-ink">{booking.meeting_date}</p>
                   <p className="mt-1 text-sm text-slate-500">
                     {booking.start_time.slice(0, 5)}–{booking.end_time.slice(0, 5)} ·{" "}
                     {booking.timezone}
@@ -337,7 +337,7 @@ function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 p-4">
       <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-1.5 text-sm font-semibold text-[#190A2F]">{value}</p>
+      <p className="mt-1.5 text-sm font-semibold text-ink">{value}</p>
     </div>
   );
 }
@@ -432,12 +432,12 @@ function AvailabilityManager() {
       <AdminCard>
         <div className="flex items-center justify-between border-b border-slate-200 p-5">
           <div>
-            <h2 className="font-semibold text-[#190A2F]">Weekly hours</h2>
+            <h2 className="font-semibold text-ink">Weekly hours</h2>
             <p className="mt-1 text-xs text-slate-400">
               Configure active days, working hours, slot length and buffer time.
             </p>
           </div>
-          <Clock3 className="h-5 w-5 text-[#FE3434]" />
+          <Clock3 className="h-5 w-5 text-brand-red" />
         </div>
         <div className="divide-y divide-slate-100">
           {rules.map((rule, index) => (
@@ -450,9 +450,9 @@ function AvailabilityManager() {
                   type="checkbox"
                   checked={Boolean(rule.enabled)}
                   onChange={(event) => updateRule(index, "enabled", event.target.checked)}
-                  className="h-4 w-4 accent-[#FE3434]"
+                  className="h-4 w-4 accent-brand-red"
                 />
-                <span className="text-sm font-semibold text-[#190A2F]">
+                <span className="text-sm font-semibold text-ink">
                   {weekdays[rule.weekday]}
                 </span>
               </label>
@@ -521,7 +521,7 @@ function AvailabilityManager() {
 
       <AdminCard className="h-fit">
         <div className="border-b border-slate-200 p-5">
-          <h2 className="font-semibold text-[#190A2F]">Blocked dates</h2>
+          <h2 className="font-semibold text-ink">Blocked dates</h2>
           <p className="mt-1 text-xs text-slate-400">
             Prevent bookings on holidays, leave or unavailable dates.
           </p>
@@ -554,7 +554,7 @@ function AvailabilityManager() {
                   className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[#190A2F]">{item.blocked_date}</p>
+                    <p className="text-sm font-semibold text-ink">{item.blocked_date}</p>
                     <p className="mt-0.5 text-xs text-slate-400">
                       {item.reason || "No reason supplied"}
                     </p>

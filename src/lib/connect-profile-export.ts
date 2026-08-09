@@ -8,14 +8,39 @@ import {
   resolveConnectProfilePlatform,
 } from "@/lib/connect-profile-links";
 import { fieldVisible } from "@/lib/team-connect";
+import { runtimeThemeColor } from "@/lib/theme-runtime";
 
 export type ConnectProfileExportFormat = "jpg" | "pdf";
 
 const CARD_WIDTH = 1240;
 const CARD_HEIGHT = 1754;
-const INK = "#190A2F";
-const RED = "#FE3434";
-const GOLD = "#FDBE02";
+let INK = "#000000";
+let RED = "#04A6A1";
+let GOLD = "#8BCF3C";
+let BACKGROUND = "#FFFFFF";
+let SURFACE = "#FAF8FC";
+let MUTED = "#756C7E";
+let BORDER = "#E6E1EA";
+
+function syncBrandPalette() {
+  INK = runtimeThemeColor("--theme-dark", "#000000");
+  RED = runtimeThemeColor("--theme-primary-start", "#04A6A1");
+  GOLD = runtimeThemeColor("--theme-primary-end", "#8BCF3C");
+  BACKGROUND = runtimeThemeColor("--theme-background", "#FFFFFF");
+  SURFACE = runtimeThemeColor("--theme-surface", "#FAF8FC");
+  MUTED = runtimeThemeColor("--theme-muted-text", "#756C7E");
+  BORDER = runtimeThemeColor("--theme-border", "#E6E1EA");
+}
+
+function hexWithAlpha(hex: string, alpha: number) {
+  const normalized = hex.replace("#", "").trim();
+  const value = normalized.length === 3
+    ? normalized.split("").map((char) => char + char).join("")
+    : normalized.slice(0, 6);
+  if (!/^[0-9a-f]{6}$/i.test(value)) return `rgba(0, 0, 0, ${alpha})`;
+  const number = Number.parseInt(value, 16);
+  return `rgba(${(number >> 16) & 255}, ${(number >> 8) & 255}, ${number & 255}, ${alpha})`;
+}
 
 function roundedRect(
   context: CanvasRenderingContext2D,
@@ -172,10 +197,10 @@ function drawContactRow(
   }
   const height = kind === "address" ? Math.max(112, 62 + addressLines.length * 28) : 94;
   roundedRect(context, x, y, width, height, 24);
-  context.fillStyle = "#F8F6FA";
+  context.fillStyle = SURFACE;
   context.fill();
   drawContactIcon(context, kind, x + 46, y + 47);
-  context.fillStyle = "#81798A";
+  context.fillStyle = MUTED;
   context.font = "700 17px Inter, Arial, sans-serif";
   context.fillText(label.toUpperCase(), textX, y + 32);
   context.fillStyle = INK;
@@ -264,7 +289,7 @@ function drawSocialLink(
     y + 23,
     width - 72,
   );
-  context.fillStyle = "#81798A";
+  context.fillStyle = MUTED;
   context.font = "500 16px Inter, Arial, sans-serif";
   context.fillText(connectProfileLinkText(link), x + 72, y + 48, width - 72);
 }
@@ -310,14 +335,14 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     );
   }
 
-  context.fillStyle = "#F4F0F7";
+  context.fillStyle = SURFACE;
   context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
   context.save();
-  context.shadowColor = "rgba(25, 10, 47, 0.18)";
+  context.shadowColor = hexWithAlpha(INK, 0.18);
   context.shadowBlur = 45;
   context.shadowOffsetY = 22;
   roundedRect(context, 45, 38, 1150, 1668, 52);
-  context.fillStyle = "#FFFFFF";
+  context.fillStyle = BACKGROUND;
   context.fill();
   context.restore();
 
@@ -326,7 +351,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.clip();
   const gradient = context.createLinearGradient(45, 38, 1195, 484);
   gradient.addColorStop(0, INK);
-  gradient.addColorStop(0.52, "#5B1639");
+  gradient.addColorStop(0.52, RED);
   gradient.addColorStop(1, GOLD);
   context.fillStyle = gradient;
   context.fillRect(45, 38, 1150, 446);
@@ -339,7 +364,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     context.save();
     context.beginPath();
     context.arc(226, 474, 134, 0, Math.PI * 2);
-    context.fillStyle = "#FFFFFF";
+    context.fillStyle = BACKGROUND;
     context.fill();
     context.beginPath();
     context.arc(226, 474, 122, 0, Math.PI * 2);
@@ -368,7 +393,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.font = `800 ${nameSize}px Sora, Inter, Arial, sans-serif`;
   context.fillText(profile.display_name, identityX, 548, identityWidth);
   if (profile.headline && fieldVisible(profile, "headline", "export")) {
-    context.fillStyle = "#6F6679";
+    context.fillStyle = MUTED;
     const headlineSize = fitText(context, profile.headline, identityWidth, 29, 20, 500);
     context.font = `500 ${headlineSize}px Inter, Arial, sans-serif`;
     context.fillText(profile.headline, identityX, 596, identityWidth);
@@ -383,7 +408,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.fillStyle = INK;
   context.font = "800 24px Sora, Inter, Arial, sans-serif";
   context.fillText("CONTACT", 88, 705);
-  context.fillStyle = "#A39BAA";
+  context.fillStyle = MUTED;
   context.font = "600 17px Inter, Arial, sans-serif";
   context.fillText("Direct ways to reach me", 88, 739);
 
@@ -432,16 +457,16 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   context.fillStyle = INK;
   context.font = "800 24px Sora, Inter, Arial, sans-serif";
   context.fillText("SOCIAL LINKS", 88, contactY + 35);
-  context.fillStyle = "#A39BAA";
+  context.fillStyle = MUTED;
   context.font = "600 17px Inter, Arial, sans-serif";
   context.fillText("Find me online", 88, contactY + 68);
 
   const socialStart = contactY + 112;
   const socialPanelY = socialStart - 28;
   roundedRect(context, 88, socialPanelY, 1064, 350, 30);
-  context.fillStyle = "#F8F6FA";
+  context.fillStyle = SURFACE;
   context.fill();
-  context.strokeStyle = "#ECE7F0";
+  context.strokeStyle = BORDER;
   context.lineWidth = 2;
   context.stroke();
 
@@ -452,7 +477,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     drawSocialLink(context, link, 120 + column * 340, socialStart + row * 82, 312);
   });
   if (socialLinks.length > visibleLinks.length) {
-    context.fillStyle = "#81798A";
+    context.fillStyle = MUTED;
     context.font = "600 15px Inter, Arial, sans-serif";
     context.fillText(
       `+${socialLinks.length - visibleLinks.length} more link${socialLinks.length - visibleLinks.length === 1 ? "" : "s"} on the QR profile`,
@@ -461,32 +486,32 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     );
   }
   if (!visibleLinks.length) {
-    context.fillStyle = "#81798A";
+    context.fillStyle = MUTED;
     context.font = "500 20px Inter, Arial, sans-serif";
     context.fillText("Scan the QR code to open this connect profile.", 120, socialStart + 34);
   }
 
   if (qr) {
     roundedRect(context, 838, socialPanelY + 20, 286, 310, 26);
-    context.fillStyle = "#FFFFFF";
+    context.fillStyle = BACKGROUND;
     context.fill();
     context.drawImage(qr, 870, socialPanelY + 43, 222, 222);
     context.fillStyle = INK;
     context.textAlign = "center";
     context.font = "800 17px Sora, Inter, Arial, sans-serif";
     context.fillText("SCAN TO CONNECT", 981, socialPanelY + 286);
-    context.fillStyle = "#81798A";
+    context.fillStyle = MUTED;
     context.font = "500 14px Inter, Arial, sans-serif";
     context.fillText("Open my live profile", 981, socialPanelY + 312);
     context.textAlign = "left";
   }
 
-  context.fillStyle = "#D9D3DF";
+  context.fillStyle = BORDER;
   context.fillRect(88, 1650, 1064, 2);
   context.fillStyle = INK;
   context.font = "700 18px Inter, Arial, sans-serif";
   context.fillText("LOGICSIFY", 88, 1685);
-  context.fillStyle = "#81798A";
+  context.fillStyle = MUTED;
   context.textAlign = "right";
   context.font = "500 18px Inter, Arial, sans-serif";
   context.fillText("logicsify.com", 1152, 1685);
@@ -572,6 +597,7 @@ export async function downloadConnectProfileCard(
   format: ConnectProfileExportFormat,
   profileUrl: string,
 ) {
+  syncBrandPalette();
   const canvas = await renderCard(profile, profileUrl);
   const jpegBlob = await canvasToBlob(canvas, "image/jpeg", 0.94);
   const safeName = profile.slug || "logicsify-connect-profile";

@@ -524,6 +524,7 @@ export type PublicSiteSettings = {
   logo_light?: string;
   mobile_logo?: string;
   admin_logo?: string;
+  brand_mark?: string;
   favicon?: string;
   apple_touch_icon?: string;
   sticky_header?: boolean;

@@ -36,6 +36,7 @@ import {
 import { useEffect, useState } from "react";
 import { PageHero } from "@/components/page-hero";
 import { SiteLayout } from "@/components/site-layout";
+import { BrandMarkImage } from "@/components/brand-mark";
 import {
   getPublicTeamMembers,
   getPublicSiteSettings,
@@ -77,7 +78,7 @@ export const Route = createFileRoute("/about")({
               "@id": "https://logicsify.com/#organization",
               name: "Logicsify",
               url: "https://logicsify.com",
-              logo: "https://logicsify.com/logicsify-logo-dark.png",
+              logo: "https://logicsify.com/3b4a0a2a1d78df66b5bb7dac579e144c.png",
               email: "connect@logicsify.com",
               contactPoint: [
                 {
@@ -394,7 +395,7 @@ function AboutPage() {
               <article
                 key={title}
                 data-reveal
-                className="group relative overflow-hidden rounded-2xl border border-black/5 bg-white p-7 transition duration-300 hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-[0_24px_70px_-42px_rgba(25,10,47,0.55)]"
+                className="group relative overflow-hidden rounded-2xl border border-black/5 bg-white p-7 transition duration-300 hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-[var(--shadow-card)]"
               >
                 <span className="absolute right-5 top-5 text-xs font-semibold text-ink/20">
                   {String(index + 1).padStart(2, "0")}
@@ -856,8 +857,8 @@ function HeroTechnologyEcosystem() {
       <svg aria-hidden="true" viewBox="0 0 500 500" className="absolute inset-0 h-full w-full">
         <defs>
           <linearGradient id="about-hero-line" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#FE3434" />
-            <stop offset="1" stopColor="#FDBE02" />
+            <stop stopColor="var(--theme-primary-start)" />
+            <stop offset="1" stopColor="var(--theme-primary-end)" />
           </linearGradient>
         </defs>
         <circle cx="250" cy="250" r="112" fill="none" stroke="white" strokeOpacity="0.08" />
@@ -885,7 +886,7 @@ function HeroTechnologyEcosystem() {
       {nodes.map(({ label, icon: Icon, x, y }) => (
         <div
           key={label}
-          className="absolute z-10 flex h-[70px] w-[88px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-white/12 bg-[#2b1a3d]/95 px-2 text-center text-white backdrop-blur transition duration-300 hover:-translate-y-[55%] hover:border-brand-gold/35 hover:bg-[#35204b] sm:h-[78px] sm:w-[102px]"
+          className="absolute z-10 flex h-[70px] w-[88px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-white/12 bg-ink/95 px-2 text-center text-white backdrop-blur transition duration-300 hover:-translate-y-[55%] hover:border-brand-gold/35 hover:bg-white/10 sm:h-[78px] sm:w-[102px]"
           style={{ left: `${(x / 500) * 100}%`, top: `${(y / 500) * 100}%` }}
         >
           <Icon className="h-4 w-4 shrink-0 text-brand-gold" />
@@ -895,13 +896,9 @@ function HeroTechnologyEcosystem() {
         </div>
       ))}
 
-      <div className="absolute left-1/2 top-1/2 z-20 grid h-32 w-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white shadow-[0_0_80px_rgba(253,190,2,0.18)] sm:h-40 sm:w-40">
+      <div className="absolute left-1/2 top-1/2 z-20 grid h-32 w-32 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white shadow-[var(--shadow-glow)] sm:h-40 sm:w-40">
         <div className="absolute inset-3 rounded-full border border-dashed border-black/10 animate-spin-slow" />
-        <img
-          src="/logicsify-mark.png"
-          alt="Logicsify"
-          className="relative h-14 w-14 sm:h-16 sm:w-16"
-        />
+        <BrandMarkImage alt="Logicsify" className="relative h-14 w-14 object-contain sm:h-16 sm:w-16" />
       </div>
     </div>
   );
@@ -917,8 +914,8 @@ function ConnectedSystemsVisual() {
       <svg aria-hidden="true" viewBox="0 0 700 610" className="absolute inset-0 h-full w-full">
         <defs>
           <linearGradient id="about-connected-line" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#FE3434" />
-            <stop offset="1" stopColor="#FDBE02" />
+            <stop stopColor="var(--theme-primary-start)" />
+            <stop offset="1" stopColor="var(--theme-primary-end)" />
           </linearGradient>
         </defs>
         <circle cx="350" cy="305" r="146" fill="none" stroke="white" strokeOpacity="0.06" />
@@ -946,7 +943,7 @@ function ConnectedSystemsVisual() {
       {connectedSystems.map(({ label, icon: Icon, x, y }) => (
         <div
           key={label}
-          className="group absolute z-10 flex h-[64px] w-[88px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-white/12 bg-[#221335]/95 px-2 text-center text-white transition duration-300 hover:-translate-y-[55%] hover:border-brand-gold/40 hover:bg-[#2b1842] sm:h-[76px] sm:w-[124px] sm:px-3"
+          className="group absolute z-10 flex h-[64px] w-[88px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-white/12 bg-ink/95 px-2 text-center text-white transition duration-300 hover:-translate-y-[55%] hover:border-brand-gold/40 hover:bg-white/10 sm:h-[76px] sm:w-[124px] sm:px-3"
           style={{ left: `${(x / 700) * 100}%`, top: `${(y / 610) * 100}%` }}
         >
           <Icon className="h-4 w-4 shrink-0 text-brand-gold sm:h-5 sm:w-5" />
@@ -958,11 +955,7 @@ function ConnectedSystemsVisual() {
 
       <div className="absolute left-1/2 top-1/2 z-20 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-white sm:h-40 sm:w-40">
         <div className="absolute inset-3 rounded-full border border-dashed border-black/10 animate-spin-slow" />
-        <img
-          src="/logicsify-mark.png"
-          alt="Logicsify"
-          className="relative h-12 w-12 sm:h-16 sm:w-16"
-        />
+        <BrandMarkImage alt="Logicsify" className="relative h-12 w-12 object-contain sm:h-16 sm:w-16" />
       </div>
     </div>
   );

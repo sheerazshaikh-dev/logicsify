@@ -232,7 +232,7 @@ function GuidePage() {
                       type="checkbox"
                       checked={form.consent}
                       onChange={(e) => setForm({ ...form, consent: e.target.checked })}
-                      className="mt-1 accent-[#FE3434]"
+                      className="mt-1 accent-brand-red"
                     />
                     <span>
                       I agree that Logicsify may contact me about this guide and related services.

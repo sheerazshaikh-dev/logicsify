@@ -125,7 +125,7 @@ function LeadsPage() {
                   <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50/70">
                     <td className="px-5 py-4">
                       <button onClick={() => setSelected(item)} className="text-left">
-                        <p className="text-sm font-semibold text-[#190A2F] hover:text-[#FE3434]">
+                        <p className="text-sm font-semibold text-ink hover:text-brand-red">
                           {item.name}
                         </p>
                         <p className="mt-1 text-xs text-slate-400">{item.email}</p>
@@ -223,7 +223,7 @@ function LeadEditor({
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-5">
             <AdminCard className="p-5">
-              <h3 className="mb-4 text-sm font-semibold text-[#190A2F]">Contact details</h3>
+              <h3 className="mb-4 text-sm font-semibold text-ink">Contact details</h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Info icon={Mail} label="Email" value={lead.email} href={`mailto:${lead.email}`} />
                 <Info
@@ -242,13 +242,13 @@ function LeadEditor({
               </div>
             </AdminCard>
             <AdminCard className="p-5">
-              <h3 className="mb-4 text-sm font-semibold text-[#190A2F]">Project requirements</h3>
+              <h3 className="mb-4 text-sm font-semibold text-ink">Project requirements</h3>
               <dl className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <dt className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
                     Service
                   </dt>
-                  <dd className="mt-1 text-sm font-semibold text-[#190A2F]">
+                  <dd className="mt-1 text-sm font-semibold text-ink">
                     {lead.service || "—"}
                   </dd>
                 </div>
@@ -256,7 +256,7 @@ function LeadEditor({
                   <dt className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
                     Budget
                   </dt>
-                  <dd className="mt-1 text-sm font-semibold text-[#190A2F]">
+                  <dd className="mt-1 text-sm font-semibold text-ink">
                     {lead.budget || "—"}
                   </dd>
                 </div>
@@ -264,7 +264,7 @@ function LeadEditor({
                   <dt className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">
                     Timeline
                   </dt>
-                  <dd className="mt-1 text-sm font-semibold text-[#190A2F]">
+                  <dd className="mt-1 text-sm font-semibold text-ink">
                     {lead.timeline || "—"}
                   </dd>
                 </div>
@@ -278,7 +278,7 @@ function LeadEditor({
             </AdminCard>
           </div>
           <AdminCard className="h-fit p-5">
-            <h3 className="mb-5 text-sm font-semibold text-[#190A2F]">Lead management</h3>
+            <h3 className="mb-5 text-sm font-semibold text-ink">Lead management</h3>
             <div>
               <FieldLabel>Status</FieldLabel>
               <select
@@ -334,7 +334,7 @@ function Info({
         <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
           {label}
         </span>
-        <span className="mt-1 block truncate text-sm font-semibold text-[#190A2F]">{value}</span>
+        <span className="mt-1 block truncate text-sm font-semibold text-ink">{value}</span>
       </span>
     </>
   );
@@ -343,7 +343,7 @@ function Info({
       href={href}
       target={href.startsWith("http") ? "_blank" : undefined}
       rel="noreferrer"
-      className="flex items-center gap-3 rounded-2xl border border-slate-200 p-3 hover:border-[#FE3434]/30"
+      className="flex items-center gap-3 rounded-2xl border border-slate-200 p-3 hover:border-brand-red/30"
     >
       {content}
     </a>

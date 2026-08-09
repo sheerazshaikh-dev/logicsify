@@ -32,7 +32,7 @@ export function NavigableLightbox({
   if (!images.length) return null;
   return (
     <div
-      className="fixed inset-0 z-[250] grid place-items-center bg-[#10051f]/95 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[250] grid place-items-center bg-ink/95 p-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-label={`${title} image viewer`}
@@ -51,7 +51,7 @@ export function NavigableLightbox({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/15 bg-white/10 p-3 transition hover:bg-white hover:text-[#190A2F]"
+            className="rounded-full border border-white/15 bg-white/10 p-3 transition hover:bg-white hover:text-ink"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -67,7 +67,7 @@ export function NavigableLightbox({
             <button
               type="button"
               onClick={() => onIndexChange((index - 1 + images.length) % images.length)}
-              className="absolute left-0 rounded-full border border-white/15 bg-white/10 p-3 text-white transition hover:bg-white hover:text-[#190A2F]"
+              className="absolute left-0 rounded-full border border-white/15 bg-white/10 p-3 text-white transition hover:bg-white hover:text-ink"
               aria-label="Previous image"
             >
               <ChevronLeft className="h-6 w-6" />
@@ -75,7 +75,7 @@ export function NavigableLightbox({
             <button
               type="button"
               onClick={() => onIndexChange((index + 1) % images.length)}
-              className="absolute right-0 rounded-full border border-white/15 bg-white/10 p-3 text-white transition hover:bg-white hover:text-[#190A2F]"
+              className="absolute right-0 rounded-full border border-white/15 bg-white/10 p-3 text-white transition hover:bg-white hover:text-ink"
               aria-label="Next image"
             >
               <ChevronRight className="h-6 w-6" />

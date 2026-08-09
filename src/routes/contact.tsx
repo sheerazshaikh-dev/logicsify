@@ -320,7 +320,7 @@ function ContactPage() {
                     <input
                       type="checkbox"
                       name="consent"
-                      className="mt-1 h-4 w-4 rounded accent-[#FE3434]"
+                      className="mt-1 h-4 w-4 rounded accent-brand-red"
                     />
                     I agree to be contacted about my inquiry and understand the privacy policy
                     applies.*
@@ -563,7 +563,7 @@ function SelectField({
         id={name}
         name={name}
         defaultValue=""
-        className="w-full rounded-xl border border-white/15 bg-[#24113e] px-4 py-3 text-white focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30"
+        className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30"
       >
         <option value="" disabled>
           Select one

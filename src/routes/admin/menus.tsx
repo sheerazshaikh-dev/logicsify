@@ -313,7 +313,7 @@ function MenusPage() {
               <button
                 key={menu.id}
                 onClick={() => chooseMenu(menu.id)}
-                className={`mb-1 w-full rounded-xl px-4 py-3 text-left transition ${selectedId === menu.id ? "bg-[#190A2F] text-white" : "text-slate-600 hover:bg-slate-100"}`}
+                className={`mb-1 w-full rounded-xl px-4 py-3 text-left transition ${selectedId === menu.id ? "bg-ink text-white" : "text-slate-600 hover:bg-slate-100"}`}
               >
                 <span className="block text-sm font-semibold">{menu.name}</span>
                 <span
@@ -329,7 +329,7 @@ function MenusPage() {
             <AdminCard className="overflow-hidden">
               <div className="flex flex-col gap-4 border-b border-slate-200 p-5 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="font-semibold text-[#190A2F]">{selectedMenu?.name}</h2>
+                  <h2 className="font-semibold text-ink">{selectedMenu?.name}</h2>
                   <p className="mt-1 text-xs text-slate-400">
                     The numbered cards below are the exact display order. Use parent items to create
                     nesting.
@@ -392,11 +392,11 @@ function MenusPage() {
                         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                           <div className="flex min-w-0 items-center gap-2">
                             <GripVertical className="h-4 w-4 shrink-0 text-slate-300" />
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#190A2F] text-xs font-bold text-white">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-ink text-xs font-bold text-white">
                               {index + 1}
                             </span>
                             <div className="min-w-0">
-                              <span className="block truncate text-sm font-semibold text-[#190A2F]">
+                              <span className="block truncate text-sm font-semibold text-ink">
                                 {item.label || "New menu item"}
                               </span>
                               <span className="mt-0.5 flex flex-wrap gap-1 text-[10px] uppercase tracking-wider text-slate-400">
@@ -454,7 +454,7 @@ function MenusPage() {
                               type="button"
                               onClick={() => duplicateItem(item.client_id)}
                               title="Duplicate"
-                              className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-[#190A2F]"
+                              className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-ink"
                             >
                               <Copy className="h-4 w-4" />
                             </button>
@@ -462,7 +462,7 @@ function MenusPage() {
                               type="button"
                               onClick={() => addItem(item.client_id)}
                               title="Add child"
-                              className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-[#190A2F]"
+                              className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-ink"
                             >
                               <Plus className="h-4 w-4" />
                             </button>
@@ -735,10 +735,10 @@ function MenusPage() {
                         </div>
 
                         {isMegaRoot ? (
-                          <div className="mt-5 rounded-2xl border border-[#FE3434]/15 bg-white p-4">
+                          <div className="mt-5 rounded-2xl border border-brand-red/15 bg-white p-4">
                             <div className="mb-4 flex items-center gap-2">
-                              <LayoutGrid className="h-4 w-4 text-[#FE3434]" />
-                              <h3 className="text-sm font-semibold text-[#190A2F]">
+                              <LayoutGrid className="h-4 w-4 text-brand-red" />
+                              <h3 className="text-sm font-semibold text-ink">
                                 Mega-menu settings
                               </h3>
                             </div>
@@ -884,9 +884,9 @@ function MenusPage() {
 
             <AdminCard className="p-5">
               <div className="flex items-start gap-3">
-                <ListTree className="mt-0.5 h-5 w-5 shrink-0 text-[#FE3434]" />
+                <ListTree className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
                 <div>
-                  <h3 className="font-semibold text-[#190A2F]">How mega-menu hierarchy works</h3>
+                  <h3 className="font-semibold text-ink">How mega-menu hierarchy works</h3>
                   <p className="mt-1 text-sm leading-6 text-slate-500">
                     Set a top-level item to <strong>Mega menu</strong>. Add group headings under it,
                     assign each group to a column, then add clickable links under those groups. The
@@ -927,7 +927,7 @@ function ImageUrlField({
           className={adminInputClass}
           placeholder="https://…"
         />
-        <label className="inline-flex h-[46px] shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:border-[#FE3434]/30 hover:text-[#FE3434]">
+        <label className="inline-flex h-[46px] shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:border-brand-red/30 hover:text-brand-red">
           <ImagePlus className="h-4 w-4" />
           {uploadingKey === uploadKey ? "Uploading…" : "Upload"}
           <input
@@ -963,10 +963,10 @@ function MenuToggle({
       role="checkbox"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition ${checked ? "border-[#FE3434]/30 bg-[#FE3434]/[0.04]" : "border-slate-200 bg-white hover:border-slate-300"}`}
+      className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition ${checked ? "border-brand-red/30 bg-brand-red/[0.04]" : "border-slate-200 bg-white hover:border-slate-300"}`}
     >
       <span
-        className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border transition ${checked ? "border-[#FE3434] bg-[#FE3434] text-white" : "border-slate-300 bg-white text-transparent"}`}
+        className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border transition ${checked ? "border-brand-red bg-brand-red text-white" : "border-slate-300 bg-white text-transparent"}`}
       >
         <Check className="h-3.5 w-3.5" />
       </span>

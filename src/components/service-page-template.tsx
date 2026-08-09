@@ -93,7 +93,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                   key={service.slug}
                   to={service.route}
                   data-reveal
-                  className="group flex min-h-[220px] flex-col rounded-2xl border border-black/10 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_18px_50px_-26px_rgba(25,10,47,.35)]"
+                  className="group flex min-h-[220px] flex-col rounded-2xl border border-black/10 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
                 >
                   <div className="text-sm font-bold text-gradient">{String(index + 1).padStart(2, "0")}</div>
                   <h3 className="mt-5 text-xl font-semibold text-ink">{service.name}</h3>
@@ -170,7 +170,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                 key={c.title}
                 id={capabilityAnchor(data.slug, c.title)}
                 data-reveal
-                className="group rounded-2xl border border-black/10 p-6 md:p-8 bg-white hover:shadow-[0_20px_50px_-20px_rgba(25,10,47,0.2)] transition-all"
+                className="group rounded-2xl border border-black/10 p-6 md:p-8 bg-white hover:shadow-[var(--shadow-card)] transition-all"
               >
                 <div className="flex items-start gap-4">
                   <Check className="w-5 h-5 text-brand-red mt-1 shrink-0" />
@@ -342,7 +342,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
             {data.faqs.map((f, i) => (
               <details
                 key={i}
-                className="group rounded-2xl bg-white border border-black/10 p-5 open:shadow-[0_10px_30px_-15px_rgba(25,10,47,0.2)]"
+                className="group rounded-2xl bg-white border border-black/10 p-5 open:shadow-[var(--shadow-card)]"
               >
                 <summary className="flex items-center justify-between gap-4 cursor-pointer list-none">
                   <span className="text-lg font-semibold text-ink">{f.q}</span>

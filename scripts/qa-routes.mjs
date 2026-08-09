@@ -115,7 +115,7 @@ try {
     else if (!body.includes('<div id="root"></div>')) failures.push(`${route}: SPA entry missing`);
   }
 
-  for (const asset of ["/robots.txt", "/sitemap.xml", "/favicon.ico"]) {
+  for (const asset of ["/robots.txt", "/sitemap.xml", "/f2048ae62fb525b2c29c3e51e755cc17.png"]) {
     const response = await fetch(`${base}${asset}`, { signal: AbortSignal.timeout(10_000) });
     if (response.status !== 200) failures.push(`${asset}: HTTP ${response.status}`);
   }

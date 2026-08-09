@@ -11,12 +11,10 @@ import {
   Globe2,
   Handshake,
   Image as ImageIcon,
-  LayoutPanelTop,
   Plus,
   Loader2,
   Mail,
   Phone,
-  Palette,
   Save,
   SearchCheck,
   Send,
@@ -59,8 +57,6 @@ type Tab =
   | "site"
   | "profiles"
   | "partners"
-  | "header"
-  | "footer"
   | "seo"
   | "email"
   | "integrations"
@@ -78,8 +74,6 @@ const tabConfig: Array<{
   { id: "site", label: "Site Settings", icon: Globe2, group: "site" },
   { id: "profiles", label: "Company Profiles", icon: FileDown, group: "site" },
   { id: "partners", label: "Partners", icon: Handshake, group: "site" },
-  { id: "header", label: "Header & Branding", icon: LayoutPanelTop, group: "site" },
-  { id: "footer", label: "Footer", icon: Palette, group: "site" },
   { id: "seo", label: "SEO & Sharing", icon: SearchCheck, group: "site" },
   { id: "email", label: "Email / SMTP", icon: Mail, group: "email" },
   { id: "integrations", label: "Integrations", icon: Share2, group: "integrations" },
@@ -139,7 +133,7 @@ function SettingsPage() {
       <AdminPageHeader
         eyebrow="Configuration"
         title="Settings"
-        description="Manage the website identity, header, footer, favicon, email delivery, integrations, calendar and administrators from one place."
+        description="Manage operational site settings, company profiles, partners, SEO, email, integrations, calendar and administrators. Brand assets, header/footer presentation and design tokens now live under Global Branding."
         actions={
           currentGroup ? (
             <AdminButton onClick={() => void save()} disabled={loading || saving}>
@@ -158,9 +152,9 @@ function SettingsPage() {
               <button
                 key={id}
                 onClick={() => setTab(id)}
-                className={`mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition ${tab === id ? "bg-[#190A2F] text-white" : "text-slate-600 hover:bg-slate-100"}`}
+                className={`mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition ${tab === id ? "bg-ink text-white" : "text-slate-600 hover:bg-slate-100"}`}
               >
-                <Icon className={`h-4 w-4 ${tab === id ? "text-[#FDBE02]" : "text-slate-400"}`} />
+                <Icon className={`h-4 w-4 ${tab === id ? "text-brand-gold" : "text-slate-400"}`} />
                 {label}
               </button>
             ))}
@@ -168,12 +162,6 @@ function SettingsPage() {
           <div>
             {tab === "site" ? (
               <SiteSettings
-                values={siteValues}
-                update={(key, value) => update("site", key, value)}
-              />
-            ) : null}
-            {tab === "header" ? (
-              <HeaderSettings
                 values={siteValues}
                 update={(key, value) => update("site", key, value)}
               />
@@ -186,12 +174,6 @@ function SettingsPage() {
             ) : null}
             {tab === "partners" ? (
               <PartnersSettings
-                values={siteValues}
-                update={(key, value) => update("site", key, value)}
-              />
-            ) : null}
-            {tab === "footer" ? (
-              <FooterSettings
                 values={siteValues}
                 update={(key, value) => update("site", key, value)}
               />
@@ -233,22 +215,10 @@ function SiteSettings({ values, update }: SettingsProps) {
   return (
     <div className="space-y-6">
       <SettingsSection
-        title="Website identity"
-        description="Core information used throughout the public website, admin panel and metadata."
+        title="Website operations"
+        description="Operational website values. Brand name, tagline, logos, favicon, header/footer presentation and visual tokens are managed only under Global Branding."
       >
         <div className="grid gap-5 md:grid-cols-2">
-          <SettingInput
-            label="Site name"
-            value={values.site_name}
-            onChange={(value) => update("site_name", value)}
-            placeholder="Logicsify"
-          />
-          <SettingInput
-            label="Tagline"
-            value={values.tagline}
-            onChange={(value) => update("tagline", value)}
-            placeholder="Technology, marketing, and automation—logically built for growth."
-          />
           <SettingInput
             label="Website URL"
             value={values.site_url}
@@ -500,7 +470,7 @@ function ContactDirectoryEditor({ values, update }: SettingsProps) {
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
             <Share2 className="mx-auto h-8 w-8 text-slate-300" />
-            <p className="mt-4 font-semibold text-[#190A2F]">No social links added yet</p>
+            <p className="mt-4 font-semibold text-ink">No social links added yet</p>
             <p className="mt-2 text-sm text-slate-500">
               Add only official Logicsify profiles. Empty or disabled links are never shown
               publicly.
@@ -509,7 +479,7 @@ function ContactDirectoryEditor({ values, update }: SettingsProps) {
         )}
 
         <details className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-          <summary className="cursor-pointer text-sm font-semibold text-[#190A2F]">
+          <summary className="cursor-pointer text-sm font-semibold text-ink">
             Legacy fixed social fields
           </summary>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -618,7 +588,7 @@ function CompanyProfilesSettings({ values, update }: SettingsProps) {
                 key={profile.id}
                 className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[auto_1fr_auto] md:items-center"
               >
-                <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-[#190A2F]">
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-ink">
                   <input
                     type="radio"
                     name="active-company-profile"
@@ -631,7 +601,7 @@ function CompanyProfilesSettings({ values, update }: SettingsProps) {
                         })),
                       )
                     }
-                    className="accent-[#FE3434]"
+                    className="accent-brand-red"
                   />{" "}
                   Active
                 </label>
@@ -654,7 +624,7 @@ function CompanyProfilesSettings({ values, update }: SettingsProps) {
                     href={profile.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-[#190A2F]"
+                    className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-ink"
                   >
                     <ExternalLink className="h-4 w-4" /> View
                   </a>
@@ -681,7 +651,7 @@ function CompanyProfilesSettings({ values, update }: SettingsProps) {
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center">
             <FileDown className="mx-auto h-9 w-9 text-slate-300" />
-            <p className="mt-3 font-semibold text-[#190A2F]">No company profiles uploaded</p>
+            <p className="mt-3 font-semibold text-ink">No company profiles uploaded</p>
             <p className="mt-1 text-sm text-slate-500">
               Add one or more PDF files from Media Library.
             </p>
@@ -831,7 +801,7 @@ function PartnersSettings({ values, update }: SettingsProps) {
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center">
             <Handshake className="mx-auto h-9 w-9 text-slate-300" />
-            <p className="mt-3 font-semibold text-[#190A2F]">No partners added</p>
+            <p className="mt-3 font-semibold text-ink">No partners added</p>
           </div>
         )}
       </SettingsSection>
@@ -1121,8 +1091,8 @@ function SeoSettings({ values, update }: SettingsProps) {
       </SettingsSection>
 
       <SettingsSection
-        title="Indexing and browser appearance"
-        description="Set the global indexing defaults and browser theme color. Individual pages may still override metadata."
+        title="Indexing defaults"
+        description="Set the global indexing defaults. Browser/app theme color is managed under Global Branding."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <ToggleSetting
@@ -1136,12 +1106,6 @@ function SeoSettings({ values, update }: SettingsProps) {
             description="Use follow by default for public pages."
             checked={boolValue(values.robots_follow, true)}
             onChange={(value) => update("robots_follow", value)}
-          />
-          <ColorSetting
-            label="Browser theme color"
-            value={values.theme_color}
-            onChange={(value) => update("theme_color", value)}
-            fallback="#190A2F"
           />
         </div>
       </SettingsSection>
@@ -1522,7 +1486,7 @@ function IntegrationSettings({
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-semibold text-[#190A2F]">{snippets.length} code blocks</p>
+            <p className="font-semibold text-ink">{snippets.length} code blocks</p>
             <p className="mt-1 text-sm text-slate-500">
               Disabled snippets remain saved but are not executed.
             </p>
@@ -1559,7 +1523,7 @@ function IntegrationSettings({
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-[#190A2F] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                      <span className="rounded-full bg-ink px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                         {snippet.snippet_type === "integration" ? "Integration" : "Code"}
                       </span>
                       <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -1569,7 +1533,7 @@ function IntegrationSettings({
                         {targetLabel(snippet.target)}
                       </span>
                     </div>
-                    <p className="mt-3 truncate font-semibold text-[#190A2F]">
+                    <p className="mt-3 truncate font-semibold text-ink">
                       {snippet.title || "Untitled snippet"}
                     </p>
                   </div>
@@ -1579,7 +1543,7 @@ function IntegrationSettings({
                       title="Move up"
                       disabled={!canManageCustomCode || index === 0}
                       onClick={() => moveSnippet(index, -1)}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-[#190A2F] disabled:opacity-35"
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-ink disabled:opacity-35"
                     >
                       <ChevronUp className="h-4 w-4" />
                     </button>
@@ -1588,7 +1552,7 @@ function IntegrationSettings({
                       title="Move down"
                       disabled={!canManageCustomCode || index === snippets.length - 1}
                       onClick={() => moveSnippet(index, 1)}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-[#190A2F] disabled:opacity-35"
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-ink disabled:opacity-35"
                     >
                       <ChevronDown className="h-4 w-4" />
                     </button>
@@ -1597,7 +1561,7 @@ function IntegrationSettings({
                       title="Duplicate"
                       disabled={!canManageCustomCode}
                       onClick={() => duplicateSnippet(index)}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-[#190A2F] disabled:opacity-35"
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:text-ink disabled:opacity-35"
                     >
                       <Copy className="h-4 w-4" />
                     </button>
@@ -1648,7 +1612,7 @@ function IntegrationSettings({
                         checked={snippet.enabled}
                         disabled={!canManageCustomCode}
                         onChange={(event) => patchSnippet(index, { enabled: event.target.checked })}
-                        className="h-4 w-4 accent-[#FE3434]"
+                        className="h-4 w-4 accent-brand-red"
                       />
                       Enabled
                     </label>
@@ -1712,7 +1676,7 @@ function IntegrationSettings({
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
             <Code2 className="mx-auto h-8 w-8 text-slate-300" />
-            <p className="mt-4 font-semibold text-[#190A2F]">No custom snippets yet</p>
+            <p className="mt-4 font-semibold text-ink">No custom snippets yet</p>
             <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
               Built-in analytics IDs above do not require snippets. Add a block only for a trusted
               service that is not already supported.
@@ -1827,7 +1791,7 @@ function AdministratorsSettings() {
     >
       <div className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold text-[#190A2F]">Administrator access and roles</p>
+          <p className="font-semibold text-ink">Administrator access and roles</p>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
             Create users, update roles, reset passwords, activate or suspend accounts, and review
             the latest login activity.
@@ -1835,7 +1799,7 @@ function AdministratorsSettings() {
         </div>
         <a
           href={adminHref("administrators")}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#190A2F] px-5 text-sm font-semibold text-white transition hover:bg-[#2a1546]"
+          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-ink px-5 text-sm font-semibold text-white transition hover:bg-ink/90"
         >
           Manage administrators <ExternalLink className="h-4 w-4" />
         </a>
@@ -1866,11 +1830,11 @@ function SettingsSection({
     <AdminCard>
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-[#190A2F]">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-ink">
             <Icon className="h-4 w-4" />
           </span>
           <div>
-            <h2 className="font-semibold text-[#190A2F]">{title}</h2>
+            <h2 className="font-semibold text-ink">{title}</h2>
             <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>
           </div>
         </div>
@@ -2037,11 +2001,11 @@ function ToggleSetting({
   return (
     <label className="flex cursor-pointer items-center justify-between gap-5 rounded-2xl border border-slate-200 p-4">
       <span>
-        <span className="block text-sm font-semibold text-[#190A2F]">{label}</span>
+        <span className="block text-sm font-semibold text-ink">{label}</span>
         <span className="mt-1 block text-xs leading-5 text-slate-400">{description}</span>
       </span>
       <span
-        className={`relative h-7 w-12 shrink-0 rounded-full transition ${checked ? "bg-[#190A2F]" : "bg-slate-200"}`}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition ${checked ? "bg-ink" : "bg-slate-200"}`}
       >
         <input
           type="checkbox"

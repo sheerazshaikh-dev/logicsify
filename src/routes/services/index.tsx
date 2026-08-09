@@ -106,13 +106,13 @@ function ServicesOverview() {
                   to={service.route}
                   hash={service.hash}
                   data-reveal
-                  className="group relative min-h-[470px] overflow-hidden rounded-3xl border border-white/10 bg-ink p-8 text-white shadow-[0_28px_80px_-38px_rgba(25,10,47,.75)] transition duration-500 hover:-translate-y-1 md:p-9"
+                  className="group relative min-h-[470px] overflow-hidden rounded-3xl border border-white/10 bg-ink p-8 text-white shadow-[var(--shadow-card)] transition duration-500 hover:-translate-y-1 md:p-9"
                 >
                   <div className="absolute inset-0 grid-noise opacity-60" />
                   <div className="absolute -right-24 -top-20 h-72 w-72 rounded-full bg-brand-gold/20 blur-3xl transition group-hover:bg-brand-gold/30" />
                   <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-brand-red/20 blur-3xl" />
                   <div className="relative flex h-full flex-col">
-                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand shadow-[0_12px_35px_-12px_rgba(254,52,52,.9)]">
+                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-brand shadow-[var(--shadow-glow)]">
                       <Icon className="h-6 w-6" />
                     </div>
                     <p className="eyebrow mt-10 text-white/55">Core service {index + 1}</p>

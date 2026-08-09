@@ -99,10 +99,10 @@ function AccountPage() {
           <form onSubmit={saveProfile}>
             <AdminCard className="h-full p-6">
               <div className="mb-6">
-                <span className="inline-flex rounded-full bg-[#190A2F] px-3 py-1 text-xs font-semibold capitalize text-white">
+                <span className="inline-flex rounded-full bg-ink px-3 py-1 text-xs font-semibold capitalize text-white">
                   {admin.role.replaceAll("_", " ")}
                 </span>
-                <h2 className="mt-4 text-xl font-semibold text-[#190A2F]">Profile details</h2>
+                <h2 className="mt-4 text-xl font-semibold text-ink">Profile details</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   This identity appears in the admin panel and Security logs.
                 </p>
@@ -146,7 +146,7 @@ function AccountPage() {
           <form onSubmit={savePassword}>
             <AdminCard className="h-full p-6">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-[#190A2F]">Change password</h2>
+                <h2 className="text-xl font-semibold text-ink">Change password</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   Changing it revokes your other active admin sessions.
                 </p>

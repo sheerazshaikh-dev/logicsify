@@ -7,11 +7,21 @@ const RICH_TEXT_EDITOR_DOCUMENT = `<!doctype html>
   <style>
     * { box-sizing: border-box; }
     html, body { min-height: 100%; margin: 0; }
+    :root {
+      --editor-text: #000000;
+      --editor-background: #FFFFFF;
+      --editor-muted: #64748B;
+      --editor-border: color-mix(in oklab, var(--theme-dark) 12%, transparent);
+      --editor-accent: #04A6A1;
+      --editor-accent-end: #8BCF3C;
+      --editor-heading-font: Sora, ui-sans-serif, system-ui, sans-serif;
+      --editor-body-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
     body {
       padding: 16px;
-      color: #190A2F;
-      background: #fff;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--editor-text);
+      background: var(--editor-background);
+      font-family: var(--editor-body-font);
       font-size: 14px;
       line-height: 1.7;
       outline: none;
@@ -23,7 +33,7 @@ const RICH_TEXT_EDITOR_DOCUMENT = `<!doctype html>
       position: relative;
       margin: 2em 0 .7em;
       padding-bottom: .65em;
-      border-bottom: 1px solid rgba(25, 10, 47, .12);
+      border-bottom: 1px solid var(--editor-border);
       font-size: 2rem;
       line-height: 1.18;
       letter-spacing: -.035em;
@@ -35,9 +45,10 @@ const RICH_TEXT_EDITOR_DOCUMENT = `<!doctype html>
       width: 56px;
       height: 3px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #FE3434, #FDBE02);
+      background: linear-gradient(135deg, var(--editor-accent), var(--editor-accent-end));
       content: "";
     }
+    h2, h3 { font-family: var(--editor-heading-font); }
     h3 {
       margin: 1.65em 0 .55em;
       font-size: 1.45rem;
@@ -45,8 +56,8 @@ const RICH_TEXT_EDITOR_DOCUMENT = `<!doctype html>
       letter-spacing: -.02em;
     }
     ul, ol { margin: 0 0 1em; padding-left: 1.5rem; }
-    blockquote { margin: 1em 0; padding-left: 1rem; border-left: 3px solid #FE3434; color: #64748b; }
-    a { color: #FE3434; text-decoration: underline; }
+    blockquote { margin: 1em 0; padding-left: 1rem; border-left: 3px solid var(--editor-accent); color: var(--editor-muted); }
+    a { color: var(--editor-accent); text-decoration: underline; }
   </style>
 </head>
 <body contenteditable="true"></body>
@@ -122,6 +133,18 @@ export function RichTextEditor({
     const editor = getEditor();
     if (!editor) return;
 
+    const theme = getComputedStyle(document.documentElement);
+    const editorRoot = editor.doc.documentElement;
+    const themeValue = (name: string, fallback: string) => theme.getPropertyValue(name).trim() || fallback;
+    editorRoot.style.setProperty("--editor-text", themeValue("--theme-text", "#000000"));
+    editorRoot.style.setProperty("--editor-background", themeValue("--theme-background", "#FFFFFF"));
+    editorRoot.style.setProperty("--editor-muted", themeValue("--theme-muted-text", "#64748B"));
+    editorRoot.style.setProperty("--editor-border", themeValue("--theme-border", "#E6E1EA"));
+    editorRoot.style.setProperty("--editor-accent", themeValue("--theme-primary-start", "#04A6A1"));
+    editorRoot.style.setProperty("--editor-accent-end", themeValue("--theme-primary-end", "#8BCF3C"));
+    editorRoot.style.setProperty("--editor-heading-font", themeValue("--theme-heading-font", "Sora, system-ui, sans-serif"));
+    editorRoot.style.setProperty("--editor-body-font", themeValue("--theme-body-font", "Inter, system-ui, sans-serif"));
+
     const initialHtml = latestValueRef.current;
     editor.body.innerHTML = initialHtml;
     editor.body.contentEditable = "true";
@@ -173,7 +196,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:ring-4 focus-within:ring-[#FE3434]/10">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:ring-4 focus-within:ring-brand-red/10">
       <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2">
         {[
           { label: "B", cmd: "bold" },
@@ -191,7 +214,7 @@ export function RichTextEditor({
             type="button"
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => command(item.cmd, item.arg)}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-[#190A2F] hover:bg-[#190A2F] hover:text-white"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-ink hover:bg-ink hover:text-white"
           >
             {item.label}
           </button>

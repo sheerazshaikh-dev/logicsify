@@ -42,7 +42,7 @@ import {
 } from "@/lib/admin-api";
 import { AdminLoading } from "@/components/admin/admin-ui";
 import { getPublicSiteSettings, type PublicSiteSettings } from "@/lib/logicsify-api";
-import { DEFAULT_BRAND_ASSETS, withDefaultBranding } from "@/lib/brand-assets";
+import { DEFAULT_BRAND_ASSETS, optimizedBrandAsset, withDefaultBranding } from "@/lib/brand-assets";
 import { adminHref, getAdminSection, legacyAdminPath } from "@/lib/admin-path";
 import { injectCodeSnippets, injectRuntimeStyle, removeRuntimeNamespace } from "@/lib/runtime-code";
 
@@ -80,7 +80,7 @@ const navigation = [
     label: "System",
     items: [
       { label: "Settings", to: "/admin/settings", section: "settings", icon: Settings },
-      { label: "Global Styling", to: "/admin/global-styling", section: "global-styling", icon: Paintbrush },
+      { label: "Global Branding", to: "/admin/global-styling", section: "global-styling", icon: Paintbrush },
       { label: "Administrators", to: "/admin/administrators", section: "administrators", icon: ShieldCheck },
       { label: "Recycle Bin", to: "/admin/trash", section: "trash", icon: ArchiveRestore },
       { label: "Security", to: "/admin/security", section: "security", icon: ShieldCheck },
@@ -133,6 +133,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     getPublicSiteSettings().then((settings) => setSiteSettings(withDefaultBranding(settings)));
+    const onBrandingUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<PublicSiteSettings>).detail;
+      if (detail) setSiteSettings(withDefaultBranding(detail));
+    };
+    window.addEventListener("logicsify:branding-updated", onBrandingUpdated);
+    return () => window.removeEventListener("logicsify:branding-updated", onBrandingUpdated);
   }, []);
 
   useEffect(() => {
@@ -210,7 +216,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   if (loading || !admin) {
     return (
-      <div className="min-h-dvh bg-slate-50">
+      <div className="logicsify-admin min-h-dvh bg-slate-50">
         <AdminLoading label={`Opening ${siteSettings.site_name || "Logicsify"} Admin…`} />
       </div>
     );
@@ -218,14 +224,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const sidebar = (
     <aside
-      className={`flex h-full flex-col border-r border-white/10 bg-[#190A2F] text-white transition-all duration-300 ${collapsed ? "w-[88px]" : "w-[274px]"}`}
+      className={`admin-sidebar flex h-full flex-col border-r border-white/10 bg-ink text-white transition-all duration-300 ${collapsed ? "w-[88px]" : "w-[274px]"}`}
     >
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
         <a href={adminHref("dashboard", location.pathname)} className="flex min-w-0 items-center gap-3 overflow-hidden">
           {collapsed ? (
             <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl shadow-lg">
               <img
-                src={siteSettings.favicon || DEFAULT_BRAND_ASSETS.favicon}
+                src={optimizedBrandAsset(siteSettings.brand_mark || siteSettings.favicon, DEFAULT_BRAND_ASSETS.brandMark)}
                 alt="Logicsify"
                 className="h-full w-full object-contain"
               />
@@ -233,7 +239,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           ) : (
             <div className="min-w-0">
               <img
-                src={siteSettings.admin_logo || DEFAULT_BRAND_ASSETS.adminLogo}
+                src={optimizedBrandAsset(siteSettings.admin_logo, DEFAULT_BRAND_ASSETS.adminLogo)}
                 alt={siteSettings.site_name || "Logicsify"}
                 className="h-8 w-auto max-w-[164px] object-contain object-left"
               />
@@ -285,18 +291,19 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     key={item.to}
                     href={adminHref(item.section, location.pathname)}
                     title={collapsed ? item.label : undefined}
+                    data-admin-active={active ? "true" : "false"}
                     className={`group flex h-11 items-center rounded-xl px-3 text-sm font-medium transition ${
                       active
-                        ? "bg-white text-[#190A2F] shadow-lg"
+                        ? "bg-white text-ink shadow-lg"
                         : "text-white/65 hover:bg-white/10 hover:text-white"
                     } ${collapsed ? "justify-center" : "gap-3"}`}
                   >
                     <Icon
-                      className={`h-[18px] w-[18px] shrink-0 ${active ? "text-[#FE3434]" : ""}`}
+                      className={`h-[18px] w-[18px] shrink-0 ${active ? "text-brand-red" : ""}`}
                     />
                     {!collapsed ? <span>{item.label}</span> : null}
                     {!collapsed && active ? (
-                      <ChevronRight className="ml-auto h-4 w-4 text-[#FE3434]" />
+                      <ChevronRight className="ml-auto h-4 w-4 text-brand-red" />
                     ) : null}
                   </a>
                 );
@@ -321,12 +328,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-dvh bg-[#f5f6fa] text-slate-900">
+    <div className="logicsify-admin admin-shell-canvas min-h-dvh bg-cream text-slate-900">
       <div className="fixed inset-y-0 left-0 z-50 hidden lg:block">{sidebar}</div>
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
-            className="absolute inset-0 bg-[#190A2F]/55"
+            className="absolute inset-0 bg-ink/55"
             onClick={() => setMobileOpen(false)}
           />
           <div className="relative h-full w-[274px]">{sidebar}</div>
@@ -336,7 +343,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div
         className={`min-h-dvh transition-all duration-300 ${collapsed ? "lg:pl-[88px]" : "lg:pl-[274px]"}`}
       >
-        <header className="sticky top-0 z-40 flex h-20 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl md:px-7">
+        <header className="admin-topbar sticky top-0 z-40 flex h-20 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl md:px-7">
           <div className="flex items-center gap-3">
             <button
               className="rounded-xl border border-slate-200 p-2.5 text-slate-600 lg:hidden"
@@ -349,7 +356,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
                 Admin Panel
               </p>
-              <p className="font-display text-lg font-semibold text-[#190A2F]">{pageTitle}</p>
+              <p className="font-display text-lg font-semibold text-ink">{pageTitle}</p>
             </div>
           </div>
 
@@ -367,7 +374,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   .toUpperCase()}
               </span>
               <span className="hidden text-left sm:block">
-                <span className="block text-sm font-semibold text-[#190A2F]">{admin.name}</span>
+                <span className="block text-sm font-semibold text-ink">{admin.name}</span>
                 <span className="block text-[11px] capitalize text-slate-400">
                   {admin.role.replaceAll("_", " ")}
                 </span>
@@ -377,7 +384,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             {profileOpen ? (
               <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
                 <div className="border-b border-slate-100 px-3 py-2.5">
-                  <p className="truncate text-sm font-semibold text-[#190A2F]">{admin.email}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{admin.email}</p>
                   <p className="mt-0.5 text-xs capitalize text-slate-400">
                     {admin.role.replaceAll("_", " ")}
                   </p>
@@ -385,7 +392,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <a
                   href={adminHref("account", location.pathname)}
                   onClick={() => setProfileOpen(false)}
-                  className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#190A2F] hover:bg-slate-50"
+                  className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-ink hover:bg-slate-50"
                 >
                   <UserCog className="h-4 w-4" /> My account
                 </a>

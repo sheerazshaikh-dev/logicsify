@@ -76,7 +76,7 @@ const emptyProfile: Partial<ConnectProfile> = {
   location_ids_json: [],
   visibility_json: DEFAULT_CONNECT_PROFILE_VISIBILITY,
   sort_order: 0,
-  theme_json: { accent: "#FE3434" },
+  theme_json: { accent: "#04A6A1" },
   status: "draft",
   is_unlisted: true,
   noindex: true,
@@ -269,9 +269,9 @@ export function ConnectProfilesPage() {
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${tab === id ? "bg-[#190A2F] text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${tab === id ? "bg-ink text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
           >
-            <Icon className={`h-4 w-4 ${tab === id ? "text-[#FDBE02]" : "text-slate-400"}`} />
+            <Icon className={`h-4 w-4 ${tab === id ? "text-brand-gold" : "text-slate-400"}`} />
             {label}
           </button>
         ))}
@@ -280,26 +280,26 @@ export function ConnectProfilesPage() {
         <AdminCard className="mb-7 overflow-hidden">
           <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
             <div
-              className="relative min-h-56 overflow-hidden bg-[#190A2F] bg-cover bg-center"
+              className="relative min-h-56 overflow-hidden bg-ink bg-cover bg-center"
               style={
                 globalCover
                   ? { backgroundImage: `url(${globalCover})` }
                   : {
                       backgroundImage:
-                        "radial-gradient(circle at 15% 20%, #FE3434cc, transparent 43%), radial-gradient(circle at 82% 70%, #FDBE0299, transparent 42%), linear-gradient(135deg, #190A2F, #361141)",
+                        "radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--theme-primary-start) 80%, transparent), transparent 43%), radial-gradient(circle at 82% 70%, color-mix(in srgb, var(--theme-primary-end) 60%, transparent), transparent 42%), linear-gradient(135deg, var(--theme-dark), color-mix(in srgb, var(--theme-dark) 82%, var(--theme-primary-start)))",
                     }
               }
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#190A2F]/45 via-transparent to-[#190A2F]/15" />
-              <span className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-[#190A2F]/60 px-4 py-2 text-xs font-bold text-white backdrop-blur">
+              <div className="absolute inset-0 bg-gradient-to-r from-ink/45 via-transparent to-ink/15" />
+              <span className="absolute bottom-5 left-5 rounded-full border border-white/20 bg-ink/60 px-4 py-2 text-xs font-bold text-white backdrop-blur">
                 Shared profile cover
               </span>
             </div>
             <div className="flex flex-col justify-center p-6 lg:p-8">
-              <p className="text-xs font-bold uppercase tracking-[.16em] text-[#FE3434]">
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-brand-red">
                 Global cover
               </p>
-              <h2 className="mt-2 text-xl font-semibold text-[#190A2F]">
+              <h2 className="mt-2 text-xl font-semibold text-ink">
                 One cover for every profile
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -358,13 +358,13 @@ export function ConnectProfilesPage() {
                         className="h-12 w-12 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="grid h-12 w-12 place-items-center rounded-full bg-[#190A2F] font-bold text-white">
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-ink font-bold text-white">
                         {item.display_name.slice(0, 1)}
                       </span>
                     )}
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-[#190A2F]">{item.display_name}</p>
+                        <p className="font-semibold text-ink">{item.display_name}</p>
                         <StatusBadge status={item.status} />
                         {item.is_unlisted ? (
                           <span className="text-xs text-slate-400">Unlisted · noindex</span>
@@ -574,7 +574,7 @@ function ProfileEditor({
           <FieldLabel>Accent color</FieldLabel>
           <input
             type="color"
-            value={value.theme_json?.accent || "#FE3434"}
+            value={value.theme_json?.accent || "#04A6A1"}
             onChange={(e) => set("theme_json", { accent: e.target.value })}
             className="h-11 w-full rounded-xl border border-slate-200 p-1"
           />
@@ -650,7 +650,7 @@ function ProfileEditor({
         </div>
       </div>
       <div className="mt-7 border-t border-slate-200 pt-6">
-        <h3 className="font-semibold text-[#190A2F]">Where this person appears</h3>
+        <h3 className="font-semibold text-ink">Where this person appears</h3>
         <p className="mt-1 text-sm text-slate-500">
           Publishing controls availability. These toggles control the exact public placements.
         </p>
@@ -683,7 +683,7 @@ function ProfileEditor({
       </div>
 
       <div className="mt-7 border-t border-slate-200 pt-6">
-        <h3 className="font-semibold text-[#190A2F]">Assigned locations</h3>
+        <h3 className="font-semibold text-ink">Assigned locations</h3>
         <p className="mt-1 text-sm text-slate-500">
           Select the office or offices this person belongs to. Their address is pulled automatically
           from these locations, so it only needs to be maintained once. Every other enabled office
@@ -715,7 +715,7 @@ function ProfileEditor({
       </div>
 
       <div className="mt-7 border-t border-slate-200 pt-6">
-        <h3 className="font-semibold text-[#190A2F]">Field visibility</h3>
+        <h3 className="font-semibold text-ink">Field visibility</h3>
         <p className="mt-1 text-sm text-slate-500">
           Name is always visible. “Assigned address” uses the addresses from the locations selected
           above. Bio, skills, and the location directory remain web-only and are intentionally
@@ -736,7 +736,7 @@ function ProfileEditor({
             <tbody className="divide-y divide-slate-100">
               {TEAM_CONNECT_FIELDS.map((field) => (
                 <tr key={field}>
-                  <td className="px-4 py-3 font-medium text-[#190A2F]">
+                  <td className="px-4 py-3 font-medium text-ink">
                     {TEAM_CONNECT_FIELD_LABELS[field]}
                   </td>
                   {TEAM_CONNECT_DESTINATIONS.map((destination) => {
@@ -753,7 +753,7 @@ function ProfileEditor({
                           onChange={(event) =>
                             setFieldVisibility(field, destination.id, event.target.checked)
                           }
-                          className="h-4 w-4 accent-[#FE3434] disabled:opacity-30"
+                          className="h-4 w-4 accent-brand-red disabled:opacity-30"
                         />
                       </td>
                     );
@@ -767,7 +767,7 @@ function ProfileEditor({
       <div className="mt-7 border-t border-slate-200 pt-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-[#190A2F]">Custom links</h3>
+            <h3 className="font-semibold text-ink">Custom links</h3>
             <p className="text-sm text-slate-500">
               Social profiles, booking links, portfolios, stores, or any HTTPS URL.
             </p>
@@ -858,17 +858,17 @@ function PlacementToggle({
 }) {
   return (
     <label
-      className={`flex cursor-pointer items-start justify-between gap-4 rounded-2xl border p-4 transition ${checked ? "border-[#FE3434]/30 bg-[#FE3434]/5" : "border-slate-200 bg-white"}`}
+      className={`flex cursor-pointer items-start justify-between gap-4 rounded-2xl border p-4 transition ${checked ? "border-brand-red/30 bg-brand-red/5" : "border-slate-200 bg-white"}`}
     >
       <span>
-        <span className="block text-sm font-semibold text-[#190A2F]">{label}</span>
+        <span className="block text-sm font-semibold text-ink">{label}</span>
         <span className="mt-1 block text-xs leading-5 text-slate-400">{description}</span>
       </span>
       <input
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="mt-1 h-4 w-4 shrink-0 accent-[#FE3434]"
+        className="mt-1 h-4 w-4 shrink-0 accent-brand-red"
       />
     </label>
   );
@@ -935,7 +935,7 @@ function LocationsEditor({
     <AdminCard>
       <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-[#190A2F]">Business locations</h2>
+          <h2 className="text-lg font-semibold text-ink">Business locations</h2>
           <p className="mt-1 text-sm text-slate-500">
             Manage office details and choose independently whether each appears on Contact, Footer,
             or Connect pages.
@@ -961,17 +961,17 @@ function LocationsEditor({
           return (
             <div
               key={location.id}
-              className={`rounded-2xl border transition ${open ? "border-[#FE3434]/25 bg-slate-50 shadow-sm" : "border-slate-200 bg-white"}`}
+              className={`rounded-2xl border transition ${open ? "border-brand-red/25 bg-slate-50 shadow-sm" : "border-slate-200 bg-white"}`}
             >
               <div
                 className={`flex flex-wrap items-center justify-between gap-3 ${open ? "border-b border-slate-200 p-5" : "p-4 sm:p-5"}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-[#190A2F] shadow-sm">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-ink shadow-sm">
                     <MapPin className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="font-semibold text-[#190A2F]">
+                    <p className="font-semibold text-ink">
                       {location.name || `Location ${index + 1}`}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
@@ -1125,7 +1125,7 @@ function MultiValueEditor({
         <button
           type="button"
           onClick={() => onChange([...values, ""])}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-[#FE3434]"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-red"
         >
           <Plus className="h-3.5 w-3.5" /> Add {singularLabel}
         </button>
@@ -1260,7 +1260,7 @@ function Check({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 accent-[#FE3434]"
+        className="h-4 w-4 accent-brand-red"
       />
       {label}
     </label>
@@ -1330,7 +1330,7 @@ function DownloadModal({ profile, close }: { profile: ConnectProfile | null; clo
       onClose={close}
       width="max-w-xl"
     >
-      <div className="rounded-2xl border border-slate-200 bg-[#faf8fc] p-4">
+      <div className="rounded-2xl border border-slate-200 bg-cream p-4">
         <div className="flex items-center gap-4">
           {profile.avatar_url ? (
             <img
@@ -1339,12 +1339,12 @@ function DownloadModal({ profile, close }: { profile: ConnectProfile | null; clo
               className="h-16 w-16 rounded-2xl object-cover shadow-sm"
             />
           ) : (
-            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[#190A2F] text-xl font-bold text-white">
+            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-ink text-xl font-bold text-white">
               {profile.display_name.slice(0, 1)}
             </span>
           )}
           <div className="min-w-0">
-            <p className="font-semibold text-[#190A2F]">{profile.display_name}</p>
+            <p className="font-semibold text-ink">{profile.display_name}</p>
             <p className="mt-1 text-sm text-slate-500">A4 portrait · high-resolution export</p>
           </div>
         </div>
@@ -1362,16 +1362,16 @@ function DownloadModal({ profile, close }: { profile: ConnectProfile | null; clo
           type="button"
           disabled={Boolean(exporting) || profile.status !== "published"}
           onClick={() => void download("jpg")}
-          className="group rounded-3xl border border-slate-200 p-5 text-left transition hover:-translate-y-0.5 hover:border-[#FE3434]/40 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50"
+          className="group rounded-3xl border border-slate-200 p-5 text-left transition hover:-translate-y-0.5 hover:border-brand-red/40 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50"
         >
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#190A2F] text-white">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ink text-white">
             {exporting === "jpg" ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <FileImage className="h-5 w-5" />
             )}
           </span>
-          <span className="mt-4 block font-semibold text-[#190A2F]">Download JPG</span>
+          <span className="mt-4 block font-semibold text-ink">Download JPG</span>
           <span className="mt-1 block text-xs leading-5 text-slate-500">
             Best for WhatsApp, social posts and quick sharing.
           </span>
@@ -1380,16 +1380,16 @@ function DownloadModal({ profile, close }: { profile: ConnectProfile | null; clo
           type="button"
           disabled={Boolean(exporting) || profile.status !== "published"}
           onClick={() => void download("pdf")}
-          className="group rounded-3xl border border-slate-200 p-5 text-left transition hover:-translate-y-0.5 hover:border-[#FE3434]/40 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50"
+          className="group rounded-3xl border border-slate-200 p-5 text-left transition hover:-translate-y-0.5 hover:border-brand-red/40 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50"
         >
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#FE3434] to-[#FDBE02] text-white">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-brand-red to-brand-gold text-white">
             {exporting === "pdf" ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <FileText className="h-5 w-5" />
             )}
           </span>
-          <span className="mt-4 block font-semibold text-[#190A2F]">Download PDF</span>
+          <span className="mt-4 block font-semibold text-ink">Download PDF</span>
           <span className="mt-1 block text-xs leading-5 text-slate-500">
             Best for printing, email attachments and documents.
           </span>

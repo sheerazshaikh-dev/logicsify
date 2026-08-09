@@ -125,7 +125,7 @@ function CmsPage() {
                   <img
                     src={image}
                     alt={title || page.title}
-                    className="w-full rounded-3xl border border-black/10 shadow-[0_30px_80px_-30px_rgba(25,10,47,0.3)]"
+                    className="w-full rounded-3xl border border-black/10 shadow-[var(--shadow-card)]"
                   />
                 </div>
               )}

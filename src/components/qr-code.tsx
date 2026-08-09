@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { runtimeThemeColor } from "@/lib/theme-runtime";
 
 export function QrCode({
   value,
@@ -10,6 +11,14 @@ export function QrCode({
   className?: string;
 }) {
   const [source, setSource] = useState("");
+  const [themeRevision, setThemeRevision] = useState(0);
+
+  useEffect(() => {
+    const update = () => setThemeRevision((value) => value + 1);
+    window.addEventListener("logicsify:theme-updated", update);
+    return () => window.removeEventListener("logicsify:theme-updated", update);
+  }, []);
+
   useEffect(() => {
     let active = true;
     import("qrcode")
@@ -18,7 +27,7 @@ export function QrCode({
           width: size,
           margin: 2,
           errorCorrectionLevel: "M",
-          color: { dark: "#190A2F", light: "#FFFFFF" },
+          color: { dark: runtimeThemeColor("--theme-dark", "#000000"), light: "#FFFFFF" },
         }),
       )
       .then((url) => active && setSource(url))
@@ -26,7 +35,7 @@ export function QrCode({
     return () => {
       active = false;
     };
-  }, [size, value]);
+  }, [size, themeRevision, value]);
   return source ? (
     <img src={source} width={size} height={size} alt="Scannable QR code" className={className} />
   ) : (

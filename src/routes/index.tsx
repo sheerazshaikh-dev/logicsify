@@ -34,6 +34,7 @@ import {
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
 import { trackAnalytics } from "@/lib/analytics";
+import { BrandMarkImage } from "@/components/brand-mark";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -159,7 +160,7 @@ function PartnersSection() {
               />
             );
             const classes =
-              "group grid h-24 min-w-[180px] place-items-center rounded-2xl border border-black/5 bg-[#faf8fc] px-7 transition hover:-translate-y-0.5 hover:border-brand-red/20 hover:bg-white hover:shadow-lg";
+              "group grid h-24 min-w-[180px] place-items-center rounded-2xl border border-black/5 bg-cream px-7 transition hover:-translate-y-0.5 hover:border-brand-red/20 hover:bg-white hover:shadow-lg";
             return partner.link_enabled && partner.website_url ? (
               <a
                 key={partner.id}
@@ -286,12 +287,11 @@ function HeroVisual() {
       </svg>
 
       <div className="absolute inset-1/3 z-20 rounded-full bg-gradient-brand animate-pulse-glow blur-xl opacity-70" />
-      <div className="absolute left-1/2 top-1/2 z-30 grid h-[86px] w-[86px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-[0_0_45px_rgba(253,190,2,0.45)]">
-        <img
-          src="/logicsify-mark.png"
+      <div className="absolute left-1/2 top-1/2 z-30 grid h-[86px] w-[86px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-[var(--shadow-glow)]">
+        <BrandMarkImage
           alt=""
           width={150}
-          height={169}
+          height={150}
           decoding="async"
           className="h-12 w-12 object-contain"
         />
@@ -634,7 +634,7 @@ function AutomationSpotlight() {
   ];
   return (
     <section className="section-dark grid-noise py-24 md:py-32 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(254,52,52,0.2),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(253,190,2,0.14),transparent_60%)]" />
+      <div className="absolute inset-0 brand-radial-glow-soft" />
       <div className="container-page relative">
         <div className="max-w-3xl mb-16">
           <p className="eyebrow text-white/60 mb-4">AI Automation</p>
@@ -796,7 +796,7 @@ function WhyLogicsify() {
             <div
               key={title}
               data-reveal
-              className="rounded-2xl bg-white border border-black/5 p-6 hover:shadow-[0_20px_40px_-20px_rgba(25,10,47,0.2)] transition"
+              className="rounded-2xl bg-white border border-black/5 p-6 hover:shadow-[var(--shadow-card)] transition"
             >
               <div className="h-10 w-10 rounded-xl bg-gradient-brand text-white flex items-center justify-center mb-4">
                 <Icon className="w-5 h-5" />
@@ -867,7 +867,7 @@ function ConnectedSystemsVisual() {
           cx="200"
           cy="200"
           r="61"
-          fill="#f1edff"
+          fill="var(--theme-surface)"
           stroke="url(#cs-line)"
           strokeWidth="1"
           opacity="0.98"
@@ -875,11 +875,10 @@ function ConnectedSystemsVisual() {
         <circle cx="200" cy="200" r="43" fill="url(#cs-line)" />
       </svg>
       <div className="absolute left-1/2 top-1/2 z-10 grid h-[66px] w-[66px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full">
-        <img
-          src="/logicsify-mark.png"
+        <BrandMarkImage
           alt=""
           width={150}
-          height={169}
+          height={150}
           loading="lazy"
           decoding="async"
           className="h-9 w-9 object-contain brightness-0 invert"
@@ -1046,7 +1045,7 @@ function TestimonialSection() {
             return (
               <article
                 key={`${testimonial.clientName}-${index}`}
-                className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[0_22px_60px_-45px_rgba(25,10,47,0.45)]"
+                className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[var(--shadow-card)]"
               >
                 {testimonial.type === "video" && testimonial.videoUrl ? (
                   <div className="relative aspect-video overflow-hidden bg-ink">
@@ -1341,7 +1340,7 @@ function ResourcesPreview() {
               key={item.slug}
               className="rounded-2xl border border-black/5 bg-white p-6 hover:shadow-lg"
             >
-              <span className="text-xs uppercase tracking-widest text-[#C3262E]">
+              <span className="text-xs uppercase tracking-widest text-brand-red">
                 {String(item.content_json?.file_type || "Resource")}
               </span>
               <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
