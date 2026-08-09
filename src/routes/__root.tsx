@@ -14,6 +14,22 @@ import { RuntimeSiteSettings } from "@/components/runtime-site-settings";
 import { DeferredToaster } from "@/components/deferred-toaster";
 
 function NotFoundComponent() {
+  useEffect(() => {
+    let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement | null;
+    const created = !robots;
+    if (!robots) {
+      robots = document.createElement("meta");
+      robots.name = "robots";
+      document.head.appendChild(robots);
+    }
+    const previous = robots.content;
+    robots.content = "noindex, nofollow, noarchive";
+    return () => {
+      if (created) robots?.remove();
+      else if (robots) robots.content = previous;
+    };
+  }, []);
+
   return (
     <div className="min-h-dvh flex items-center justify-center bg-ink text-white grid-noise relative overflow-hidden">
       <div className="absolute inset-0 opacity-40 brand-radial-glow" />

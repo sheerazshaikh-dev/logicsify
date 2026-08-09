@@ -94,10 +94,15 @@ for (const pair of [
 }
 const robots = fs.readFileSync(path.join(root, "public", "robots.txt"), "utf8");
 if (!robots.includes("Disallow: /admin/")) errors.push("robots.txt must disallow /admin/");
-const sitemap = fs.readFileSync(path.join(root, "public", "sitemap.xml"), "utf8");
-if (sitemap.includes("/admin/")) errors.push("sitemap.xml contains an admin route");
-if (sitemap.includes("<loc>https://logicsify.com/resources/website-planning-checklist</loc>") && !sitemap.includes("published")) {
-  // The generated file contains only public URLs; resource drafts are intentionally excluded by the generator.
+const sitemapRewrite = (vercel.rewrites || []).find((rule) => rule?.source === "/sitemap.xml");
+if (sitemapRewrite?.destination !== "https://backend.logicsify.com/api/public/sitemap.xml") {
+  errors.push("vercel.json must route /sitemap.xml to the live backend sitemap endpoint");
+}
+if (fs.existsSync(path.join(root, "public", "sitemap.xml"))) {
+  errors.push("public/sitemap.xml must not exist; it can shadow the live database-driven sitemap");
+}
+if (!robots.includes("Sitemap: https://logicsify.com/sitemap.xml")) {
+  errors.push("robots.txt must reference the canonical live sitemap URL");
 }
 
 if (errors.length) {

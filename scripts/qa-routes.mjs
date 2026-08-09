@@ -115,7 +115,7 @@ try {
     else if (!body.includes('<div id="root"></div>')) failures.push(`${route}: SPA entry missing`);
   }
 
-  for (const asset of ["/robots.txt", "/sitemap.xml", "/f2048ae62fb525b2c29c3e51e755cc17.png"]) {
+  for (const asset of ["/robots.txt", "/f2048ae62fb525b2c29c3e51e755cc17.png"]) {
     const response = await fetch(`${base}${asset}`, { signal: AbortSignal.timeout(10_000) });
     if (response.status !== 200) failures.push(`${asset}: HTTP ${response.status}`);
   }
@@ -124,8 +124,8 @@ try {
 }
 
 if (failures.length) {
-  console.error(`SPA route QA failed (${failures.length}/${routes.length + 3} checks):`);
+  console.error(`SPA route QA failed (${failures.length}/${routes.length + 2} checks):`);
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`SPA route QA passed (${routes.length} client routes and 3 public assets).`);
+console.log(`SPA route QA passed (${routes.length} client routes and 2 public assets).`);
