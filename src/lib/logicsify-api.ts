@@ -26,6 +26,21 @@ export function publicAssetUrl(value: string): string {
   }
 }
 
+export function versionedPublicAssetUrl(value: string | null | undefined, version?: string | null): string {
+  const normalized = publicAssetUrl(String(value || ""));
+  if (!normalized || normalized.startsWith("data:") || normalized.startsWith("blob:")) return normalized;
+  if (!version) return normalized;
+
+  try {
+    const url = new URL(normalized, SITE_BASE);
+    url.searchParams.set("v", String(version).replace(/[^a-zA-Z0-9._:-]/g, ""));
+    return url.origin === SITE_BASE ? `${url.pathname}${url.search}${url.hash}` : url.toString();
+  } catch {
+    const separator = normalized.includes("?") ? "&" : "?";
+    return `${normalized}${separator}v=${encodeURIComponent(String(version))}`;
+  }
+}
+
 export function normalizePublicAssetUrls<T>(value: T): T {
   if (typeof value === "string") return publicAssetUrl(value) as T;
   if (Array.isArray(value)) return value.map(normalizePublicAssetUrls) as T;
@@ -332,6 +347,7 @@ export type CmsContentItem = {
     noindex?: boolean;
   };
   published_at?: string;
+  updated_at?: string;
   sort_order?: number;
 };
 

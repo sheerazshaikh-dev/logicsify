@@ -4,7 +4,7 @@ import { ArrowRight, ExternalLink, Share2 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
-import { getCmsContentItem, getCmsContentList } from "@/lib/logicsify-api";
+import { getCmsContentItem, getCmsContentList, versionedPublicAssetUrl } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 
@@ -98,6 +98,13 @@ function InsightPage() {
   const c = article.content_json || {};
   const processed = useMemo(() => processBody(String(c.body || "")), [c.body]);
   const sources = sourceLinks(c.sources, c.source_name, c.source_url);
+  // Version the rendered asset with the CMS record timestamp. This forces the
+  // browser/CDN to request the new file immediately when an editor changes or
+  // replaces an Insight featured image, even when the stored path is reused.
+  const featuredImage = versionedPublicAssetUrl(
+    article.featured_image,
+    article.updated_at || article.published_at || String(article.id),
+  );
   useEffect(() => trackEvent("insight_opened", { slug: article.slug }), [article.slug]);
   async function share() {
     trackEvent("insight_share_clicked", { slug: article.slug });
@@ -143,10 +150,11 @@ function InsightPage() {
           </div>
         </div>
       </section>
-      {article.featured_image ? (
+      {featuredImage ? (
         <div className="container-page">
           <img
-            src={article.featured_image}
+            key={featuredImage}
+            src={featuredImage}
             alt={String(c.featured_image_alt || article.title)}
             className="max-h-[680px] w-full rounded-3xl object-cover"
           />
