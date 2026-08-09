@@ -53,15 +53,23 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   try {
     const isPublicContentRequest = path.startsWith("public/content/");
+    const headers = new Headers(init.headers || {});
+    const method = String(init.method || "GET").toUpperCase();
+    const hasBody = init.body !== undefined && init.body !== null;
+
+    // Keep public GET requests CORS-simple. Sending Cache-Control as a request
+    // header caused browsers to preflight the CMS request, while older backend
+    // CORS rules did not allow that header. The backend response already uses
+    // no-store/no-cache, and fetch cache:no-store prevents browser reuse.
+    if (hasBody && method !== "GET" && method !== "HEAD" && !headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
+
     const response = await fetch(`${API_BASE}/${path.replace(/^\//, "")}`, {
       ...init,
       cache: isPublicContentRequest ? "no-store" : init.cache,
       signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        ...(isPublicContentRequest ? { "Cache-Control": "no-cache" } : {}),
-        ...(init.headers || {}),
-      },
+      headers,
     });
 
     let payload: ApiEnvelope<T> | null = null;
