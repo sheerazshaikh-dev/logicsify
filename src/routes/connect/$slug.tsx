@@ -92,7 +92,6 @@ function ConnectProfilePage() {
   const globalSocials = (settings.social_links || []).filter(
     (social) => social.enabled !== false && social.url,
   );
-  const accent = profile.theme_json?.accent || "var(--theme-primary-start)";
   const coverUrl = profile.global_cover_url || profile.cover_url;
   const whatsapp = profile.whatsapp?.replace(/\D/g, "");
   const actions = [
@@ -117,7 +116,7 @@ function ConnectProfilePage() {
             coverUrl
               ? { backgroundImage: `url(${coverUrl})` }
               : {
-                  backgroundImage: `radial-gradient(circle at 15% 20%, color-mix(in srgb, ${accent} 80%, transparent), transparent 43%), radial-gradient(circle at 82% 70%, color-mix(in srgb, var(--theme-primary-end) 60%, transparent), transparent 42%), linear-gradient(135deg, var(--theme-dark), color-mix(in srgb, var(--theme-dark) 82%, var(--theme-primary-start)))`,
+                  backgroundImage: `radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--theme-primary-start) 80%, transparent), transparent 43%), radial-gradient(circle at 82% 70%, color-mix(in srgb, var(--theme-primary-end) 60%, transparent), transparent 42%), linear-gradient(135deg, var(--theme-dark), color-mix(in srgb, var(--theme-dark) 82%, var(--theme-primary-start)))`,
                 }
           }
         >
@@ -141,7 +140,7 @@ function ConnectProfilePage() {
             ) : (
               <span
                 className="grid h-32 w-32 place-items-center rounded-[2rem] border-[5px] border-white text-5xl font-bold text-white shadow-xl sm:h-40 sm:w-40 sm:rounded-[2.4rem]"
-                style={{ background: `linear-gradient(135deg, ${accent}, var(--theme-primary-end))` }}
+                style={{ background: "linear-gradient(var(--theme-gradient-angle), var(--theme-primary-start), var(--theme-primary-end))" }}
               >
                 {profile.display_name.slice(0, 1)}
               </span>
@@ -168,7 +167,7 @@ function ConnectProfilePage() {
             ) : null}
             <div
               className="mt-5 h-1.5 w-20 rounded-full"
-              style={{ background: `linear-gradient(90deg, ${accent}, var(--theme-primary-end))` }}
+              style={{ background: "linear-gradient(90deg, var(--theme-primary-start), var(--theme-primary-end))" }}
             />
           </div>
 
@@ -209,7 +208,7 @@ function ConnectProfilePage() {
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel="noreferrer"
                 className="group flex items-center justify-between rounded-2xl px-5 py-4 text-sm font-semibold text-white shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-lg"
-                style={{ background: `linear-gradient(115deg, ${accent}, var(--theme-primary-end))` }}
+                style={{ background: "linear-gradient(var(--theme-gradient-angle), var(--theme-primary-start), var(--theme-primary-end))" }}
               >
                 <span className="flex items-center gap-3">
                   <Icon className="h-4 w-4" />

@@ -76,7 +76,7 @@ const emptyProfile: Partial<ConnectProfile> = {
   location_ids_json: [],
   visibility_json: DEFAULT_CONNECT_PROFILE_VISIBILITY,
   sort_order: 0,
-  theme_json: { accent: "#04A6A1" },
+  theme_json: {},
   status: "draft",
   is_unlisted: true,
   noindex: true,
@@ -570,14 +570,12 @@ function ProfileEditor({
           value={value.whatsapp}
           onChange={(v) => set("whatsapp", v)}
         />
-        <div>
-          <FieldLabel>Accent color</FieldLabel>
-          <input
-            type="color"
-            value={value.theme_json?.accent || "#04A6A1"}
-            onChange={(e) => set("theme_json", { accent: e.target.value })}
-            className="h-11 w-full rounded-xl border border-slate-200 p-1"
-          />
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <FieldLabel>Profile branding</FieldLabel>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Connect profile colors inherit automatically from Global Branding, including gradients,
+            accent icons, glows, and export artwork.
+          </p>
         </div>
         <div className="md:col-span-2">
           <FieldLabel>Bio</FieldLabel>
