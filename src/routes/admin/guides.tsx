@@ -7,7 +7,7 @@ export const Route = createFileRoute("/admin/guides")({
       type="resource"
       title="Guides"
       singular="Guide"
-      description="Manage gated PDFs, checklists, audits, templates, cover images, previews, and downloadable files."
+      description="Manage guide listing cards and their lead-gated downloadable files. Guide detail pages are no longer used."
     />
   ),
 });

@@ -1,0 +1,12 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/resources/$slug")({
+  loader: ({ params }) => {
+    throw redirect({
+      to: "/guides",
+      search: { guide: params.slug },
+      statusCode: 301,
+    });
+  },
+  component: () => null,
+});

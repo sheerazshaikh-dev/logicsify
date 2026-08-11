@@ -28,7 +28,7 @@ export function contentPublicPath(type: PublicContentType, slugValue: unknown): 
     case "portfolio": return `/portfolio/${slug}`;
     case "insight": return `/insights/${slug}`;
     case "career": return `/careers#${encodeURIComponent(slug)}`;
-    case "resource": return `/guides/${slug}`;
+    case "resource": return `/guides?guide=${encodeURIComponent(slug)}`;
     case "comparison": return `/comparisons/${slug}`;
     case "engagement_model": return `/engagement-models#${encodeURIComponent(slug)}`;
     case "integration": return `/integrations#${encodeURIComponent(slug)}`;
@@ -42,7 +42,7 @@ export function visualEditorPath(type: PublicContentType, slugValue: unknown): s
 }
 
 export function isVisualEditableType(type: PublicContentType | undefined): boolean {
-  return type === "page" || type === "service" || type === "case_study" || type === "portfolio" || type === "insight" || type === "resource" || type === "comparison";
+  return type === "page" || type === "service" || type === "case_study" || type === "portfolio" || type === "insight" || type === "comparison";
 }
 
 export function normalizePublicHref(value: unknown): string {
@@ -60,7 +60,7 @@ export function normalizePublicHref(value: unknown): string {
   else if (serviceSlugs.has(slug)) repaired = `/services/${slug}`;
   else if (caseStudySlugs.has(slug)) repaired = `/work/${slug}`;
   else if (insightSlugs.has(slug)) repaired = `/insights/${slug}`;
-  else if (slug.startsWith("resources/")) repaired = `/guides/${slug.slice("resources/".length)}`;
+  else if (slug.startsWith("resources/")) repaired = `/guides?guide=${encodeURIComponent(slug.slice("resources/".length))}`;
   if (slug === "industries") repaired = "/services";
   return `${repaired}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
 }

@@ -1344,13 +1344,13 @@ function ResourcesPreview() {
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {items.slice(0, 4).map((item) => (
             <Link
-              to="/guides/$slug"
-              params={{ slug: item.slug }}
+              to="/guides"
+              search={{ guide: item.slug }}
               key={item.slug}
               className="rounded-2xl border border-black/5 bg-white p-6 hover:shadow-lg"
             >
               <span className="text-xs uppercase tracking-widest text-brand-red">
-                {String(item.content_json?.file_type || "Resource")}
+                {String(item.content_json?.category || "Guide")}
               </span>
               <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
               <p className="mt-3 text-sm leading-6 text-ink-soft">{item.excerpt}</p>

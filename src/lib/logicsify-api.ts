@@ -199,7 +199,6 @@ export type ResourceDownloadSubmission = {
   email: string;
   company: string;
   phone?: string;
-  consent: boolean;
   honey?: string;
   recaptcha_token?: string;
 };

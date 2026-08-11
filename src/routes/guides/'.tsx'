@@ -1,0 +1,14 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+// Guide detail pages were retired in favor of the lead-gated download modal on /guides.
+// Keep a redirect for old bookmarks/search results without rendering a detail page.
+export const Route = createFileRoute("/guides/$slug")({
+  loader: ({ params }) => {
+    throw redirect({
+      to: "/guides",
+      search: { guide: params.slug },
+      statusCode: 301,
+    });
+  },
+  component: () => null,
+});

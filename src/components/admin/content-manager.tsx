@@ -1018,8 +1018,10 @@ function ContentEditor({
             ...(isVisualEditableType(form.content_type)
               ? [["visual", "Visual Page Editor", Monitor] as const]
               : []),
-            ["content", "Content & Page Settings", Edit3] as const,
-            ["seo", "SEO & Sharing", Search] as const,
+            ["content", form.content_type === "resource" ? "Guide & Download" : "Content & Page Settings", Edit3] as const,
+            ...(form.content_type === "resource"
+              ? []
+              : [["seo", "SEO & Sharing", Search] as const]),
             ["history", "Revision History", History] as const,
           ].map(([value, label, Icon]) => (
             <button
@@ -1126,17 +1128,19 @@ function ContentEditor({
                   }
                 />
               </div>
-              <div>
-                <FieldLabel>Slug</FieldLabel>
-                <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 pl-3 text-sm text-slate-400 focus-within:border-brand-red focus-within:ring-4 focus-within:ring-brand-red/10">
-                  <span>/</span>
-                  <input
-                    value={form.slug || ""}
-                    onChange={(event) => setField("slug", slugify(event.target.value))}
-                    className="h-11 flex-1 bg-transparent px-1.5 text-ink outline-none"
-                  />
+              {form.content_type !== "resource" ? (
+                <div>
+                  <FieldLabel>Slug</FieldLabel>
+                  <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 pl-3 text-sm text-slate-400 focus-within:border-brand-red focus-within:ring-4 focus-within:ring-brand-red/10">
+                    <span>/</span>
+                    <input
+                      value={form.slug || ""}
+                      onChange={(event) => setField("slug", slugify(event.target.value))}
+                      className="h-11 flex-1 bg-transparent px-1.5 text-ink outline-none"
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : null}
               {form.content_type === "testimonial" ? (
                 <AdminCard className="space-y-5 p-5">
                   <div>
@@ -1250,6 +1254,53 @@ function ContentEditor({
                     </>
                   ) : null}
                 </AdminCard>
+              ) : form.content_type === "resource" ? (
+                <>
+                  <AdminCard className="space-y-5 p-5">
+                    <div>
+                      <h3 className="text-base font-semibold text-ink">Guide listing & download</h3>
+                      <p className="mt-1 text-xs leading-5 text-slate-400">
+                        Guides no longer have detail pages. Visitors click the listing card, submit the short lead form, and the attached file downloads immediately.
+                      </p>
+                    </div>
+                    <div>
+                      <FieldLabel>Short description</FieldLabel>
+                      <textarea
+                        rows={4}
+                        value={form.excerpt || ""}
+                        onChange={(event) => setField("excerpt", event.target.value)}
+                        className={adminTextareaClass}
+                        placeholder="A concise description shown on the Guides listing card."
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Category</FieldLabel>
+                      <input
+                        value={String(contentJson.category || "")}
+                        onChange={(event) => updateContentJson("category", event.target.value)}
+                        className={adminInputClass}
+                        placeholder="AI Automation, CRM, Website Planning…"
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Guide download file</FieldLabel>
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <input
+                          value={String(contentJson.download_file || "")}
+                          onChange={(event) => updateContentJson("download_file", event.target.value)}
+                          className={adminInputClass}
+                          placeholder="Upload or select the PDF/DOCX/XLSX file"
+                        />
+                        <AdminButton
+                          variant="secondary"
+                          onClick={() => chooseStructuredMedia("download_file", "documents")}
+                        >
+                          <Download className="h-4 w-4" /> Browse files
+                        </AdminButton>
+                      </div>
+                    </div>
+                  </AdminCard>
+                </>
               ) : (
                 <>
                   <div>
@@ -1382,36 +1433,38 @@ function ContentEditor({
                 </p>
               </AdminCard>
 
-              <AdminCard className="p-5">
-                <h3 className="mb-4 text-sm font-semibold text-ink">Classification</h3>
-                <div className="space-y-4">
-                  <div>
-                    <FieldLabel>Category</FieldLabel>
-                    <input
-                      value={String(contentJson.category || "")}
-                      onChange={(event) => updateContentJson("category", event.target.value)}
-                      className={adminInputClass}
-                    />
+              {form.content_type !== "resource" ? (
+                <AdminCard className="p-5">
+                  <h3 className="mb-4 text-sm font-semibold text-ink">Classification</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <FieldLabel>Category</FieldLabel>
+                      <input
+                        value={String(contentJson.category || "")}
+                        onChange={(event) => updateContentJson("category", event.target.value)}
+                        className={adminInputClass}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Tags</FieldLabel>
+                      <input
+                        value={Array.isArray(contentJson.tags) ? contentJson.tags.join(", ") : ""}
+                        onChange={(event) =>
+                          updateContentJson(
+                            "tags",
+                            event.target.value
+                              .split(",")
+                              .map((tag) => tag.trim())
+                              .filter(Boolean),
+                          )
+                        }
+                        className={adminInputClass}
+                        placeholder="AI, Automation, SaaS"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <FieldLabel>Tags</FieldLabel>
-                    <input
-                      value={Array.isArray(contentJson.tags) ? contentJson.tags.join(", ") : ""}
-                      onChange={(event) =>
-                        updateContentJson(
-                          "tags",
-                          event.target.value
-                            .split(",")
-                            .map((tag) => tag.trim())
-                            .filter(Boolean),
-                        )
-                      }
-                      className={adminInputClass}
-                      placeholder="AI, Automation, SaaS"
-                    />
-                  </div>
-                </div>
-              </AdminCard>
+                </AdminCard>
+              ) : null}
             </div>
           </div>
         ) : null}
@@ -1983,31 +2036,6 @@ function StructuredContentFields({
     );
   }
 
-  if (type === "resource") {
-    return (
-      <AdminCard className="space-y-5 p-5">
-        <div>
-          <h3 className="text-base font-semibold text-ink">Guide file and access</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-400">
-            The public API hides the guide file URL until a valid download form is submitted.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {mediaField("Download file", "download_file", "documents")}
-          {mediaField("Preview image", "preview_image", "images")}
-          {textField("File type", "file_type", "PDF, DOCX, XLSX…")}
-          {textField("File size", "file_size", "2.4 MB")}
-          {textField("Related service slug", "related_service")}
-        </div>
-        {listField(
-          "What is included",
-          "includes",
-          "Checklist\nPlanning worksheet\nImplementation notes",
-        )}
-        {textField("Who it is for", "audience", "Describe the intended reader.", true)}
-      </AdminCard>
-    );
-  }
 
   if (type === "team") {
     return (
