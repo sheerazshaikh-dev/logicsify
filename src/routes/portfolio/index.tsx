@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Layers3, Sparkles } from "lucide-react";
+import { ArrowUpRight, BriefcaseBusiness } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { CTASection } from "@/components/cta-section";
@@ -39,14 +39,8 @@ function PortfolioPage() {
 
       <section className="py-20 md:py-28">
         <div className="container-page">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Stat icon={BriefcaseBusiness} value={String(items.length)} label="Published portfolio projects" />
-            <Stat icon={Sparkles} value={String(featured.length)} label="Featured projects" />
-            <Stat icon={Layers3} value="Separate" label="From long-form Case Studies" />
-          </div>
-
           {ordered.length ? (
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {ordered.map((item) => <PortfolioCard key={item.id} item={item} />)}
             </div>
           ) : (
@@ -60,16 +54,6 @@ function PortfolioPage() {
       </section>
       <CTASection />
     </SiteLayout>
-  );
-}
-
-function Stat({ icon: Icon, value, label }: { icon: typeof BriefcaseBusiness; value: string; label: string }) {
-  return (
-    <div className="rounded-2xl border border-black/10 bg-white p-6">
-      <Icon className="h-5 w-5 text-ink-soft" />
-      <div className="mt-7 text-3xl font-semibold">{value}</div>
-      <p className="mt-2 text-sm text-ink-soft">{label}</p>
-    </div>
   );
 }
 

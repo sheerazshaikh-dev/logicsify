@@ -1625,11 +1625,21 @@ function ContentEditor({
 
 function textList(value: unknown) {
   return Array.isArray(value)
-    ? value.map(String).filter(Boolean)
+    ? value.map(String).map((item) => item.trim()).filter(Boolean)
     : String(value || "")
         .split(/\r?\n|,/)
         .map((item) => item.trim())
         .filter(Boolean);
+}
+
+// Keep blank trailing rows while the user is actively typing. The previous
+// list textarea normalized/filterered the value on every keystroke, which
+// immediately removed a newly-entered line break and made it impossible to
+// enter a second item. We only fully normalize the list when the field blurs.
+function editableTextList(value: unknown) {
+  return Array.isArray(value)
+    ? value.map(String)
+    : String(value || "").split(/\r?\n|,/);
 }
 
 function StructuredContentFields({
@@ -1654,12 +1664,15 @@ function StructuredContentFields({
       <FieldLabel>{label}</FieldLabel>
       <textarea
         rows={rows}
-        value={textList(content[key]).join("\n")}
-        onChange={(event) => update(key, textList(event.target.value))}
+        value={editableTextList(content[key]).join("\n")}
+        onChange={(event) => update(key, editableTextList(event.target.value))}
+        onBlur={(event) => update(key, textList(event.currentTarget.value))}
         className={adminTextareaClass}
         placeholder={placeholder}
       />
-      <p className="mt-1 text-[11px] text-slate-400">Enter one item per line.</p>
+      <p className="mt-1 text-[11px] text-slate-400">
+        Add multiple items using one item per line or commas.
+      </p>
     </div>
   );
 
