@@ -51,6 +51,7 @@ const contentTypes: Array<{ type: ContentItem["content_type"]; label: string }> 
   { type: "page", label: "Pages" },
   { type: "service", label: "Services" },
   { type: "case_study", label: "Case Studies" },
+  { type: "portfolio", label: "Portfolio" },
   { type: "insight", label: "Insights" },
   { type: "resource", label: "Guides" },
   { type: "comparison", label: "Comparisons" },
@@ -1098,6 +1099,7 @@ function contentPath(item: ContentItem) {
   if (item.content_type === "page") return slug === "home" ? "/" : `/${slug}`;
   if (item.content_type === "service") return `/services/${slug}`;
   if (item.content_type === "case_study") return `/work/${slug}`;
+  if (item.content_type === "portfolio") return `/portfolio/${slug}`;
   if (item.content_type === "insight") return `/insights/${slug}`;
   if (item.content_type === "career") return `/careers#${slug}`;
   return `/${slug}`;

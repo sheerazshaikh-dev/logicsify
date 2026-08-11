@@ -28,7 +28,7 @@ const staticRoutes = [
   "/", "/services", "/work", "/portfolio", "/company-profile", "/automation-lab", "/integrations", "/resources", "/project-estimator",
   "/comparisons", "/engagement-models", "/insights", "/about", "/process", "/technology",
   "/careers", "/contact", "/book-a-call", "/technical-roadmap", "/privacy", "/terms",
-  "/admin/login", "/admin/dashboard", "/admin/pages", "/admin/services", "/admin/case-studies",
+  "/admin/login", "/admin/dashboard", "/admin/pages", "/admin/services", "/admin/case-studies", "/admin/portfolio",
   "/admin/insights", "/admin/resources", "/admin/comparisons", "/admin/engagement-models",
   "/admin/integrations", "/admin/careers", "/admin/testimonials", "/admin/team", "/admin/leads",
   "/admin/bookings", "/admin/media", "/admin/menus", "/admin/settings", "/admin/administrators",

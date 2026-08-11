@@ -141,6 +141,7 @@ export type ContentItem = {
     | "service"
     | "industry"
     | "case_study"
+    | "portfolio"
     | "insight"
     | "career"
     | "testimonial"

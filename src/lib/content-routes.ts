@@ -25,6 +25,7 @@ export function contentPublicPath(type: PublicContentType, slugValue: unknown): 
     case "service": return legacyServiceRedirects[slug] || groupedOtherServicePaths[slug] || `/services/${slug}`;
     case "industry": return industryRedirects[slug] || "/services";
     case "case_study": return `/work/${slug}`;
+    case "portfolio": return `/portfolio/${slug}`;
     case "insight": return `/insights/${slug}`;
     case "career": return `/careers#${encodeURIComponent(slug)}`;
     case "resource": return `/guides/${slug}`;
@@ -41,7 +42,7 @@ export function visualEditorPath(type: PublicContentType, slugValue: unknown): s
 }
 
 export function isVisualEditableType(type: PublicContentType | undefined): boolean {
-  return type === "page" || type === "service" || type === "case_study" || type === "insight" || type === "resource" || type === "comparison";
+  return type === "page" || type === "service" || type === "case_study" || type === "portfolio" || type === "insight" || type === "resource" || type === "comparison";
 }
 
 export function normalizePublicHref(value: unknown): string {
@@ -82,6 +83,7 @@ export function resolveContentFromPath(pathnameValue: string): { type: PublicCon
   if (!segments.length) return { type: "page", slug: "home" };
   if (segments[0] === "services" && segments[1]) return { type: "service", slug: segments.slice(1).join("/") };
   if (segments[0] === "work" && segments[1]) return { type: "case_study", slug: segments.slice(1).join("/") };
+  if (segments[0] === "portfolio" && segments[1]) return { type: "portfolio", slug: segments.slice(1).join("/") };
   if (segments[0] === "insights" && segments[1]) return { type: "insight", slug: segments.slice(1).join("/") };
   if ((segments[0] === "guides" || segments[0] === "resources") && segments[1]) return { type: "resource", slug: segments.slice(1).join("/") };
   if (segments[0] === "comparisons" && segments[1]) return { type: "comparison", slug: segments.slice(1).join("/") };

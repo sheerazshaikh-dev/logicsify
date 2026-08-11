@@ -20,6 +20,7 @@ import { Route as LoginRoute } from "@/routes/admin/login";
 import { Route as MediaRoute } from "@/routes/admin/media";
 import { Route as MenusRoute } from "@/routes/admin/menus";
 import { Route as PagesRoute } from "@/routes/admin/pages";
+import { Route as PortfolioRoute } from "@/routes/admin/portfolio";
 import { Route as SecurityRoute } from "@/routes/admin/security";
 import { Route as ServicesRoute } from "@/routes/admin/services";
 import { Route as SettingsRoute } from "@/routes/admin/settings";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/control/$adminSlug/$")({ component: Custo
 
 const routes: Record<string, unknown> = {
   login: LoginRoute, dashboard: DashboardRoute, pages: PagesRoute, services: ServicesRoute,
-  "case-studies": CaseStudiesRoute, insights: InsightsRoute, careers: CareersRoute,
+  "case-studies": CaseStudiesRoute, portfolio: PortfolioRoute, insights: InsightsRoute, careers: CareersRoute,
   testimonials: TestimonialsRoute, team: TeamRoute, "connect-profiles": ConnectProfilesRoute,
   "team-connect": TeamConnectRoute, guides: GuidesRoute,
   comparisons: ComparisonsRoute, "engagement-models": EngagementModelsRoute,

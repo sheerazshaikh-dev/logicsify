@@ -57,6 +57,7 @@ const navigation = [
       { label: "Pages", to: "/admin/pages", section: "pages", icon: FileText },
       { label: "Services", to: "/admin/services", section: "services", icon: Sparkles },
       { label: "Case Studies", to: "/admin/case-studies", section: "case-studies", icon: BriefcaseBusiness },
+      { label: "Portfolio", to: "/admin/portfolio", section: "portfolio", icon: Images },
       { label: "Insights", to: "/admin/insights", section: "insights", icon: Newspaper },
       { label: "Careers", to: "/admin/careers", section: "careers", icon: BookOpen },
       { label: "Testimonials", to: "/admin/testimonials", section: "testimonials", icon: MessageSquareText },

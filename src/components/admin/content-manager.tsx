@@ -170,6 +170,7 @@ export function ContentManagerPage({
   const supportsJsonTransfer = [
     "insight",
     "case_study",
+    "portfolio",
     "resource",
     "comparison",
     "engagement_model",
@@ -1899,6 +1900,35 @@ function StructuredContentFields({
           {textField("Testimonial name", "testimonial_name")}
           {textField("Testimonial role", "testimonial_role")}
         </div>
+      </AdminCard>
+    );
+  }
+
+  if (type === "portfolio") {
+    return (
+      <AdminCard className="space-y-5 p-5">
+        <div>
+          <h3 className="text-base font-semibold text-ink">Portfolio project details</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Portfolio is intentionally separate from Case Studies. Use it for concise, visual project showcases rather than long-form client stories.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {textField("Client / brand", "client_name")}
+          {textField("Project type", "project_type", "Website, CRM, AI automation, portal…")}
+          {textField("Category", "category", "AI Automation, Web Platform, CRM…")}
+          {textField("Year", "year", "2026")}
+          {textField("Live URL", "live_url", "https://…")}
+          {textField("Project role", "role", "Strategy, design, development, automation…")}
+        </div>
+        {textField("Portfolio summary", "summary", "A concise explanation of what was built and why.", true)}
+        <div className="grid gap-4 md:grid-cols-2">
+          {listField("Services used", "services", "ai-automation-voice-agents\ncustom-websites-portals-cms")}
+          {listField("Technology stack", "technology_stack", "React\nPHP\nMySQL")}
+          {listField("Project highlights", "highlights", "Connected lead routing\nCustom operations dashboard")}
+          {listField("Deliverables", "deliverables", "UX design\nDevelopment\nIntegrations")}
+        </div>
+        {mediaList("Portfolio gallery", "gallery")}
       </AdminCard>
     );
   }

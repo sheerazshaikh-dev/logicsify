@@ -521,7 +521,7 @@ function FeaturedWork() {
   const [items, setItems] = useState<CmsContentItem[]>([]);
   useEffect(() => {
     let active = true;
-    getCmsContentList("case_study")
+    getCmsContentList("portfolio")
       .then((result) => {
         if (!active) return;
         setItems([...result.filter((item) => item.featured), ...result.filter((item) => !item.featured)]);
@@ -542,7 +542,7 @@ function FeaturedWork() {
             <h2 className="fluid-h2">Real systems built around real operating problems.</h2>
             <p className="mt-5 text-lg leading-8 text-ink-soft">Selected projects across AI automation, CRM operations, websites, portals, CMS platforms, integrations, and digital products.</p>
           </div>
-          <Link to="/$slug" params={{ slug: "portfolio" }} className="btn-ghost-dark shrink-0">
+          <Link to="/portfolio" className="btn-ghost-dark shrink-0">
             View portfolio <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -552,7 +552,7 @@ function FeaturedWork() {
             const services = Array.isArray(content.services) ? content.services.map(String) : [];
             return (
               <Link
-                to="/work/$slug"
+                to="/portfolio/$slug"
                 params={{ slug: item.slug }}
                 key={item.slug}
                 data-reveal
@@ -572,7 +572,7 @@ function FeaturedWork() {
                 )}
                 <div className="relative">
                   <p className="eyebrow text-white/60">
-                    {[String(content.industry || ""), String(content.client_name || "")]
+                    {[String(content.category || content.project_type || ""), String(content.client_name || content.company || "")]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>

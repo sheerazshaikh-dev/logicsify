@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BookOpenCheck,
   Bot,
+  BriefcaseBusiness,
   Calculator,
   FileText,
   Handshake,
@@ -20,16 +21,18 @@ import { getCmsContentList } from "@/lib/logicsify-api";
 export const Route = createFileRoute("/resources/")({
   pendingComponent: PublicRouteLoading,
   loader: async () => {
-    const [insights, guides, work] = await Promise.all([
+    const [insights, guides, work, portfolio] = await Promise.all([
       getCmsContentList("insight"),
       getCmsContentList("resource"),
       getCmsContentList("case_study"),
+      getCmsContentList("portfolio"),
     ]);
     return {
       counts: {
         insights: insights.length,
         guides: guides.length,
         work: work.length,
+        portfolio: portfolio.length,
       },
     };
   },
@@ -75,6 +78,13 @@ const generalResources = [
     to: "/work",
     icon: FileText,
     countKey: "work" as const,
+  },
+  {
+    title: "Portfolio",
+    description: "Browse concise visual project showcases managed separately from long-form case studies.",
+    to: "/portfolio",
+    icon: BriefcaseBusiness,
+    countKey: "portfolio" as const,
   },
   {
     title: "Engagement Models",

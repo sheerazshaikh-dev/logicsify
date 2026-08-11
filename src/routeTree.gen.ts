@@ -29,6 +29,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminMediaRouteImport } from './routes/admin/media'
 import { Route as AdminMenusRouteImport } from './routes/admin/menus'
 import { Route as AdminPagesRouteImport } from './routes/admin/pages'
+import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
 import { Route as AdminResourcesRouteImport } from './routes/admin/resources'
 import { Route as AdminSecurityRouteImport } from './routes/admin/security'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
@@ -40,6 +41,7 @@ import { Route as AdminTrashRouteImport } from './routes/admin/trash'
 import { Route as AutomationLabRouteImport } from './routes/automation-lab'
 import { Route as BookACallRouteImport } from './routes/book-a-call'
 import { Route as CareersRouteImport } from './routes/careers'
+import { Route as CompanyProfileRouteImport } from './routes/company-profile'
 import { Route as ComparisonsIndexRouteImport } from './routes/comparisons/index'
 import { Route as ComparisonsSlugRouteImport } from './routes/comparisons/$slug'
 import { Route as ConnectSlugRouteImport } from './routes/connect/$slug'
@@ -53,6 +55,8 @@ import { Route as IndustriesSlugRouteImport } from './routes/industries/$slug'
 import { Route as InsightsIndexRouteImport } from './routes/insights/index'
 import { Route as InsightsSlugRouteImport } from './routes/insights/$slug'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as PortfolioIndexRouteImport } from './routes/portfolio/index'
+import { Route as PortfolioSlugRouteImport } from './routes/portfolio/$slug'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProcessRouteImport } from './routes/process'
 import { Route as ProjectEstimatorRouteImport } from './routes/project-estimator'
@@ -210,6 +214,12 @@ const AdminPagesRoute = AdminPagesRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
+  id: '/admin/portfolio',
+  path: '/admin/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const AdminResourcesRoute = AdminResourcesRouteImport.update({
   id: '/admin/resources',
   path: '/admin/resources',
@@ -273,6 +283,12 @@ const BookACallRoute = BookACallRouteImport.update({
 const CareersRoute = CareersRouteImport.update({
   id: '/careers',
   path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const CompanyProfileRoute = CompanyProfileRouteImport.update({
+  id: '/company-profile',
+  path: '/company-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -351,6 +367,18 @@ const InsightsSlugRoute = InsightsSlugRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const PortfolioIndexRoute = PortfolioIndexRouteImport.update({
+  id: '/portfolio/',
+  path: '/portfolio/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
+  id: '/portfolio/$slug',
+  path: '/portfolio/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -451,6 +479,7 @@ export interface FileRoutesByFullPath {
   '/admin/media': typeof AdminMediaRoute
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
+  '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
@@ -462,6 +491,7 @@ export interface FileRoutesByFullPath {
   '/automation-lab': typeof AutomationLabRoute
   '/book-a-call': typeof BookACallRoute
   '/careers': typeof CareersRoute
+  '/company-profile': typeof CompanyProfileRoute
   '/comparisons/': typeof ComparisonsIndexRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
   '/connect/$slug': typeof ConnectSlugRoute
@@ -475,6 +505,8 @@ export interface FileRoutesByFullPath {
   '/insights/': typeof InsightsIndexRoute
   '/insights/$slug': typeof InsightsSlugRoute
   '/integrations': typeof IntegrationsRoute
+  '/portfolio/': typeof PortfolioIndexRoute
+  '/portfolio/$slug': typeof PortfolioSlugRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/project-estimator': typeof ProjectEstimatorRoute
@@ -514,6 +546,7 @@ export interface FileRoutesByTo {
   '/admin/media': typeof AdminMediaRoute
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
+  '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
@@ -525,6 +558,7 @@ export interface FileRoutesByTo {
   '/automation-lab': typeof AutomationLabRoute
   '/book-a-call': typeof BookACallRoute
   '/careers': typeof CareersRoute
+  '/company-profile': typeof CompanyProfileRoute
   '/comparisons': typeof ComparisonsIndexRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
   '/connect/$slug': typeof ConnectSlugRoute
@@ -538,6 +572,8 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsIndexRoute
   '/insights/$slug': typeof InsightsSlugRoute
   '/integrations': typeof IntegrationsRoute
+  '/portfolio': typeof PortfolioIndexRoute
+  '/portfolio/$slug': typeof PortfolioSlugRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/project-estimator': typeof ProjectEstimatorRoute
@@ -578,6 +614,7 @@ export interface FileRoutesById {
   '/admin/media': typeof AdminMediaRoute
   '/admin/menus': typeof AdminMenusRoute
   '/admin/pages': typeof AdminPagesRoute
+  '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/resources': typeof AdminResourcesRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
@@ -589,6 +626,7 @@ export interface FileRoutesById {
   '/automation-lab': typeof AutomationLabRoute
   '/book-a-call': typeof BookACallRoute
   '/careers': typeof CareersRoute
+  '/company-profile': typeof CompanyProfileRoute
   '/comparisons/': typeof ComparisonsIndexRoute
   '/comparisons/$slug': typeof ComparisonsSlugRoute
   '/connect/$slug': typeof ConnectSlugRoute
@@ -602,6 +640,8 @@ export interface FileRoutesById {
   '/insights/': typeof InsightsIndexRoute
   '/insights/$slug': typeof InsightsSlugRoute
   '/integrations': typeof IntegrationsRoute
+  '/portfolio/': typeof PortfolioIndexRoute
+  '/portfolio/$slug': typeof PortfolioSlugRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
   '/project-estimator': typeof ProjectEstimatorRoute
@@ -643,6 +683,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/menus'
     | '/admin/pages'
+    | '/admin/portfolio'
     | '/admin/resources'
     | '/admin/security'
     | '/admin/services'
@@ -654,6 +695,7 @@ export interface FileRouteTypes {
     | '/automation-lab'
     | '/book-a-call'
     | '/careers'
+    | '/company-profile'
     | '/comparisons/'
     | '/comparisons/$slug'
     | '/connect/$slug'
@@ -667,6 +709,8 @@ export interface FileRouteTypes {
     | '/insights/'
     | '/insights/$slug'
     | '/integrations'
+    | '/portfolio/'
+    | '/portfolio/$slug'
     | '/privacy'
     | '/process'
     | '/project-estimator'
@@ -705,6 +749,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/menus'
     | '/admin/pages'
+    | '/admin/portfolio'
     | '/admin/resources'
     | '/admin/security'
     | '/admin/services'
@@ -716,6 +761,7 @@ export interface FileRouteTypes {
     | '/automation-lab'
     | '/book-a-call'
     | '/careers'
+    | '/company-profile'
     | '/comparisons'
     | '/comparisons/$slug'
     | '/connect/$slug'
@@ -729,6 +775,8 @@ export interface FileRouteTypes {
     | '/insights'
     | '/insights/$slug'
     | '/integrations'
+    | '/portfolio'
+    | '/portfolio/$slug'
     | '/privacy'
     | '/process'
     | '/project-estimator'
@@ -767,6 +815,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/menus'
     | '/admin/pages'
+    | '/admin/portfolio'
     | '/admin/resources'
     | '/admin/security'
     | '/admin/services'
@@ -778,6 +827,7 @@ export interface FileRouteTypes {
     | '/automation-lab'
     | '/book-a-call'
     | '/careers'
+    | '/company-profile'
     | '/comparisons/'
     | '/comparisons/$slug'
     | '/connect/$slug'
@@ -791,6 +841,8 @@ export interface FileRouteTypes {
     | '/insights/'
     | '/insights/$slug'
     | '/integrations'
+    | '/portfolio/'
+    | '/portfolio/$slug'
     | '/privacy'
     | '/process'
     | '/project-estimator'
@@ -831,6 +883,7 @@ export interface RootRouteChildren {
   AdminMediaRoute: typeof AdminMediaRoute
   AdminMenusRoute: typeof AdminMenusRoute
   AdminPagesRoute: typeof AdminPagesRoute
+  AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminResourcesRoute: typeof AdminResourcesRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminServicesRoute: typeof AdminServicesRoute
@@ -842,6 +895,7 @@ export interface RootRouteChildren {
   AutomationLabRoute: typeof AutomationLabRoute
   BookACallRoute: typeof BookACallRoute
   CareersRoute: typeof CareersRoute
+  CompanyProfileRoute: typeof CompanyProfileRoute
   ComparisonsIndexRoute: typeof ComparisonsIndexRoute
   ComparisonsSlugRoute: typeof ComparisonsSlugRoute
   ConnectSlugRoute: typeof ConnectSlugRoute
@@ -855,6 +909,8 @@ export interface RootRouteChildren {
   InsightsIndexRoute: typeof InsightsIndexRoute
   InsightsSlugRoute: typeof InsightsSlugRoute
   IntegrationsRoute: typeof IntegrationsRoute
+  PortfolioIndexRoute: typeof PortfolioIndexRoute
+  PortfolioSlugRoute: typeof PortfolioSlugRoute
   PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
   ProjectEstimatorRoute: typeof ProjectEstimatorRoute
@@ -1039,6 +1095,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/portfolio': {
+      id: '/admin/portfolio'
+      path: '/admin/portfolio'
+      fullPath: '/admin/portfolio'
+      preLoaderRoute: typeof AdminPortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/resources': {
       id: '/admin/resources'
       path: '/admin/resources'
@@ -1114,6 +1177,13 @@ declare module '@tanstack/react-router' {
       path: '/careers'
       fullPath: '/careers'
       preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company-profile': {
+      id: '/company-profile'
+      path: '/company-profile'
+      fullPath: '/company-profile'
+      preLoaderRoute: typeof CompanyProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comparisons/': {
@@ -1205,6 +1275,20 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/': {
+      id: '/portfolio/'
+      path: '/portfolio'
+      fullPath: '/portfolio/'
+      preLoaderRoute: typeof PortfolioIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio/$slug': {
+      id: '/portfolio/$slug'
+      path: '/portfolio/$slug'
+      fullPath: '/portfolio/$slug'
+      preLoaderRoute: typeof PortfolioSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1319,6 +1403,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminMediaRoute,
   AdminMenusRoute,
   AdminPagesRoute,
+  AdminPortfolioRoute,
   AdminResourcesRoute,
   AdminSecurityRoute,
   AdminServicesRoute,
@@ -1330,6 +1415,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutomationLabRoute,
   BookACallRoute,
   CareersRoute,
+  CompanyProfileRoute,
   ComparisonsIndexRoute,
   ComparisonsSlugRoute,
   ConnectSlugRoute,
@@ -1343,6 +1429,8 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsIndexRoute,
   InsightsSlugRoute,
   IntegrationsRoute,
+  PortfolioIndexRoute,
+  PortfolioSlugRoute,
   PrivacyRoute,
   ProcessRoute,
   ProjectEstimatorRoute,
