@@ -48,6 +48,17 @@ const records = (value: unknown): Array<Record<string, unknown>> =>
 const strings = (value: unknown): string[] =>
   Array.isArray(value) ? value.map((item) => text(item)).filter(Boolean) : [];
 
+const PROFILE_BACKGROUND_IMAGES = [
+  "/profile-backgrounds/annie-spratt-QckxruozjRg-unsplash.jpg",
+  "/profile-backgrounds/tim-van-der-kuip-CPs2X8JYmS8-unsplash.jpg",
+  "/profile-backgrounds/campaign-creators-gMsnXqILjp4-unsplash.jpg",
+  "/profile-backgrounds/microsoft-copilot-8UnGiO4yesk-unsplash.jpg",
+  "/profile-backgrounds/charlesdeluvio-Lks7vei-eAg-unsplash.jpg",
+  "/profile-backgrounds/israel-andrade-YI_9SivVt_s-unsplash.jpg",
+  "/profile-backgrounds/nastuh-abootalebi-eHD8Y1Znfpk-unsplash.jpg",
+  "/profile-backgrounds/microsoft-copilot-Zcp8xN9DnjM-unsplash.jpg",
+];
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -476,14 +487,8 @@ function CompanyProfile() {
 
   const backgroundPool = useMemo(
     () =>
-      [
-        settings.default_og_image,
-        ...services.map((item) => item.featured_image || ""),
-        ...portfolio.map((item) => item.featured_image || ""),
-        ...caseStudies.map((item) => item.featured_image || ""),
-        ...team.map((member) => member.avatar_url || ""),
-      ].filter((value): value is string => Boolean(value)),
-    [settings.default_og_image, services, portfolio, caseStudies, team],
+      PROFILE_BACKGROUND_IMAGES.filter((value): value is string => Boolean(value)),
+    [],
   );
   const backgroundFor = (index: number) =>
     backgroundPool.length ? backgroundPool[index % backgroundPool.length] : undefined;
