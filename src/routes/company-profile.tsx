@@ -57,20 +57,21 @@ function slugify(value: string) {
 
 export const Route = createFileRoute("/company-profile")({
   loader: async () => {
-    const [services, portfolio, team, settings] = await Promise.all([
+    const [services, portfolio, caseStudies, team, settings] = await Promise.all([
       getCmsContentList("service"),
       getCmsContentList("portfolio"),
-      getPublicTeamMembers("about"),
+      getCmsContentList("case_study"),
+      getPublicTeamMembers("profile"),
       getPublicSiteSettings(),
     ]);
-    return { services, portfolio, team, settings };
+    return { services, portfolio, caseStudies, team, settings };
   },
   head: ({ loaderData }) => {
     const settings = loaderData?.settings || {};
     const base = settings.site_url || "https://logicsify.com";
     const title = `Company Profile | ${settings.site_name || "Logicsify"}`;
     const description =
-      "Explore Logicsify's company profile, connected technology services, cybersecurity capability, delivery model, portfolio, team, and locations.";
+      "Explore Logicsify's company profile, connected technology services, cybersecurity capability, delivery model, portfolio, case studies, team, and locations.";
     return {
       meta: [
         { title },
@@ -252,12 +253,13 @@ function ProfileSection({
           <Link
             to="/"
             aria-label={`Open ${siteName} homepage`}
-            className={cn(
-              "inline-flex rounded-xl border p-2 shadow-[var(--shadow-card)] backdrop-blur-sm",
-              dark ? "border-white/12 bg-white" : "border-black/10 bg-white/95",
-            )}
+            className="inline-flex items-center p-1"
           >
-            <img src={logo} alt={`${siteName} logo`} className="h-7 w-auto sm:h-8 lg:h-9" />
+            <img
+              src={logo}
+              alt={`${siteName} logo`}
+              className="h-8 w-auto object-contain sm:h-9 lg:h-10"
+            />
           </Link>
           <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] sm:text-xs">
             <span className={dark ? "text-white/48" : "text-ink-soft"}>{chapter}</span>
@@ -460,7 +462,7 @@ function TeamMemberSlide({
 }
 
 function CompanyProfile() {
-  const { services, portfolio, team, settings } = Route.useLoaderData();
+  const { services, portfolio, caseStudies, team, settings } = Route.useLoaderData();
   const serviceMap = new Map(services.map((service) => [service.slug, service]));
   const core = coreServiceDefinitions
     .map((definition) => serviceMap.get(definition.slug))
@@ -478,9 +480,10 @@ function CompanyProfile() {
         settings.default_og_image,
         ...services.map((item) => item.featured_image || ""),
         ...portfolio.map((item) => item.featured_image || ""),
+        ...caseStudies.map((item) => item.featured_image || ""),
         ...team.map((member) => member.avatar_url || ""),
       ].filter((value): value is string => Boolean(value)),
-    [settings.default_og_image, services, portfolio, team],
+    [settings.default_og_image, services, portfolio, caseStudies, team],
   );
   const backgroundFor = (index: number) =>
     backgroundPool.length ? backgroundPool[index % backgroundPool.length] : undefined;
@@ -489,12 +492,13 @@ function CompanyProfile() {
     "profile-cover",
     "profile-overview",
     "profile-principles",
-    "profile-core-services",
+    ...(core.length ? ["profile-core-services"] : []),
     ...core.map((item) => `profile-core-${item.slug}`),
-    "profile-cybersecurity",
-    "profile-specialist",
+    ...(cyber ? ["profile-cybersecurity"] : []),
+    ...(specialist.length ? ["profile-specialist"] : []),
     "profile-delivery",
-    "profile-portfolio",
+    ...(portfolio.length ? ["profile-portfolio"] : []),
+    ...(caseStudies.length ? ["profile-case-studies"] : []),
     ...team.map((member) => `profile-team-${slugify(member.display_name)}`),
     "profile-contact",
   ];
@@ -532,13 +536,16 @@ function CompanyProfile() {
           </div>
           <div className="grid grid-cols-2 gap-3 self-end">
             {[
-              [String(services.length), "Published service capabilities"],
-              [String(core.length), "Core service families"],
-              [String(portfolio.length), "Portfolio projects"],
-              [String(team.length), "Team profiles"],
-            ].map(([value, label]) => (
+              [services.length, "Published service capabilities"],
+              [core.length, "Core service families"],
+              [portfolio.length, "Portfolio projects"],
+              [caseStudies.length, "Case studies"],
+              [team.length, "Team profiles"],
+            ]
+              .filter(([value]) => Number(value) > 0)
+              .map(([value, label]) => (
               <div key={label} className="rounded-[1.35rem] border border-white/13 bg-white/[0.065] p-4 backdrop-blur-xl sm:p-5">
-                <p className="text-xl font-extrabold text-white sm:text-2xl">{value}</p>
+                <p className="text-xl font-extrabold text-white sm:text-2xl">{String(value)}</p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/52">{label}</p>
               </div>
             ))}
@@ -606,6 +613,7 @@ function CompanyProfile() {
         </div>
       </ProfileSection>
 
+      {core.length ? (
       <ProfileSection id="profile-core-services" number={sectionNumber("profile-core-services")} total={total} chapter="Core service portfolio" dark backgroundImage={backgroundFor(3)} settings={settings}>
         <div className="w-full">
           <SectionTitle eyebrow="Integrated core practices" title="Three core systems designed to work together." lead="AI conversations, revenue operations and digital platforms connected around the same customer and operating journey." dark />
@@ -628,13 +636,15 @@ function CompanyProfile() {
           </div>
         </div>
       </ProfileSection>
+      ) : null}
 
       {core.map((item, index) => {
         const id = `profile-core-${item.slug}`;
         return <CoreServiceSlide key={id} item={item} id={id} number={sectionNumber(id)} total={total} settings={settings} backgroundImage={backgroundFor(4 + index)} />;
       })}
 
-      <ProfileSection id="profile-cybersecurity" number={sectionNumber("profile-cybersecurity")} total={total} chapter="Cybersecurity" backgroundImage={cyber?.featured_image || backgroundFor(8)} settings={settings}>
+      {cyber ? (
+      <ProfileSection id="profile-cybersecurity" number={sectionNumber("profile-cybersecurity")} total={total} chapter="Cybersecurity" backgroundImage={cyber.featured_image || backgroundFor(8)} settings={settings}>
         <div className="grid w-full items-center gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14">
           <div>
             <SectionTitle eyebrow="Dedicated security capability" title="Security built into the system, not added after launch." lead={cyber?.excerpt || "Application, cloud, identity, dependency, integration, monitoring and recovery security tied to practical business risk."} compact />
@@ -651,7 +661,9 @@ function CompanyProfile() {
           </div>
         </div>
       </ProfileSection>
+      ) : null}
 
+      {specialist.length ? (
       <ProfileSection id="profile-specialist" number={sectionNumber("profile-specialist")} total={total} chapter="Specialist services" dark backgroundImage={backgroundFor(9)} settings={settings}>
         <div className="w-full">
           <SectionTitle eyebrow="Specialist capability" title="Additional expertise around the core operating system." lead="Specialist services are introduced when they remove delivery risk, improve usability, strengthen security, or support growth." dark compact />
@@ -665,6 +677,7 @@ function CompanyProfile() {
           </div>
         </div>
       </ProfileSection>
+      ) : null}
 
       <ProfileSection id="profile-delivery" number={sectionNumber("profile-delivery")} total={total} chapter="Delivery model" dark backgroundImage={backgroundFor(10)} settings={settings}>
         <div className="w-full">
@@ -688,13 +701,13 @@ function CompanyProfile() {
         </div>
       </ProfileSection>
 
-      <ProfileSection id="profile-portfolio" number={sectionNumber("profile-portfolio")} total={total} chapter="Selected portfolio" backgroundImage={backgroundFor(11)} settings={settings}>
-        <div className="w-full">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <SectionTitle eyebrow="Selected portfolio" title="Visual work from real Logicsify projects." lead="Portfolio projects are managed separately from Case Studies in Content Studio." compact />
-            <Link to="/portfolio" className="btn-ghost-dark">View portfolio <ArrowRight className="h-4 w-4" /></Link>
-          </div>
-          {portfolio.length ? (
+      {portfolio.length ? (
+        <ProfileSection id="profile-portfolio" number={sectionNumber("profile-portfolio")} total={total} chapter="Selected portfolio" backgroundImage={backgroundFor(11)} settings={settings}>
+          <div className="w-full">
+            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <SectionTitle eyebrow="Selected portfolio" title="Visual work from real Logicsify projects." lead="Portfolio projects are managed separately from Case Studies in Content Studio." compact />
+              <Link to="/portfolio" className="btn-ghost-dark">View portfolio <ArrowRight className="h-4 w-4" /></Link>
+            </div>
             <div className="mt-7 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {portfolio.slice(0, 4).map((item) => (
                 <Link key={item.id} to="/portfolio/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm transition hover:-translate-y-1">
@@ -703,15 +716,32 @@ function CompanyProfile() {
                 </Link>
               ))}
             </div>
-          ) : (
-            <div className="mt-7 rounded-2xl border border-black/10 bg-white p-7 text-ink-soft">Published Portfolio projects will appear here automatically.</div>
-          )}
-        </div>
-      </ProfileSection>
+          </div>
+        </ProfileSection>
+      ) : null}
+
+      {caseStudies.length ? (
+        <ProfileSection id="profile-case-studies" number={sectionNumber("profile-case-studies")} total={total} chapter="Case studies" dark backgroundImage={backgroundFor(12)} settings={settings}>
+          <div className="w-full">
+            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <SectionTitle eyebrow="Case studies" title="The operating problem, implementation, and measurable outcome." lead="Published Case Studies are pulled directly from Content Studio and remain separate from Portfolio." dark compact />
+              <Link to="/work" className="inline-flex items-center gap-2 text-sm font-bold text-white">View all case studies <ArrowRight className="h-4 w-4" /></Link>
+            </div>
+            <div className="mt-7 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {caseStudies.slice(0, 4).map((item) => (
+                <Link key={item.id} to="/work/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] transition hover:-translate-y-1 hover:bg-white/[0.08]">
+                  {item.featured_image ? <img src={item.featured_image} alt={item.title} className="aspect-[4/3] w-full object-cover" /> : <div className="brand-radial-glow grid aspect-[4/3] place-items-center bg-black/25"><BriefcaseBusiness className="size-10 text-white/30" /></div>}
+                  <div className="p-4"><h3 className="text-sm font-bold text-white">{item.title}</h3><p className="mt-2 line-clamp-2 text-xs leading-relaxed text-white/58">{item.excerpt}</p></div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </ProfileSection>
+      ) : null}
 
       {team.map((member, index) => {
         const id = `profile-team-${slugify(member.display_name)}`;
-        return <TeamMemberSlide key={id} member={member} id={id} number={sectionNumber(id)} total={total} settings={settings} backgroundImage={backgroundFor(12 + index)} />;
+        return <TeamMemberSlide key={id} member={member} id={id} number={sectionNumber(id)} total={total} settings={settings} backgroundImage={backgroundFor(13 + index)} />;
       })}
 
       <ProfileSection id="profile-contact" number={sectionNumber("profile-contact")} total={total} chapter="Contact" dark backgroundImage={backgroundFor(30)} settings={settings}>

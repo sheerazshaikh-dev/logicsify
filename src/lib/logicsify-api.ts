@@ -274,7 +274,7 @@ export type PublicTeamMember = {
   sort_order: number;
 };
 
-export function getPublicTeamMembers(placement: "home" | "about" | "contact") {
+export function getPublicTeamMembers(placement: "home" | "about" | "contact" | "profile") {
   return request<PublicTeamMember[]>(`public/team-directory?placement=${placement}`);
 }
 
