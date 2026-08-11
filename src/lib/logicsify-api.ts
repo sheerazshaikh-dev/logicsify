@@ -41,6 +41,27 @@ export function versionedPublicAssetUrl(value: string | null | undefined, versio
   }
 }
 
+export function optimizedPublicImageUrl(
+  value: string | null | undefined,
+  width = 1200,
+  version?: string | null,
+): string {
+  const normalized = versionedPublicAssetUrl(value, version);
+  if (!normalized || normalized.startsWith("data:") || normalized.startsWith("blob:")) return normalized;
+  try {
+    const url = new URL(normalized, SITE_BASE);
+    // Width hints are understood by the same-domain /media proxy. External
+    // images are left untouched so third-party/CDN URLs keep their own rules.
+    if (url.origin === SITE_BASE && url.pathname.startsWith("/media/")) {
+      url.searchParams.set("w", String(Math.max(320, Math.min(2200, Math.round(width)))));
+      url.searchParams.set("q", "82");
+    }
+    return url.origin === SITE_BASE ? `${url.pathname}${url.search}${url.hash}` : url.toString();
+  } catch {
+    return normalized;
+  }
+}
+
 export function normalizePublicAssetUrls<T>(value: T): T {
   if (typeof value === "string") return publicAssetUrl(value) as T;
   if (Array.isArray(value)) return value.map(normalizePublicAssetUrls) as T;
@@ -82,7 +103,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
     const response = await fetch(`${API_BASE}/${path.replace(/^\//, "")}`, {
       ...init,
-      cache: isPublicContentRequest ? "no-store" : init.cache,
+      cache: isPublicContentRequest ? (init.cache || "default") : init.cache,
       signal: controller.signal,
       headers,
     });
@@ -350,14 +371,21 @@ export type CmsContentItem = {
   sort_order?: number;
 };
 
-export async function getCmsContentList(type: string): Promise<CmsContentItem[]> {
+export async function getCmsContentList(
+  type: string,
+  options: { fresh?: boolean } = {},
+): Promise<CmsContentItem[]> {
   try {
-    // CMS content changes in Content Studio must be visible immediately after
-    // reload/navigation. Do not reuse the generic in-memory public cache here.
-    return await request<CmsContentItem[]>(
-      `public/content/${encodeURIComponent(type)}?_=${Date.now()}`,
-      { cache: "no-store" },
-    );
+    const path = `public/content/${encodeURIComponent(type)}`;
+    // Public CMS reads are reused briefly across route loaders. This removes
+    // duplicate network/DB work while keeping Content Studio changes visible
+    // within a few seconds instead of pinning stale content for long periods.
+    // A fresh read uses a query nonce rather than a Cache-Control request header,
+    // so the cross-origin GET stays CORS-simple and does not trigger preflight.
+    if (options.fresh) {
+      return await request<CmsContentItem[]>(`${path}?_fresh=${Date.now()}`);
+    }
+    return await cachedPublicRequest<CmsContentItem[]>(path, 10_000);
   } catch {
     return [];
   }
@@ -366,12 +394,14 @@ export async function getCmsContentList(type: string): Promise<CmsContentItem[]>
 export async function getCmsContentItem(
   type: string,
   slug: string,
+  options: { fresh?: boolean } = {},
 ): Promise<CmsContentItem | null> {
   try {
-    return await request<CmsContentItem>(
-      `public/content/${encodeURIComponent(type)}/${encodeURIComponent(slug)}?_=${Date.now()}`,
-      { cache: "no-store" },
-    );
+    const path = `public/content/${encodeURIComponent(type)}/${encodeURIComponent(slug)}`;
+    if (options.fresh) {
+      return await request<CmsContentItem>(`${path}?_fresh=${Date.now()}`);
+    }
+    return await cachedPublicRequest<CmsContentItem>(path, 10_000);
   } catch {
     return null;
   }

@@ -5,7 +5,7 @@ import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { CTASection } from "@/components/cta-section";
 import { NavigableLightbox } from "@/components/navigable-lightbox";
-import { getCmsContentItem, getCmsContentList } from "@/lib/logicsify-api";
+import { getCmsContentItem, getCmsContentList, optimizedPublicImageUrl } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/portfolio/$slug")({
   loader: async ({ params }) => {
@@ -67,13 +67,13 @@ function PortfolioDetail() {
         primaryCta={liveUrl ? undefined : { label: "Discuss a Similar Project", to: "/contact" }}
       />
 
-      <section className="pb-16">
+      <section className="pt-8 pb-6 md:pt-10 md:pb-8">
         <div className="container-page">
-          {item.featured_image ? <img src={item.featured_image} alt={item.title} className="w-full rounded-[2rem] border border-black/10 object-cover shadow-[var(--shadow-card)]" /> : <div className="brand-radial-glow grid aspect-[16/7] place-items-center rounded-[2rem] bg-ink"><BriefcaseBusiness className="h-16 w-16 text-white/25" /></div>}
+          {item.featured_image ? <img src={optimizedPublicImageUrl(item.featured_image, 1600, item.updated_at || item.published_at || String(item.id))} alt={item.title} className="w-full rounded-[2rem] border border-black/10 object-cover shadow-[var(--shadow-card)]" loading="eager" decoding="async" fetchPriority="high" /> : <div className="brand-radial-glow grid aspect-[16/7] place-items-center rounded-[2rem] bg-ink"><BriefcaseBusiness className="h-16 w-16 text-white/25" /></div>}
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="pt-8 pb-16 md:pt-10 md:pb-24">
         <div className="container-page grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div>
             {body ? <div className="cms-rich-content" dangerouslySetInnerHTML={{ __html: body }} /> : null}
@@ -91,10 +91,11 @@ function PortfolioDetail() {
                       aria-label={`Open ${item.title} gallery image ${index + 1}`}
                     >
                       <img
-                        src={image}
+                        src={optimizedPublicImageUrl(image, 900, item.updated_at || item.published_at || String(item.id))}
                         alt={`${item.title} project view ${index + 1}`}
                         className="aspect-[16/10] w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                         loading="lazy"
+                        decoding="async"
                       />
                     </button>
                   ))}
@@ -149,7 +150,7 @@ function PortfolioDetail() {
         </div>
       </section>
 
-      {related.length ? <section className="bg-cream py-16"><div className="container-page"><div className="flex items-end justify-between gap-4"><div><p className="eyebrow">More portfolio</p><h2 className="mt-3 fluid-h3">Other selected projects</h2></div><Link to="/portfolio" className="btn-ghost-dark">View all <ArrowUpRight className="h-4 w-4" /></Link></div><div className="mt-8 grid gap-5 md:grid-cols-3">{related.map((project) => <Link key={project.id} to="/portfolio/$slug" params={{ slug: project.slug }} className="overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1">{project.featured_image ? <img src={project.featured_image} alt={project.title} className="aspect-[16/10] w-full object-cover" loading="lazy" /> : null}<div className="p-5"><h3 className="font-semibold">{project.title}</h3><p className="mt-2 line-clamp-3 text-sm text-ink-soft">{project.excerpt}</p></div></Link>)}</div></div></section> : null}
+      {related.length ? <section className="bg-cream py-16"><div className="container-page"><div className="flex items-end justify-between gap-4"><div><p className="eyebrow">More portfolio</p><h2 className="mt-3 fluid-h3">Other selected projects</h2></div><Link to="/portfolio" className="btn-ghost-dark">View all <ArrowUpRight className="h-4 w-4" /></Link></div><div className="mt-8 grid gap-5 md:grid-cols-3">{related.map((project) => <Link key={project.id} to="/portfolio/$slug" params={{ slug: project.slug }} className="overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1">{project.featured_image ? <img src={optimizedPublicImageUrl(project.featured_image, 720, project.updated_at || project.published_at || String(project.id))} alt={project.title} className="aspect-[16/10] w-full object-cover" loading="lazy" decoding="async" /> : null}<div className="p-5"><h3 className="font-semibold">{project.title}</h3><p className="mt-2 line-clamp-3 text-sm text-ink-soft">{project.excerpt}</p></div></Link>)}</div></div></section> : null}
 
       <div className="container-page py-8"><Link to="/portfolio" className="inline-flex items-center gap-2 text-sm font-semibold"><ArrowLeft className="h-4 w-4" /> Back to portfolio</Link></div>
       <CTASection />

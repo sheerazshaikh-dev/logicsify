@@ -4,20 +4,22 @@ import { ArrowRight, ExternalLink, Share2 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
-import { getCmsContentItem, getCmsContentList, versionedPublicAssetUrl } from "@/lib/logicsify-api";
+import { getCmsContentList, optimizedPublicImageUrl } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 
 export const Route = createFileRoute("/insights/$slug")({
   pendingComponent: PublicRouteLoading,
   loader: async ({ params }) => {
-    const [article, all] = await Promise.all([
-      getCmsContentItem("insight", params.slug),
-      getCmsContentList("insight"),
-    ]);
+    // Use the same CMS list payload as the Insights listing. Besides removing an
+    // unnecessary API request, this guarantees the detail page uses the exact
+    // featured-image record currently visible in Admin/listing.
+    const all = await getCmsContentList("insight", { fresh: true });
+    const article = all.find((item) => item.slug === params.slug) || null;
     if (!article) throw notFound();
     return { article, related: all.filter((item) => item.slug !== params.slug).slice(0, 3) };
   },
+  staleTime: 0,
   component: InsightPage,
   head: ({ loaderData, params }) => ({
     meta: [
@@ -101,8 +103,9 @@ function InsightPage() {
   // Version the rendered asset with the CMS record timestamp. This forces the
   // browser/CDN to request the new file immediately when an editor changes or
   // replaces an Insight featured image, even when the stored path is reused.
-  const featuredImage = versionedPublicAssetUrl(
+  const featuredImage = optimizedPublicImageUrl(
     article.featured_image,
+    1600,
     article.updated_at || article.published_at || String(article.id),
   );
   useEffect(() => trackEvent("insight_opened", { slug: article.slug }), [article.slug]);
@@ -157,6 +160,9 @@ function InsightPage() {
             src={featuredImage}
             alt={String(c.featured_image_alt || article.title)}
             className="max-h-[680px] w-full rounded-3xl object-cover"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
           />
         </div>
       ) : null}

@@ -66,7 +66,7 @@ const matchesRoute = (url) => {
     return expected.length === actual.length && expected.every((segment, index) => segment.startsWith("$") || segment === actual[index]);
   });
 };
-const ignoredPrefixes = ["/assets/", "/uploads/", "/api/", "/favicon", "/robots", "/sitemap", "/rss", "/apple-", "/site.webmanifest"];
+const ignoredPrefixes = ["/assets/", "/uploads/", "/api/", "/favicon", "/robots", "/sitemap", "/rss", "/apple-", "/site.webmanifest", "/profile-backgrounds/"];
 for (const file of sourceFiles.filter((item) => /\.(?:ts|tsx)$/.test(item))) {
   const text = fs.readFileSync(file, "utf8");
   for (const match of text.matchAll(/(["'`])(\/[^"'`\s{}<>]*)\1/g)) {
