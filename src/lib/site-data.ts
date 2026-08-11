@@ -125,7 +125,7 @@ export const otherServices: ServiceItem[] = [
   { slug: "ecommerce-development", name: "E-commerce Development", short: "Storefronts, payments, inventory, analytics, and customer lifecycle integrations.", route: "/services/ecommerce-development", tier: "other" },
   { slug: "cloud-deployment", name: "Cloud Deployment", short: "Production hosting, deployment pipelines, monitoring, and environment management.", route: "/services/cloud-maintenance", hash: "cloud-deployment", tier: "other" },
   { slug: "website-maintenance", name: "Website Maintenance", short: "Security updates, performance monitoring, fixes, and ongoing improvements.", route: "/services/cloud-maintenance", hash: "website-maintenance", tier: "other" },
-  { slug: "cybersecurity", name: "Cybersecurity", short: "Practical application, access, dependency, and deployment security reviews.", route: "/services/cloud-maintenance", hash: "cybersecurity", tier: "other" },
+  { slug: "cybersecurity", name: "Cybersecurity", short: "Application, cloud, access, dependency, integration, and recovery security built around practical business risk.", route: "/services/cybersecurity", tier: "other" },
   { slug: "staff-augmentation", name: "Staff Augmentation", short: "Additional design and engineering capacity with documented ownership and delivery controls.", route: "/services/cloud-maintenance", hash: "staff-augmentation", tier: "other" },
 ];
 
@@ -144,7 +144,8 @@ export const megaMenu: ServiceGroup[] = [
       otherServices.find((item) => item.slug === "ui-ux-design")!,
       otherServices.find((item) => item.slug === "seo-digital-marketing")!,
       otherServices.find((item) => item.slug === "branding")!,
-      { slug: "cloud-maintenance", name: "Cloud & Maintenance", short: "Deployment, security, maintenance, and delivery support.", route: "/services/cloud-maintenance", tier: "other" },
+      otherServices.find((item) => item.slug === "cybersecurity")!,
+      { slug: "cloud-maintenance", name: "Cloud & Maintenance", short: "Deployment, monitoring, maintenance, and delivery support.", route: "/services/cloud-maintenance", tier: "other" },
     ],
   },
 ];

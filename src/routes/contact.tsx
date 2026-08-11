@@ -74,6 +74,7 @@ const services = [
   "SEO & Digital Marketing",
   "Branding",
   "Cloud & Maintenance",
+  "Cybersecurity",
   "Other",
 ];
 

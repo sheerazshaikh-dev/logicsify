@@ -85,7 +85,7 @@ function LeadDemo() {
     <div className="grid gap-4 md:grid-cols-2">
       <Select label="Business type" value={form.business} options={["SaaS","Home services","Healthcare","E-commerce","Agency","Professional services"]} onChange={(value) => setForm({ ...form, business: value })} />
       <Select label="Monthly leads" value={form.leads} options={["Under 50","50–200","200–1,000","1,000+"]} onChange={(value) => setForm({ ...form, leads: value })} />
-      <Select label="Service required" value={form.service} options={["AI automation","CRM implementation","Voice AI","Web application","Marketing system"]} onChange={(value) => setForm({ ...form, service: value })} />
+      <Select label="Service required" value={form.service} options={["AI automation","CRM implementation","Voice AI","Web application","Marketing system","Cybersecurity"]} onChange={(value) => setForm({ ...form, service: value })} />
       <Select label="Main problem" value={form.problem} options={["Slow lead response","Manual qualification","Missed appointments","Disconnected reporting","Repetitive data entry"]} onChange={(value) => setForm({ ...form, problem: value })} />
       <Select label="Budget" value={form.budget} options={["Under $5,000","$5,000–$15,000","$15,000–$35,000","Not defined"]} onChange={(value) => setForm({ ...form, budget: value })} />
       <Select label="Timeline" value={form.timeline} options={["As soon as practical","1–2 months","3–6 months","Exploring"]} onChange={(value) => setForm({ ...form, timeline: value })} />
@@ -149,7 +149,7 @@ function DocumentDemo() {
 }
 
 const kb = [
-  { match:["service","provide"], answer:"Logicsify provides web and application development, SaaS and mobile product work, AI automation, CRM workflows, integrations, SEO, paid advertising, and digital growth services." },
+  { match:["service","provide"], answer:"Logicsify provides web and application development, SaaS and mobile product work, AI automation, CRM workflows, cybersecurity, integrations, SEO, paid advertising, and digital growth services." },
   { match:["custom crm","crm"], answer:"Logicsify can configure existing CRM platforms or build custom CRM workflows when the operating model cannot fit a standard tool. Discovery is needed before recommending either path." },
   { match:["saas"], answer:"Logicsify supports SaaS product discovery, product design, application engineering, billing, onboarding, admin systems, analytics, and scaling work." },
   { match:["appointment","booking"], answer:"Logicsify can design appointment workflows using forms, calendars, CRM automations, SMS, email, and controlled voice AI where the required accounts and consent process are available." },

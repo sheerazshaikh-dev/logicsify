@@ -516,13 +516,16 @@ function OtherServicesSection({ cmsBySlug }: { cmsBySlug: Map<string, CmsContent
   );
 }
 
-/* ---------- FEATURED WORK ---------- */
+/* ---------- PORTFOLIO ---------- */
 function FeaturedWork() {
   const [items, setItems] = useState<CmsContentItem[]>([]);
   useEffect(() => {
     let active = true;
     getCmsContentList("case_study")
-      .then((result) => active && setItems(result.filter((item) => item.featured)))
+      .then((result) => {
+        if (!active) return;
+        setItems([...result.filter((item) => item.featured), ...result.filter((item) => !item.featured)]);
+      })
       .catch(() => undefined);
     return () => {
       active = false;
@@ -533,9 +536,15 @@ function FeaturedWork() {
   return (
     <section className="bg-cream py-24 md:py-32">
       <div className="container-page">
-        <div className="mb-16 max-w-3xl">
-          <p className="eyebrow mb-4">Selected work</p>
-          <h2 className="fluid-h2">Real systems built around real operating problems.</h2>
+        <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-4">Portfolio</p>
+            <h2 className="fluid-h2">Real systems built around real operating problems.</h2>
+            <p className="mt-5 text-lg leading-8 text-ink-soft">Selected projects across AI automation, CRM operations, websites, portals, CMS platforms, integrations, and digital products.</p>
+          </div>
+          <Link to="/$slug" params={{ slug: "portfolio" }} className="btn-ghost-dark shrink-0">
+            View portfolio <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           {items.slice(0, 4).map((item, index) => {
@@ -584,7 +593,7 @@ function FeaturedWork() {
                     </div>
                   ) : null}
                   <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold group-hover:text-gradient">
-                    Read case study <ArrowUpRight className="h-4 w-4" />
+                    View project <ArrowUpRight className="h-4 w-4" />
                   </div>
                 </div>
               </Link>

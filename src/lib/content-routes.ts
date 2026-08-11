@@ -9,7 +9,6 @@ const insightSlugs = new Set(insights.map((item) => item.slug));
 const groupedOtherServicePaths: Record<string, string> = {
   "cloud-deployment": "/services/cloud-maintenance#cloud-deployment",
   "website-maintenance": "/services/cloud-maintenance#website-maintenance",
-  cybersecurity: "/services/cloud-maintenance#cybersecurity",
   "staff-augmentation": "/services/cloud-maintenance#staff-augmentation",
 };
 

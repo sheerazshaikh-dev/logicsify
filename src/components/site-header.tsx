@@ -739,6 +739,7 @@ function buildFallbackNavigation(): NavItem[] {
         ["UI/UX Design", "/services/ui-ux-design"],
         ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
         ["Branding", "/services/branding"],
+        ["Cybersecurity", "/services/cybersecurity"],
         ["Cloud & Maintenance", "/services/cloud-maintenance"],
         [
           "Supported Integrations",
@@ -765,6 +766,7 @@ function buildFallbackNavigation(): NavItem[] {
         ["Insights", "/insights", "Articles, analysis, company news, and practical guides."],
         ["Guides", "/guides", "Downloadable PDFs, checklists, audits, and templates."],
         ["Case Studies", "/work", "Published work connected to real operating problems."],
+        ["Company Profile", "/company-profile", "A concise overview of Logicsify, our services, delivery model, portfolio, and locations."],
         [
           "Engagement Models",
           "/engagement-models",
@@ -808,7 +810,7 @@ function buildFallbackNavigation(): NavItem[] {
     fallbackLink(nextId--, "Home", "/"),
     fallbackLink(nextId--, "Who We Are", "/about"),
     services,
-    fallbackLink(nextId--, "Work", "/work"),
+    fallbackLink(nextId--, "Portfolio", "/portfolio"),
     resources,
     fallbackLink(nextId--, "Contact", "/contact"),
   ];

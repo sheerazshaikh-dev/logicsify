@@ -343,16 +343,21 @@ function AboutPage() {
               AI-powered workflows, and digital marketing solutions built around real business
               goals.
             </p>
-            {activeCompanyProfile ? (
-              <a
-                href={activeCompanyProfile.url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-primary mt-7"
-              >
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link to="/$slug" params={{ slug: "company-profile" }} className="btn-primary">
                 View Company Profile <ExternalLink className="h-4 w-4" />
-              </a>
-            ) : null}
+              </Link>
+              {activeCompanyProfile ? (
+                <a
+                  href={activeCompanyProfile.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-ghost-dark"
+                >
+                  Download PDF Profile <ExternalLink className="h-4 w-4" />
+                </a>
+              ) : null}
+            </div>
           </div>
           <div className="lg:col-span-6" data-reveal>
             <div className="border-gradient relative overflow-hidden rounded-3xl bg-ink p-8 text-white md:p-10">

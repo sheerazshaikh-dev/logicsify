@@ -13,6 +13,7 @@ const serviceOptions = [
   "CRM Automation",
   "SEO & Digital Marketing",
   "Branding",
+  "Cybersecurity",
   "Other",
 ];
 

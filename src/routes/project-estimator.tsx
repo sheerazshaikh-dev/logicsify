@@ -21,7 +21,7 @@ export const Route = createFileRoute("/project-estimator")({
   }),
 });
 
-const services = ["Marketing website","E-commerce website","Custom web application","SaaS MVP","Mobile application","AI automation","Voice AI agent","CRM implementation","Custom CMS","SEO and marketing"];
+const services = ["Marketing website","E-commerce website","Custom web application","SaaS MVP","Mobile application","AI automation","Voice AI agent","CRM implementation","Custom CMS","SEO and marketing","Cybersecurity"];
 const featureMap: Record<string,string[]> = {
   "Marketing website": ["Custom design","CMS","Blog","Forms","Booking","Payments","Multi-language","Membership","Analytics"],
   "E-commerce website": ["Custom design","Product catalog","Checkout","Payments","Inventory integration","CRM","Email flows","Analytics","Customer support"],
@@ -32,6 +32,7 @@ const featureMap: Record<string,string[]> = {
   "Voice AI agent": ["Inbound calls","Lead qualification","Appointment booking","Knowledge base","Human transfer","CRM logging","Call analytics"],
   "CRM implementation": ["Pipeline design","Contact migration","Lead routing","Email automation","SMS automation","Reporting","Calendar booking","Permissions"],
   "Custom CMS": ["Structured content","User roles","Media library","Visual editor","Revisions","SEO fields","Forms","API integration"],
+  "Cybersecurity": ["Application security review","Authentication & access","Cloud exposure review","Dependency audit","API security","Secrets handling","Backup & recovery","Security remediation plan"],
   "SEO and marketing": ["Technical SEO","Content strategy","Paid advertising","Social media","Conversion tracking","Reporting","Landing pages"],
 };
 const integrations = ["GoHighLevel","HubSpot","Supabase","Shopify","WordPress","Stripe","Twilio","Retell AI","OpenAI","Google Ads","Meta","n8n","Make","Zapier"];

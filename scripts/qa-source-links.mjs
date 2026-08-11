@@ -54,13 +54,23 @@ const required = [
   "/services/ai-calling-agents",
   "/services/gohighlevel-implementation",
   "/services/custom-cms-platforms",
+  "/services/cybersecurity",
 ];
 for (const route of required) {
   if (!canonicalRoutes.has(route)) problems.push(`Missing canonical core service route: ${route}`);
 }
 
-const sitemap = fs.readFileSync(path.join(root, "public/sitemap.xml"), "utf8");
-if (sitemap.includes("/industries")) problems.push("Sitemap still contains Industries URLs");
+const staticSitemapPath = path.join(root, "public/sitemap.xml");
+if (fs.existsSync(staticSitemapPath)) {
+  problems.push("A static public/sitemap.xml exists; production sitemap must remain database-driven.");
+}
+const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
+const sitemapRewrite = Array.isArray(vercel.rewrites)
+  ? vercel.rewrites.find((rule) => rule?.source === "/sitemap.xml")
+  : null;
+if (!sitemapRewrite || !String(sitemapRewrite.destination || "").includes("public/sitemap.xml")) {
+  problems.push("vercel.json is missing the live backend sitemap rewrite.");
+}
 
 if (problems.length) {
   console.error(problems.join("\n"));
