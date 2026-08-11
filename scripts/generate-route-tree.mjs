@@ -5,6 +5,26 @@ const root = process.cwd();
 const routesDir = path.join(root, 'src', 'routes');
 const out = path.join(root, 'src', 'routeTree.gen.ts');
 
+function removeInvalidRouteArtifacts(dir) {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      removeInvalidRouteArtifacts(full);
+      continue;
+    }
+    if (!entry.name.endsWith('.tsx')) continue;
+    // Quote characters are never valid in this project's file-route names and can
+    // make generated TypeScript identifiers/imports invalid (for example: ''.tsx).
+    if (/["']/.test(entry.name)) {
+      fs.rmSync(full, { force: true });
+      console.warn(`Removed invalid route artifact: ${path.relative(root, full)}`);
+    }
+  }
+}
+
+removeInvalidRouteArtifacts(routesDir);
+
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const full = path.join(dir, entry.name);

@@ -67,13 +67,13 @@ function PortfolioDetail() {
         primaryCta={liveUrl ? undefined : { label: "Discuss a Similar Project", to: "/contact" }}
       />
 
-      <section className="py-10 md:py-12">
+      <section className="pb-16">
         <div className="container-page">
           {item.featured_image ? <img src={item.featured_image} alt={item.title} className="w-full rounded-[2rem] border border-black/10 object-cover shadow-[var(--shadow-card)]" /> : <div className="brand-radial-glow grid aspect-[16/7] place-items-center rounded-[2rem] bg-ink"><BriefcaseBusiness className="h-16 w-16 text-white/25" /></div>}
         </div>
       </section>
 
-      <section className="pb-16 pt-0 md:pb-24 md:pt-0">
+      <section className="py-16 md:py-24">
         <div className="container-page grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div>
             {body ? <div className="cms-rich-content" dangerouslySetInnerHTML={{ __html: body }} /> : null}

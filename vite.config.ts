@@ -58,6 +58,8 @@ export default defineConfig({
       autoCodeSplitting: true,
       routesDirectory: "./src/routes",
       generatedRouteTree: "./src/routeTree.gen.ts",
+      // Ignore malformed quote-named artifacts if one is accidentally committed.
+      routeFileIgnorePattern: "[\"']",
     }),
     react(),
     tailwindcss(),
