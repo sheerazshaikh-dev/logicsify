@@ -27,6 +27,7 @@ export function contentPublicPath(type: PublicContentType, slugValue: unknown): 
     case "case_study": return `/work/${slug}`;
     case "portfolio": return `/portfolio/${slug}`;
     case "insight": return `/insights/${slug}`;
+    case "testimonial": return "/testimonials";
     case "career": return `/careers#${encodeURIComponent(slug)}`;
     case "resource": return `/guides?guide=${encodeURIComponent(slug)}`;
     case "comparison": return `/comparisons/${slug}`;

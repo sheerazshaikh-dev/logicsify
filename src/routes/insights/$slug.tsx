@@ -95,6 +95,15 @@ export const Route = createFileRoute("/insights/$slug")({
   }),
 });
 
+function relatedServicePath(value: unknown) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("/services/")) return raw;
+  if (raw.startsWith("services/")) return `/${raw}`;
+  return `/services/${raw.replace(/^\/+|\/+$/g, "")}`;
+}
+
 function InsightPage() {
   const { article, related } = Route.useLoaderData();
   const c = article.content_json || {};
@@ -185,7 +194,10 @@ function InsightPage() {
           <aside className="lg:col-span-2">
             <div className="lg:sticky lg:top-28 space-y-4">
               {c.related_service ? (
-                <Link to={String(c.related_service)} className="block rounded-2xl bg-cream p-5">
+                <Link
+                  to={relatedServicePath(c.related_service)}
+                  className="block rounded-2xl bg-cream p-5"
+                >
                   <p className="eyebrow">Related service</p>
                   <p className="mt-2 font-semibold">Explore the relevant service</p>
                 </Link>

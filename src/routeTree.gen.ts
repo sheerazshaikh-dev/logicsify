@@ -67,6 +67,7 @@ import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as TechnicalRoadmapRouteImport } from './routes/technical-roadmap'
 import { Route as TechnologyRouteImport } from './routes/technology'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TestimonialsRouteImport } from './routes/testimonials'
 import { Route as WorkIndexRouteImport } from './routes/work/index'
 import { Route as WorkSlugRouteImport } from './routes/work/$slug'
 
@@ -442,6 +443,12 @@ const TermsRoute = TermsRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const TestimonialsRoute = TestimonialsRouteImport.update({
+  id: '/testimonials',
+  path: '/testimonials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const WorkIndexRoute = WorkIndexRouteImport.update({
   id: '/work/',
   path: '/work/',
@@ -517,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
+  '/testimonials': typeof TestimonialsRoute
   '/work/': typeof WorkIndexRoute
   '/work/$slug': typeof WorkSlugRoute
 }
@@ -584,6 +592,7 @@ export interface FileRoutesByTo {
   '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
+  '/testimonials': typeof TestimonialsRoute
   '/work': typeof WorkIndexRoute
   '/work/$slug': typeof WorkSlugRoute
 }
@@ -652,6 +661,7 @@ export interface FileRoutesById {
   '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
+  '/testimonials': typeof TestimonialsRoute
   '/work/': typeof WorkIndexRoute
   '/work/$slug': typeof WorkSlugRoute
 }
@@ -721,6 +731,7 @@ export interface FileRouteTypes {
     | '/technical-roadmap'
     | '/technology'
     | '/terms'
+    | '/testimonials'
     | '/work/'
     | '/work/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -787,6 +798,7 @@ export interface FileRouteTypes {
     | '/technical-roadmap'
     | '/technology'
     | '/terms'
+    | '/testimonials'
     | '/work'
     | '/work/$slug'
   id:
@@ -853,6 +865,7 @@ export interface FileRouteTypes {
     | '/technical-roadmap'
     | '/technology'
     | '/terms'
+    | '/testimonials'
     | '/work/'
     | '/work/$slug'
   fileRoutesById: FileRoutesById
@@ -921,6 +934,7 @@ export interface RootRouteChildren {
   TechnicalRoadmapRoute: typeof TechnicalRoadmapRoute
   TechnologyRoute: typeof TechnologyRoute
   TermsRoute: typeof TermsRoute
+  TestimonialsRoute: typeof TestimonialsRoute
   WorkIndexRoute: typeof WorkIndexRoute
   WorkSlugRoute: typeof WorkSlugRoute
 }
@@ -1361,6 +1375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/testimonials': {
+      id: '/testimonials'
+      path: '/testimonials'
+      fullPath: '/testimonials'
+      preLoaderRoute: typeof TestimonialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/work/': {
       id: '/work/'
       path: '/work'
@@ -1441,6 +1462,7 @@ const rootRouteChildren: RootRouteChildren = {
   TechnicalRoadmapRoute,
   TechnologyRoute,
   TermsRoute,
+  TestimonialsRoute,
   WorkIndexRoute,
   WorkSlugRoute,
 }

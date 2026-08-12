@@ -174,6 +174,7 @@ export function ContentManagerPage({
     "resource",
     "comparison",
     "engagement_model",
+    "testimonial",
   ].includes(type);
 
   const load = useCallback(async () => {

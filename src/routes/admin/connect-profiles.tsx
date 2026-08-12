@@ -36,7 +36,11 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { QrCode } from "@/components/qr-code";
 import type { ConnectProfileExportFormat } from "@/lib/connect-profile-export";
 import { CONNECT_PROFILE_PLATFORM_OPTIONS } from "@/lib/connect-profile-links";
-import { downloadQrCode } from "@/lib/qr-code";
+import {
+  buildOfflineContactVCard,
+  downloadOfflineContactQrPng,
+  downloadOfflineContactQrSvg,
+} from "@/lib/offline-contact-qr";
 import {
   DEFAULT_CONNECT_PROFILE_VISIBILITY,
   normalizeConnectProfileVisibility,
@@ -71,6 +75,8 @@ const emptyProfile: Partial<ConnectProfile> = {
   email: "",
   phone: "",
   whatsapp: "",
+  company: "Logicsify",
+  website: "https://logicsify.com",
   links_json: [],
   skills_json: [],
   location_ids_json: [],
@@ -146,7 +152,8 @@ export function ConnectProfilesPage() {
     try {
       const result = await saveTeamConnectLocations(locations);
       setLocations(result.locations);
-      toast.success("Location visibility and contact details saved.");
+      await refresh();
+      toast.success("Location visibility and contact details saved. Offline contact QRs now use the updated office details.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save locations.");
     } finally {
@@ -408,12 +415,36 @@ export function ConnectProfilesPage() {
                     >
                       Edit
                     </AdminButton>
-                    {item.visibility_json.placements.connect ? (
-                      <AdminButton variant="secondary" onClick={() => setQr(item)}>
-                        <QrIcon className="h-4 w-4" />
-                        QR code
-                      </AdminButton>
-                    ) : null}
+                    <AdminButton variant="secondary" onClick={() => setQr(item)}>
+                      <QrIcon className="h-4 w-4" />
+                      Preview QR
+                    </AdminButton>
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() =>
+                        void downloadOfflineContactQrPng(item)
+                          .then(() => toast.success("Offline contact QR downloaded as PNG."))
+                          .catch((error) =>
+                            toast.error(error instanceof Error ? error.message : "Could not download QR PNG."),
+                          )
+                      }
+                    >
+                      <Download className="h-4 w-4" />
+                      QR – PNG
+                    </AdminButton>
+                    <AdminButton
+                      variant="secondary"
+                      onClick={() =>
+                        void downloadOfflineContactQrSvg(item)
+                          .then(() => toast.success("Offline contact QR downloaded as SVG."))
+                          .catch((error) =>
+                            toast.error(error instanceof Error ? error.message : "Could not download QR SVG."),
+                          )
+                      }
+                    >
+                      <Download className="h-4 w-4" />
+                      QR – SVG
+                    </AdminButton>
                     {item.visibility_json.placements.connect ? (
                       <AdminButton variant="secondary" onClick={() => setDownloadProfile(item)}>
                         <Download className="h-4 w-4" />
@@ -565,6 +596,8 @@ function ProfileEditor({
         />
         <Field label="Email" value={value.email} onChange={(v) => set("email", v)} />
         <Field label="Phone" value={value.phone} onChange={(v) => set("phone", v)} />
+        <Field label="Company" value={value.company} onChange={(v) => set("company", v)} />
+        <Field label="Website" value={value.website} onChange={(v) => set("website", v)} />
         <Field
           label="WhatsApp number"
           value={value.whatsapp}
@@ -1266,31 +1299,40 @@ function Check({
 }
 function QrModal({ profile, close }: { profile: ConnectProfile | null; close: () => void }) {
   if (!profile) return null;
-  const url = `${window.location.origin}/connect/${profile.slug}`;
+  const value = buildOfflineContactVCard(profile);
   return (
     <AdminModal
       open
-      title={`QR code: ${profile.display_name}`}
-      description="This code points to the profile's permanent connect URL."
+      title={`Offline contact QR: ${profile.display_name}`}
+      description="The contact details are stored directly inside this QR as a vCard. Scanning works without internet and opens Add/Save Contact on supported phones."
       onClose={close}
       width="max-w-md"
     >
       <div className="flex flex-col items-center text-center">
-        <QrCode value={url} className="rounded-2xl border border-slate-200" />
-        <p className="mt-4 break-all text-sm text-slate-500">{url}</p>
-        <div className="mt-5 flex gap-2">
+        <QrCode value={value} size={260} className="rounded-2xl border border-slate-200" />
+        <p className="mt-4 text-sm leading-6 text-slate-500">
+          Includes the latest saved name, designation, company, phone, email, assigned office
+          address, website, WhatsApp, and LinkedIn details when available.
+        </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
           <AdminButton
             variant="secondary"
             onClick={() =>
-              void navigator.clipboard.writeText(url).then(() => toast.success("URL copied."))
+              void navigator.clipboard
+                .writeText(value)
+                .then(() => toast.success("vCard data copied."))
             }
           >
             <Copy className="h-4 w-4" />
-            Copy
+            Copy vCard
           </AdminButton>
-          <AdminButton onClick={() => void downloadQrCode(url, `${profile.slug}-qr.png`)}>
+          <AdminButton onClick={() => void downloadOfflineContactQrPng(profile)}>
             <Download className="h-4 w-4" />
-            Download PNG
+            QR – PNG
+          </AdminButton>
+          <AdminButton variant="secondary" onClick={() => void downloadOfflineContactQrSvg(profile)}>
+            <Download className="h-4 w-4" />
+            QR – SVG
           </AdminButton>
         </div>
       </div>
