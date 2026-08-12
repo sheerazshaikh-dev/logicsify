@@ -54,7 +54,7 @@ const defaults: Required<PublicThemeSettings> = {
   nav_font_size: 14,
   button_font_size: 14,
   small_font_size: 12,
-  container_max_width: 1360,
+  container_max_width: 1600,
   section_spacing_desktop: 128,
   section_spacing_mobile: 72,
   card_radius: 24,
@@ -79,7 +79,9 @@ export function GlobalStylingPage() {
   useEffect(() => {
     Promise.all([getSettings(), getCurrentAdmin()])
       .then(([result, admin]) => {
-        setValues({ ...defaults, ...(result.theme || {}) });
+        const loadedTheme = { ...defaults, ...(result.theme || {}) };
+        if (Number(loadedTheme.container_max_width) === 1360) loadedTheme.container_max_width = 1600;
+        setValues(loadedTheme);
         setSiteValues({ ...DEFAULT_SITE_BRANDING, ...(result.site || {}) });
         setIsSuperAdmin(admin.role === "super_admin");
       })

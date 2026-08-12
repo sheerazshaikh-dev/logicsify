@@ -1,0 +1,91 @@
+diff -ruN src/components/page-hero.tsx /mnt/data/layout_hotfix_only/src/components/page-hero.tsx
+--- src/components/page-hero.tsx	2026-08-12 04:36:33.016924015 +0000
++++ /mnt/data/layout_hotfix_only/src/components/page-hero.tsx	2026-08-12 04:36:32.580640305 +0000
+@@ -48,7 +48,7 @@
+               <h1 className="fluid-display text-white">{title}</h1>
+             </div>
+             {intro && (
+-              <p className="mt-6 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed">
++              <p className="mt-6 text-lg md:text-xl text-white/70 max-w-3xl leading-relaxed">
+                 {intro}
+               </p>
+             )}
+diff -ruN src/lib/logicsify-api.ts /mnt/data/layout_hotfix_only/src/lib/logicsify-api.ts
+--- src/lib/logicsify-api.ts	2026-08-12 04:36:33.016986878 +0000
++++ /mnt/data/layout_hotfix_only/src/lib/logicsify-api.ts	2026-08-12 04:36:32.581367816 +0000
+@@ -547,7 +547,13 @@
+ 
+ export async function getPublicThemeSettings(): Promise<PublicThemeSettings> {
+   try {
+-    return await cachedPublicRequest<PublicThemeSettings>("public/settings/theme", 60_000);
++    const settings = await cachedPublicRequest<PublicThemeSettings>("public/settings/theme", 60_000);
++    // Upgrade the previous site-wide default to the new 1600px design width.
++    // Custom widths other than the old 1360px default are preserved.
++    if (Number(settings.container_max_width) === 1360) {
++      return { ...settings, container_max_width: 1600 };
++    }
++    return settings;
+   } catch {
+     return {};
+   }
+diff -ruN src/routes/admin/global-styling.tsx /mnt/data/layout_hotfix_only/src/routes/admin/global-styling.tsx
+--- src/routes/admin/global-styling.tsx	2026-08-12 04:36:33.017245242 +0000
++++ /mnt/data/layout_hotfix_only/src/routes/admin/global-styling.tsx	2026-08-12 04:36:32.582215347 +0000
+@@ -54,7 +54,7 @@
+   nav_font_size: 14,
+   button_font_size: 14,
+   small_font_size: 12,
+-  container_max_width: 1360,
++  container_max_width: 1600,
+   section_spacing_desktop: 128,
+   section_spacing_mobile: 72,
+   card_radius: 24,
+@@ -79,7 +79,9 @@
+   useEffect(() => {
+     Promise.all([getSettings(), getCurrentAdmin()])
+       .then(([result, admin]) => {
+-        setValues({ ...defaults, ...(result.theme || {}) });
++        const loadedTheme = { ...defaults, ...(result.theme || {}) };
++        if (Number(loadedTheme.container_max_width) === 1360) loadedTheme.container_max_width = 1600;
++        setValues(loadedTheme);
+         setSiteValues({ ...DEFAULT_SITE_BRANDING, ...(result.site || {}) });
+         setIsSuperAdmin(admin.role === "super_admin");
+       })
+diff -ruN src/styles.css /mnt/data/layout_hotfix_only/src/styles.css
+--- src/styles.css	2026-08-12 04:36:33.016788353 +0000
++++ /mnt/data/layout_hotfix_only/src/styles.css	2026-08-12 04:36:32.579857511 +0000
+@@ -81,7 +81,7 @@
+   --theme-nav-font-size: 14px;
+   --theme-button-font-size: 14px;
+   --theme-small-font-size: 12px;
+-  --theme-container-max-width: 1360px;
++  --theme-container-max-width: 1600px;
+   --theme-section-spacing-desktop: 128px;
+   --theme-section-spacing-mobile: 72px;
+   --theme-card-radius: 24px;
+@@ -523,21 +523,12 @@
+   pointer-events: auto;
+ }
+ 
+-/* Inner-page heroes use a shorter reading measure. The homepage has its own
+-   two-column geometry and must retain the full width of its seven-column cell. */
++/* Inner-page hero headings should use the full width of their grid column.
++   Do not shrink the heading again inside the column: that caused long service,
++   resource and portfolio titles to stack into unnaturally narrow lines. */
+ .page-hero-heading-wrap {
+   width: 100%;
+-  max-width: 1120px;
+-}
+-@media (min-width: 768px) {
+-  .page-hero-heading-wrap {
+-    width: 88%;
+-  }
+-}
+-@media (min-width: 1024px) {
+-  .page-hero-heading-wrap {
+-    width: 75%;
+-  }
++  max-width: none;
+ }
+ 
+ .public-prose {

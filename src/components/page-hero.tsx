@@ -48,7 +48,7 @@ export function PageHero({
               <h1 className="fluid-display text-white">{title}</h1>
             </div>
             {intro && (
-              <p className="mt-6 text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed">
+              <p className="mt-6 text-lg md:text-xl text-white/70 max-w-3xl leading-relaxed">
                 {intro}
               </p>
             )}

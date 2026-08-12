@@ -547,7 +547,13 @@ export type PublicThemeSettings = {
 
 export async function getPublicThemeSettings(): Promise<PublicThemeSettings> {
   try {
-    return await cachedPublicRequest<PublicThemeSettings>("public/settings/theme", 60_000);
+    const settings = await cachedPublicRequest<PublicThemeSettings>("public/settings/theme", 60_000);
+    // Upgrade the previous site-wide default to the new 1600px design width.
+    // Custom widths other than the old 1360px default are preserved.
+    if (Number(settings.container_max_width) === 1360) {
+      return { ...settings, container_max_width: 1600 };
+    }
+    return settings;
   } catch {
     return {};
   }

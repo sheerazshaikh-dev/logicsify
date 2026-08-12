@@ -81,7 +81,7 @@
   --theme-nav-font-size: 14px;
   --theme-button-font-size: 14px;
   --theme-small-font-size: 12px;
-  --theme-container-max-width: 1360px;
+  --theme-container-max-width: 1600px;
   --theme-section-spacing-desktop: 128px;
   --theme-section-spacing-mobile: 72px;
   --theme-card-radius: 24px;
@@ -523,21 +523,12 @@ body.cms-edit-mode [data-cms-field-keys] {
   pointer-events: auto;
 }
 
-/* Inner-page heroes use a shorter reading measure. The homepage has its own
-   two-column geometry and must retain the full width of its seven-column cell. */
+/* Inner-page hero headings should use the full width of their grid column.
+   Do not shrink the heading again inside the column: that caused long service,
+   resource and portfolio titles to stack into unnaturally narrow lines. */
 .page-hero-heading-wrap {
   width: 100%;
-  max-width: 1120px;
-}
-@media (min-width: 768px) {
-  .page-hero-heading-wrap {
-    width: 88%;
-  }
-}
-@media (min-width: 1024px) {
-  .page-hero-heading-wrap {
-    width: 75%;
-  }
+  max-width: none;
 }
 
 .public-prose {
