@@ -1,12 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Check, HelpCircle } from "lucide-react";
+import { ArrowRight, Check, HelpCircle } from "lucide-react";
 import { PageHero } from "./page-hero";
 import { CTASection } from "./cta-section";
 import { allServices, getParentCoreService, getSubservicesForCore } from "@/lib/site-data";
-import { useEffect, useState, type ComponentType } from "react";
+import { type ComponentType } from "react";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
-import { engagementModels } from "@/lib/expansion-data";
-import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 import { RelatedAutomationDemo } from "@/components/related-automation-demo";
 
 export type ServicePageData = {
@@ -314,22 +312,13 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
 
       {(["ai-automation-voice-agents", "crm-revenue-operations", "custom-websites-portals-cms"].includes(data.slug)) ? <SystemsWeIntegrate /> : null}
 
-      <section className="py-20 md:py-28">
-        <div className="container-page">
-          <div className="mb-10 max-w-2xl"><p className="eyebrow mb-4">Engagement models</p><h2 className="fluid-h2">A delivery model that fits the scope.</h2></div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {engagementModels.map((model) => <Link key={model.slug} to="/engagement-models" hash={model.slug} className="rounded-2xl border border-black/10 bg-white p-5"><h3 className="font-semibold">{model.title}</h3><p className="mt-2 text-sm leading-6 text-ink-soft">{model.bestFor}</p></Link>)}
-          </div>
-        </div>
-      </section>
+
 
       {data.scenarios?.length ? (
         <section className="bg-ink py-20 text-white md:py-28">
           <div className="container-page"><div className="mb-12 max-w-3xl"><p className="eyebrow !text-brand-gold mb-4">Evidence structure</p><h2 className="fluid-h2">Systems designed around real operating problems.</h2></div><div className="grid gap-5 md:grid-cols-3">{data.scenarios.map((item)=><article key={item.title} className="rounded-3xl border border-white/10 bg-white/5 p-7"><h3 className="text-xl font-semibold">{item.title}</h3><p className="mt-4 leading-7 text-white/65">{item.body}</p></article>)}</div>{data.measures?.length?<div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-7"><p className="text-sm font-bold uppercase tracking-[.18em] text-white/50">What to measure</p><div className="mt-5 flex flex-wrap gap-3">{data.measures.map((item)=><span key={item} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">{item}</span>)}</div></div>:null}</div>
         </section>
       ) : null}
-
-      <RelatedWork serviceSlug={data.slug} />
 
       {/* FAQs */}
       <section className="py-20 md:py-28 bg-cream">
@@ -358,35 +347,37 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
       </section>
 
       {/* Related services */}
-      <section className="py-20 md:py-28">
-        <div className="container-page">
-          <div className="max-w-2xl mb-10">
-            <p className="eyebrow mb-4">Related services</p>
-            <h2 className="fluid-h2">Often paired with…</h2>
+      {data.related.length ? (
+        <section className="py-20 md:py-28">
+          <div className="container-page">
+            <div className="max-w-2xl mb-10">
+              <p className="eyebrow mb-4">Related services</p>
+              <h2 className="fluid-h2">Often paired with…</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data.related.map((slug) => {
+                const s = allServices.find((x) => x.slug === slug);
+                if (!s) return null;
+                return (
+                  <Link
+                    to={s.route}
+                    key={slug}
+                    className="group rounded-2xl border border-black/10 p-6 bg-white hover:-translate-y-1 transition-all"
+                  >
+                    <h3 className="font-semibold text-lg mb-1 group-hover:text-gradient transition">
+                      {s.name}
+                    </h3>
+                    <p className="text-sm text-ink-soft">{s.short}</p>
+                    <div className="mt-4 inline-flex items-center gap-1 text-sm text-ink font-semibold">
+                      Learn more <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.related.map((slug) => {
-              const s = allServices.find((x) => x.slug === slug);
-              if (!s) return null;
-              return (
-                <Link
-                  to={s.route}
-                  key={slug}
-                  className="group rounded-2xl border border-black/10 p-6 bg-white hover:-translate-y-1 transition-all"
-                >
-                  <h3 className="font-semibold text-lg mb-1 group-hover:text-gradient transition">
-                    {s.name}
-                  </h3>
-                  <p className="text-sm text-ink-soft">{s.short}</p>
-                  <div className="mt-4 inline-flex items-center gap-1 text-sm text-ink font-semibold">
-                    Learn more <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <CTASection />
     </>
@@ -425,39 +416,6 @@ function ServiceHeroVisual({ name, workflow }: { name: string; workflow: string[
   );
 }
 
-function RelatedWork({ serviceSlug }: { serviceSlug: string }) {
-  const [items, setItems] = useState<CmsContentItem[]>([]);
-  useEffect(() => {
-    let active = true;
-    getCmsContentList("case_study")
-      .then((result) => {
-        if (!active) return;
-        const matched = result.filter((item) => {
-          const services = Array.isArray(item.content_json?.services) ? item.content_json.services.map(String) : [];
-          return services.includes(serviceSlug) || item.featured;
-        }).slice(0, 3);
-        setItems(matched);
-      })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, [serviceSlug]);
-  if (!items.length) return null;
-  return (
-    <section className="bg-cream py-20 md:py-28">
-      <div className="container-page">
-        <div className="mb-10 max-w-2xl"><p className="eyebrow mb-4">Related work</p><h2 className="fluid-h2">Systems delivered around real operating problems.</h2></div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {items.map((item) => (
-            <Link key={item.slug} to="/work/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-2xl border border-black/10 bg-white">
-              {item.featured_image ? <img src={item.featured_image} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" /> : <div className="grid aspect-[16/9] place-items-center bg-ink"><BriefcaseBusiness className="h-10 w-10 text-white/20" /></div>}
-              <div className="p-6"><h3 className="text-lg font-semibold">{item.title}</h3><p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p><span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">Read case study <ArrowUpRight className="h-4 w-4" /></span></div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 function capabilityAnchor(serviceSlug: string, title: string) {
   if (serviceSlug === "cloud-maintenance") {
     const normalized = title.toLowerCase();

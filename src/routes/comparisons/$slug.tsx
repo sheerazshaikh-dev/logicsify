@@ -1,13 +1,14 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
 import type { ComparisonDefinition } from "@/lib/expansion-data";
-import { getCmsContentItem, type CmsContentItem } from "@/lib/logicsify-api";
+import { getCmsContentItem, getRelatedContent, type CmsContentItem } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
+import { RelatedContentSections } from "@/components/related-content-sections";
 
 function cmsComparisonFallback(cms: CmsContentItem): ComparisonDefinition {
   const content = cms.content_json || {};
@@ -27,7 +28,10 @@ function cmsComparisonFallback(cms: CmsContentItem): ComparisonDefinition {
 export const Route = createFileRoute("/comparisons/$slug")({
   pendingComponent: PublicRouteLoading,
   loader: async ({ params }) => {
-    const cms = await getCmsContentItem("comparison", params.slug);
+    const [cms, relatedContent] = await Promise.all([
+      getCmsContentItem("comparison", params.slug),
+      getRelatedContent("comparison", params.slug),
+    ]);
 
     // The CMS/database is the only source of truth. A deleted comparison must
     // become a 404 and a newly published comparison must work without any
@@ -37,6 +41,7 @@ export const Route = createFileRoute("/comparisons/$slug")({
     return {
       comparison: cmsComparisonFallback(cms),
       cms,
+      relatedContent,
     };
   },
   component: ComparisonPage,
@@ -116,14 +121,13 @@ function faqs(value: unknown) {
 }
 
 function ComparisonPage() {
-  const { comparison, cms } = Route.useLoaderData();
+  const { comparison, cms, relatedContent } = Route.useLoaderData();
   const c = cms?.content_json || {};
   const optionA = String(c.option_a || comparison.optionA);
   const optionB = String(c.option_b || comparison.optionB);
   const tableRows = rows(c.comparison_rows, comparison.rows);
   const risks = stringList(c.risks).length ? stringList(c.risks) : comparison.risks;
   const questions = faqs(c.faqs);
-  const related = stringList(c.related_services);
 
   useEffect(() => trackEvent("comparison_opened", { slug: comparison.slug }), [comparison.slug]);
 
@@ -284,25 +288,9 @@ function ComparisonPage() {
             </section>
           ) : null}
 
-          {related.length ? (
-            <section className="mt-16">
-              <h2 className="fluid-h3">Related services</h2>
-              <div className="mt-5 flex flex-wrap gap-3">
-                {related.map((slug) => (
-                  <Link
-                    key={slug}
-                    to="/services/$slug"
-                    params={{ slug }}
-                    className="rounded-full border border-black/10 px-5 py-3 text-sm font-semibold hover:border-brand-red"
-                  >
-                    {slug.replaceAll("-", " ")}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
         </div>
       </section>
+      <RelatedContentSections data={relatedContent} title="Related services, insights, work and resources" />
       <TechnicalRoadmapCTA source={`comparison:${comparison.slug}`} />
     </SiteLayout>
   );

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { supportedIntegrations } from "@/lib/expansion-data";
 import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
+import { relatedServiceItems } from "@/lib/related-content";
 
 const categories = ["All", "CRM", "Development", "AI", "Marketing", "Automation", "Payments", "Communication"] as const;
 type Category = (typeof categories)[number];
-type IntegrationItem = { slug: string; name: string; category: Exclude<Category, "All">; text: string; logo?: string; platformUrl?: string };
+type IntegrationItem = { slug: string; name: string; category: Exclude<Category, "All">; text: string; logo?: string; platformUrl?: string; services: Array<{ slug: string; label: string }> };
 
 function normalizeCategory(value: unknown): Exclude<Category, "All"> {
   const label = String(value || "Development");
@@ -20,6 +21,7 @@ function fromCms(item: CmsContentItem): IntegrationItem {
     text: item.excerpt || String(content.category || "Supported integration"),
     logo: String(content.logo || item.featured_image || "") || undefined,
     platformUrl: String(content.platform_url || "") || undefined,
+    services: relatedServiceItems(item),
   };
 }
 
@@ -41,7 +43,7 @@ export function SystemsWeIntegrate({ compact = false }: { compact?: boolean }) {
 
   const source: IntegrationItem[] = managed.length
     ? managed
-    : supportedIntegrations.map((item) => ({ ...item, slug: slugify(item.name), category: normalizeCategory(item.category) }));
+    : supportedIntegrations.map((item) => ({ ...item, slug: slugify(item.name), category: normalizeCategory(item.category), services: [] }));
   const items = useMemo(
     () => source.filter((item) => category === "All" || item.category === category),
     [category, source],
@@ -83,12 +85,29 @@ export function SystemsWeIntegrate({ compact = false }: { compact?: boolean }) {
               <p className="mt-3 text-sm font-semibold text-ink">{item.name}</p>
               <p className="mt-1 text-[11px] text-ink-soft">{item.text}</p>
             </>;
-            return item.platformUrl ? (
-              <a id={item.slug} key={item.name} href={item.platformUrl} target="_blank" rel="noreferrer" className="scroll-mt-28 rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                {card}
-              </a>
-            ) : (
-              <div id={item.slug} key={item.name} className="scroll-mt-28 rounded-2xl border border-black/10 bg-white p-5 text-center shadow-sm">{card}</div>
+            return (
+              <article id={item.slug} key={item.name} className="scroll-mt-28 overflow-hidden rounded-2xl border border-black/10 bg-white text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                {item.platformUrl ? (
+                  <a href={item.platformUrl} target="_blank" rel="noreferrer" className="block p-5">{card}</a>
+                ) : (
+                  <div className="p-5">{card}</div>
+                )}
+                {item.services.length ? (
+                  <div className="border-t border-black/8 px-3 py-3">
+                    <div className="flex flex-wrap justify-center gap-1.5">
+                      {item.services.map((service) => (
+                        <a
+                          key={service.slug}
+                          href={`/services/${service.slug}`}
+                          className="rounded-full bg-cream px-2.5 py-1 text-[10px] font-semibold capitalize transition hover:bg-ink hover:text-white"
+                        >
+                          {service.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </article>
             );
           })}
         </div>

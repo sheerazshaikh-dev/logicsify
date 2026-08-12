@@ -1,12 +1,13 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
-import { ArrowRight, ExternalLink, Share2 } from "lucide-react";
+import { ExternalLink, Share2 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
-import { getCmsContentList, optimizedPublicImageUrl } from "@/lib/logicsify-api";
+import { getCmsContentList, getRelatedContent, optimizedPublicImageUrl } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
+import { RelatedContentSections } from "@/components/related-content-sections";
 
 export const Route = createFileRoute("/insights/$slug")({
   pendingComponent: PublicRouteLoading,
@@ -14,10 +15,13 @@ export const Route = createFileRoute("/insights/$slug")({
     // Use the same CMS list payload as the Insights listing. Besides removing an
     // unnecessary API request, this guarantees the detail page uses the exact
     // featured-image record currently visible in Admin/listing.
-    const all = await getCmsContentList("insight", { fresh: true });
+    const [all, relatedContent] = await Promise.all([
+      getCmsContentList("insight", { fresh: true }),
+      getRelatedContent("insight", params.slug),
+    ]);
     const article = all.find((item) => item.slug === params.slug) || null;
     if (!article) throw notFound();
-    return { article, related: all.filter((item) => item.slug !== params.slug).slice(0, 3) };
+    return { article, relatedContent };
   },
   staleTime: 0,
   component: InsightPage,
@@ -95,17 +99,8 @@ export const Route = createFileRoute("/insights/$slug")({
   }),
 });
 
-function relatedServicePath(value: unknown) {
-  const raw = String(value || "").trim();
-  if (!raw) return "";
-  if (/^https?:\/\//i.test(raw)) return raw;
-  if (raw.startsWith("/services/")) return raw;
-  if (raw.startsWith("services/")) return `/${raw}`;
-  return `/services/${raw.replace(/^\/+|\/+$/g, "")}`;
-}
-
 function InsightPage() {
-  const { article, related } = Route.useLoaderData();
+  const { article, relatedContent } = Route.useLoaderData();
   const c = article.content_json || {};
   const processed = useMemo(() => processBody(String(c.body || "")), [c.body]);
   const sources = sourceLinks(c.sources, c.source_name, c.source_url);
@@ -193,15 +188,6 @@ function InsightPage() {
           />
           <aside className="lg:col-span-2">
             <div className="lg:sticky lg:top-28 space-y-4">
-              {c.related_service ? (
-                <Link
-                  to={relatedServicePath(c.related_service)}
-                  className="block rounded-2xl bg-cream p-5"
-                >
-                  <p className="eyebrow">Related service</p>
-                  <p className="mt-2 font-semibold">Explore the relevant service</p>
-                </Link>
-              ) : null}
               {sources.length ? (
                 <section className="rounded-2xl border border-black/10 p-5">
                   <p className="eyebrow">Sources</p>
@@ -225,29 +211,7 @@ function InsightPage() {
           </aside>
         </div>
       </section>
-      {related.length ? (
-        <section className="bg-cream py-20">
-          <div className="container-page">
-            <h2 className="fluid-h3">Related insights</h2>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {related.map((item) => (
-                <Link
-                  key={item.id}
-                  to="/insights/$slug"
-                  params={{ slug: item.slug }}
-                  className="rounded-2xl bg-white p-6"
-                >
-                  <p className="eyebrow">{String(item.content_json?.category || "Insight")}</p>
-                  <h3 className="mt-3 font-semibold">{item.title}</h3>
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">
-                    Read <ArrowRight className="h-4 w-4" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <RelatedContentSections data={relatedContent} title="Related services, work and resources" />
       <TechnicalRoadmapCTA source={`insight:${article.slug}`} />
     </SiteLayout>
   );

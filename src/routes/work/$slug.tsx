@@ -1,24 +1,25 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { CheckCircle2, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
-import { getCmsContentItem, getCmsContentList } from "@/lib/logicsify-api";
+import { getCmsContentItem, getRelatedContent } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 import { NavigableLightbox } from "@/components/navigable-lightbox";
+import { RelatedContentSections } from "@/components/related-content-sections";
 
 export const Route = createFileRoute("/work/$slug")({
   pendingComponent: PublicRouteLoading,
   loader: async ({ params }) => {
-    const [study, all] = await Promise.all([
+    const [study, relatedContent] = await Promise.all([
       getCmsContentItem("case_study", params.slug),
-      getCmsContentList("case_study"),
+      getRelatedContent("case_study", params.slug),
     ]);
     if (!study) throw notFound();
-    return { study, related: all.filter((item) => item.slug !== params.slug).slice(0, 3) };
+    return { study, relatedContent };
   },
   component: CaseStudyPage,
   head: ({ loaderData, params }) => ({
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/work/$slug")({
 });
 
 function CaseStudyPage() {
-  const { study, related } = Route.useLoaderData();
+  const { study, relatedContent } = Route.useLoaderData();
   const c = study.content_json || {};
   useEffect(() => trackEvent("case_study_opened", { slug: study.slug }), [study.slug]);
   const services = arr(c.services);
@@ -192,53 +193,7 @@ function CaseStudyPage() {
         </div>
       </section>
       {integrations.length ? <SystemsWeIntegrate compact /> : null}
-      {services.length ? (
-        <section className="py-16">
-          <div className="container-page">
-            <h2 className="fluid-h3">Related services</h2>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {services.map((service) => (
-                <Link
-                  key={service}
-                  to="/services/$slug"
-                  params={{
-                    slug: service
-                      .toLowerCase()
-                      .replace(/[^a-z0-9]+/g, "-")
-                      .replace(/^-|-$/g, ""),
-                  }}
-                  className="rounded-full border border-black/10 px-5 py-3 text-sm font-semibold hover:border-brand-red"
-                >
-                  {service}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-      {related.length ? (
-        <section className="bg-cream py-20">
-          <div className="container-page">
-            <h2 className="fluid-h3">Related case studies</h2>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {related.map((item) => (
-                <Link
-                  key={item.id}
-                  to="/work/$slug"
-                  params={{ slug: item.slug }}
-                  className="rounded-2xl bg-white p-6"
-                >
-                  <p className="font-semibold">{item.title}</p>
-                  <p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">
-                    Open <ArrowRight className="h-4 w-4" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <RelatedContentSections data={relatedContent} title="Related services, proof, insights and resources" />
       <TechnicalRoadmapCTA source={`case_study:${study.slug}`} />
     </SiteLayout>
   );

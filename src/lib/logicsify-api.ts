@@ -371,6 +371,23 @@ export type CmsContentItem = {
   sort_order?: number;
 };
 
+export type RelatedContentResponse = {
+  service_slugs: string[];
+  services: CmsContentItem[];
+  groups: Partial<Record<string, CmsContentItem[]>>;
+};
+
+export async function getRelatedContent(type: string, slug: string): Promise<RelatedContentResponse> {
+  try {
+    return await cachedPublicRequest<RelatedContentResponse>(
+      `public/related/${encodeURIComponent(type)}/${encodeURIComponent(slug)}`,
+      10_000,
+    );
+  } catch {
+    return { service_slugs: [], services: [], groups: {} };
+  }
+}
+
 export async function getCmsContentList(
   type: string,
   options: { fresh?: boolean } = {},

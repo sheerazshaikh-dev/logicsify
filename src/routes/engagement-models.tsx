@@ -5,6 +5,7 @@ import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
 import { engagementModels } from "@/lib/expansion-data";
 import { getCmsContentList } from "@/lib/logicsify-api";
+import { relatedServiceItems } from "@/lib/related-content";
 
 export const Route = createFileRoute("/engagement-models")({
   loader: async () => ({ cms: await getCmsContentList("engagement_model") }),
@@ -43,6 +44,7 @@ function EngagementModelsPage() {
             cms.map((item, index) => {
               const fallback = engagementModels.find((model) => model.slug === item.slug);
               const c = item.content_json || {};
+              const services = relatedServiceItems(item);
               const communication = [String(c.communication_format || ""), String(c.delivery_cadence || "")]
                 .filter(Boolean)
                 .join(" ") || fallback?.cadence || "Delivery cadence is agreed around the engagement.";
@@ -81,6 +83,22 @@ function EngagementModelsPage() {
                       <Info title="Logicsify responsibilities" body={String(c.logicsify_responsibilities || fallback?.logicsify || "Own the agreed delivery responsibilities, quality, communication, and handover.")} />
                     </div>
                   </div>
+                  {services.length ? (
+                    <div className="mt-8 border-t border-black/10 pt-8">
+                      <p className="eyebrow">Related services</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {services.map((service) => (
+                          <a
+                            key={service.slug}
+                            href={`/services/${service.slug}`}
+                            className="rounded-full bg-cream px-3 py-1.5 text-xs font-semibold capitalize transition hover:bg-ink hover:text-white"
+                          >
+                            {service.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {(advantages.length || tradeoffs.length) ? (
                     <div className="mt-8 grid gap-5 border-t border-black/10 pt-8 md:grid-cols-2">
                       <div>

@@ -11,6 +11,7 @@ import {
 } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
+import { relatedServiceItems } from "@/lib/related-content";
 import {
   Dialog,
   DialogContent,
@@ -165,33 +166,7 @@ function GuidesPage() {
           ) : (
             <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {filtered.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => openGuide(item, "grid")}
-                  className="group overflow-hidden rounded-2xl border border-black/10 bg-white text-left transition hover:-translate-y-1 hover:shadow-lg"
-                >
-                  {item.featured_image ? (
-                    <img
-                      src={item.featured_image}
-                      alt=""
-                      className="aspect-[16/9] w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="grid aspect-[16/9] place-items-center bg-cream">
-                      <FileText className="h-10 w-10 text-ink-soft" />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <p className="eyebrow">{String(item.content_json?.category || "Guide")}</p>
-                    <h3 className="mt-3 text-xl font-semibold text-ink">{item.title}</h3>
-                    <p className="mt-3 text-sm text-ink-soft">{item.excerpt}</p>
-                    <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">
-                      Get the guide <ArrowRight className="h-4 w-4" />
-                    </div>
-                  </div>
-                </button>
+                <GuideCard key={item.id} item={item} onOpen={() => openGuide(item, "grid")} />
               ))}
             </div>
           )}
@@ -201,6 +176,47 @@ function GuidesPage() {
       <GuideDownloadDialog guide={selected} onOpenChange={(open) => !open && setSelected(null)} />
       <TechnicalRoadmapCTA source="guides" />
     </SiteLayout>
+  );
+}
+
+function GuideCard({ item, onOpen }: { item: CmsContentItem; onOpen: () => void }) {
+  const services = relatedServiceItems(item);
+  return (
+    <article className="overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1 hover:shadow-lg">
+      <button type="button" onClick={onOpen} className="group block w-full text-left">
+        {item.featured_image ? (
+          <img src={item.featured_image} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="grid aspect-[16/9] place-items-center bg-cream">
+            <FileText className="h-10 w-10 text-ink-soft" />
+          </div>
+        )}
+        <div className="p-6 pb-4">
+          <p className="eyebrow">{String(item.content_json?.category || "Guide")}</p>
+          <h3 className="mt-3 text-xl font-semibold text-ink">{item.title}</h3>
+          <p className="mt-3 text-sm text-ink-soft">{item.excerpt}</p>
+          <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">
+            Get the guide <ArrowRight className="h-4 w-4" />
+          </div>
+        </div>
+      </button>
+      {services.length ? (
+        <div className="border-t border-black/8 px-6 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">Related services</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {services.map((service) => (
+              <a
+                key={service.slug}
+                href={`/services/${service.slug}`}
+                className="rounded-full bg-cream px-3 py-1.5 text-xs font-semibold capitalize transition hover:bg-ink hover:text-white"
+              >
+                {service.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </article>
   );
 }
 

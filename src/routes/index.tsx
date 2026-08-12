@@ -1120,6 +1120,11 @@ function TestimonialSection() {
             );
           })}
         </div>
+        <div className="mt-10 flex justify-center">
+          <Link to="/testimonials" className="btn-ghost-dark">
+            View All Testimonials <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -6,6 +6,7 @@ import { PublicRouteLoading } from "@/components/public-route-loading";
 import { SiteLayout } from "@/components/site-layout";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
 import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
+import { relatedServiceItems } from "@/lib/related-content";
 
 export const Route = createFileRoute("/testimonials")({
   pendingComponent: PublicRouteLoading,
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/testimonials")({
 
 type TestimonialData = {
   id: number;
+  slug: string;
   clientName: string;
   role: string;
   company: string;
@@ -41,12 +43,14 @@ type TestimonialData = {
   videoUrl: string;
   poster: string;
   image: string;
+  services: Array<{ slug: string; label: string }>;
 };
 
 function testimonialData(item: CmsContentItem): TestimonialData {
   const content = item.content_json || {};
   return {
     id: item.id,
+    slug: item.slug,
     clientName: String(content.client_name || item.title || "Client"),
     role: String(content.role || ""),
     company: String(content.company || ""),
@@ -56,6 +60,7 @@ function testimonialData(item: CmsContentItem): TestimonialData {
     videoUrl: String(content.video_url || ""),
     poster: String(content.video_poster || item.featured_image || ""),
     image: String(content.client_image || item.featured_image || ""),
+    services: relatedServiceItems(item),
   };
 }
 
@@ -177,7 +182,7 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialData }) {
   const hostedVideo = testimonial.videoUrl && !embedUrl;
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[var(--shadow-card)]">
+    <article id={testimonial.slug} className="scroll-mt-28 overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[var(--shadow-card)]">
       {testimonial.type === "video" && testimonial.videoUrl ? (
         <div className="relative aspect-video overflow-hidden bg-ink">
           {embedUrl ? (
@@ -232,6 +237,22 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialData }) {
         {testimonial.type === "video" ? (
           <div className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-brand-red">
             <Play className="h-3.5 w-3.5" /> Video testimonial
+          </div>
+        ) : null}
+        {testimonial.services.length ? (
+          <div className="mt-5 border-t border-black/8 pt-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">Related services</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {testimonial.services.map((service) => (
+                <a
+                  key={service.slug}
+                  href={`/services/${service.slug}`}
+                  className="rounded-full bg-cream px-3 py-1.5 text-xs font-semibold capitalize transition hover:bg-ink hover:text-white"
+                >
+                  {service.label}
+                </a>
+              ))}
+            </div>
           </div>
         ) : null}
       </div>

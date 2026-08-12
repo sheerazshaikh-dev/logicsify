@@ -112,6 +112,7 @@ const emptyItem = (type: ContentItem["content_type"]): Partial<ContentItem> => (
     includes: [],
     audience: "",
     related_service: "",
+    related_services: [],
     problems: [],
     capabilities: [],
     workflow: [],
@@ -254,6 +255,7 @@ export function ContentManagerPage({
         includes: [],
         audience: "",
         related_service: "",
+        related_services: [],
         problems: [],
         capabilities: [],
         workflow: [],
@@ -262,6 +264,12 @@ export function ContentManagerPage({
         related: [],
         use_cases: [],
         ...(item.content_json || {}),
+        related_services: Array.isArray(item.content_json?.related_services)
+          ? item.content_json?.related_services
+          : item.content_json?.related_service
+            ? [String(item.content_json.related_service)]
+            : [],
+        related_service: "",
       },
       seo_json: {
         title: "",
@@ -1204,6 +1212,22 @@ function ContentEditor({
                     </div>
                   </div>
                   <div>
+                    <FieldLabel>Related service slugs</FieldLabel>
+                    <textarea
+                      rows={3}
+                      value={(Array.isArray(contentJson.related_services) ? contentJson.related_services : []).map(String).join("\n")}
+                      onChange={(event) =>
+                        updateContentJson(
+                          "related_services",
+                          event.target.value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean),
+                        )
+                      }
+                      className={adminTextareaClass}
+                      placeholder="custom-websites-portals-cms\nai-automation-voice-agents"
+                    />
+                    <p className="mt-1 text-[11px] text-slate-400">One service slug per line. These relationships power automatic two-way related content.</p>
+                  </div>
+                  <div>
                     <FieldLabel>Client image / company logo</FieldLabel>
                     <div className="flex gap-2">
                       <input
@@ -1281,6 +1305,21 @@ function ContentEditor({
                         onChange={(event) => updateContentJson("category", event.target.value)}
                         className={adminInputClass}
                         placeholder="AI Automation, CRM, Website Planning…"
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Related service slugs</FieldLabel>
+                      <textarea
+                        rows={3}
+                        value={(Array.isArray(contentJson.related_services) ? contentJson.related_services : []).map(String).join("\n")}
+                        onChange={(event) =>
+                          updateContentJson(
+                            "related_services",
+                            event.target.value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean),
+                          )
+                        }
+                        className={adminTextareaClass}
+                        placeholder="custom-websites-portals-cms\ncrm-revenue-operations"
                       />
                     </div>
                     <div>
@@ -2028,7 +2067,7 @@ function StructuredContentFields({
             </select>
           </div>
           {textField("Updated date", "updated_date", "YYYY-MM-DD")}
-          {textField("Related service slug", "related_service")}
+          {listField("Related service slugs", "related_services", "custom-websites-portals-cms\nai-automation-voice-agents")}
           {textField("Related case study slug", "related_case_study")}
           {textField("Related resource slugs", "related_resources", "slug-one, slug-two")}
           <SourceLinksField content={content} updateMany={updateMany} />
@@ -2127,6 +2166,11 @@ function StructuredContentFields({
           {textField("Communication format", "communication_format")}
           {textField("Optional starting price", "starting_price", "Leave empty when not approved")}
         </div>
+        {listField(
+          "Related service slugs",
+          "related_services",
+          "custom-websites-portals-cms\nai-automation-voice-agents",
+        )}
         {textField(
           "How work is scoped",
           "scope",
@@ -2162,6 +2206,11 @@ function StructuredContentFields({
           {mediaField("Platform logo", "logo")}
           {textField("Official platform URL", "platform_url", "https://…")}
         </div>
+        {listField(
+          "Related service slugs",
+          "related_services",
+          "crm-revenue-operations\nai-automation-voice-agents",
+        )}
         <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           <input
             type="checkbox"

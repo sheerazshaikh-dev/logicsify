@@ -3,9 +3,10 @@ import { SiteLayout } from "@/components/site-layout";
 import { ServicePageTemplate, type ServicePageData } from "@/components/service-page-template";
 import { serviceData } from "@/lib/service-data";
 import { allServices, getParentCoreService, legacyServiceRedirects } from "@/lib/site-data";
-import { getCmsContentItem } from "@/lib/logicsify-api";
+import { getCmsContentItem, getRelatedContent } from "@/lib/logicsify-api";
 import { asRecord, asRecordArray } from "@/lib/content-utils";
 import { PublicRouteLoading } from "@/components/public-route-loading";
+import { RelatedContentSections } from "@/components/related-content-sections";
 
 export const Route = createFileRoute("/services/$slug")({
   component: ServicePage,
@@ -15,7 +16,10 @@ export const Route = createFileRoute("/services/$slug")({
   loader: async ({ params }) => {
     const legacyDestination = legacyServiceRedirects[params.slug];
     if (legacyDestination) throw redirect({ href: legacyDestination, statusCode: 301 });
-    const cms = await getCmsContentItem("service", params.slug);
+    const [cms, relatedContent] = await Promise.all([
+      getCmsContentItem("service", params.slug),
+      getRelatedContent("service", params.slug),
+    ]);
     const staticService = allServices.find((item) => item.slug === params.slug);
     const fallback =
       serviceData[params.slug] ||
@@ -23,7 +27,7 @@ export const Route = createFileRoute("/services/$slug")({
         ? genericServiceData(staticService.slug, staticService.name, staticService.short)
         : undefined);
     if (!cms && !fallback) throw notFound();
-    return { data: mergeServiceData(params.slug, cms, fallback), cms };
+    return { data: mergeServiceData(params.slug, cms, fallback), cms, relatedContent };
   },
   head: ({ loaderData, params }) => {
     const data = loaderData?.data;
@@ -251,10 +255,11 @@ function mergeServiceData(
 }
 
 function ServicePage() {
-  const { data } = Route.useLoaderData();
+  const { data, relatedContent } = Route.useLoaderData();
   return (
     <SiteLayout>
       <ServicePageTemplate data={data} />
+      <RelatedContentSections data={relatedContent} showServices={false} title="Related work, insights, proof and resources" />
     </SiteLayout>
   );
 }

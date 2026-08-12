@@ -1,24 +1,25 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowUpRight, BriefcaseBusiness, ExternalLink } from "lucide-react";
+import { ArrowLeft, BriefcaseBusiness, ExternalLink } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { CTASection } from "@/components/cta-section";
 import { NavigableLightbox } from "@/components/navigable-lightbox";
-import { getCmsContentItem, getCmsContentList, optimizedPublicImageUrl } from "@/lib/logicsify-api";
+import { RelatedContentSections } from "@/components/related-content-sections";
+import { getCmsContentItem, getCmsContentList, getRelatedContent, optimizedPublicImageUrl } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/portfolio/$slug")({
   loader: async ({ params }) => {
-    const [item, all, serviceItems] = await Promise.all([
+    const [item, serviceItems, relatedContent] = await Promise.all([
       getCmsContentItem("portfolio", params.slug),
-      getCmsContentList("portfolio"),
       getCmsContentList("service"),
+      getRelatedContent("portfolio", params.slug),
     ]);
     if (!item) throw notFound();
     return {
       item,
       serviceItems,
-      related: all.filter((candidate) => candidate.slug !== item.slug).slice(0, 3),
+      relatedContent,
     };
   },
   head: ({ loaderData, params }) => {
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/portfolio/$slug")({
 });
 
 function PortfolioDetail() {
-  const { item, related, serviceItems } = Route.useLoaderData();
+  const { item, relatedContent, serviceItems } = Route.useLoaderData();
   const content = item.content_json || {};
   const list = (key: string) => normalizeList(content[key]);
   const gallery = list("gallery");
@@ -150,7 +151,7 @@ function PortfolioDetail() {
         </div>
       </section>
 
-      {related.length ? <section className="bg-cream py-16"><div className="container-page"><div className="flex items-end justify-between gap-4"><div><p className="eyebrow">More portfolio</p><h2 className="mt-3 fluid-h3">Other selected projects</h2></div><Link to="/portfolio" className="btn-ghost-dark">View all <ArrowUpRight className="h-4 w-4" /></Link></div><div className="mt-8 grid gap-5 md:grid-cols-3">{related.map((project) => <Link key={project.id} to="/portfolio/$slug" params={{ slug: project.slug }} className="overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1">{project.featured_image ? <img src={optimizedPublicImageUrl(project.featured_image, 720, project.updated_at || project.published_at || String(project.id))} alt={project.title} className="aspect-[16/10] w-full object-cover" loading="lazy" decoding="async" /> : null}<div className="p-5"><h3 className="font-semibold">{project.title}</h3><p className="mt-2 line-clamp-3 text-sm text-ink-soft">{project.excerpt}</p></div></Link>)}</div></div></section> : null}
+      <RelatedContentSections data={relatedContent} title="Related services, case studies, insights and proof" />
 
       <div className="container-page py-8"><Link to="/portfolio" className="inline-flex items-center gap-2 text-sm font-semibold"><ArrowLeft className="h-4 w-4" /> Back to portfolio</Link></div>
       <CTASection />
