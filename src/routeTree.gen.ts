@@ -34,6 +34,7 @@ import { Route as AdminResourcesRouteImport } from './routes/admin/resources'
 import { Route as AdminSecurityRouteImport } from './routes/admin/security'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminSiteHealthRouteImport } from './routes/admin/site-health'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTeamConnectRouteImport } from './routes/admin/team-connect'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
@@ -64,6 +65,7 @@ import { Route as ResourcesIndexRouteImport } from './routes/resources/index'
 import { Route as ResourcesSlugRouteImport } from './routes/resources/$slug'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as TechnicalRoadmapRouteImport } from './routes/technical-roadmap'
 import { Route as TechnologyRouteImport } from './routes/technology'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -242,6 +244,12 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const AdminSiteHealthRoute = AdminSiteHealthRouteImport.update({
+  id: '/admin/site-health',
+  path: '/admin/site-health',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -425,6 +433,12 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const TechnicalRoadmapRoute = TechnicalRoadmapRouteImport.update({
   id: '/technical-roadmap',
   path: '/technical-roadmap',
@@ -491,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/site-health': typeof AdminSiteHealthRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/team-connect': typeof AdminTeamConnectRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
@@ -521,6 +536,7 @@ export interface FileRoutesByFullPath {
   '/resources/$slug': typeof ResourcesSlugRoute
   '/services/': typeof ServicesIndexRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/team': typeof TeamRoute
   '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
@@ -559,6 +575,7 @@ export interface FileRoutesByTo {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/site-health': typeof AdminSiteHealthRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/team-connect': typeof AdminTeamConnectRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
@@ -589,6 +606,7 @@ export interface FileRoutesByTo {
   '/resources/$slug': typeof ResourcesSlugRoute
   '/services': typeof ServicesIndexRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/team': typeof TeamRoute
   '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
@@ -628,6 +646,7 @@ export interface FileRoutesById {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/site-health': typeof AdminSiteHealthRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/team-connect': typeof AdminTeamConnectRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
@@ -658,6 +677,7 @@ export interface FileRoutesById {
   '/resources/$slug': typeof ResourcesSlugRoute
   '/services/': typeof ServicesIndexRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/team': typeof TeamRoute
   '/technical-roadmap': typeof TechnicalRoadmapRoute
   '/technology': typeof TechnologyRoute
   '/terms': typeof TermsRoute
@@ -698,6 +718,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site-health'
     | '/admin/team'
     | '/admin/team-connect'
     | '/admin/testimonials'
@@ -728,6 +749,7 @@ export interface FileRouteTypes {
     | '/resources/$slug'
     | '/services/'
     | '/services/$slug'
+    | '/team'
     | '/technical-roadmap'
     | '/technology'
     | '/terms'
@@ -765,6 +787,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site-health'
     | '/admin/team'
     | '/admin/team-connect'
     | '/admin/testimonials'
@@ -795,6 +818,7 @@ export interface FileRouteTypes {
     | '/resources/$slug'
     | '/services'
     | '/services/$slug'
+    | '/team'
     | '/technical-roadmap'
     | '/technology'
     | '/terms'
@@ -832,6 +856,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/services'
     | '/admin/settings'
+    | '/admin/site-health'
     | '/admin/team'
     | '/admin/team-connect'
     | '/admin/testimonials'
@@ -862,6 +887,7 @@ export interface FileRouteTypes {
     | '/resources/$slug'
     | '/services/'
     | '/services/$slug'
+    | '/team'
     | '/technical-roadmap'
     | '/technology'
     | '/terms'
@@ -901,6 +927,7 @@ export interface RootRouteChildren {
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSiteHealthRoute: typeof AdminSiteHealthRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminTeamConnectRoute: typeof AdminTeamConnectRoute
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
@@ -931,6 +958,7 @@ export interface RootRouteChildren {
   ResourcesSlugRoute: typeof ResourcesSlugRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
+  TeamRoute: typeof TeamRoute
   TechnicalRoadmapRoute: typeof TechnicalRoadmapRoute
   TechnologyRoute: typeof TechnologyRoute
   TermsRoute: typeof TermsRoute
@@ -1144,6 +1172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/site-health': {
+      id: '/admin/site-health'
+      path: '/admin/site-health'
+      fullPath: '/admin/site-health'
+      preLoaderRoute: typeof AdminSiteHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/team': {
       id: '/admin/team'
       path: '/admin/team'
@@ -1354,6 +1389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/technical-roadmap': {
       id: '/technical-roadmap'
       path: '/technical-roadmap'
@@ -1429,6 +1471,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSecurityRoute,
   AdminServicesRoute,
   AdminSettingsRoute,
+  AdminSiteHealthRoute,
   AdminTeamRoute,
   AdminTeamConnectRoute,
   AdminTestimonialsRoute,
@@ -1459,6 +1502,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResourcesSlugRoute,
   ServicesIndexRoute,
   ServicesSlugRoute,
+  TeamRoute,
   TechnicalRoadmapRoute,
   TechnologyRoute,
   TermsRoute,

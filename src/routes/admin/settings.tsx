@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { adminHref } from "@/lib/admin-path";
 import {
+  Bot,
   CalendarDays,
   ChevronDown,
   ChevronUp,
@@ -12,10 +13,12 @@ import {
   Handshake,
   Image as ImageIcon,
   Plus,
+  KeyRound,
   Loader2,
   Mail,
   Phone,
   Save,
+  RefreshCw,
   SearchCheck,
   Send,
   ShieldAlert,
@@ -40,11 +43,15 @@ import {
   adminTextareaClass,
 } from "@/components/admin/admin-ui";
 import {
+  getChatGptActionsStatus,
   getCurrentAdmin,
   getSettings,
+  revokeChatGptActionsKey,
+  rotateChatGptActionsKey,
   saveSettings,
   testSmtp,
   uploadMedia,
+  type ChatGptActionsStatus,
   type SettingsResponse,
 } from "@/lib/admin-api";
 import type { CodeSnippet, SocialProfile } from "@/lib/logicsify-api";
@@ -1252,6 +1259,162 @@ function EmailSettings({ values, update }: SettingsProps) {
   );
 }
 
+
+function ChatGptActionsSettings({ canManage }: { canManage: boolean }) {
+  const [status, setStatus] = useState<ChatGptActionsStatus | null>(null);
+  const [visibleKey, setVisibleKey] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    getChatGptActionsStatus()
+      .then(setStatus)
+      .catch((error) =>
+        toast.error(error instanceof Error ? error.message : "Could not load ChatGPT Actions settings."),
+      );
+  }, []);
+
+  async function rotateKey() {
+    if (status?.enabled && !window.confirm("Rotate the ChatGPT Actions API key? The existing key will stop working immediately.")) return;
+    setBusy(true);
+    try {
+      const next = await rotateChatGptActionsKey();
+      setStatus(next);
+      setVisibleKey(next.api_key || "");
+      toast.success(status?.enabled ? "ChatGPT Actions key rotated." : "ChatGPT Actions enabled.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not generate the API key.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revokeKey() {
+    if (!window.confirm("Revoke ChatGPT access to the Logicsify CMS? The connected GPT will stop working until you generate a new key.")) return;
+    setBusy(true);
+    try {
+      const next = await revokeChatGptActionsKey();
+      setStatus(next);
+      setVisibleKey("");
+      toast.success("ChatGPT Actions access revoked.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not revoke ChatGPT Actions access.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copy(value: string, label: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied.`);
+    } catch {
+      toast.error(`Could not copy ${label.toLowerCase()}.`);
+    }
+  }
+
+  return (
+    <SettingsSection
+      title="ChatGPT CMS Actions"
+      description="Connect a Custom GPT securely to Logicsify so it can inspect your CMS structure, read existing content, export it, and import new items as drafts."
+      icon={Bot}
+      actions={
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status?.enabled ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}`}>
+          {status?.enabled ? "Connected API ready" : "Not configured"}
+        </span>
+      }
+    >
+      {!status ? (
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading ChatGPT Actions settings…
+        </div>
+      ) : (
+        <div className="space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">OpenAPI schema</p>
+              <p className="mt-2 break-all text-sm font-medium text-ink">{status.schema_url}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <AdminButton type="button" variant="secondary" onClick={() => void copy(status.schema_url, "Schema URL")}>
+                  <Copy className="h-4 w-4" /> Copy schema URL
+                </AdminButton>
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => window.open(status.schema_url, "_blank", "noopener,noreferrer")}
+                >
+                  <ExternalLink className="h-4 w-4" /> Open schema
+                </AdminButton>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">API access</p>
+              <p className="mt-2 text-sm font-semibold text-ink">
+                {status.enabled ? `Active key ending in ${status.key_last_four || "••••"}` : "No active API key"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                {status.created_at ? `Generated ${new Date(status.created_at).toLocaleString()}.` : "Generate a key, then add it to the GPT Action authentication settings as a Bearer API key."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <AdminButton type="button" disabled={!canManage || busy} onClick={() => void rotateKey()}>
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : status.enabled ? <RefreshCw className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}
+                  {status.enabled ? "Rotate API key" : "Generate API key"}
+                </AdminButton>
+                {status.enabled ? (
+                  <AdminButton type="button" variant="danger" disabled={!canManage || busy} onClick={() => void revokeKey()}>
+                    Revoke access
+                  </AdminButton>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {visibleKey ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p className="font-semibold text-amber-950">Copy this API key now — it is shown only once.</p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <code className="min-w-0 flex-1 break-all rounded-xl bg-white px-4 py-3 text-sm text-ink shadow-sm">{visibleKey}</code>
+                <AdminButton type="button" onClick={() => void copy(visibleKey, "API key")}>
+                  <Copy className="h-4 w-4" /> Copy key
+                </AdminButton>
+              </div>
+            </div>
+          ) : null}
+
+          <div>
+            <p className="text-sm font-semibold text-ink">Supported CMS post types</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {status.supported_content_types.map((item) => (
+                <span key={item.value} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold text-blue-950">Recommended Custom GPT instructions</p>
+                <p className="mt-1 text-xs leading-5 text-blue-800">These tell ChatGPT when to read your CMS and when it is allowed to import content.</p>
+              </div>
+              <AdminButton type="button" variant="secondary" onClick={() => void copy(status.recommended_instructions, "GPT instructions")}>
+                <Copy className="h-4 w-4" /> Copy instructions
+              </AdminButton>
+            </div>
+            <pre className="mt-4 max-h-56 overflow-auto whitespace-pre-wrap rounded-xl bg-white p-4 text-xs leading-5 text-slate-600">{status.recommended_instructions}</pre>
+          </div>
+
+          {!canManage ? (
+            <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              Only a Super Admin can generate, rotate, or revoke the ChatGPT Actions API key.
+            </p>
+          ) : null}
+        </div>
+      )}
+    </SettingsSection>
+  );
+}
+
 function IntegrationSettings({
   values,
   update,
@@ -1325,6 +1488,8 @@ function IntegrationSettings({
 
   return (
     <div className="space-y-6">
+      <ChatGptActionsSettings canManage={canManageCustomCode} />
+
       <SettingsSection
         title="Tracking master switch"
         description="Disable built-in analytics and advertising scripts without deleting saved IDs. Custom snippets have their own enable switches."

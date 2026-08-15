@@ -9,6 +9,7 @@ import {
 } from "@/lib/connect-profile-links";
 import { fieldVisible } from "@/lib/team-connect";
 import { runtimeThemeColor } from "@/lib/theme-runtime";
+import { buildOfflineContactVCard } from "@/lib/offline-contact-qr";
 
 export type ConnectProfileExportFormat = "jpg" | "pdf";
 
@@ -308,10 +309,10 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   const [coverResource, avatarResource, qrResource] = await Promise.all([
     loadImage(exportMediaUrl(coverSource)),
     loadImage(exportMediaUrl(avatarSource)),
-    QRCode.toDataURL(profileUrl, {
-      width: 420,
-      margin: 2,
-      errorCorrectionLevel: "H",
+    QRCode.toDataURL(buildOfflineContactVCard(profile, profileUrl), {
+      width: 900,
+      margin: 3,
+      errorCorrectionLevel: "M",
       color: { dark: INK, light: "#FFFFFF" },
     }).then(loadImage),
   ]);
@@ -474,7 +475,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   visibleLinks.forEach((link, index) => {
     const column = index % 2;
     const row = Math.floor(index / 2);
-    drawSocialLink(context, link, 120 + column * 340, socialStart + row * 82, 312);
+    drawSocialLink(context, link, 120 + column * 308, socialStart + row * 82, 270);
   });
   if (socialLinks.length > visibleLinks.length) {
     context.fillStyle = MUTED;
@@ -492,17 +493,17 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   }
 
   if (qr) {
-    roundedRect(context, 838, socialPanelY + 20, 286, 310, 26);
+    roundedRect(context, 776, socialPanelY + 12, 348, 326, 26);
     context.fillStyle = BACKGROUND;
     context.fill();
-    context.drawImage(qr, 870, socialPanelY + 43, 222, 222);
+    context.drawImage(qr, 814, socialPanelY + 22, 272, 272);
     context.fillStyle = INK;
     context.textAlign = "center";
-    context.font = "800 17px Sora, Inter, Arial, sans-serif";
-    context.fillText("SCAN TO CONNECT", 981, socialPanelY + 286);
+    context.font = "800 14px Sora, Inter, Arial, sans-serif";
+    context.fillText("OFFLINE CONTACT QR", 950, socialPanelY + 316);
     context.fillStyle = MUTED;
-    context.font = "500 14px Inter, Arial, sans-serif";
-    context.fillText("Open my live profile", 981, socialPanelY + 312);
+    context.font = "500 12px Inter, Arial, sans-serif";
+    context.fillText("Save contact + Connect link", 950, socialPanelY + 336);
     context.textAlign = "left";
   }
 

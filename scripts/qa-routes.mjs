@@ -26,7 +26,7 @@ const workRoutes = slugsBetween("export const caseStudies = [", "];" ).map((slug
 const insightRoutes = slugsBetween("export const insights = [", "];" ).map((slug) => `/insights/${slug}`);
 const staticRoutes = [
   "/", "/services", "/work", "/portfolio", "/company-profile", "/automation-lab", "/integrations", "/resources", "/project-estimator",
-  "/comparisons", "/engagement-models", "/insights", "/about", "/process", "/technology",
+  "/comparisons", "/engagement-models", "/insights", "/about", "/team", "/process", "/technology",
   "/careers", "/contact", "/book-a-call", "/technical-roadmap", "/privacy", "/terms",
   "/admin/login", "/admin/dashboard", "/admin/pages", "/admin/services", "/admin/case-studies", "/admin/portfolio",
   "/admin/insights", "/admin/resources", "/admin/comparisons", "/admin/engagement-models",

@@ -5,18 +5,21 @@ import {
   ArrowUpRight,
   BriefcaseBusiness,
   CheckCircle2,
+  Download,
   Cpu,
   Globe2,
   Layers3,
+  Loader2,
   Mail,
   MapPin,
   Network,
   Phone,
   ShieldCheck,
   Sparkles,
+  Users,
   Workflow,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import {
   getCmsContentList,
@@ -36,6 +39,7 @@ import {
 } from "@/lib/contact-directory";
 import { DEFAULT_BRAND_ASSETS, optimizedBrandAsset } from "@/lib/brand-assets";
 import { cn } from "@/lib/utils";
+import { downloadCompanyProfileHtml } from "@/lib/company-profile-export";
 
 const text = (value: unknown) =>
   typeof value === "string" ? value : value == null ? "" : String(value);
@@ -259,7 +263,10 @@ function ProfileSection({
         </div>
       ) : null}
 
-      <div className="relative mx-auto grid h-auto min-h-0 w-full max-w-[96rem] grid-rows-[auto_auto_auto] px-5 py-5 sm:px-8 sm:py-6 md:h-full md:grid-rows-[auto_1fr_auto] lg:px-12">
+      <div
+        data-profile-slide-frame="true"
+        className="relative mx-auto grid h-auto min-h-0 w-full max-w-[96rem] grid-rows-[auto_auto_auto] px-5 py-5 sm:px-8 sm:py-6 md:h-full md:grid-rows-[auto_1fr_auto] lg:px-12"
+      >
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -281,7 +288,10 @@ function ProfileSection({
           </div>
         </header>
 
-        <div className="py-7 sm:py-8 md:flex md:min-h-0 md:items-center md:py-7 lg:py-8">
+        <div
+          data-profile-slide-content="true"
+          className="py-7 sm:py-8 md:flex md:min-h-0 md:items-center md:py-7 lg:py-8"
+        >
           {children}
         </div>
 
@@ -472,6 +482,84 @@ function TeamMemberSlide({
   );
 }
 
+function TeamOverviewSlide({
+  team,
+  id,
+  number,
+  total,
+  settings,
+  backgroundImage,
+}: {
+  team: PublicTeamMember[];
+  id: string;
+  number: number;
+  total: number;
+  settings: PublicSiteSettings;
+  backgroundImage?: string;
+}) {
+  return (
+    <ProfileSection
+      id={id}
+      number={number}
+      total={total}
+      chapter="Our team"
+      backgroundImage={backgroundImage}
+      settings={settings}
+    >
+      <div className="w-full">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <SectionTitle
+            eyebrow="Our team"
+            title="The people behind connected delivery."
+            lead="Team members appear in the same order maintained in Admin → Team, with individual professional profiles following this overview."
+            compact
+          />
+          <Link to="/team" className="btn-primary shrink-0">
+            Meet the team <ArrowRight className="size-4" />
+          </Link>
+        </div>
+        <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {team.slice(0, 8).map((member) => (
+            <a
+              key={member.id}
+              href={member.connect_enabled ? `/connect/${member.slug}` : "/team"}
+              className="group flex items-center gap-3 rounded-2xl border border-black/10 bg-white p-3 shadow-sm transition hover:-translate-y-0.5"
+            >
+              {member.avatar_url ? (
+                <img
+                  src={member.avatar_url}
+                  alt={member.display_name}
+                  className="size-16 shrink-0 rounded-xl object-cover object-top"
+                />
+              ) : (
+                <span className="brand-radial-glow grid size-16 shrink-0 place-items-center rounded-xl bg-ink text-lg font-extrabold text-white">
+                  {member.display_name
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .map((part) => part[0])
+                    .join("")
+                    .slice(0, 2)}
+                </span>
+              )}
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-extrabold text-ink">{member.display_name}</span>
+                <span className="mt-1 line-clamp-2 block text-xs leading-5 text-ink-soft">
+                  {member.headline || "Logicsify team"}
+                </span>
+              </span>
+            </a>
+          ))}
+        </div>
+        {team.length > 8 ? (
+          <p className="mt-4 text-xs font-semibold text-ink-soft">
+            +{team.length - 8} more team member{team.length - 8 === 1 ? "" : "s"} included in the following profile slides.
+          </p>
+        ) : null}
+      </div>
+    </ProfileSection>
+  );
+}
+
 function CompanyProfile() {
   const { services, portfolio, caseStudies, team, settings } = Route.useLoaderData();
   const serviceMap = new Map(services.map((service) => [service.slug, service]));
@@ -504,6 +592,7 @@ function CompanyProfile() {
     "profile-delivery",
     ...(portfolio.length ? ["profile-portfolio"] : []),
     ...(caseStudies.length ? ["profile-case-studies"] : []),
+    ...(team.length ? ["profile-team"] : []),
     ...team.map((member) => `profile-team-${slugify(member.display_name)}`),
     "profile-contact",
   ];
@@ -511,10 +600,36 @@ function CompanyProfile() {
   const containerRef = useMandatorySlideNavigation(sectionIds);
   const sectionNumber = (id: string) => Math.max(1, sectionIds.indexOf(id) + 1);
   const total = sectionIds.length;
+  const [exportingProfile, setExportingProfile] = useState(false);
+
+  async function downloadProfile() {
+    if (!containerRef.current || exportingProfile) return;
+    setExportingProfile(true);
+    try {
+      await downloadCompanyProfileHtml(containerRef.current, settings.site_name || "Logicsify");
+    } catch (error) {
+      console.error("Company profile HTML export failed", error);
+      window.alert(error instanceof Error ? error.message : "The company profile could not be downloaded.");
+    } finally {
+      setExportingProfile(false);
+    }
+  }
 
   return (
-    <div
-      ref={containerRef}
+    <>
+      <button
+        type="button"
+        data-profile-export-ignore="true"
+        onClick={() => void downloadProfile()}
+        disabled={exportingProfile}
+        className="fixed bottom-5 right-5 z-[90] inline-flex items-center gap-2 rounded-full border border-white/15 bg-ink px-5 py-3 text-sm font-bold text-white shadow-2xl transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70"
+        title="Download the exact company-profile design as fixed 1920 × 1080 HTML slides"
+      >
+        {exportingProfile ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+        {exportingProfile ? "Preparing profile…" : "Download 1920×1080 HTML"}
+      </button>
+      <div
+        ref={containerRef}
       className="profile-scroll h-auto overflow-visible bg-background md:h-[100svh] md:overflow-y-auto"
       tabIndex={0}
     >
@@ -744,6 +859,17 @@ function CompanyProfile() {
         </ProfileSection>
       ) : null}
 
+      {team.length ? (
+        <TeamOverviewSlide
+          team={team}
+          id="profile-team"
+          number={sectionNumber("profile-team")}
+          total={total}
+          settings={settings}
+          backgroundImage={backgroundFor(13)}
+        />
+      ) : null}
+
       {team.map((member, index) => {
         const id = `profile-team-${slugify(member.display_name)}`;
         return <TeamMemberSlide key={id} member={member} id={id} number={sectionNumber(id)} total={total} settings={settings} backgroundImage={backgroundFor(13 + index)} />;
@@ -767,6 +893,7 @@ function CompanyProfile() {
           </div>
         </div>
       </ProfileSection>
-    </div>
+      </div>
+    </>
   );
 }

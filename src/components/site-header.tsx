@@ -602,14 +602,21 @@ function mergeFallbackNavigation(items: NavItem[]): NavItem[] {
   const visibleItems = items.filter((item) => navKey(item) !== "industries");
   const byKey = new Map(visibleItems.map((item) => [navKey(item), item]));
   return fallbackNavigation.map((fallback) => {
-    const existing = byKey.get(navKey(fallback));
+    const existing =
+      byKey.get(navKey(fallback)) ||
+      visibleItems.find((item) => item.to === fallback.to);
     if (!existing) return fallback;
+    const requiredChildren = fallback.children.filter(
+      (required) => !existing.children.some((child) => child.to === required.to),
+    );
     return {
       ...existing,
       label: fallback.label,
       to: fallback.to,
-      menuStyle: fallback.children.length ? "mega" : "link",
-      children: existing.children.length ? existing.children : fallback.children,
+      menuStyle: fallback.menuStyle,
+      children: existing.children.length
+        ? [...existing.children, ...requiredChildren]
+        : fallback.children,
       comingSoon: existing.comingSoon,
       hideDesktop: existing.hideDesktop,
       hideMobile: existing.hideMobile,
@@ -807,9 +814,27 @@ function buildFallbackNavigation(): NavItem[] {
     },
   );
 
+  const aboutId = nextId--;
+  const about = {
+    ...fallbackLink(aboutId, "Who We Are", "/about"),
+    menuStyle: "dropdown" as const,
+    children: [
+      {
+        ...fallbackLink(nextId--, "About Logicsify", "/about"),
+        parentId: aboutId,
+        description: "Who we are, how we work, and what guides our delivery.",
+      },
+      {
+        ...fallbackLink(nextId--, "Our Team", "/team"),
+        parentId: aboutId,
+        description: "Meet the people behind Logicsify's technology and growth work.",
+      },
+    ],
+  };
+
   return [
     fallbackLink(nextId--, "Home", "/"),
-    fallbackLink(nextId--, "Who We Are", "/about"),
+    about,
     services,
     resources,
     fallbackLink(nextId--, "Testimonials", "/testimonials"),

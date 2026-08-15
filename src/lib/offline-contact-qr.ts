@@ -41,7 +41,12 @@ function whatsappNumber(profile: ConnectProfile) {
   return "";
 }
 
-export function buildOfflineContactVCard(profile: ConnectProfile) {
+function defaultConnectProfileUrl(profile: ConnectProfile) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://logicsify.com";
+  return `${origin.replace(/\/$/, "")}/connect/${encodeURIComponent(profile.slug)}`;
+}
+
+export function buildOfflineContactVCard(profile: ConnectProfile, connectProfileUrl?: string) {
   const name = profile.display_name.trim();
   const { given, family } = splitName(name);
   const company = profile.company?.trim() || "Logicsify";
@@ -49,6 +54,7 @@ export function buildOfflineContactVCard(profile: ConnectProfile) {
   const linkedin = normalizeUrl(matchingLink(profile, "linkedin"));
   const whatsapp = whatsappNumber(profile);
   const address = String(profile.address || "").trim().replace(/\r?\n/g, ", ");
+  const connectUrl = normalizeUrl(connectProfileUrl || defaultConnectProfileUrl(profile));
 
   const lines = [
     "BEGIN:VCARD",
@@ -70,6 +76,10 @@ export function buildOfflineContactVCard(profile: ConnectProfile) {
   if (linkedin) {
     lines.push(`item2.URL:${linkedin}`);
     lines.push("item2.X-ABLabel:LinkedIn");
+  }
+  if (connectUrl) {
+    lines.push(`item3.URL:${connectUrl}`);
+    lines.push("item3.X-ABLabel:Logicsify Connect Profile");
   }
 
   lines.push("END:VCARD");

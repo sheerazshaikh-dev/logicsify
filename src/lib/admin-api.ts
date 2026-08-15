@@ -70,11 +70,12 @@ async function adminRequest<T>(
   path: string,
   init: RequestInit = {},
   includeMeta = false,
+  timeoutMs = 20_000,
 ): Promise<T | { data: T; meta: ApiMeta }> {
   const token = getAdminToken();
   const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const abortFromCaller = () => controller.abort();
   init.signal?.addEventListener("abort", abortFromCaller, { once: true });
 
@@ -117,6 +118,73 @@ async function adminRequest<T>(
 
   const data = normalizePublicAssetUrls(payload.data);
   return includeMeta ? { data, meta: payload.meta || {} } : data;
+}
+
+export type SiteHealthIssue = {
+  severity: "critical" | "warning" | "info";
+  type: string;
+  message: string;
+  source?: string | null;
+  target?: string | null;
+  field?: string | null;
+  snippet?: string | null;
+  http_status?: number | null;
+  final_url?: string | null;
+  content_type?: string | null;
+  content_id?: number | null;
+  detail?: string | null;
+};
+
+export type SiteHealthSummary = {
+  status: "healthy" | "warnings" | "issues";
+  critical: number;
+  warnings: number;
+  info: number;
+  total_issues: number;
+  pages_checked: number;
+  sitemap_pages_checked: number;
+  internal_links_checked: number;
+  images_checked: number;
+  content_items_scanned: number;
+  menu_items_scanned: number;
+  team_members_scanned: number;
+  public_settings_scanned: number;
+};
+
+export type SiteHealthReport = {
+  version: number;
+  scan_id: string;
+  origin: string;
+  sitemap_url: string;
+  started_at: string;
+  completed_at: string;
+  duration_seconds: number;
+  summary: SiteHealthSummary;
+  issues: SiteHealthIssue[];
+};
+
+export type SiteHealthReportResponse = {
+  report: SiteHealthReport | null;
+  history: Array<{
+    scan_id: string;
+    started_at?: string | null;
+    completed_at?: string | null;
+    summary: Partial<SiteHealthSummary>;
+  }>;
+  cron: { recommended_schedule: string; script: string; example: string };
+};
+
+export function getSiteHealthReport() {
+  return adminRequest<SiteHealthReportResponse>("site-health/report") as Promise<SiteHealthReportResponse>;
+}
+
+export function runSiteHealthScan() {
+  return adminRequest<SiteHealthReport>(
+    "site-health/run",
+    { method: "POST", body: JSON.stringify({}) },
+    false,
+    240_000,
+  ) as Promise<SiteHealthReport>;
 }
 
 export type DashboardResponse = {
@@ -367,7 +435,7 @@ export function listConnectProfiles(
     status: params.status || "all",
     search: params.search || "",
     page: String(params.page || 1),
-    per_page: "50",
+    per_page: "100",
   });
   return adminRequest<ConnectProfile[]>(`connect-profiles?${search}`, {}, true) as Promise<{
     data: ConnectProfile[];
@@ -390,6 +458,16 @@ export function deleteConnectProfile(id: number) {
   return adminRequest<{ deleted: boolean }>(`connect-profiles/${id}`, {
     method: "DELETE",
   }) as Promise<{ deleted: boolean }>;
+}
+
+export function reorderConnectProfiles(ids: number[]) {
+  return adminRequest<{ saved: boolean; items: Array<{ id: number; sort_order: number }> }>(
+    "connect-profiles/reorder",
+    {
+      method: "PUT",
+      body: JSON.stringify({ ids }),
+    },
+  ) as Promise<{ saved: boolean; items: Array<{ id: number; sort_order: number }> }>;
 }
 
 export type ConnectProfileSettings = { global_cover_url: string };
@@ -773,6 +851,84 @@ export function testSmtp() {
   return adminRequest<{ sent: boolean; message: string }>("settings/email/test", {
     method: "POST",
   }) as Promise<{ sent: boolean; message: string }>;
+}
+
+export type ChatGptActionsContentType = { value: string; label: string };
+
+export type ChatGptActionsStatus = {
+  enabled: boolean;
+  key_last_four: string;
+  created_at: string | null;
+  base_url: string;
+  schema_url: string;
+  supported_content_types: ChatGptActionsContentType[];
+  recommended_instructions: string;
+  api_key?: string;
+  api_key_visible_once?: boolean;
+};
+
+function chatGptActionsAdminUrl() {
+  const api = new URL(API_BASE);
+  return `${api.origin}/chatgpt-actions/admin.php`;
+}
+
+async function chatGptActionsAdminRequest(
+  init: RequestInit = {},
+): Promise<ChatGptActionsStatus> {
+  const token = getAdminToken();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const response = await fetch(chatGptActionsAdminUrl(), {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init.headers || {}),
+      },
+    });
+    let payload: ApiEnvelope<ChatGptActionsStatus> | null = null;
+    try {
+      payload = (await response.json()) as ApiEnvelope<ChatGptActionsStatus>;
+    } catch {
+      // Normalized below.
+    }
+    if (!response.ok || !payload?.success) {
+      if (response.status === 401) clearAdminToken();
+      throw new AdminApiError(
+        payload?.message || "The ChatGPT integration request could not be completed.",
+        response.status,
+        payload?.errors || {},
+      );
+    }
+    return payload.data;
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new AdminApiError("The backend took too long to respond. Please try again.", 408);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export function getChatGptActionsStatus() {
+  return chatGptActionsAdminRequest();
+}
+
+export function rotateChatGptActionsKey() {
+  return chatGptActionsAdminRequest({
+    method: "POST",
+    body: JSON.stringify({ action: "rotate" }),
+  });
+}
+
+export function revokeChatGptActionsKey() {
+  return chatGptActionsAdminRequest({
+    method: "POST",
+    body: JSON.stringify({ action: "revoke" }),
+  });
 }
 
 export function listAdministrators() {

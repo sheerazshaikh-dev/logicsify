@@ -7,6 +7,7 @@ import {
   ExternalLink,
   FileImage,
   FileText,
+  GripVertical,
   ImagePlus,
   Loader2,
   MapPin,
@@ -54,6 +55,7 @@ import {
   getConnectProfileSettings,
   getTeamConnectLocations,
   listConnectProfiles,
+  reorderConnectProfiles,
   saveConnectProfileSettings,
   saveTeamConnectLocations,
   updateConnectProfile,
@@ -116,6 +118,9 @@ export function ConnectProfilesPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<ConnectProfile> | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [dragOverId, setDragOverId] = useState<number | null>(null);
   const [qr, setQr] = useState<ConnectProfile | null>(null);
   const [downloadProfile, setDownloadProfile] = useState<ConnectProfile | null>(null);
   const [globalCover, setGlobalCover] = useState("");
@@ -162,8 +167,10 @@ export function ConnectProfilesPage() {
   }
 
   function openNewProfile() {
+    const nextSortOrder = items.reduce((highest, item) => Math.max(highest, item.sort_order || 0), 0) + 10;
     const profile = {
       ...emptyProfile,
+      sort_order: nextSortOrder,
       visibility_json: normalizeConnectProfileVisibility(DEFAULT_CONNECT_PROFILE_VISIBILITY),
       location_ids_json: [],
       skills_json: [],
@@ -243,6 +250,47 @@ export function ConnectProfilesPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not delete profile.");
     }
+  }
+
+  async function persistTeamOrder(nextItems: ConnectProfile[]) {
+    if (savingOrder) return;
+    const normalized = nextItems.map((item, index) => ({
+      ...item,
+      sort_order: (index + 1) * 10,
+    }));
+    const previous = items;
+    setItems(normalized);
+    setSavingOrder(true);
+    try {
+      await reorderConnectProfiles(normalized.map((item) => item.id));
+      toast.success("Team order saved. Company Profile now uses this order.");
+    } catch (error) {
+      setItems(previous);
+      toast.error(error instanceof Error ? error.message : "Could not save team order.");
+      await refresh();
+    } finally {
+      setSavingOrder(false);
+      setDraggingId(null);
+      setDragOverId(null);
+    }
+  }
+
+  function reorderedItems(sourceId: number, targetId: number) {
+    if (sourceId === targetId) return items;
+    const sourceIndex = items.findIndex((item) => item.id === sourceId);
+    const targetIndex = items.findIndex((item) => item.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return items;
+    const next = [...items];
+    const [moved] = next.splice(sourceIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    return next;
+  }
+
+  function moveByOffset(id: number, offset: -1 | 1) {
+    const sourceIndex = items.findIndex((item) => item.id === id);
+    const targetIndex = sourceIndex + offset;
+    if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= items.length || savingOrder) return;
+    void persistTeamOrder(reorderedItems(id, items[targetIndex].id));
   }
   return (
     <AdminShell>
@@ -346,6 +394,16 @@ export function ConnectProfilesPage() {
       ) : null}
       {tab === "people" ? (
         <AdminCard>
+          {!loading && items.length > 1 ? (
+            <div className="flex flex-col gap-2 border-b border-slate-100 bg-slate-50/70 px-5 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+              <span>Drag the handle to reorder team members. The saved order is used on the Company Profile and other Team placements.</span>
+              {savingOrder ? (
+                <span className="inline-flex shrink-0 items-center gap-2 font-semibold text-slate-600">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving order…
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           {loading ? (
             <AdminLoading />
           ) : items.length === 0 ? (
@@ -355,9 +413,79 @@ export function ConnectProfilesPage() {
             />
           ) : (
             <div className="divide-y divide-slate-100">
-              {items.map((item) => (
-                <div key={item.id} className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center">
-                  <div className="flex min-w-0 flex-1 items-center gap-4">
+              {items.map((item, index) => (
+                <div
+                  key={item.id}
+                  onDragOver={(event) => {
+                    if (draggingId === null || savingOrder) return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    setDragOverId(item.id);
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverId === item.id) setDragOverId(null);
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const sourceId = draggingId ?? Number(event.dataTransfer.getData("text/plain"));
+                    if (!Number.isFinite(sourceId) || sourceId === item.id || savingOrder) {
+                      setDraggingId(null);
+                      setDragOverId(null);
+                      return;
+                    }
+                    void persistTeamOrder(reorderedItems(sourceId, item.id));
+                  }}
+                  className={`flex flex-col gap-4 p-5 transition lg:flex-row lg:items-center ${
+                    dragOverId === item.id && draggingId !== item.id
+                      ? "bg-brand-gold/10 ring-1 ring-inset ring-brand-gold/35"
+                      : "bg-white"
+                  } ${draggingId === item.id ? "opacity-55" : ""}`}
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="flex shrink-0 items-center gap-1">
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        draggable={!savingOrder}
+                        title="Drag to reorder team member"
+                        aria-label={`Drag ${item.display_name} to reorder`}
+                        onDragStart={(event) => {
+                          setDraggingId(item.id);
+                          setDragOverId(item.id);
+                          event.dataTransfer.effectAllowed = "move";
+                          event.dataTransfer.setData("text/plain", String(item.id));
+                        }}
+                        onDragEnd={() => {
+                          setDraggingId(null);
+                          setDragOverId(null);
+                        }}
+                        className={`grid h-10 w-8 cursor-grab place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-400 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-600 active:cursor-grabbing ${
+                          savingOrder ? "pointer-events-none opacity-50" : ""
+                        }`}
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </span>
+                      <div className="flex flex-col">
+                        <button
+                          type="button"
+                          disabled={index === 0 || savingOrder}
+                          onClick={() => moveByOffset(item.id, -1)}
+                          className="grid h-5 w-6 place-items-center rounded text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-25"
+                          aria-label={`Move ${item.display_name} up`}
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === items.length - 1 || savingOrder}
+                          onClick={() => moveByOffset(item.id, 1)}
+                          className="grid h-5 w-6 place-items-center rounded text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-25"
+                          aria-label={`Move ${item.display_name} down`}
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
                     {item.avatar_url ? (
                       <img
                         src={item.avatar_url}
@@ -1304,15 +1432,15 @@ function QrModal({ profile, close }: { profile: ConnectProfile | null; close: ()
     <AdminModal
       open
       title={`Offline contact QR: ${profile.display_name}`}
-      description="The contact details are stored directly inside this QR as a vCard. Scanning works without internet and opens Add/Save Contact on supported phones."
+      description="The contact details are stored directly inside this QR as a vCard, together with the member’s Logicsify Connect link. Scanning works offline for Add/Save Contact; the Connect link opens whenever internet is available."
       onClose={close}
-      width="max-w-md"
+      width="max-w-lg"
     >
       <div className="flex flex-col items-center text-center">
-        <QrCode value={value} size={260} className="rounded-2xl border border-slate-200" />
+        <QrCode value={value} size={380} className="rounded-2xl border border-slate-200" />
         <p className="mt-4 text-sm leading-6 text-slate-500">
           Includes the latest saved name, designation, company, phone, email, assigned office
-          address, website, WhatsApp, and LinkedIn details when available.
+          address, website, WhatsApp, LinkedIn, and /connect/{profile.slug}.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <AdminButton
@@ -1366,7 +1494,7 @@ function DownloadModal({ profile, close }: { profile: ConnectProfile | null; clo
     <AdminModal
       open
       title={`Download: ${profile.display_name}`}
-      description="Choose a portrait format. Both versions include the Logicsify logo, contact details, social links and a scannable QR code."
+      description="Choose a portrait format. Both versions include the Logicsify logo, contact details, social links, and a larger offline vCard QR that saves the contact and carries the member’s Connect link."
       onClose={close}
       width="max-w-xl"
     >

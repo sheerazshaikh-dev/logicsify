@@ -24,6 +24,7 @@ import { Route as PortfolioRoute } from "@/routes/admin/portfolio";
 import { Route as SecurityRoute } from "@/routes/admin/security";
 import { Route as ServicesRoute } from "@/routes/admin/services";
 import { Route as SettingsRoute } from "@/routes/admin/settings";
+import { Route as SiteHealthRoute } from "@/routes/admin/site-health";
 import { Route as TeamRoute } from "@/routes/admin/team";
 import { Route as TeamConnectRoute } from "@/routes/admin/team-connect";
 import { Route as TestimonialsRoute } from "@/routes/admin/testimonials";
@@ -38,7 +39,7 @@ const routes: Record<string, unknown> = {
   "team-connect": TeamConnectRoute, guides: GuidesRoute,
   comparisons: ComparisonsRoute, "engagement-models": EngagementModelsRoute,
   integrations: IntegrationsRoute, leads: LeadsRoute, bookings: BookingsRoute, media: MediaRoute,
-  menus: MenusRoute, settings: SettingsRoute, "global-styling": GlobalStylingRoute,
+  menus: MenusRoute, settings: SettingsRoute, "site-health": SiteHealthRoute, "global-styling": GlobalStylingRoute,
   administrators: AdministratorsRoute, trash: TrashRoute, security: SecurityRoute, "audit-logs": SecurityRoute, account: AccountRoute,
 };
 

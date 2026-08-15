@@ -22,6 +22,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
+  SearchCheck,
   ShieldCheck,
   Sparkles,
   Users,
@@ -80,6 +81,7 @@ const navigation = [
   {
     label: "System",
     items: [
+      { label: "Site Health", to: "/admin/site-health", section: "site-health", icon: SearchCheck },
       { label: "Settings", to: "/admin/settings", section: "settings", icon: Settings },
       { label: "Global Branding", to: "/admin/global-styling", section: "global-styling", icon: Paintbrush },
       { label: "Administrators", to: "/admin/administrators", section: "administrators", icon: ShieldCheck },
