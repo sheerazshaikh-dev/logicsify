@@ -1434,10 +1434,10 @@ function QrModal({ profile, close }: { profile: ConnectProfile | null; close: ()
       title={`Offline contact QR: ${profile.display_name}`}
       description="The contact details are stored directly inside this QR as a vCard, together with the member’s Logicsify Connect link. Scanning works offline for Add/Save Contact; the Connect link opens whenever internet is available."
       onClose={close}
-      width="max-w-lg"
+      width="max-w-2xl"
     >
       <div className="flex flex-col items-center text-center">
-        <QrCode value={value} size={380} className="rounded-2xl border border-slate-200" />
+        <QrCode value={value} size={520} className="h-auto max-w-full rounded-2xl border border-slate-200" />
         <p className="mt-4 text-sm leading-6 text-slate-500">
           Includes the latest saved name, designation, company, phone, email, assigned office
           address, website, WhatsApp, LinkedIn, and /connect/{profile.slug}.

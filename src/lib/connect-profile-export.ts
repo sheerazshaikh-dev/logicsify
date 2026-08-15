@@ -310,9 +310,9 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
     loadImage(exportMediaUrl(coverSource)),
     loadImage(exportMediaUrl(avatarSource)),
     QRCode.toDataURL(buildOfflineContactVCard(profile, profileUrl), {
-      width: 900,
-      margin: 3,
-      errorCorrectionLevel: "M",
+      width: 1400,
+      margin: 4,
+      errorCorrectionLevel: "L",
       color: { dark: INK, light: "#FFFFFF" },
     }).then(loadImage),
   ]);
@@ -464,7 +464,7 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
 
   const socialStart = contactY + 112;
   const socialPanelY = socialStart - 28;
-  roundedRect(context, 88, socialPanelY, 1064, 350, 30);
+  roundedRect(context, 88, socialPanelY, 1064, 458, 30);
   context.fillStyle = SURFACE;
   context.fill();
   context.strokeStyle = BORDER;
@@ -493,17 +493,17 @@ async function renderCard(profile: ConnectProfile, profileUrl: string) {
   }
 
   if (qr) {
-    roundedRect(context, 776, socialPanelY + 12, 348, 326, 26);
+    roundedRect(context, 700, socialPanelY + 12, 424, 434, 26);
     context.fillStyle = BACKGROUND;
     context.fill();
-    context.drawImage(qr, 814, socialPanelY + 22, 272, 272);
+    context.drawImage(qr, 724, socialPanelY + 26, 376, 376);
     context.fillStyle = INK;
     context.textAlign = "center";
     context.font = "800 14px Sora, Inter, Arial, sans-serif";
-    context.fillText("OFFLINE CONTACT QR", 950, socialPanelY + 316);
+    context.fillText("OFFLINE CONTACT QR", 912, socialPanelY + 418);
     context.fillStyle = MUTED;
     context.font = "500 12px Inter, Arial, sans-serif";
-    context.fillText("Save contact + Connect link", 950, socialPanelY + 336);
+    context.fillText("Save contact + Connect link", 912, socialPanelY + 440);
     context.textAlign = "left";
   }
 
