@@ -23,11 +23,16 @@ type PointerState = {
   y: number;
   active: boolean;
   pressed: boolean;
+  vx: number;
+  vy: number;
+  lastX: number;
+  lastY: number;
+  lastTime: number;
 };
 
 const ALPHA_THRESHOLD = 42;
-const MAX_DPR = 2;
-const MAX_PARTICLES = 9000;
+const MAX_DPR = 2.5;
+const MAX_PARTICLES = 24000;
 
 /**
  * Renders the supplied transparent brand mark as tightly-packed particles.
@@ -55,6 +60,11 @@ export function InteractiveLogoParticles({
       y: -10000,
       active: false,
       pressed: false,
+      vx: 0,
+      vy: 0,
+      lastX: -10000,
+      lastY: -10000,
+      lastTime: 0,
     };
 
     let particles: Particle[] = [];
@@ -86,8 +96,25 @@ export function InteractiveLogoParticles({
       wake();
       const rect = canvas.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
-      pointer.x = ((event.clientX - rect.left) / rect.width) * width;
-      pointer.y = ((event.clientY - rect.top) / rect.height) * height;
+      const nextX = ((event.clientX - rect.left) / rect.width) * width;
+      const nextY = ((event.clientY - rect.top) / rect.height) * height;
+      const now = performance.now();
+
+      if (pointer.lastTime > 0) {
+        const elapsed = Math.max(8, Math.min(40, now - pointer.lastTime));
+        const velocityScale = 16.67 / elapsed;
+        pointer.vx = (nextX - pointer.lastX) * velocityScale;
+        pointer.vy = (nextY - pointer.lastY) * velocityScale;
+      } else {
+        pointer.vx = 0;
+        pointer.vy = 0;
+      }
+
+      pointer.x = nextX;
+      pointer.y = nextY;
+      pointer.lastX = nextX;
+      pointer.lastY = nextY;
+      pointer.lastTime = now;
       pointer.active = true;
     };
 
@@ -107,6 +134,11 @@ export function InteractiveLogoParticles({
       pointer.pressed = false;
       pointer.x = -10000;
       pointer.y = -10000;
+      pointer.vx = 0;
+      pointer.vy = 0;
+      pointer.lastX = -10000;
+      pointer.lastY = -10000;
+      pointer.lastTime = 0;
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -122,6 +154,9 @@ export function InteractiveLogoParticles({
         pointer.active = false;
         pointer.x = -10000;
         pointer.y = -10000;
+        pointer.vx = 0;
+        pointer.vy = 0;
+        pointer.lastTime = 0;
       }
     };
 
@@ -154,13 +189,15 @@ export function InteractiveLogoParticles({
 
       // Dense enough that adjacent circles overlap slightly. This is what makes
       // the idle state look like the original artwork instead of a dotted logo.
-      let step = width >= 500 ? 4 : width >= 380 ? 3.5 : 3.25;
+      let step = width >= 500 ? 2.25 : width >= 380 ? 2.15 : 2.05;
       const estimatedOpaqueArea = drawWidth * drawHeight * 0.39;
       const estimatedCount = estimatedOpaqueArea / (step * step);
       if (estimatedCount > MAX_PARTICLES) {
         step *= Math.sqrt(estimatedCount / MAX_PARTICLES);
       }
-      particleRadius = Math.max(1.8, step * 0.64);
+      // Smaller dots + much tighter sampling produce a crisp, high-resolution
+      // silhouette while retaining a visible particle texture up close.
+      particleRadius = Math.max(1.08, step * 0.57);
 
       const nextParticles: Particle[] = [];
       const startX = Math.max(0, Math.floor(drawX));
@@ -220,12 +257,18 @@ export function InteractiveLogoParticles({
 
       // Mouse interaction is intentionally local: only particles under/near the
       // pointer scatter, while the rest of the mark stays recognizable.
-      const reactionRadius = Math.min(118, Math.max(76, width * 0.18));
+      const reactionRadius = Math.min(170, Math.max(105, width * 0.245));
       const reactionRadiusSq = reactionRadius * reactionRadius;
-      const spring = pointer.active ? 0.052 : 0.09;
-      const damping = pointer.active ? 0.84 : 0.79;
-      const forceMultiplier = pointer.pressed ? 4.7 : 3.05;
-      const maxDisplacement = reactionRadius * 1.15;
+
+      // Softer spring + higher damping = slower, more natural recovery.
+      // While hovering, particles carry more inertia so the logo deforms
+      // organically instead of snapping away and immediately rebuilding.
+      const spring = pointer.active ? 0.018 : 0.042;
+      const damping = pointer.active ? 0.925 : 0.875;
+      const forceMultiplier = pointer.pressed ? 8.4 : 5.65;
+      const maxDisplacement = reactionRadius * 1.7;
+      const pointerSpeed = Math.min(28, Math.hypot(pointer.vx, pointer.vy));
+      const flowStrength = pointerSpeed > 0.2 ? Math.min(0.32, pointerSpeed * 0.012) : 0;
       let unsettled = false;
 
       for (let index = 0; index < particles.length; index += 1) {
@@ -239,9 +282,20 @@ export function InteractiveLogoParticles({
           if (distanceSq > 0.0001 && distanceSq < reactionRadiusSq) {
             const distance = Math.sqrt(distanceSq);
             const proximity = 1 - distance / reactionRadius;
-            const force = proximity * proximity * forceMultiplier;
+            const easedProximity = proximity * proximity * (3 - 2 * proximity);
+            const force = easedProximity * forceMultiplier;
+
+            // Radial repulsion opens a convincing cavity around the pointer.
             particle.vx += (dx / distance) * force;
             particle.vy += (dy / distance) * force;
+
+            // Add a restrained directional wake from pointer velocity. This
+            // makes quick sweeps pull particles sideways instead of producing
+            // a perfectly symmetrical, artificial-looking explosion.
+            if (flowStrength > 0) {
+              particle.vx += pointer.vx * flowStrength * easedProximity;
+              particle.vy += pointer.vy * flowStrength * easedProximity;
+            }
           }
         }
 
@@ -261,8 +315,8 @@ export function InteractiveLogoParticles({
           const homeDistance = Math.sqrt(homeDistanceSq);
           particle.x = particle.originX + (homeDx / homeDistance) * maxDisplacement;
           particle.y = particle.originY + (homeDy / homeDistance) * maxDisplacement;
-          particle.vx *= 0.35;
-          particle.vy *= 0.35;
+          particle.vx *= 0.55;
+          particle.vy *= 0.55;
         }
 
         if (
@@ -270,7 +324,7 @@ export function InteractiveLogoParticles({
             Math.abs(particle.vy) +
             Math.abs(particle.x - particle.originX) +
             Math.abs(particle.y - particle.originY) >
-          0.06
+          0.045
         ) {
           unsettled = true;
         }
