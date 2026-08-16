@@ -31,13 +31,13 @@ import {
   type PublicTeamMember,
   type Partner,
 } from "@/lib/logicsify-api";
-import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
 import { trackAnalytics } from "@/lib/analytics";
 import { BrandMarkImage } from "@/components/brand-mark";
 import { InteractiveLogoParticles } from "@/components/interactive-logo-particles";
 import { WorkTestimonialCard } from "@/components/work-testimonial-card";
 import { buildWorkTestimonials } from "@/lib/work-testimonials";
+import { HomeIntegrationMarquee } from "@/components/home-integration-marquee";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -72,6 +72,9 @@ function HomePage() {
       <div className="contents" data-cms-section-id="home-trust-strip">
         <TrustStrip />
       </div>
+      <div className="contents" data-cms-section-id="home-integrations-marquee">
+        <HomeIntegrationMarquee />
+      </div>
       <div className="contents" data-cms-section-id="home-partners">
         <PartnersSection />
       </div>
@@ -101,9 +104,6 @@ function HomePage() {
       </div>
       <div className="contents" data-cms-section-id="home-why-logicsify">
         <WhyLogicsify />
-      </div>
-      <div className="contents" data-cms-section-id="home-integrations">
-        <SystemsWeIntegrate />
       </div>
       <div className="contents" data-cms-section-id="home-engagement-models">
         <EngagementModelsPreview />
@@ -547,6 +547,11 @@ function FeaturedWork() {
               </Link>
             );
           })}
+        </div>
+        <div className="mt-10 flex justify-center">
+          <Link to="/portfolio" className="btn-ghost-light">
+            View more projects <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>

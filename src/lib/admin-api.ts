@@ -125,6 +125,7 @@ export type SiteHealthIssue = {
   type: string;
   message: string;
   source?: string | null;
+  source_url?: string | null;
   target?: string | null;
   field?: string | null;
   snippet?: string | null;
@@ -171,11 +172,16 @@ export type SiteHealthReportResponse = {
     completed_at?: string | null;
     summary: Partial<SiteHealthSummary>;
   }>;
+  selected?: { scan_id?: string | null; date?: string | null };
   cron: { recommended_schedule: string; script: string; example: string };
 };
 
-export function getSiteHealthReport() {
-  return adminRequest<SiteHealthReportResponse>("site-health/report") as Promise<SiteHealthReportResponse>;
+export function getSiteHealthReport(options: { scanId?: string; date?: string } = {}) {
+  const search = new URLSearchParams();
+  if (options.scanId) search.set("scan_id", options.scanId);
+  if (options.date) search.set("date", options.date);
+  const suffix = search.toString() ? `?${search.toString()}` : "";
+  return adminRequest<SiteHealthReportResponse>(`site-health/report${suffix}`) as Promise<SiteHealthReportResponse>;
 }
 
 export function runSiteHealthScan() {

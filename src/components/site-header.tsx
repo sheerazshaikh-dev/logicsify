@@ -37,7 +37,7 @@ type NavItem = {
   children: NavItem[];
 };
 
-const fallbackNavigation = buildFallbackNavigation();
+const fallbackNavigation = ensureRequiredNavigation(buildFallbackNavigation());
 
 export function SiteHeader() {
   const { location } = useRouterState();
@@ -73,7 +73,7 @@ export function SiteHeader() {
         if (!active) return;
         setSiteSettings(settings);
         if (menu.items.length) {
-          const tree = mergeFallbackNavigation(buildMenuTree(menu.items));
+          const tree = ensureRequiredNavigation(mergeFallbackNavigation(buildMenuTree(menu.items)));
           if (tree.length) setPrimaryNav(tree);
         }
       })
@@ -584,6 +584,34 @@ function MobileMenuItem({ item }: { item: NavItem }) {
   );
 }
 
+function ensureRequiredNavigation(items: NavItem[]): NavItem[] {
+  const requiredPath = "/services/internal-workflow-automation";
+  const clone = (item: NavItem): NavItem => ({ ...item, children: item.children.map(clone) });
+  const tree = items.map(clone);
+  const services = tree.find((item) => navKey(item) === "services" || item.to === "/services");
+  if (!services) return tree;
+
+  const alreadyPresent = (itemsToCheck: NavItem[]): boolean =>
+    itemsToCheck.some(
+      (item) => item.to === requiredPath || (item.children.length > 0 && alreadyPresent(item.children)),
+    );
+  if (alreadyPresent(services.children)) return tree;
+
+  const aiGroup = services.children.find((item) => {
+    const key = navKey(item);
+    return key.includes("ai-automation") || item.to === "/services/ai-automation-voice-agents";
+  });
+  const link: NavItem = {
+    ...fallbackLink(-19991, "AI Workflow Automation", requiredPath),
+    parentId: aiGroup?.id ?? services.id,
+    description: "AI-powered internal workflow automation across business systems and operations.",
+    columnNumber: aiGroup?.columnNumber || 1,
+  };
+  if (aiGroup) aiGroup.children.push(link);
+  else services.children.unshift(link);
+  return tree;
+}
+
 function normalizeMegaGroups(item: NavItem): NavItem[] {
   const visible = item.children.filter((child) => !child.hideDesktop);
   const explicitGroups = visible.filter((child) => child.isHeading || child.children.length > 0);
@@ -723,6 +751,7 @@ function buildFallbackNavigation(): NavItem[] {
         ["Appointment-Booking Agents", "/services/appointment-booking-agents"],
         ["Lead Qualification Agents", "/services/lead-qualification-agents"],
         ["AI Support Chatbots", "/services/ai-support-chatbots"],
+        ["AI Workflow Automation", "/services/internal-workflow-automation"],
         ["Document Extraction", "/services/document-extraction-processing"],
       ]),
       group("CRM & Revenue Operations", 2, [

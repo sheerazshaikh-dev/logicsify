@@ -1,6 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
 import { contentPublicPath, type PublicContentType } from "@/lib/content-routes";
 import type { CmsContentItem, RelatedContentResponse } from "@/lib/logicsify-api";
+import { WorkTestimonialCard } from "@/components/work-testimonial-card";
+import { buildWorkTestimonials, type WorkTestimonial } from "@/lib/work-testimonials";
 
 const groupLabels: Record<string, string> = {
   case_study: "Case Studies",
@@ -23,6 +25,45 @@ const groupEyebrows: Record<string, string> = {
   engagement_model: "Ways to work",
   integration: "Connected platforms",
 };
+
+
+function text(value: unknown) {
+  return String(value || "").trim();
+}
+
+function relationSlug(value: unknown) {
+  return text(value)
+    .replace(/^https?:\/\/[^/]+/i, "")
+    .replace(/^\/+|\/+$/g, "")
+    .split("/")
+    .filter(Boolean)
+    .pop() || "";
+}
+
+function standaloneRelatedTestimonial(item: CmsContentItem): WorkTestimonial | null {
+  const content = item.content_json || {};
+  const quote = text(content.quote || item.excerpt || content.body);
+  const videoUrl = text(content.video_url);
+  if (!quote && !videoUrl) return null;
+  const caseSlug = relationSlug(content.related_case_study || content.case_study_slug);
+  const portfolioSlug = relationSlug(content.related_portfolio || content.portfolio_slug);
+  return {
+    id: `testimonial:${item.id}`,
+    sourceType: "testimonial",
+    sourceSlug: item.slug,
+    clientName: text(content.client_name || item.title || "Client"),
+    role: text(content.role),
+    company: text(content.company),
+    projectType: text(content.project_type),
+    quote,
+    type: text(content.testimonial_type).toLowerCase() === "video" ? "video" : "text",
+    videoUrl,
+    poster: text(content.video_poster || item.featured_image),
+    image: text(content.client_image || item.featured_image),
+    relatedPath: caseSlug ? `/work/${caseSlug}` : portfolioSlug ? `/portfolio/${portfolioSlug}` : "",
+    relatedTitle: "",
+  };
+}
 
 function itemPath(item: CmsContentItem) {
   return contentPublicPath(item.content_type as PublicContentType, item.slug) || "#";
@@ -67,9 +108,23 @@ export function RelatedContentSections({
   title?: string;
 }) {
   if (!data) return null;
-  const groups = Object.entries(data.groups || {}).filter(([, items]) => Array.isArray(items) && items.length);
+  const caseStudies = (data.groups?.case_study || []) as CmsContentItem[];
+  const portfolio = (data.groups?.portfolio || []) as CmsContentItem[];
+  const standaloneTestimonials = ((data.groups?.testimonial || []) as CmsContentItem[])
+    .map(standaloneRelatedTestimonial)
+    .filter((item): item is WorkTestimonial => Boolean(item));
+  const embeddedTestimonials = buildWorkTestimonials({ caseStudies, portfolio });
+  const testimonialMap = new Map<string, WorkTestimonial>();
+  [...standaloneTestimonials, ...embeddedTestimonials].forEach((item) => {
+    const key = `${item.clientName.toLowerCase()}|${item.quote.toLowerCase()}|${item.videoUrl.toLowerCase()}`;
+    if (!testimonialMap.has(key)) testimonialMap.set(key, item);
+  });
+  const testimonials = [...testimonialMap.values()].slice(0, 3);
+  const groups = Object.entries(data.groups || {}).filter(
+    ([type, items]) => type !== "testimonial" && Array.isArray(items) && items.length,
+  );
   const services = showServices ? data.services || [] : [];
-  if (!services.length && !groups.length) return null;
+  if (!services.length && !groups.length && !testimonials.length) return null;
 
   return (
     <section className="border-t border-black/8 bg-cream py-20 md:py-24">
@@ -94,6 +149,20 @@ export function RelatedContentSections({
                 >
                   {service.title || service.slug.replaceAll("-", " ")}
                 </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {testimonials.length ? (
+          <div className="mt-12">
+            <div>
+              <p className="eyebrow">Client proof</p>
+              <h3 className="mt-2 text-2xl font-semibold text-ink">Testimonials</h3>
+            </div>
+            <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((testimonial) => (
+                <WorkTestimonialCard key={testimonial.id} testimonial={testimonial} />
               ))}
             </div>
           </div>

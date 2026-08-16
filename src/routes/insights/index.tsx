@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { ArrowRight, Loader2, Newspaper, Search } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Loader2, Newspaper } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
@@ -8,20 +8,180 @@ import { getCmsContentList, submitNewsletter, optimizedPublicImageUrl } from "@/
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 
-const categories=["All","AI and Automation","Web Development","Software and SaaS","Digital Marketing","CRM and Operations","Company News","Guides"];
-export const Route=createFileRoute("/insights/")({pendingComponent:PublicRouteLoading,loader:async()=>({articles:await getCmsContentList("insight")}),component:InsightsPage,head:()=>({meta:[{title:"Insights | AI, Software, Automation & Marketing | Logicsify"},{name:"description",content:"Read practical Logicsify insights about AI automation, software development, SaaS, CRM systems, digital marketing, and business technology."},{property:"og:title",content:"Insights | AI, Software, Automation & Marketing | Logicsify"},{property:"og:description",content:"Practical articles, guides, technology updates, and verified company news."},{property:"og:url",content:"https://logicsify.com/insights"}],links:[{rel:"canonical",href:"https://logicsify.com/insights"}]})});
+export const Route = createFileRoute("/insights/")({
+  pendingComponent: PublicRouteLoading,
+  loader: async () => ({ articles: await getCmsContentList("insight") }),
+  component: InsightsPage,
+  head: () => ({
+    meta: [
+      { title: "Insights | AI, Software, Automation & Marketing | Logicsify" },
+      { name: "description", content: "Read practical Logicsify insights about AI automation, software development, SaaS, CRM systems, digital marketing, and business technology." },
+      { property: "og:title", content: "Insights | AI, Software, Automation & Marketing | Logicsify" },
+      { property: "og:description", content: "Practical articles, guides, technology updates, and verified company news." },
+      { property: "og:url", content: "https://logicsify.com/insights" },
+    ],
+    links: [{ rel: "canonical", href: "https://logicsify.com/insights" }],
+  }),
+});
 
-function InsightsPage(){const{articles}=Route.useLoaderData();const[search,setSearch]=useState("");const[category,setCategory]=useState(()=>{if(typeof window==="undefined")return "All";const value=new URLSearchParams(window.location.search).get("category");return value&&categories.includes(value)?value:"All"});const[visible,setVisible]=useState(9);const featured=articles.find((item)=>Boolean(item.featured));const filtered=useMemo(()=>articles.filter((item)=>{const itemCategory=String(item.content_json?.category||"Guides");const q=search.trim().toLowerCase();return(category==="All"||itemCategory===category)&&(!q||`${item.title} ${item.excerpt||""} ${itemCategory}`.toLowerCase().includes(q))}),[articles,search,category]);const popular=articles.filter((item)=>Boolean(item.featured)).slice(0,4);const company=articles.filter((item)=>String(item.content_json?.category||"")==="Company News").slice(0,4);return <SiteLayout>
-  <PageHero eyebrow="Insights" breadcrumbs={[{label:"Home",to:"/"},{label:"Insights"}]} title={<>Practical thinking about software, automation, and <span className="text-gradient">digital growth.</span></>} intro="Educational articles, guides, technology updates, and verified company news published through the existing CMS." primaryCta={{label:"Get a Free Technical Roadmap",to:"/technical-roadmap"}} />
-  <section className="py-20 md:py-28"><div className="container-page">
-    {featured?<Link to="/insights/$slug" params={{slug:featured.slug}} onClick={()=>trackEvent("insight_opened",{slug:featured.slug,placement:"featured"})} className="mb-12 grid overflow-hidden rounded-3xl bg-ink text-white lg:grid-cols-12"><div className="p-8 md:p-12 lg:col-span-7"><p className="eyebrow text-white/60">Featured · {String(featured.content_json?.category||"Insight")}</p><h2 className="mt-4 fluid-h3">{featured.title}</h2><p className="mt-4 text-white/65">{featured.excerpt}</p><span className="mt-7 inline-flex items-center gap-2 font-semibold">Read article <ArrowRight className="h-4 w-4"/></span></div>{featured.featured_image?<img key={optimizedPublicImageUrl(featured.featured_image,960,featured.updated_at||featured.published_at||String(featured.id))} src={optimizedPublicImageUrl(featured.featured_image,960,featured.updated_at||featured.published_at||String(featured.id))} alt="" className="h-full min-h-72 w-full object-cover lg:col-span-5" decoding="async" fetchPriority="high"/>:<div className="grid min-h-72 place-items-center bg-white/5 lg:col-span-5"><Newspaper className="h-14 w-14 text-white/20"/></div>}</Link>:null}
-    <div className="flex flex-col gap-4 border-b border-black/10 pb-6"><label className="relative max-w-lg"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft"/><input className="form-input pl-11" value={search} onChange={(e)=>{setSearch(e.target.value);trackEvent("insight_search_used",{has_query:Boolean(e.target.value)})}} placeholder="Search insights" aria-label="Search insights"/></label><div className="flex flex-wrap gap-2" role="group" aria-label="Insight categories">{categories.map((item)=><button key={item} aria-pressed={category===item} onClick={()=>{setCategory(item);setVisible(9);const url=new URL(window.location.href);if(item==="All")url.searchParams.delete("category");else url.searchParams.set("category",item);window.history.replaceState({},"",url);trackEvent("insight_category_selected",{category:item})}} className={`rounded-full border px-4 py-2 text-sm font-semibold ${category===item?"border-ink bg-ink text-white":"border-black/10"}`}>{item}</button>)}</div></div>
-    {!filtered.length?<div className="py-20 text-center"><Newspaper className="mx-auto h-10 w-10 text-ink-soft"/><h2 className="mt-5 fluid-h3">No published insights match.</h2><p className="mx-auto mt-3 max-w-xl text-ink-soft">Drafts and scheduled articles remain private until their publish status and date are valid.</p></div>:<div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">{filtered.slice(0,visible).map((item)=><ArticleCard key={item.id} item={item}/>)}</div>}
-    {visible<filtered.length?<div className="mt-10 text-center"><button className="btn-ghost-light" onClick={()=>setVisible((v)=>v+9)}>Load more</button></div>:null}
-    <div className="mt-20 grid gap-8 lg:grid-cols-12"><div className="rounded-3xl bg-cream p-8 lg:col-span-5"><h2 className="text-2xl font-semibold">Popular articles</h2>{popular.length?<div className="mt-5 space-y-4">{popular.map((item)=><Link key={item.id} to="/insights/$slug" params={{slug:item.slug}} className="block border-b border-black/10 pb-4 font-semibold">{item.title}</Link>)}</div>:<p className="mt-4 text-sm text-ink-soft">Feature published articles in Admin → Insights to populate this list.</p>}</div><div className="rounded-3xl bg-cream p-8 lg:col-span-7"><h2 className="text-2xl font-semibold">Latest company news</h2>{company.length?<div className="mt-5 grid gap-4 md:grid-cols-2">{company.map((item)=><Link key={item.id} to="/insights/$slug" params={{slug:item.slug}} className="rounded-2xl bg-white p-5"><p className="font-semibold">{item.title}</p><p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p></Link>)}</div>:<p className="mt-4 text-sm text-ink-soft">No verified company news has been published.</p>}</div></div>
-    <Newsletter />
-  </div></section>
-  <TechnicalRoadmapCTA source="insights" />
-</SiteLayout>}
-function ArticleCard({item}:{item:Awaited<ReturnType<typeof getCmsContentList>>[number]}){const c=item.content_json||{};return <Link to="/insights/$slug" params={{slug:item.slug}} onClick={()=>trackEvent("insight_opened",{slug:item.slug,placement:"grid"})} className="group overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1 hover:shadow-lg">{item.featured_image?<img key={optimizedPublicImageUrl(item.featured_image,720,item.updated_at||item.published_at||String(item.id))} src={optimizedPublicImageUrl(item.featured_image,720,item.updated_at||item.published_at||String(item.id))} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" decoding="async"/>:<div className="grid aspect-[16/9] place-items-center bg-cream"><Newspaper className="h-10 w-10 text-ink-soft"/></div>}<div className="p-6"><p className="eyebrow">{String(c.category||"Insight")}</p><h2 className="mt-3 text-xl font-semibold">{item.title}</h2><p className="mt-3 text-sm text-ink-soft">{item.excerpt}</p><div className="mt-5 flex flex-wrap gap-3 text-xs text-ink-soft"><span>{String(c.author||"Logicsify")}</span>{item.published_at?<span>{new Date(item.published_at.replace(" ","T")).toLocaleDateString()}</span>:null}<span>{String(c.reading_time||"Reading time not set")}</span></div><span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">Read Article <ArrowRight className="h-4 w-4"/></span></div></Link>}
-function Newsletter(){const[email,setEmail]=useState("");const[consent,setConsent]=useState(false);const[loading,setLoading]=useState(false);const[message,setMessage]=useState("");const[error,setError]=useState("");async function submit(e:React.FormEvent){e.preventDefault();setError("");setLoading(true);try{const result=await submitNewsletter({email,consent,source:"insights-newsletter"});setMessage(result.message);setEmail("");setConsent(false)}catch(err){setError(err instanceof Error?err.message:"Could not subscribe.")}finally{setLoading(false)}}return <form onSubmit={submit} className="mt-20 rounded-3xl bg-ink p-8 text-white md:p-12"><div className="grid gap-8 lg:grid-cols-12 lg:items-end"><div className="lg:col-span-6"><p className="eyebrow text-white/60">Newsletter</p><h2 className="mt-3 fluid-h3">Practical technology notes, not a copied news feed.</h2><p className="mt-3 text-white/60">Original summaries, source links, and the reason each update matters.</p></div><div className="lg:col-span-6"><div className="flex gap-2"><input required type="email" value={email} onChange={(e)=>setEmail(e.target.value)} className="form-input" placeholder="Work email"/><button disabled={loading} className="btn-primary">{loading?<Loader2 className="h-4 w-4 animate-spin"/>:"Subscribe"}</button></div><label className="mt-3 flex items-start gap-2 text-xs text-white/55"><input type="checkbox" checked={consent} onChange={(e)=>setConsent(e.target.checked)} className="mt-0.5 accent-brand-red"/><span>I agree to receive Logicsify Insights emails.</span></label>{message?<p className="mt-3 text-sm text-green-300" role="status">{message}</p>:null}{error?<p className="mt-3 text-sm text-red-300" role="alert">{error}</p>:null}</div></div></form>}
+function InsightsPage() {
+  const { articles } = Route.useLoaderData();
+  const [visible, setVisible] = useState(9);
+  const featured = articles.find((item) => Boolean(item.featured));
+  const popular = articles.filter((item) => Boolean(item.featured)).slice(0, 4);
+  const company = articles.filter((item) => String(item.content_json?.category || "") === "Company News").slice(0, 4);
+
+  return (
+    <SiteLayout>
+      <PageHero
+        eyebrow="Insights"
+        breadcrumbs={[{ label: "Home", to: "/" }, { label: "Insights" }]}
+        title={<>Practical thinking about software, automation, and <span className="text-gradient">digital growth.</span></>}
+        intro="Educational articles, guides, technology updates, and verified company news published through the existing CMS."
+        primaryCta={{ label: "Get a Free Technical Roadmap", to: "/technical-roadmap" }}
+      />
+      <section className="py-20 md:py-28">
+        <div className="container-page">
+          {featured ? (
+            <Link
+              to="/insights/$slug"
+              params={{ slug: featured.slug }}
+              onClick={() => trackEvent("insight_opened", { slug: featured.slug, placement: "featured" })}
+              className="mb-12 grid overflow-hidden rounded-3xl bg-ink text-white lg:grid-cols-12"
+            >
+              <div className="p-8 md:p-12 lg:col-span-7">
+                <p className="eyebrow text-white/60">Featured · {String(featured.content_json?.category || "Insight")}</p>
+                <h2 className="mt-4 fluid-h3">{featured.title}</h2>
+                <p className="mt-4 text-white/65">{featured.excerpt}</p>
+                <span className="mt-7 inline-flex items-center gap-2 font-semibold">Read article <ArrowRight className="h-4 w-4" /></span>
+              </div>
+              {featured.featured_image ? (
+                <img
+                  key={optimizedPublicImageUrl(featured.featured_image, 960, featured.updated_at || featured.published_at || String(featured.id))}
+                  src={optimizedPublicImageUrl(featured.featured_image, 960, featured.updated_at || featured.published_at || String(featured.id))}
+                  alt=""
+                  className="h-full min-h-72 w-full object-cover lg:col-span-5"
+                  decoding="async"
+                  fetchPriority="high"
+                />
+              ) : (
+                <div className="grid min-h-72 place-items-center bg-white/5 lg:col-span-5"><Newspaper className="h-14 w-14 text-white/20" /></div>
+              )}
+            </Link>
+          ) : null}
+
+          {!articles.length ? (
+            <div className="py-20 text-center">
+              <Newspaper className="mx-auto h-10 w-10 text-ink-soft" />
+              <h2 className="mt-5 fluid-h3">No published insights yet.</h2>
+              <p className="mx-auto mt-3 max-w-xl text-ink-soft">Drafts and scheduled articles remain private until their publish status and date are valid.</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {articles.slice(0, visible).map((item) => <ArticleCard key={item.id} item={item} />)}
+            </div>
+          )}
+          {visible < articles.length ? (
+            <div className="mt-10 text-center"><button className="btn-ghost-light" onClick={() => setVisible((v) => v + 9)}>Load more</button></div>
+          ) : null}
+
+          <div className="mt-20 grid gap-8 lg:grid-cols-12">
+            <div className="rounded-3xl bg-cream p-8 lg:col-span-5">
+              <h2 className="text-2xl font-semibold">Popular articles</h2>
+              {popular.length ? (
+                <div className="mt-5 space-y-4">{popular.map((item) => <Link key={item.id} to="/insights/$slug" params={{ slug: item.slug }} className="block border-b border-black/10 pb-4 font-semibold">{item.title}</Link>)}</div>
+              ) : <p className="mt-4 text-sm text-ink-soft">Feature published articles in Admin → Insights to populate this list.</p>}
+            </div>
+            <div className="rounded-3xl bg-cream p-8 lg:col-span-7">
+              <h2 className="text-2xl font-semibold">Latest company news</h2>
+              {company.length ? (
+                <div className="mt-5 grid gap-4 md:grid-cols-2">{company.map((item) => <Link key={item.id} to="/insights/$slug" params={{ slug: item.slug }} className="rounded-2xl bg-white p-5"><p className="font-semibold">{item.title}</p><p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p></Link>)}</div>
+              ) : <p className="mt-4 text-sm text-ink-soft">No verified company news has been published.</p>}
+            </div>
+          </div>
+          <Newsletter />
+        </div>
+      </section>
+      <TechnicalRoadmapCTA source="insights" />
+    </SiteLayout>
+  );
+}
+
+function ArticleCard({ item }: { item: Awaited<ReturnType<typeof getCmsContentList>>[number] }) {
+  const c = item.content_json || {};
+  return (
+    <Link
+      to="/insights/$slug"
+      params={{ slug: item.slug }}
+      onClick={() => trackEvent("insight_opened", { slug: item.slug, placement: "grid" })}
+      className="group overflow-hidden rounded-2xl border border-black/10 bg-white transition hover:-translate-y-1 hover:shadow-lg"
+    >
+      {item.featured_image ? (
+        <img
+          key={optimizedPublicImageUrl(item.featured_image, 720, item.updated_at || item.published_at || String(item.id))}
+          src={optimizedPublicImageUrl(item.featured_image, 720, item.updated_at || item.published_at || String(item.id))}
+          alt=""
+          className="aspect-[16/9] w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div className="grid aspect-[16/9] place-items-center bg-cream"><Newspaper className="h-10 w-10 text-ink-soft" /></div>
+      )}
+      <div className="p-6">
+        <p className="eyebrow">{String(c.category || "Insight")}</p>
+        <h2 className="mt-3 text-xl font-semibold">{item.title}</h2>
+        <p className="mt-3 text-sm text-ink-soft">{item.excerpt}</p>
+        <div className="mt-5 flex flex-wrap gap-3 text-xs text-ink-soft">
+          <span>{String(c.author || "Logicsify")}</span>
+          {item.published_at ? <span>{new Date(item.published_at.replace(" ", "T")).toLocaleDateString()}</span> : null}
+          <span>{String(c.reading_time || "Reading time not set")}</span>
+        </div>
+        <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">Read Article <ArrowRight className="h-4 w-4" /></span>
+      </div>
+    </Link>
+  );
+}
+
+function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await submitNewsletter({ email, consent, source: "insights-newsletter" });
+      setMessage(result.message);
+      setEmail("");
+      setConsent(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not subscribe.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  return (
+    <form onSubmit={submit} className="mt-20 rounded-3xl bg-ink p-8 text-white md:p-12">
+      <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-6">
+          <p className="eyebrow text-white/60">Newsletter</p>
+          <h2 className="mt-3 fluid-h3">Practical technology notes, not a copied news feed.</h2>
+          <p className="mt-3 text-white/60">Original summaries, source links, and the reason each update matters.</p>
+        </div>
+        <div className="lg:col-span-6">
+          <div className="flex gap-2">
+            <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="form-input" placeholder="Work email" />
+            <button disabled={loading} className="btn-primary">{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}</button>
+          </div>
+          <label className="mt-3 flex items-start gap-2 text-xs text-white/55"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-brand-red" /><span>I agree to receive Logicsify Insights emails.</span></label>
+          {message ? <p className="mt-3 text-sm text-green-300" role="status">{message}</p> : null}
+          {error ? <p className="mt-3 text-sm text-red-300" role="alert">{error}</p> : null}
+        </div>
+      </div>
+    </form>
+  );
+}

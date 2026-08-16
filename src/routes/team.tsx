@@ -58,7 +58,7 @@ function TeamPage() {
         breadcrumbs={[{ label: "Home", to: "/" }, { label: "Who We Are", to: "/about" }, { label: "Team" }]}
       />
 
-      <section className="section-pad bg-background">
+      <section className="bg-background py-20 md:py-28">
         <div className="container-page">
           {team.length ? (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

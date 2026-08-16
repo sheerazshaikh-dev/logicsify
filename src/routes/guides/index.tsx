@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Download, FileText, Loader2, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Download, FileText, Loader2 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
@@ -49,25 +49,7 @@ export const Route = createFileRoute("/guides/")({
 function GuidesPage() {
   const { guides } = Route.useLoaderData();
   const { guide: requestedGuide } = Route.useSearch();
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState<CmsContentItem | null>(null);
-
-  const categories = useMemo(
-    () => [
-      "All",
-      ...Array.from(new Set(guides.map((item) => String(item.content_json?.category || "General")))),
-    ],
-    [guides],
-  );
-
-  const filtered = guides.filter((item) => {
-    const matchesCategory =
-      category === "All" || String(item.content_json?.category || "General") === category;
-    const q = search.trim().toLowerCase();
-    const matchesSearch = !q || `${item.title} ${item.excerpt || ""}`.toLowerCase().includes(q);
-    return matchesCategory && matchesSearch;
-  });
 
   const featured = guides.find((item) => Boolean(item.featured));
 
@@ -127,35 +109,7 @@ function GuidesPage() {
             </button>
           ) : null}
 
-          <div className="flex flex-col gap-4 border-b border-black/10 pb-6 md:flex-row md:items-center md:justify-between">
-            <div className="relative max-w-md flex-1">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                className="form-input pl-11"
-                placeholder="Search guides"
-                aria-label="Search guides"
-              />
-            </div>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Guide categories">
-              {categories.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  aria-pressed={category === item}
-                  onClick={() => setCategory(item)}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold ${
-                    category === item ? "border-ink bg-ink text-white" : "border-black/10"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {!filtered.length ? (
+          {!guides.length ? (
             <div className="py-20 text-center">
               <FileText className="mx-auto h-10 w-10 text-ink-soft" />
               <h2 className="mt-5 fluid-h3">No published guides yet.</h2>
@@ -165,7 +119,7 @@ function GuidesPage() {
             </div>
           ) : (
             <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((item) => (
+              {guides.map((item) => (
                 <GuideCard key={item.id} item={item} onOpen={() => openGuide(item, "grid")} />
               ))}
             </div>
