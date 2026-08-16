@@ -35,6 +35,7 @@ import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { engagementModels } from "@/lib/expansion-data";
 import { trackAnalytics } from "@/lib/analytics";
 import { BrandMarkImage } from "@/components/brand-mark";
+import { InteractiveLogoParticles } from "@/components/interactive-logo-particles";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -240,77 +241,13 @@ function Hero() {
 }
 
 function HeroVisual() {
-  const nodes = [
-    [200, 40],
-    [340, 120],
-    [340, 280],
-    [200, 360],
-    [60, 280],
-    [60, 120],
-  ] as const;
-
   return (
-    <div className="relative aspect-square max-w-[520px] mx-auto">
-      <div className="absolute inset-0 rounded-full border border-white/10 animate-spin-slow" />
-      <div
-        className="absolute inset-8 rounded-full border border-white/10 animate-spin-slow"
-        style={{ animationDirection: "reverse", animationDuration: "24s" }}
-      />
-      <div
-        className="absolute inset-20 rounded-full border border-white/10 animate-spin-slow"
-        style={{ animationDuration: "18s" }}
-      />
-
-      <svg viewBox="0 0 400 400" className="absolute inset-0 z-10 w-full h-full" aria-hidden>
-        <defs>
-          <linearGradient id="node-line" x1="0" x2="1">
-            <stop offset="0%" stopColor="var(--theme-primary-start)" />
-            <stop offset="100%" stopColor="var(--theme-primary-end)" />
-          </linearGradient>
-        </defs>
-        {nodes.map(([x, y], i) => (
-          <g key={i}>
-            <line
-              x1="200"
-              y1="200"
-              x2={x}
-              y2={y}
-              stroke="url(#node-line)"
-              strokeWidth="1.5"
-              opacity="0.62"
-              strokeDasharray="5 7"
-            />
-            <circle cx={x} cy={y} r="6" fill="url(#node-line)" opacity="0.95" />
-            <circle cx={x} cy={y} r="12" fill="none" stroke="url(#node-line)" opacity="0.45" />
-          </g>
-        ))}
-      </svg>
-
-      <div className="absolute inset-1/3 z-20 rounded-full bg-gradient-brand animate-pulse-glow blur-xl opacity-70" />
-      <div className="absolute left-1/2 top-1/2 z-30 grid h-[86px] w-[86px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-[var(--shadow-glow)]">
-        <BrandMarkImage
-          alt=""
-          width={150}
-          height={150}
-          decoding="async"
-          className="h-12 w-12 object-contain"
-        />
-      </div>
-
-      <div className="absolute -top-4 -right-4 z-40 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float">
-        <p className="text-white/60 text-[10px] uppercase tracking-widest">Automation</p>
-        <p className="mt-1 font-semibold">Lead qualified → CRM</p>
-      </div>
-      <div
-        className="absolute -bottom-2 -left-4 z-40 glass-card rounded-2xl px-4 py-3 text-xs text-white animate-float"
-        style={{ animationDelay: "1.5s" }}
-      >
-        <p className="text-white/60 text-[10px] uppercase tracking-widest">Growth</p>
-        <p className="mt-1 font-semibold">MQL → SQL, live</p>
-      </div>
+    <div className="relative mx-auto w-full max-w-[620px]">
+      <InteractiveLogoParticles imageSrc="/logicsify-particle-mark.png" />
     </div>
   );
 }
+
 
 /* ---------- TRUST STRIP ---------- */
 function TrustStrip() {
