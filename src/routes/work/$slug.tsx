@@ -5,21 +5,24 @@ import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { TechnicalRoadmapCTA } from "@/components/technical-roadmap-cta";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
-import { getCmsContentItem, getRelatedContent } from "@/lib/logicsify-api";
+import { getCmsContentItem, getCmsContentList, getRelatedContent } from "@/lib/logicsify-api";
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 import { NavigableLightbox } from "@/components/navigable-lightbox";
 import { RelatedContentSections } from "@/components/related-content-sections";
+import { WorkTestimonialCard } from "@/components/work-testimonial-card";
+import { buildWorkTestimonials, testimonialsForWork } from "@/lib/work-testimonials";
 
 export const Route = createFileRoute("/work/$slug")({
   pendingComponent: PublicRouteLoading,
   loader: async ({ params }) => {
-    const [study, relatedContent] = await Promise.all([
+    const [study, relatedContent, testimonialItems] = await Promise.all([
       getCmsContentItem("case_study", params.slug),
       getRelatedContent("case_study", params.slug),
+      getCmsContentList("testimonial"),
     ]);
     if (!study) throw notFound();
-    return { study, relatedContent };
+    return { study, relatedContent, testimonialItems };
   },
   component: CaseStudyPage,
   head: ({ loaderData, params }) => ({
@@ -66,7 +69,7 @@ export const Route = createFileRoute("/work/$slug")({
 });
 
 function CaseStudyPage() {
-  const { study, relatedContent } = Route.useLoaderData();
+  const { study, relatedContent, testimonialItems } = Route.useLoaderData();
   const c = study.content_json || {};
   useEffect(() => trackEvent("case_study_opened", { slug: study.slug }), [study.slug]);
   const services = arr(c.services);
@@ -81,6 +84,11 @@ function CaseStudyPage() {
     { title: "Additional images", items: gallery, mobile: false },
   ].filter((group) => group.items.length);
   const results = arr(c.measurable_results || c.results);
+  const workTestimonials = testimonialsForWork(
+    buildWorkTestimonials({ testimonials: testimonialItems, caseStudies: [study] }),
+    "case_study",
+    study.slug,
+  );
   const toc = [
     ["problem", "Problem", Boolean(c.challenge)],
     ["objectives", "Objectives", Boolean(arr(c.objectives).length || c.objectives)],
@@ -91,6 +99,7 @@ function CaseStudyPage() {
     ["screenshots", "Project gallery", Boolean(galleryGroups.length)],
     ["process", "Process", Boolean(arr(c.process).length || c.process)],
     ["results", "Results", Boolean(results.length)],
+    ["testimonial", "Client testimonial", Boolean(workTestimonials.length)],
   ] as const;
   return (
     <SiteLayout>
@@ -168,16 +177,16 @@ function CaseStudyPage() {
                 </p>
               </div>
             )}
-            {c.testimonial ? (
-              <blockquote className="rounded-3xl bg-ink p-8 text-white">
-                <p className="text-xl leading-relaxed">“{String(c.testimonial)}”</p>
-                {c.testimonial_name ? (
-                  <footer className="mt-5 text-sm text-white/60">
-                    {String(c.testimonial_name)}
-                    {c.testimonial_role ? `, ${String(c.testimonial_role)}` : ""}
-                  </footer>
-                ) : null}
-              </blockquote>
+            {workTestimonials.length ? (
+              <section id="testimonial" className="scroll-mt-28">
+                <p className="eyebrow">Client testimonial</p>
+                <h2 className="mt-3 fluid-h3">Feedback connected to this case study.</h2>
+                <div className="mt-6 grid gap-5 md:grid-cols-2">
+                  {workTestimonials.map((testimonial) => (
+                    <WorkTestimonialCard key={testimonial.id} testimonial={testimonial} />
+                  ))}
+                </div>
+              </section>
             ) : null}
             {c.live_url ? (
               <a

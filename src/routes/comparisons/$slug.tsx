@@ -9,6 +9,7 @@ import { getCmsContentItem, getRelatedContent, type CmsContentItem } from "@/lib
 import { trackEvent } from "@/lib/analytics";
 import { PublicRouteLoading } from "@/components/public-route-loading";
 import { RelatedContentSections } from "@/components/related-content-sections";
+import { relatedServiceItems } from "@/lib/related-content";
 
 function cmsComparisonFallback(cms: CmsContentItem): ComparisonDefinition {
   const content = cms.content_json || {};
@@ -128,6 +129,29 @@ function ComparisonPage() {
   const tableRows = rows(c.comparison_rows, comparison.rows);
   const risks = stringList(c.risks).length ? stringList(c.risks) : comparison.risks;
   const questions = faqs(c.faqs);
+  const directServices = relatedServiceItems(cms);
+  const serviceMap = new Map((relatedContent.services || []).map((service) => [service.slug, service]));
+  directServices.forEach((service, index) => {
+    if (!serviceMap.has(service.slug)) {
+      serviceMap.set(service.slug, {
+        id: -(index + 1),
+        content_type: "service",
+        title: service.label,
+        slug: service.slug,
+        status: "published",
+        featured: false,
+        excerpt: "",
+        featured_image: "",
+        content_json: {},
+        seo_json: {},
+      });
+    }
+  });
+  const relatedWithServices = {
+    ...relatedContent,
+    service_slugs: Array.from(new Set([...(relatedContent.service_slugs || []), ...directServices.map((service) => service.slug)])),
+    services: Array.from(serviceMap.values()),
+  };
 
   useEffect(() => trackEvent("comparison_opened", { slug: comparison.slug }), [comparison.slug]);
 
@@ -290,7 +314,7 @@ function ComparisonPage() {
 
         </div>
       </section>
-      <RelatedContentSections data={relatedContent} title="Related services, insights, work and resources" />
+      <RelatedContentSections data={relatedWithServices} title="Related services, insights, work and resources" />
       <TechnicalRoadmapCTA source={`comparison:${comparison.slug}`} />
     </SiteLayout>
   );

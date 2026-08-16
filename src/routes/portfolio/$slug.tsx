@@ -6,20 +6,24 @@ import { PageHero } from "@/components/page-hero";
 import { CTASection } from "@/components/cta-section";
 import { NavigableLightbox } from "@/components/navigable-lightbox";
 import { RelatedContentSections } from "@/components/related-content-sections";
+import { WorkTestimonialCard } from "@/components/work-testimonial-card";
+import { buildWorkTestimonials, testimonialsForWork } from "@/lib/work-testimonials";
 import { getCmsContentItem, getCmsContentList, getRelatedContent, optimizedPublicImageUrl } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/portfolio/$slug")({
   loader: async ({ params }) => {
-    const [item, serviceItems, relatedContent] = await Promise.all([
+    const [item, serviceItems, relatedContent, testimonialItems] = await Promise.all([
       getCmsContentItem("portfolio", params.slug),
       getCmsContentList("service"),
       getRelatedContent("portfolio", params.slug),
+      getCmsContentList("testimonial"),
     ]);
     if (!item) throw notFound();
     return {
       item,
       serviceItems,
       relatedContent,
+      testimonialItems,
     };
   },
   head: ({ loaderData, params }) => {
@@ -40,7 +44,7 @@ export const Route = createFileRoute("/portfolio/$slug")({
 });
 
 function PortfolioDetail() {
-  const { item, relatedContent, serviceItems } = Route.useLoaderData();
+  const { item, relatedContent, serviceItems, testimonialItems } = Route.useLoaderData();
   const content = item.content_json || {};
   const list = (key: string) => normalizeList(content[key]);
   const gallery = list("gallery");
@@ -57,6 +61,11 @@ function PortfolioDetail() {
   const liveUrl = String(content.live_url || "");
   const client = String(content.client_name || content.company || "");
   const category = String(content.category || content.project_type || "Portfolio project");
+  const workTestimonials = testimonialsForWork(
+    buildWorkTestimonials({ testimonials: testimonialItems, portfolio: [item] }),
+    "portfolio",
+    item.slug,
+  );
 
   return (
     <SiteLayout>
@@ -150,6 +159,22 @@ function PortfolioDetail() {
           </aside>
         </div>
       </section>
+
+      {workTestimonials.length ? (
+        <section className="border-t border-black/8 py-20 md:py-24">
+          <div className="container-page">
+            <div className="max-w-3xl">
+              <p className="eyebrow">Client testimonial</p>
+              <h2 className="mt-3 fluid-h3">Feedback connected to this portfolio project.</h2>
+            </div>
+            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {workTestimonials.map((testimonial) => (
+                <WorkTestimonialCard key={testimonial.id} testimonial={testimonial} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <RelatedContentSections data={relatedContent} title="Related services, case studies, insights and proof" />
 

@@ -44,6 +44,7 @@ export const coreServiceDefinitions: CoreServiceDefinition[] = [
     route: "/services/ai-automation-voice-agents",
     tier: "core",
     subservices: [
+      subservice("ai-automation-voice-agents", "internal-workflow-automation", "AI Workflow Automation", "AI-assisted workflows that connect triggers, decisions, approvals, data updates, notifications, and human handoffs across business systems."),
       subservice("ai-automation-voice-agents", "ai-calling-agents", "AI Calling Agents", "Inbound and outbound voice agents with qualification, routing, logging, and human-transfer rules."),
       subservice("ai-automation-voice-agents", "appointment-booking-agents", "Appointment-Booking Agents", "Voice and chat booking flows connected to calendars, availability, reminders, and CRM records."),
       subservice("ai-automation-voice-agents", "lead-qualification-agents", "Lead Qualification Agents", "Consistent lead intake, scoring, prioritization, pipeline assignment, and next-action recommendations."),
@@ -51,7 +52,6 @@ export const coreServiceDefinitions: CoreServiceDefinition[] = [
       subservice("ai-automation-voice-agents", "automated-lead-follow-up", "Automated Lead Follow-Up", "Email, WhatsApp, SMS, and task sequences triggered by lead behavior and pipeline status."),
       subservice("ai-automation-voice-agents", "messaging-calendar-automation", "Messaging & Calendar Automation", "Connected CRM, email, WhatsApp, SMS, calendar, reminder, and escalation workflows."),
       subservice("ai-automation-voice-agents", "document-extraction-processing", "Document Extraction & Processing", "Structured extraction, validation, routing, notifications, and approval workflows for business documents."),
-      subservice("ai-automation-voice-agents", "internal-workflow-automation", "Internal Workflow Automation", "Reduce repetitive handoffs, copying, status checks, alerts, approvals, and reporting work."),
       subservice("ai-automation-voice-agents", "custom-ai-integrations", "Custom AI Integrations", "Connect approved AI models and services to existing products, portals, data, and operating systems."),
     ],
   },

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { CTASection } from "@/components/cta-section";
 import {
@@ -16,8 +16,8 @@ import {
   Database,
   Cloud,
   LineChart,
-  Play,
-  Quote,
+  BriefcaseBusiness,
+  Scale,
   Workflow,
   Search,
   Megaphone,
@@ -36,6 +36,8 @@ import { engagementModels } from "@/lib/expansion-data";
 import { trackAnalytics } from "@/lib/analytics";
 import { BrandMarkImage } from "@/components/brand-mark";
 import { InteractiveLogoParticles } from "@/components/interactive-logo-particles";
+import { WorkTestimonialCard } from "@/components/work-testimonial-card";
+import { buildWorkTestimonials } from "@/lib/work-testimonials";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -81,6 +83,15 @@ function HomePage() {
       </div>
       <div className="contents" data-cms-section-id="home-featured-work">
         <FeaturedWork />
+      </div>
+      <div className="contents" data-cms-section-id="home-case-studies">
+        <CaseStudiesPreview />
+      </div>
+      <div className="contents" data-cms-section-id="home-comparisons">
+        <ComparisonsPreview />
+      </div>
+      <div className="contents" data-cms-section-id="home-automation-lab">
+        <AutomationLabPreview />
       </div>
       <div className="contents" data-cms-section-id="home-automation">
         <AutomationSpotlight />
@@ -483,8 +494,8 @@ function FeaturedWork() {
             View portfolio <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          {items.slice(0, 4).map((item, index) => {
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {items.slice(0, 3).map((item, index) => {
             const content = item.content_json || {};
             const services = Array.isArray(content.services) ? content.services.map(String) : [];
             return (
@@ -494,7 +505,7 @@ function FeaturedWork() {
                 key={item.slug}
                 data-reveal
                 style={{ ["--reveal-delay" as string]: `${index * 80}ms` }}
-                className="group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-white transition-transform duration-500 hover:scale-[1.01] md:p-10"
+                className="group relative flex min-h-[400px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-white transition-transform duration-500 hover:scale-[1.01] md:p-10"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-red/25 via-transparent to-brand-gold/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 {item.featured_image ? (
@@ -565,6 +576,121 @@ function MockupVisual({ index }: { index: number }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ---------- CASE STUDIES / COMPARISONS / AUTOMATION LAB ---------- */
+function CaseStudiesPreview() {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("case_study")
+      .then((result) => active && setItems(result.slice(0, 3)))
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  if (!items.length) return null;
+
+  return (
+    <section className="py-24 md:py-32">
+      <div className="container-page">
+        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-4">Case studies</p>
+            <h2 className="fluid-h2">How connected systems perform in real client work.</h2>
+            <p className="mt-5 text-lg leading-8 text-ink-soft">Three recent case studies from published Logicsify projects.</p>
+          </div>
+          <Link to="/work" className="btn-ghost-light shrink-0">View all case studies <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {items.map((item) => {
+            const content = item.content_json || {};
+            return (
+              <Link key={item.id} to="/work/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-3xl border border-black/10 bg-white transition hover:-translate-y-1 hover:shadow-xl">
+                {item.featured_image ? <img src={item.featured_image} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" decoding="async" /> : <div className="grid aspect-[16/9] place-items-center bg-ink"><BriefcaseBusiness className="h-12 w-12 text-white/20" /></div>}
+                <div className="p-7">
+                  <p className="eyebrow">{String(content.category || content.industry || "Case study")}</p>
+                  <h3 className="mt-3 text-2xl font-semibold">{item.title}</h3>
+                  {item.excerpt ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink-soft">{item.excerpt}</p> : null}
+                  <span className="mt-6 inline-flex items-center gap-2 font-semibold">Read case study <ArrowUpRight className="h-4 w-4" /></span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ComparisonsPreview() {
+  const [items, setItems] = useState<CmsContentItem[]>([]);
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("comparison")
+      .then((result) => active && setItems(result.slice(0, 3)))
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  if (!items.length) return null;
+
+  return (
+    <section className="bg-cream py-24 md:py-32">
+      <div className="container-page">
+        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-4">Comparisons</p>
+            <h2 className="fluid-h2">Make technology decisions with the tradeoffs visible.</h2>
+          </div>
+          <Link to="/comparisons" className="btn-ghost-light shrink-0">View all comparisons <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {items.map((item) => (
+            <Link key={item.id} to="/comparisons/$slug" params={{ slug: item.slug }} className="group overflow-hidden rounded-3xl border border-black/10 bg-white transition hover:-translate-y-1 hover:shadow-lg">
+              {item.featured_image ? <img src={item.featured_image} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" decoding="async" /> : <div className="grid aspect-[16/9] place-items-center bg-lavender"><Scale className="h-12 w-12 text-ink/20" /></div>}
+              <div className="p-7">
+                <Scale className="h-6 w-6 text-brand-red" />
+                <h3 className="mt-4 text-2xl font-semibold">{item.title}</h3>
+                {item.excerpt ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink-soft">{item.excerpt}</p> : null}
+                <span className="mt-6 inline-flex items-center gap-2 font-semibold">Open comparison <ArrowRight className="h-4 w-4" /></span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AutomationLabPreview() {
+  const demos = [
+    { icon: Bot, title: "Lead Qualification Agent", text: "See how lead context becomes a score, route, CRM action, and follow-up recommendation." },
+    { icon: Workflow, title: "CRM Automation Map", text: "Explore triggers, conditions, routing, and actions inside a connected revenue workflow." },
+    { icon: Zap, title: "Voice & Booking Automation", text: "Preview a controlled AI conversation that captures intent and prepares a booking workflow." },
+  ];
+  return (
+    <section className="section-dark grid-noise relative py-24 md:py-32">
+      <div className="absolute inset-0 brand-radial-glow-soft" />
+      <div className="container-page relative">
+        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-4 text-white/60">Automation Lab</p>
+            <h2 className="fluid-h2 text-white">See the workflow behave before you scope the full system.</h2>
+          </div>
+          <Link to="/automation-lab" className="btn-ghost-dark shrink-0">Open Automation Lab <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          {demos.map(({ icon: Icon, title, text }) => (
+            <Link key={title} to="/automation-lab" className="group rounded-3xl border border-white/10 bg-white/[0.045] p-7 text-white backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.075]">
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand"><Icon className="h-5 w-5" /></div>
+              <h3 className="mt-6 text-xl font-semibold">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-white/65">{text}</p>
+              <span className="mt-7 inline-flex items-center gap-2 text-sm font-semibold">Try demo <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -908,159 +1034,39 @@ function TechStack() {
   );
 }
 
-/* ---------- TESTIMONIAL FRAMEWORK ---------- */
-type TestimonialData = {
-  clientName: string;
-  role: string;
-  company: string;
-  projectType: string;
-  quote: string;
-  type: "text" | "video";
-  videoUrl: string;
-  poster: string;
-  image: string;
-};
-
-function testimonialData(item: CmsContentItem): TestimonialData {
-  const content = item.content_json || {};
-  return {
-    clientName: String(content.client_name || item.title || "Client"),
-    role: String(content.role || ""),
-    company: String(content.company || ""),
-    projectType: String(content.project_type || ""),
-    quote: String(content.quote || item.excerpt || content.body || ""),
-    type: String(content.testimonial_type || "text") === "video" ? "video" : "text",
-    videoUrl: String(content.video_url || ""),
-    poster: String(content.video_poster || item.featured_image || ""),
-    image: String(content.client_image || item.featured_image || ""),
-  };
-}
-
-function videoEmbedUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("youtube.com")) {
-      const id = parsed.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : url;
-    }
-    if (parsed.hostname === "youtu.be")
-      return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
-    if (parsed.hostname.includes("vimeo.com")) {
-      const id = parsed.pathname.split("/").filter(Boolean).pop();
-      return id ? `https://player.vimeo.com/video/${id}` : url;
-    }
-  } catch {
-    return "";
-  }
-  return "";
-}
-
+/* ---------- WORK-LINKED TESTIMONIALS ---------- */
 function TestimonialSection() {
-  const [items, setItems] = useState<CmsContentItem[]>([]);
+  const [items, setItems] = useState<ReturnType<typeof buildWorkTestimonials>>([]);
 
   useEffect(() => {
     let active = true;
-    void getCmsContentList("testimonial").then((result) => {
-      if (active) setItems(result);
-    });
-    return () => {
-      active = false;
-    };
+    Promise.all([
+      getCmsContentList("testimonial"),
+      getCmsContentList("case_study"),
+      getCmsContentList("portfolio"),
+    ])
+      .then(([testimonials, caseStudies, portfolio]) => {
+        if (active) setItems(buildWorkTestimonials({ testimonials, caseStudies, portfolio }));
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
   }, []);
 
-  const testimonials = useMemo(
-    () => items.map(testimonialData).filter((item) => item.quote || item.videoUrl),
-    [items],
-  );
-  if (!testimonials.length) return null;
+  if (!items.length) return null;
 
   return (
     <section className="py-24 md:py-32">
       <div className="container-page">
-        <div className="max-w-3xl mb-16">
-          <p className="eyebrow mb-4">Voices</p>
-          <h2 className="fluid-h2">What clients say after the work ships.</h2>
-          <p className="mt-4 text-ink-soft">
-            Published testimonials are managed from the Logicsify admin panel.
-          </p>
+        <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-4">Client proof</p>
+            <h2 className="fluid-h2">What clients say about work we actually delivered.</h2>
+            <p className="mt-4 text-ink-soft">Testimonials are connected to a published case study or portfolio project, so the feedback always has project context.</p>
+          </div>
+          <Link to="/testimonials" className="btn-ghost-light shrink-0">View all testimonials <ArrowRight className="h-4 w-4" /></Link>
         </div>
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((testimonial, index) => {
-            const embedUrl = videoEmbedUrl(testimonial.videoUrl);
-            const hostedVideo = testimonial.videoUrl && !embedUrl;
-            return (
-              <article
-                key={`${testimonial.clientName}-${index}`}
-                className="overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[var(--shadow-card)]"
-              >
-                {testimonial.type === "video" && testimonial.videoUrl ? (
-                  <div className="relative aspect-video overflow-hidden bg-ink">
-                    {embedUrl ? (
-                      <iframe
-                        src={embedUrl}
-                        title={`${testimonial.clientName} video testimonial`}
-                        className="h-full w-full"
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : hostedVideo ? (
-                      <video
-                        className="h-full w-full object-cover"
-                        controls
-                        preload="metadata"
-                        poster={testimonial.poster || undefined}
-                      >
-                        <source src={testimonial.videoUrl} />
-                      </video>
-                    ) : null}
-                    {!embedUrl && !hostedVideo && testimonial.poster ? (
-                      <img src={testimonial.poster} alt="" className="h-full w-full object-cover" />
-                    ) : null}
-                  </div>
-                ) : null}
-                <div className="p-7 md:p-8">
-                  <Quote className="mb-5 h-7 w-7 text-brand-red" />
-                  {testimonial.quote ? (
-                    <blockquote className="text-lg leading-relaxed text-ink">
-                      “{testimonial.quote}”
-                    </blockquote>
-                  ) : null}
-                  <footer className="mt-7 flex items-center gap-3">
-                    {testimonial.image ? (
-                      <img
-                        src={testimonial.image}
-                        alt={testimonial.clientName}
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="grid h-12 w-12 place-items-center rounded-full bg-gradient-brand text-sm font-bold text-white">
-                        {testimonial.clientName.slice(0, 1).toUpperCase()}
-                      </span>
-                    )}
-                    <div>
-                      <p className="font-semibold text-ink">{testimonial.clientName}</p>
-                      <p className="text-sm text-ink-soft">
-                        {[testimonial.role, testimonial.company, testimonial.projectType]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
-                    </div>
-                  </footer>
-                  {testimonial.type === "video" && testimonial.videoUrl ? (
-                    <div className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-brand-red">
-                      <Play className="h-3.5 w-3.5" /> Video testimonial
-                    </div>
-                  ) : null}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-        <div className="mt-10 flex justify-center">
-          <Link to="/testimonials" className="btn-ghost-dark">
-            View All Testimonials <ArrowRight className="h-4 w-4" />
-          </Link>
+          {items.slice(0, 3).map((testimonial) => <WorkTestimonialCard key={testimonial.id} testimonial={testimonial} />)}
         </div>
       </div>
     </section>

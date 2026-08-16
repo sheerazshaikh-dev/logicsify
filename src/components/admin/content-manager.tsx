@@ -1211,6 +1211,32 @@ function ContentEditor({
                       />
                     </div>
                   </div>
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+                    <p className="text-sm font-semibold text-emerald-950">Related work</p>
+                    <p className="mt-1 text-xs leading-5 text-emerald-800/80">
+                      Link this testimonial to a published Case Study or Portfolio project. Unlinked standalone testimonials are intentionally not shown publicly.
+                    </p>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div>
+                        <FieldLabel>Related case study slug</FieldLabel>
+                        <input
+                          value={String(contentJson.related_case_study || "")}
+                          onChange={(event) => updateContentJson("related_case_study", slugify(event.target.value))}
+                          className={adminInputClass}
+                          placeholder="case-study-slug"
+                        />
+                      </div>
+                      <div>
+                        <FieldLabel>Related portfolio slug</FieldLabel>
+                        <input
+                          value={String(contentJson.related_portfolio || "")}
+                          onChange={(event) => updateContentJson("related_portfolio", slugify(event.target.value))}
+                          className={adminInputClass}
+                          placeholder="portfolio-project-slug"
+                        />
+                      </div>
+                    </div>
+                  </div>
                   <div>
                     <FieldLabel>Related service slugs</FieldLabel>
                     <textarea
@@ -1996,15 +2022,31 @@ function StructuredContentFields({
           "measurable_results",
           "Reduced manual processing\nImproved mobile usability",
         )}
-        {textField(
-          "Client testimonial",
-          "testimonial",
-          "Leave empty unless supplied by the client.",
-          true,
-        )}
-        <div className="grid gap-4 md:grid-cols-2">
-          {textField("Testimonial name", "testimonial_name")}
-          {textField("Testimonial role", "testimonial_role")}
+        <div className="rounded-2xl border border-black/10 bg-cream/60 p-5">
+          <div>
+            <h4 className="text-sm font-semibold text-ink">Project testimonial</h4>
+            <p className="mt-1 text-xs leading-5 text-slate-400">This testimonial automatically appears on this case study, the Testimonials page, and homepage client proof.</p>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <FieldLabel>Testimonial type</FieldLabel>
+              <select value={String(content.testimonial_type || "text")} onChange={(event) => update("testimonial_type", event.target.value)} className={adminInputClass}>
+                <option value="text">Written testimonial</option>
+                <option value="video">Video testimonial</option>
+              </select>
+            </div>
+            {textField("Testimonial name", "testimonial_name")}
+            {textField("Testimonial role", "testimonial_role")}
+            {textField("Testimonial company", "testimonial_company")}
+          </div>
+          <div className="mt-4">
+            {textField("Client testimonial", "testimonial", "Leave empty unless supplied by the client.", true)}
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {mediaField("Testimonial image / logo", "testimonial_image")}
+            {String(content.testimonial_type || "text") === "video" ? mediaField("Video poster", "testimonial_video_poster") : null}
+            {String(content.testimonial_type || "text") === "video" ? textField("Video URL", "testimonial_video_url", "YouTube, Vimeo, MP4/WebM URL") : null}
+          </div>
         </div>
       </AdminCard>
     );
@@ -2035,6 +2077,32 @@ function StructuredContentFields({
           {listField("Deliverables", "deliverables", "UX design\nDevelopment\nIntegrations")}
         </div>
         {mediaList("Portfolio gallery", "gallery")}
+        <div className="rounded-2xl border border-black/10 bg-cream/60 p-5">
+          <div>
+            <h4 className="text-sm font-semibold text-ink">Project testimonial</h4>
+            <p className="mt-1 text-xs leading-5 text-slate-400">Add verified client feedback here to show it on this project, the Testimonials page, and homepage client proof.</p>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <FieldLabel>Testimonial type</FieldLabel>
+              <select value={String(content.testimonial_type || "text")} onChange={(event) => update("testimonial_type", event.target.value)} className={adminInputClass}>
+                <option value="text">Written testimonial</option>
+                <option value="video">Video testimonial</option>
+              </select>
+            </div>
+            {textField("Testimonial name", "testimonial_name")}
+            {textField("Testimonial role", "testimonial_role")}
+            {textField("Testimonial company", "testimonial_company")}
+          </div>
+          <div className="mt-4">
+            {textField("Client testimonial", "testimonial", "Leave empty unless supplied by the client.", true)}
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {mediaField("Testimonial image / logo", "testimonial_image")}
+            {String(content.testimonial_type || "text") === "video" ? mediaField("Video poster", "testimonial_video_poster") : null}
+            {String(content.testimonial_type || "text") === "video" ? textField("Video URL", "testimonial_video_url", "YouTube, Vimeo, MP4/WebM URL") : null}
+          </div>
+        </div>
       </AdminCard>
     );
   }
