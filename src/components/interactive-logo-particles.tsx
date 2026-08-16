@@ -71,6 +71,9 @@ export function InteractiveLogoParticles({
     let particleRadius = 2.6;
     let width = 0;
     let height = 0;
+    let visualWidth = 0;
+    let visualHeight = 0;
+    let interactionPadding = 0;
     let animationFrame = 0;
     let image: HTMLImageElement | null = null;
     let destroyed = false;
@@ -94,10 +97,13 @@ export function InteractiveLogoParticles({
 
     const updatePointer = (event: PointerEvent) => {
       wake();
-      const rect = canvas.getBoundingClientRect();
+      const rect = wrapper.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
-      const nextX = ((event.clientX - rect.left) / rect.width) * width;
-      const nextY = ((event.clientY - rect.top) / rect.height) * height;
+      // Pointer coordinates are measured in the visible logo box, then shifted
+      // into the larger off-edge simulation canvas. The extra canvas is purely
+      // render space and never intercepts clicks in neighboring hero content.
+      const nextX = event.clientX - rect.left + interactionPadding;
+      const nextY = event.clientY - rect.top + interactionPadding;
       const now = performance.now();
 
       if (pointer.lastTime > 0) {
@@ -145,7 +151,7 @@ export function InteractiveLogoParticles({
       if (reducedMotion) return;
       updatePointer(event);
       pointer.pressed = true;
-      canvas.setPointerCapture?.(event.pointerId);
+      wrapper.setPointerCapture?.(event.pointerId);
     };
 
     const onPointerUp = (event: PointerEvent) => {
@@ -174,22 +180,24 @@ export function InteractiveLogoParticles({
 
       offscreenContext.clearRect(0, 0, offscreen.width, offscreen.height);
 
-      // Keep generous interaction space while making the actual mark dominant.
-      const padding = Math.max(14, Math.min(width, height) * 0.055);
-      const availableWidth = Math.max(1, width - padding * 2);
-      const availableHeight = Math.max(1, height - padding * 2);
+      // The logo is sized only against the visible wrapper. The bitmap itself is
+      // larger on every side so displaced particles have real drawing room and
+      // never hit a hard canvas edge during hover distortion.
+      const padding = Math.max(14, Math.min(visualWidth, visualHeight) * 0.055);
+      const availableWidth = Math.max(1, visualWidth - padding * 2);
+      const availableHeight = Math.max(1, visualHeight - padding * 2);
       const scale = Math.min(availableWidth / image.width, availableHeight / image.height);
       const drawWidth = image.width * scale;
       const drawHeight = image.height * scale;
-      const drawX = (width - drawWidth) / 2;
-      const drawY = (height - drawHeight) / 2;
+      const drawX = interactionPadding + (visualWidth - drawWidth) / 2;
+      const drawY = interactionPadding + (visualHeight - drawHeight) / 2;
 
       offscreenContext.drawImage(image, drawX, drawY, drawWidth, drawHeight);
       const pixelData = offscreenContext.getImageData(0, 0, offscreen.width, offscreen.height).data;
 
       // Dense enough that adjacent circles overlap slightly. This is what makes
       // the idle state look like the original artwork instead of a dotted logo.
-      let step = width >= 500 ? 2.25 : width >= 380 ? 2.15 : 2.05;
+      let step = visualWidth >= 500 ? 2.25 : visualWidth >= 380 ? 2.15 : 2.05;
       const estimatedOpaqueArea = drawWidth * drawHeight * 0.39;
       const estimatedCount = estimatedOpaqueArea / (step * step);
       if (estimatedCount > MAX_PARTICLES) {
@@ -234,14 +242,23 @@ export function InteractiveLogoParticles({
 
     const resize = () => {
       const rect = wrapper.getBoundingClientRect();
-      width = Math.max(280, rect.width);
-      height = Math.max(280, rect.height);
+      visualWidth = Math.max(280, rect.width);
+      visualHeight = Math.max(280, rect.height);
+
+      // Around 190–270 CSS pixels of invisible render buffer surrounds the
+      // visible logo. This is intentionally larger than normal displacement so
+      // even strong pointer sweeps remain inside the bitmap.
+      interactionPadding = Math.min(270, Math.max(190, Math.min(visualWidth, visualHeight) * 0.42));
+      width = visualWidth + interactionPadding * 2;
+      height = visualHeight + interactionPadding * 2;
 
       const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       canvas.width = Math.max(1, Math.round(width * dpr));
       canvas.height = Math.max(1, Math.round(height * dpr));
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
+      canvas.style.left = `${-interactionPadding}px`;
+      canvas.style.top = `${-interactionPadding}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       buildParticles();
@@ -257,7 +274,7 @@ export function InteractiveLogoParticles({
 
       // Mouse interaction is intentionally local: only particles under/near the
       // pointer scatter, while the rest of the mark stays recognizable.
-      const reactionRadius = Math.min(170, Math.max(105, width * 0.245));
+      const reactionRadius = Math.min(170, Math.max(105, visualWidth * 0.245));
       const reactionRadiusSq = reactionRadius * reactionRadius;
 
       // Softer spring + higher damping = slower, more natural recovery.
@@ -266,7 +283,7 @@ export function InteractiveLogoParticles({
       const spring = pointer.active ? 0.018 : 0.042;
       const damping = pointer.active ? 0.925 : 0.875;
       const forceMultiplier = pointer.pressed ? 8.4 : 5.65;
-      const maxDisplacement = reactionRadius * 1.7;
+      const maxDisplacement = Math.min(reactionRadius * 1.7, interactionPadding * 0.88);
       const pointerSpeed = Math.min(28, Math.hypot(pointer.vx, pointer.vy));
       const flowStrength = pointerSpeed > 0.2 ? Math.min(0.32, pointerSpeed * 0.012) : 0;
       let unsettled = false;
@@ -354,12 +371,12 @@ export function InteractiveLogoParticles({
     );
     visibilityObserver.observe(wrapper);
 
-    canvas.addEventListener("pointermove", onPointerMove, { passive: true });
-    canvas.addEventListener("pointerenter", onPointerEnter, { passive: true });
-    canvas.addEventListener("pointerleave", onPointerLeave, { passive: true });
-    canvas.addEventListener("pointerdown", onPointerDown, { passive: true });
-    canvas.addEventListener("pointerup", onPointerUp, { passive: true });
-    canvas.addEventListener("pointercancel", onPointerLeave, { passive: true });
+    wrapper.addEventListener("pointermove", onPointerMove, { passive: true });
+    wrapper.addEventListener("pointerenter", onPointerEnter, { passive: true });
+    wrapper.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    wrapper.addEventListener("pointerdown", onPointerDown, { passive: true });
+    wrapper.addEventListener("pointerup", onPointerUp, { passive: true });
+    wrapper.addEventListener("pointercancel", onPointerLeave, { passive: true });
 
     image = new Image();
     image.decoding = "async";
@@ -376,12 +393,12 @@ export function InteractiveLogoParticles({
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
       motionQuery.removeEventListener?.("change", onMotionChange);
-      canvas.removeEventListener("pointermove", onPointerMove);
-      canvas.removeEventListener("pointerenter", onPointerEnter);
-      canvas.removeEventListener("pointerleave", onPointerLeave);
-      canvas.removeEventListener("pointerdown", onPointerDown);
-      canvas.removeEventListener("pointerup", onPointerUp);
-      canvas.removeEventListener("pointercancel", onPointerLeave);
+      wrapper.removeEventListener("pointermove", onPointerMove);
+      wrapper.removeEventListener("pointerenter", onPointerEnter);
+      wrapper.removeEventListener("pointerleave", onPointerLeave);
+      wrapper.removeEventListener("pointerdown", onPointerDown);
+      wrapper.removeEventListener("pointerup", onPointerUp);
+      wrapper.removeEventListener("pointercancel", onPointerLeave);
     };
   }, [imageSrc]);
 
@@ -392,7 +409,7 @@ export function InteractiveLogoParticles({
     >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 h-full w-full touch-pan-y"
+        className="pointer-events-none absolute touch-pan-y"
         aria-hidden="true"
       />
       <span className="sr-only">Interactive Logicsify brand mark</span>
