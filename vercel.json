@@ -83,7 +83,7 @@
     },
     {
       "source": "/media/:path*",
-      "destination": "https://backend.logicsify.com/api/public/media/:path*"
+      "destination": "https://backend.logicsify.com/uploads/:path*"
     },
     {
       "source": "/((?!api/|admin(?:/|$)|media(?:/|$)).*)",
