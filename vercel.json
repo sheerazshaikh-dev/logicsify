@@ -86,7 +86,11 @@
       "destination": "https://backend.logicsify.com/uploads/:path*"
     },
     {
-      "source": "/((?!api/|admin(?:/|$)|media(?:/|$)).*)",
+      "source": "/uploads/:path*",
+      "destination": "https://backend.logicsify.com/uploads/:path*"
+    },
+    {
+      "source": "/((?!api/|admin(?:/|$)|media(?:/|$)|uploads(?:/|$)).*)",
       "destination": "/index.html"
     }
   ],
