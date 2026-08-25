@@ -76,14 +76,48 @@
           }
         };
 
-        const observer = new MutationObserver(applyMobileDrawerBranding);
+        // Dropdown items such as "Who We Are" are not mega menus. The React
+        // fallback grouper can otherwise expose internal placeholders such as
+        // "Column 1" ... "Column 5" on mobile. Remove only those generated
+        // headings while keeping the actual About/Team links untouched.
+        const cleanupMobileMenuColumns = () => {
+          const closeButton = document.querySelector('button[aria-label="Close menu"]');
+          if (!(closeButton instanceof HTMLElement)) return;
+
+          const drawerHeader = closeButton.parentElement;
+          const nav = drawerHeader?.nextElementSibling;
+          if (!(nav instanceof HTMLElement)) return;
+
+          const whoWeAre = Array.from(nav.querySelectorAll("details")).find((details) => {
+            const summary = details.querySelector("summary");
+            return summary?.textContent?.trim() === "Who We Are";
+          });
+          if (!(whoWeAre instanceof HTMLElement)) return;
+
+          whoWeAre.querySelectorAll("p").forEach((heading) => {
+            if (!/^Column\s+\d+$/i.test(heading.textContent?.trim() || "")) return;
+            const group = heading.parentElement;
+            if (group instanceof HTMLElement && group.children.length === 1) {
+              group.remove();
+            } else {
+              heading.remove();
+            }
+          });
+        };
+
+        const applyMobileUiFixes = () => {
+          applyMobileDrawerBranding();
+          cleanupMobileMenuColumns();
+        };
+
+        const observer = new MutationObserver(applyMobileUiFixes);
         observer.observe(document.documentElement, {
           childList: true,
           subtree: true,
           attributes: true,
           attributeFilter: ["src"],
         });
-        document.addEventListener("DOMContentLoaded", applyMobileDrawerBranding, { once: true });
+        document.addEventListener("DOMContentLoaded", applyMobileUiFixes, { once: true });
       })();
     </script>
     <title>Logicsify | Web Development, AI Automation & Digital Marketing</title>
