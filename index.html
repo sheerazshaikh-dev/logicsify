@@ -17,6 +17,75 @@
       type="font/woff2"
       crossorigin
     />
+    <script data-logicsify-mobile-ui-reliability>
+      (() => {
+        const lightLogo = "/9d583de744ef8542e0dae01c7231673a.png";
+        const backendUploads = "https://backend.logicsify.com/uploads/";
+
+        // Safari/mobile recovery: if a same-origin media route fails, retry the
+        // underlying static upload directly once instead of leaving a broken image.
+        document.addEventListener(
+          "error",
+          (event) => {
+            const image = event.target;
+            if (!(image instanceof HTMLImageElement) || image.dataset.logicsifyMediaRetry === "1") return;
+
+            try {
+              const source = image.currentSrc || image.src;
+              const url = new URL(source, window.location.origin);
+              if (url.origin !== window.location.origin) return;
+
+              let relativePath = "";
+              if (url.pathname.startsWith("/media/")) {
+                relativePath = url.pathname.slice("/media/".length);
+              } else if (url.pathname.startsWith("/uploads/")) {
+                relativePath = url.pathname.slice("/uploads/".length);
+              }
+
+              if (!relativePath || relativePath.split("/").some((segment) => segment === "..")) return;
+
+              image.dataset.logicsifyMediaRetry = "1";
+              image.removeAttribute("srcset");
+              image.src = `${backendUploads}${relativePath}${url.search}`;
+            } catch {
+              // Preserve the browser's normal broken-image behavior for unknown URLs.
+            }
+          },
+          true,
+        );
+
+        // The official light wordmark is designed for a dark surface. Keep the
+        // mobile drawer body light, but give its brand strip a dark background so
+        // the complete light logo remains visible instead of only showing the mark.
+        const applyMobileDrawerBranding = () => {
+          const closeButton = document.querySelector('button[aria-label="Close menu"]');
+          if (!(closeButton instanceof HTMLElement)) return;
+
+          const drawerHeader = closeButton.parentElement;
+          if (!(drawerHeader instanceof HTMLElement)) return;
+
+          drawerHeader.style.backgroundColor = "#000000";
+          drawerHeader.style.borderColor = "rgba(255,255,255,0.12)";
+          closeButton.style.color = "#ffffff";
+          closeButton.style.borderColor = "rgba(255,255,255,0.22)";
+
+          const drawerLogo = drawerHeader.querySelector("img");
+          if (drawerLogo instanceof HTMLImageElement && drawerLogo.getAttribute("src") !== lightLogo) {
+            drawerLogo.removeAttribute("srcset");
+            drawerLogo.src = lightLogo;
+          }
+        };
+
+        const observer = new MutationObserver(applyMobileDrawerBranding);
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["src"],
+        });
+        document.addEventListener("DOMContentLoaded", applyMobileDrawerBranding, { once: true });
+      })();
+    </script>
     <title>Logicsify | Web Development, AI Automation & Digital Marketing</title>
   </head>
   <body>
