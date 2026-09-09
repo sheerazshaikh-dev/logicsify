@@ -4,8 +4,8 @@ export const DEFAULT_BRAND_ASSETS = {
   mobileLogo: "/logicsify-logo-light.png",
   adminLogo: "/logicsify-logo-light.png",
   adminLogoDark: "/logicsify-logo-dark.png",
-  brandMark: "/logicsify-mark.png",
-  favicon: "/logicsify-mark.png",
+  brandMark: "/logicsify-mark.webp",
+  favicon: "/logicsify-mark.webp",
   appleTouchIcon: "/apple-touch-icon.png",
 } as const;
 
