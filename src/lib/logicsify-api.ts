@@ -294,7 +294,31 @@ export type PublicTeamMember = {
   sort_order: number;
 };
 
-export function getPublicTeamMembers(placement: "home" | "about" | "contact" | "profile") {
+export async function getPublicTeamMembers(
+  placement: "home" | "about" | "contact" | "profile",
+): Promise<PublicTeamMember[]> {
+  // Public team pages are browser-facing and should not depend on cross-origin
+  // CORS behavior. Vercel proxies this same-origin endpoint to the CMS API.
+  if (typeof window !== "undefined") {
+    const response = await fetch(
+      `/api/team-directory?placement=${encodeURIComponent(placement)}`,
+      { cache: "no-store" },
+    );
+
+    let payload: ApiEnvelope<PublicTeamMember[]> | null = null;
+    try {
+      payload = (await response.json()) as ApiEnvelope<PublicTeamMember[]>;
+    } catch {
+      // A non-JSON upstream response is treated as a failed team read.
+    }
+
+    if (!response.ok || !payload?.success || !Array.isArray(payload.data)) {
+      throw new Error(payload?.message || "The team directory could not be loaded.");
+    }
+
+    return normalizePublicAssetUrls(payload.data);
+  }
+
   return request<PublicTeamMember[]>(`public/team-directory?placement=${placement}`);
 }
 
