@@ -1,12 +1,12 @@
 export const DEFAULT_BRAND_ASSETS = {
-  logoLight: "/9d583de744ef8542e0dae01c7231673a.png",
-  logoDark: "/3b4a0a2a1d78df66b5bb7dac579e144c.png",
-  mobileLogo: "/3b4a0a2a1d78df66b5bb7dac579e144c.png",
-  adminLogo: "/9d583de744ef8542e0dae01c7231673a.png",
-  adminLogoDark: "/3b4a0a2a1d78df66b5bb7dac579e144c.png",
-  brandMark: "/f2048ae62fb525b2c29c3e51e755cc17.png",
-  favicon: "/f2048ae62fb525b2c29c3e51e755cc17.png",
-  appleTouchIcon: "/f2048ae62fb525b2c29c3e51e755cc17.png",
+  logoLight: "/logicsify-logo-light.png",
+  logoDark: "/logicsify-logo-dark.png",
+  mobileLogo: "/logicsify-logo-light.png",
+  adminLogo: "/logicsify-logo-light.png",
+  adminLogoDark: "/logicsify-logo-dark.png",
+  brandMark: "/logicsify-mark.png",
+  favicon: "/logicsify-mark.png",
+  appleTouchIcon: "/apple-touch-icon.png",
 } as const;
 
 export const DEFAULT_SITE_BRANDING = {
