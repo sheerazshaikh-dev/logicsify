@@ -2,10 +2,29 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Linkedin, Mail, Phone, Users } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
 import { SiteLayout } from "@/components/site-layout";
-import { getPublicTeamMembers } from "@/lib/logicsify-api";
+import { getPublicTeamMembers, type PublicTeamMember } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/team")({
-  loader: async () => ({ team: await getPublicTeamMembers("profile") }),
+  loader: async () => {
+    const placements = ["profile", "about", "home", "contact"] as const;
+    const results = await Promise.allSettled(
+      placements.map((placement) => getPublicTeamMembers(placement)),
+    );
+
+    const members = new Map<number, PublicTeamMember>();
+    for (const result of results) {
+      if (result.status !== "fulfilled") continue;
+      for (const member of result.value) members.set(member.id, member);
+    }
+
+    return {
+      team: [...members.values()].sort(
+        (a, b) =>
+          (a.sort_order ?? 0) - (b.sort_order ?? 0) ||
+          a.display_name.localeCompare(b.display_name),
+      ),
+    };
+  },
   head: () => ({
     meta: [
       { title: "Our Team | Logicsify" },
