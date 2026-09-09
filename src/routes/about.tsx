@@ -78,7 +78,7 @@ export const Route = createFileRoute("/about")({
               "@id": "https://logicsify.com/#organization",
               name: "Logicsify",
               url: "https://logicsify.com",
-              logo: "https://logicsify.com/3b4a0a2a1d78df66b5bb7dac579e144c.png",
+              logo: "https://logicsify.com/logicsify-logo-dark.png",
               email: "connect@logicsify.com",
               contactPoint: [
                 {
