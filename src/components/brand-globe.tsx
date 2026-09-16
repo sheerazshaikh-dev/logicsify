@@ -6,36 +6,26 @@ const WORLD_DATA_URL = "https://assets.aceternity.com/globe.json";
 
 type GeoPoint = { lat: number; lng: number };
 type ProjectedPoint = GeoPoint & { x: number; y: number; z: number; visible: boolean };
-type Arc = {
-  start: GeoPoint;
-  end: GeoPoint;
-  altitude: number;
-  color: string;
-};
+type Arc = { start: GeoPoint; end: GeoPoint; altitude: number; color: string };
 type Ring = { point: GeoPoint; startedAt: number; color: string };
-
-type GeoGeometry = {
-  type: "Polygon" | "MultiPolygon";
-  coordinates: unknown;
-};
+type GeoGeometry = { type: "Polygon" | "MultiPolygon"; coordinates: unknown };
 type GeoFeature = { geometry?: GeoGeometry | null };
 type GeoCollection = { features?: GeoFeature[] };
-
 type Polygon = [number, number][];
 
 const hubs: GeoPoint[] = [
-  { lat: 24.86, lng: 67.01 }, // Karachi
-  { lat: 25.2, lng: 55.27 }, // Dubai
-  { lat: 51.5, lng: -0.12 }, // London
-  { lat: 40.71, lng: -74.0 }, // New York
-  { lat: 37.77, lng: -122.42 }, // San Francisco
-  { lat: 1.35, lng: 103.82 }, // Singapore
-  { lat: -33.87, lng: 151.21 }, // Sydney
-  { lat: 35.68, lng: 139.69 }, // Tokyo
-  { lat: 52.52, lng: 13.4 }, // Berlin
-  { lat: 19.08, lng: 72.88 }, // Mumbai
-  { lat: -23.55, lng: -46.63 }, // Sao Paulo
-  { lat: -1.29, lng: 36.82 }, // Nairobi
+  { lat: 24.86, lng: 67.01 },
+  { lat: 25.2, lng: 55.27 },
+  { lat: 51.5, lng: -0.12 },
+  { lat: 40.71, lng: -74.0 },
+  { lat: 37.77, lng: -122.42 },
+  { lat: 1.35, lng: 103.82 },
+  { lat: -33.87, lng: 151.21 },
+  { lat: 35.68, lng: 139.69 },
+  { lat: 52.52, lng: 13.4 },
+  { lat: 19.08, lng: 72.88 },
+  { lat: -23.55, lng: -46.63 },
+  { lat: -1.29, lng: 36.82 },
 ];
 
 const arcs: Arc[] = [
@@ -87,58 +77,26 @@ function extractPolygons(collection: GeoCollection): Polygon[] {
   return polygons;
 }
 
-function polygonBounds(polygon: Polygon) {
-  let minLng = 180;
-  let maxLng = -180;
-  let minLat = 90;
-  let maxLat = -90;
-  for (const [lng, lat] of polygon) {
-    minLng = Math.min(minLng, lng);
-    maxLng = Math.max(maxLng, lng);
-    minLat = Math.min(minLat, lat);
-    maxLat = Math.max(maxLat, lat);
-  }
-  return { minLng, maxLng, minLat, maxLat };
-}
-
 function pointInPolygon(lng: number, lat: number, polygon: Polygon) {
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i][0];
-    const yi = polygon[i][1];
-    const xj = polygon[j][0];
-    const yj = polygon[j][1];
-    const intersects =
-      yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi || 1e-9) + xi;
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    const intersects = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi || 1e-9) + xi;
     if (intersects) inside = !inside;
   }
   return inside;
 }
 
 function buildLandDots(collection: GeoCollection): GeoPoint[] {
-  const polygons = extractPolygons(collection)
-    .map((polygon) => ({ polygon, bounds: polygonBounds(polygon) }))
-    .filter(({ bounds }) => bounds.maxLat >= -82 && bounds.minLat <= 82);
-
+  const polygons = extractPolygons(collection);
   const result: GeoPoint[] = [];
   const step = 3.25;
   for (let lat = -78; lat <= 82; lat += step) {
-    // Slight longitudinal staggering creates a hex-like point field.
     const stagger = Math.round((lat + 90) / step) % 2 ? step * 0.5 : 0;
     for (let lng = -180 + stagger; lng <= 180; lng += step) {
-      for (const { polygon, bounds } of polygons) {
-        if (
-          lng < bounds.minLng ||
-          lng > bounds.maxLng ||
-          lat < bounds.minLat ||
-          lat > bounds.maxLat
-        ) {
-          continue;
-        }
-        if (pointInPolygon(lng, lat, polygon)) {
-          result.push({ lat, lng: normalizeLng(lng) });
-          break;
-        }
+      if (polygons.some((polygon) => pointInPolygon(lng, lat, polygon))) {
+        result.push({ lat, lng: normalizeLng(lng) });
       }
     }
   }
@@ -146,7 +104,6 @@ function buildLandDots(collection: GeoCollection): GeoPoint[] {
 }
 
 function fallbackLandDots(): GeoPoint[] {
-  // Used only if the Aceternity world data cannot be loaded.
   const seeds = [
     { lat: 47, lng: -101 }, { lat: 39, lng: -96 }, { lat: 31, lng: -99 },
     { lat: -9, lng: -60 }, { lat: -22, lng: -48 }, { lat: -35, lng: -66 },
@@ -160,8 +117,7 @@ function fallbackLandDots(): GeoPoint[] {
   for (const seed of seeds) {
     for (let y = -10; y <= 10; y += 3.4) {
       for (let x = -15; x <= 15; x += 3.4) {
-        const distance = Math.hypot(x / 1.4, y);
-        if (distance < 10 + ((seed.lng + x + y) % 4)) {
+        if (Math.hypot(x / 1.4, y) < 10 + ((seed.lng + x + y) % 4)) {
           dots.push({ lat: seed.lat + y, lng: normalizeLng(seed.lng + x) });
         }
       }
@@ -178,13 +134,11 @@ export function BrandGlobe() {
     const canvas = canvasRef.current;
     const wrap = wrapRef.current;
     if (!canvas || !wrap) return;
-
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let width = 0;
     let height = 0;
-    let dpr = 1;
     let rotation = -1.05;
     let tilt = -0.08;
     let raf = 0;
@@ -211,7 +165,7 @@ export function BrandGlobe() {
       const rect = wrap.getBoundingClientRect();
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       canvas.style.width = `${width}px`;
@@ -226,14 +180,12 @@ export function BrandGlobe() {
       let x = cosLat * Math.sin(lng);
       let y = Math.sin(lat);
       let z = cosLat * Math.cos(lng);
-
       const ct = Math.cos(tilt);
       const st = Math.sin(tilt);
       const y2 = y * ct - z * st;
       const z2 = y * st + z * ct;
       y = y2;
       z = z2;
-
       return { ...point, x: cx + x * radius, y: cy - y * radius, z, visible: z > 0.01 };
     };
 
@@ -248,11 +200,11 @@ export function BrandGlobe() {
     ) => {
       const mx = (p0.x + p1.x) / 2;
       const my = (p0.y + p1.y) / 2;
-      const fromCenterX = mx - cx;
-      const fromCenterY = my - cy;
-      const length = Math.max(1, Math.hypot(fromCenterX, fromCenterY));
-      const controlX = mx + (fromCenterX / length) * radius * altitude;
-      const controlY = my + (fromCenterY / length) * radius * altitude;
+      const dx = mx - cx;
+      const dy = my - cy;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const controlX = mx + (dx / length) * radius * altitude;
+      const controlY = my + (dy / length) * radius * altitude;
       const mt = 1 - t;
       return {
         x: mt * mt * p0.x + 2 * mt * t * controlX + t * t * p1.x,
@@ -262,11 +214,54 @@ export function BrandGlobe() {
       };
     };
 
+    const drawGrid = (radius: number, cx: number, cy: number) => {
+      ctx.save();
+      ctx.lineWidth = 0.72;
+      ctx.strokeStyle = "rgba(255,255,255,0.075)";
+
+      for (let lat = -60; lat <= 60; lat += 20) {
+        ctx.beginPath();
+        let started = false;
+        for (let lng = -180; lng <= 180; lng += 3) {
+          const p = project({ lat, lng }, radius, cx, cy);
+          if (!p.visible) {
+            started = false;
+            continue;
+          }
+          if (!started) {
+            ctx.moveTo(p.x, p.y);
+            started = true;
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+        ctx.stroke();
+      }
+
+      for (let lng = -180; lng < 180; lng += 20) {
+        ctx.beginPath();
+        let started = false;
+        for (let lat = -88; lat <= 88; lat += 2.5) {
+          const p = project({ lat, lng }, radius, cx, cy);
+          if (!p.visible) {
+            started = false;
+            continue;
+          }
+          if (!started) {
+            ctx.moveTo(p.x, p.y);
+            started = true;
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
+
     const draw = (time: number) => {
       raf = 0;
       if (!visible || !width || !height) return;
-
-      // 30fps is visually smooth for this ambient hero element and keeps CPU/GPU use low.
       if (lastFrame && time - lastFrame < 32 && !dragging) {
         raf = requestAnimationFrame(draw);
         return;
@@ -280,7 +275,6 @@ export function BrandGlobe() {
       const cx = width * 0.5;
       const cy = height * 0.53;
 
-      // Aceternity-style atmosphere.
       const atmosphere = ctx.createRadialGradient(cx, cy, radius * 0.72, cx, cy, radius * 1.23);
       atmosphere.addColorStop(0, "rgba(4,166,161,0)");
       atmosphere.addColorStop(0.78, "rgba(4,166,161,0.025)");
@@ -291,7 +285,6 @@ export function BrandGlobe() {
       ctx.arc(cx, cy, radius * 1.23, 0, Math.PI * 2);
       ctx.fill();
 
-      // Dark, slightly emissive globe surface.
       const sphere = ctx.createRadialGradient(
         cx - radius * 0.35,
         cy - radius * 0.42,
@@ -314,8 +307,8 @@ export function BrandGlobe() {
       ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.clip();
 
-      // Country texture: small hex-like points built from the same world dataset
-      // linked by the Aceternity component documentation.
+      drawGrid(radius, cx, cy);
+
       for (let i = 0; i < landDots.length; i += 1) {
         const p = project(landDots[i], radius, cx, cy);
         if (!p.visible) continue;
@@ -323,25 +316,22 @@ export function BrandGlobe() {
         const alpha = 0.22 + front * 0.48;
         const color = i % 5 === 0 ? BRAND_GREEN : BRAND_TEAL;
         ctx.fillStyle = rgba(color, alpha);
-        const dotRadius = 0.75 + front * 0.62;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 0.75 + front * 0.62, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Animated arcs with dashed heads/tails rather than static full lines.
       arcs.forEach((arc, index) => {
         const start = project(arc.start, radius, cx, cy);
         const end = project(arc.end, radius, cx, cy);
         if (!start.visible || !end.visible) return;
-
         const mid = bezierPoint(start, end, cx, cy, radius, arc.altitude, 0.5);
         const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
         gradient.addColorStop(0, rgba(arc.color, 0.15));
         gradient.addColorStop(0.5, rgba(arc.color, 0.95));
         gradient.addColorStop(1, rgba(arc.color === BRAND_TEAL ? BRAND_GREEN : BRAND_TEAL, 0.45));
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 1.15;
+        ctx.lineWidth = 1.35;
         ctx.setLineDash([radius * 0.17, radius * 0.075]);
         ctx.lineDashOffset = -(time * 0.018 + index * 34);
         ctx.beginPath();
@@ -353,15 +343,14 @@ export function BrandGlobe() {
         const travel = (time * 0.00012 + index * 0.11) % 1;
         const moving = bezierPoint(start, end, cx, cy, radius, arc.altitude, travel);
         ctx.shadowColor = arc.color;
-        ctx.shadowBlur = 9;
+        ctx.shadowBlur = 12;
         ctx.fillStyle = arc.color;
         ctx.beginPath();
-        ctx.arc(moving.x, moving.y, 1.65, 0, Math.PI * 2);
+        ctx.arc(moving.x, moving.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
       });
 
-      // Endpoint dots.
       hubs.forEach((point, index) => {
         const p = project(point, radius, cx, cy);
         if (!p.visible) return;
@@ -369,15 +358,14 @@ export function BrandGlobe() {
         const front = Math.max(0.35, p.z);
         ctx.fillStyle = rgba(color, 0.16);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 5.5 * front, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 9 * front, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.8 + front * 0.6, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 2.7 + front * 0.8, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Propagating rings similar to the Aceternity globe's ring layer.
       if (!reduceMotion && time >= nextRingAt) {
         const index = Math.floor((time / 1300) % hubs.length);
         rings.push({
@@ -385,24 +373,23 @@ export function BrandGlobe() {
           startedAt: time,
           color: index % 2 ? BRAND_GREEN : BRAND_TEAL,
         });
-        rings = rings.slice(-4);
-        nextRingAt = time + 950;
+        rings = rings.slice(-5);
+        nextRingAt = time + 900;
       }
-      rings = rings.filter((ring) => time - ring.startedAt < 1800);
+      rings = rings.filter((ring) => time - ring.startedAt < 1900);
       for (const ring of rings) {
         const p = project(ring.point, radius, cx, cy);
         if (!p.visible) continue;
-        const age = Math.min(1, (time - ring.startedAt) / 1800);
-        ctx.strokeStyle = rgba(ring.color, (1 - age) * 0.52);
-        ctx.lineWidth = 1;
+        const age = Math.min(1, (time - ring.startedAt) / 1900);
+        ctx.strokeStyle = rgba(ring.color, (1 - age) * 0.58);
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 3 + age * 22, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 5 + age * 34, 0, Math.PI * 2);
         ctx.stroke();
       }
 
       ctx.restore();
 
-      // Thin illuminated rim.
       const rim = ctx.createLinearGradient(cx - radius, cy, cx + radius, cy);
       rim.addColorStop(0, rgba(BRAND_TEAL, 0.08));
       rim.addColorStop(0.45, "rgba(255,255,255,0.10)");
@@ -468,7 +455,6 @@ export function BrandGlobe() {
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", onPointerUp);
     canvas.addEventListener("pointercancel", onPointerUp);
-
     resize();
     start();
 
