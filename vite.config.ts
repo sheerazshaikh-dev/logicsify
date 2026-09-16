@@ -33,23 +33,11 @@ function stableFirstPaintPlugin() {
         },
       ];
     },
-    closeBundle() {
-      const outputPath = path.resolve("dist/index.html");
-      if (!fs.existsSync(outputPath)) return;
-      let html = fs.readFileSync(outputPath, "utf8");
-      html = html.replace(
-        /<link rel="stylesheet" crossorigin href="\/(assets\/[^"]+\.css)">/g,
-        (tag, assetPath) => {
-          const cssPath = path.resolve("dist", assetPath);
-          if (!fs.existsSync(cssPath)) return tag;
-          const css = fs.readFileSync(cssPath, "utf8").replace(/<\/style/gi, "<\\/style");
-          return `<style data-logicsify-entry-css>${css}</style>`;
-        },
-      );
-      fs.writeFileSync(outputPath, html);
-    },
   };
 }
+
+const isAdminOnlyPreload = (dependency: string) =>
+  /(?:^|\/)(?:admin-|admin-shell|visual-page-api)/.test(dependency);
 
 export default defineConfig({
   plugins: [
@@ -82,5 +70,11 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: true,
     target: "es2022",
+    modulePreload: {
+      resolveDependencies(_filename, deps, { hostType }) {
+        if (hostType !== "html") return deps;
+        return deps.filter((dependency) => !isAdminOnlyPreload(dependency));
+      },
+    },
   },
 });

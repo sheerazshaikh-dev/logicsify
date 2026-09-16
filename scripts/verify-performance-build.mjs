@@ -18,11 +18,16 @@ if (!html.includes("logicsify:theme:v2")) {
 if (!html.includes("data-logicsify-runtime")) {
   failures.push("the cached API custom CSS bootstrap is missing");
 }
-if (!html.includes("data-logicsify-entry-css")) {
-  failures.push("the entry stylesheet was not inlined");
+
+// Keep the full Tailwind bundle as a cacheable stylesheet instead of embedding it
+// into every HTML response. The small theme bootstrap above still runs before the
+// stylesheet, so theme variables are ready before first paint without bloating HTML.
+const stylesheetMatch = html.match(/<link rel="stylesheet"[^>]+href="\/(assets\/index-[^"]+\.css)"[^>]*>/);
+if (!stylesheetMatch) {
+  failures.push("the cacheable entry stylesheet link is missing");
 }
-if (/<link rel="stylesheet"[^>]+\/assets\/index-[^>]+>/.test(html)) {
-  failures.push("the entry stylesheet is still render blocking");
+if (html.includes("data-logicsify-entry-css")) {
+  failures.push("the full entry stylesheet is still inlined into HTML");
 }
 
 const builtAssetsDirectory = path.resolve("dist/assets");
@@ -37,8 +42,15 @@ if (!builtJavaScript.includes("Get a Free Technical Roadmap")) {
   failures.push("the stable first-render header CTA fallback is missing");
 }
 
-const entryCssMatch = html.match(/<style data-logicsify-entry-css>([\s\S]*?)<\/style>/);
-const entryCss = entryCssMatch?.[1] || "";
+let entryCss = "";
+if (stylesheetMatch?.[1]) {
+  const cssPath = path.resolve("dist", stylesheetMatch[1]);
+  if (!fs.existsSync(cssPath)) {
+    failures.push("the entry stylesheet asset was not generated");
+  } else {
+    entryCss = fs.readFileSync(cssPath, "utf8");
+  }
+}
 if (!entryCss.includes("page-hero-heading-wrap")) {
   failures.push("the inner-page hero measure is missing");
 }
@@ -46,8 +58,16 @@ if (/\.hero-heading-wrap[^{}]*\{[^}]*width:\s*75%/.test(entryCss)) {
   failures.push("the homepage hero is still constrained to 75% width");
 }
 
+// Public HTML must not eagerly preload admin/editor-only chunks.
+const adminPreloads = ["admin-api-", "admin-shell-", "visual-page-api-"];
+for (const chunk of adminPreloads) {
+  if (html.includes(`rel="modulepreload"`) && html.includes(chunk)) {
+    failures.push(`public HTML still preloads ${chunk} code`);
+  }
+}
+
 if (failures.length) {
   throw new Error(`Performance build verification failed: ${failures.join("; ")}.`);
 }
 
-console.log("Performance build verification passed (stable theme and inline entry CSS).");
+console.log("Performance build verification passed (cached entry CSS and public preload hygiene).");
