@@ -66,20 +66,38 @@ export function TopProgressBar() {
   const progress = displayingRouteProgress ? routeProgress : scrollProgress;
 
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-[3px] overflow-hidden"
-    >
+    <>
       <div
-        className="h-full origin-left bg-gradient-to-r from-[#8BCF3C] to-[#04A6A1] shadow-[0_0_10px_rgba(4,166,161,0.45)] will-change-transform"
-        style={{
-          transform: `scaleX(${progress / 100})`,
-          transition: displayingRouteProgress
-            ? "transform 180ms ease-out, opacity 180ms ease-out"
-            : "transform 80ms linear",
-          opacity: progress > 0 ? 1 : 0,
-        }}
-      />
-    </div>
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-[10000] h-[5px] overflow-hidden"
+      >
+        <div
+          className="h-full origin-left bg-gradient-to-r from-[#8BCF3C] to-[#04A6A1] shadow-[0_0_12px_rgba(4,166,161,0.55)] will-change-transform"
+          style={{
+            transform: `scaleX(${progress / 100})`,
+            transition: displayingRouteProgress
+              ? "transform 180ms ease-out, opacity 180ms ease-out"
+              : "transform 80ms linear",
+            opacity: progress > 0 ? 1 : 0,
+          }}
+        />
+      </div>
+
+      {isNavigating ? (
+        <div
+          aria-live="polite"
+          aria-label="Loading page"
+          className="pointer-events-none fixed inset-0 z-[9999] flex items-center justify-center bg-black/[0.04] backdrop-blur-[1px]"
+        >
+          <div className="flex items-center gap-3 rounded-full border border-white/15 bg-black/80 px-5 py-3 text-white shadow-2xl shadow-black/20 backdrop-blur-xl">
+            <span className="relative block h-5 w-5">
+              <span className="absolute inset-0 rounded-full border-2 border-white/20" />
+              <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-[#8BCF3C] border-r-[#04A6A1]" />
+            </span>
+            <span className="text-sm font-medium tracking-wide">Loading</span>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
