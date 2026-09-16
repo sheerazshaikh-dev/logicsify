@@ -81,8 +81,8 @@ const sampleArcs: Position[] = arcValues.map(
 
 export function BrandGlobe() {
   return (
-    <div className="relative mx-auto flex h-[36rem] w-[118%] max-w-[760px] items-center justify-center overflow-visible md:h-[40rem] lg:h-[42rem] lg:w-[138%] lg:max-w-none lg:-ml-[20%]">
-      <div className="absolute inset-0 z-10">
+    <div className="relative mx-auto flex h-[38rem] w-[128%] max-w-none items-center justify-center overflow-visible md:h-[42rem] md:w-[140%] lg:h-[44rem] lg:w-[170%] lg:-ml-[22%] xl:h-[46rem] xl:w-[180%] xl:-ml-[26%]">
+      <div className="absolute -right-[8%] -bottom-[12%] z-10 h-[118%] w-[118%] md:-right-[10%] md:-bottom-[14%] lg:-right-[16%] lg:-bottom-[20%] lg:h-[128%] lg:w-[128%] xl:-right-[20%] xl:-bottom-[24%]">
         <World data={sampleArcs} globeConfig={globeConfig} />
       </div>
     </div>
