@@ -1,23 +1,23 @@
 import { World, type Position } from "@/components/ui/globe";
 
 const globeConfig = {
-  pointSize: 4,
+  pointSize: 5,
   globeColor: "#000000",
   showAtmosphere: true,
-  atmosphereColor: "#FFFFFF",
-  atmosphereAltitude: 0.1,
-  emissive: "#000000",
-  emissiveIntensity: 0.1,
+  atmosphereColor: "#8BCF3C",
+  atmosphereAltitude: 0.08,
+  emissive: "#071107",
+  emissiveIntensity: 0.08,
   shininess: 0.9,
-  polygonColor: "rgba(255,255,255,0.7)",
-  ambientLight: "#ffffff",
-  directionalLeftLight: "#ffffff",
+  polygonColor: "rgba(255,255,255,0.72)",
+  ambientLight: "#8BCF3C",
+  directionalLeftLight: "#dff8c6",
   directionalTopLight: "#ffffff",
-  pointLight: "#ffffff",
+  pointLight: "#8BCF3C",
   arcTime: 1000,
   arcLength: 0.9,
   rings: 1,
-  maxRings: 3,
+  maxRings: 3.8,
   initialPosition: { lat: 22.3193, lng: 114.1694 },
   autoRotate: true,
   autoRotateSpeed: 0.5,
@@ -82,7 +82,10 @@ const sampleArcs: Position[] = arcValues.map(
 export function BrandGlobe() {
   return (
     <div className="relative mx-auto flex h-[24rem] w-full max-w-[30rem] items-center justify-center overflow-visible sm:h-[30rem] sm:max-w-[36rem] md:h-[48rem] md:w-[175%] md:max-w-none lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]">
-      <div className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]">
+      <div
+        className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]"
+        style={{ filter: "drop-shadow(0 0 34px rgba(139, 207, 60, 0.14))" }}
+      >
         <World data={sampleArcs} globeConfig={globeConfig} />
       </div>
     </div>
