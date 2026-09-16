@@ -5,8 +5,6 @@ dist/
 .tanstack/
 
 # Environment files
-.env
-.env.*
 !.env.example
 *.local
 
@@ -19,7 +17,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Editors and operating systems
-.vscode/*
 !.vscode/extensions.json
 .idea/
 .DS_Store
@@ -29,3 +26,4 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+config.bat
