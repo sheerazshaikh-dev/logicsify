@@ -15,3 +15,16 @@
   width: 100%;
   align-items: center;
 }
+
+/* Keep all copy and CTAs above the oversized globe. */
+[data-cms-section-id="home-hero"] > section > .container-page > div:first-child {
+  position: relative;
+  z-index: 20;
+}
+
+/* The globe is decorative in the hero, so it must never intercept CTA clicks. */
+[data-cms-section-id="home-hero"] > section > .container-page > div:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
