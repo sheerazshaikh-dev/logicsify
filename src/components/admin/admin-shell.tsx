@@ -6,7 +6,6 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
-  FileText,
   FileDown,
   Scale,
   Handshake,
@@ -24,7 +23,6 @@ import {
   Settings,
   SearchCheck,
   ShieldCheck,
-  Sparkles,
   Users,
   UserCog,
   Workflow,
@@ -55,8 +53,6 @@ const navigation = [
   {
     label: "Content",
     items: [
-      { label: "Pages", to: "/admin/pages", section: "pages", icon: FileText },
-      { label: "Services", to: "/admin/services", section: "services", icon: Sparkles },
       { label: "Case Studies", to: "/admin/case-studies", section: "case-studies", icon: BriefcaseBusiness },
       { label: "Portfolio", to: "/admin/portfolio", section: "portfolio", icon: Images },
       { label: "Insights", to: "/admin/insights", section: "insights", icon: Newspaper },
@@ -173,13 +169,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!admin || !legacyAdminPath(location.pathname)) return;
-    getSecurityConfig().then((security) => {
-      if (security.legacy_admin_path_enabled === false && security.admin_entry_path) {
-        const section = getAdminSection(location.pathname);
-        const base = security.admin_entry_path.replace(/\/login$/, "");
-        window.location.replace(`${base}/${section}`);
-      }
-    }).catch(() => undefined);
+    getSecurityConfig()
+      .then((security) => {
+        if (security.legacy_admin_path_enabled === false && security.admin_entry_path) {
+          const section = getAdminSection(location.pathname);
+          const base = security.admin_entry_path.replace(/\/login$/, "");
+          window.location.replace(`${base}/${section}`);
+        }
+      })
+      .catch(() => undefined);
   }, [admin, location.pathname]);
 
   useEffect(() => {
@@ -230,11 +228,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
       className={`admin-sidebar flex h-full flex-col border-r border-white/10 bg-ink text-white transition-all duration-300 ${collapsed ? "w-[88px]" : "w-[274px]"}`}
     >
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-        <a href={adminHref("dashboard", location.pathname)} className="flex min-w-0 items-center gap-3 overflow-hidden">
+        <a
+          href={adminHref("dashboard", location.pathname)}
+          className="flex min-w-0 items-center gap-3 overflow-hidden"
+        >
           {collapsed ? (
             <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl shadow-lg">
               <img
-                src={optimizedBrandAsset(siteSettings.brand_mark || siteSettings.favicon, DEFAULT_BRAND_ASSETS.brandMark)}
+                src={optimizedBrandAsset(
+                  siteSettings.brand_mark || siteSettings.favicon,
+                  DEFAULT_BRAND_ASSETS.brandMark,
+                )}
                 alt="Logicsify"
                 className="h-full w-full object-contain"
               />
