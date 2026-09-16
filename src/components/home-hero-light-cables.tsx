@@ -6,15 +6,18 @@ import InteractiveLightCables from "@/components/interactive-light-cables";
 export function HomeHeroLightCables() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [target, setTarget] = useState<HTMLElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (pathname !== "/") {
       setTarget(null);
+      setIsVisible(false);
       return;
     }
 
     let raf = 0;
     let attempts = 0;
+    let observer: IntersectionObserver | null = null;
 
     const findHero = () => {
       const hero = document.querySelector(
@@ -30,6 +33,17 @@ export function HomeHeroLightCables() {
         if (scrollHint) scrollHint.style.zIndex = "2";
 
         setTarget(hero);
+
+        observer = new IntersectionObserver(
+          ([entry]) => {
+            setIsVisible(Boolean(entry?.isIntersecting));
+          },
+          {
+            threshold: 0.01,
+            rootMargin: "120px 0px",
+          },
+        );
+        observer.observe(hero);
         return;
       }
 
@@ -38,32 +52,39 @@ export function HomeHeroLightCables() {
     };
 
     raf = requestAnimationFrame(findHero);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      observer?.disconnect();
+    };
   }, [pathname]);
 
   if (!target) return null;
 
   return createPortal(
     <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden="true">
-      <InteractiveLightCables
-        style={{ width: "100%", height: "100%", opacity: 0.78 }}
-        direction="ltr"
-        background="#000000"
-        baseColor="#000000"
-        accentColor="#04A6A1"
-        highlight="#8BCF3C"
-        positionX={-11}
-        positionY={-4}
-        bundle={{
-          bend: 0,
-          count: 48,
-          spread: 89,
-          widthEnd: 300,
-          thickness: 220,
-          widthStart: 0,
-        }}
-        flow={{ flow: 300, pulses: 1 }}
-      />
+      {isVisible ? (
+        <InteractiveLightCables
+          style={{ width: "100%", height: "100%", opacity: 0.78 }}
+          direction="ltr"
+          background="#000000"
+          baseColor="#000000"
+          accentColor="#04A6A1"
+          highlight="#8BCF3C"
+          positionX={-11}
+          positionY={-4}
+          bundle={{
+            bend: 0,
+            count: 32,
+            spread: 89,
+            widthEnd: 300,
+            thickness: 220,
+            widthStart: 0,
+          }}
+          flow={{ flow: 300, pulses: 1 }}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-black" />
+      )}
       <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/20 to-black/35" />
     </div>,
     target,
