@@ -16,6 +16,7 @@ const WORLD_DATA_URL = "https://assets.aceternity.com/globe.json";
 const RING_PROPAGATION_SPEED = 3;
 const aspect = 1.2;
 const cameraZ = 300;
+const CARD_DISTANCE_FACTOR = 180;
 
 export type Position = {
   order: number;
@@ -70,7 +71,7 @@ type WorldData = {
   features: unknown[];
 };
 
-function latLngToPosition(lat: number, lng: number, altitude = 0.2): [number, number, number] {
+function latLngToPosition(lat: number, lng: number, altitude = 0.3): [number, number, number] {
   const radius = 100 * (1 + altitude);
   const phi = ((90 - lat) * Math.PI) / 180;
   const theta = ((90 - lng) * Math.PI) / 180;
@@ -84,10 +85,10 @@ function latLngToPosition(lat: number, lng: number, altitude = 0.2): [number, nu
 function cardShell(accent: string, width = 154) {
   return {
     width: `${width}px`,
-    border: "1px solid rgba(255,255,255,0.14)",
+    border: "1px solid rgba(255,255,255,0.15)",
     borderRadius: "14px",
-    background: "linear-gradient(145deg, rgba(9,14,13,0.96), rgba(4,8,8,0.86))",
-    boxShadow: `0 14px 40px rgba(0,0,0,0.36), 0 0 24px ${accent}18`,
+    background: "linear-gradient(145deg, rgba(9,14,13,0.97), rgba(4,8,8,0.9))",
+    boxShadow: `0 14px 40px rgba(0,0,0,0.42), 0 0 28px ${accent}20`,
     backdropFilter: "blur(14px)",
     WebkitBackdropFilter: "blur(14px)",
     color: "#ffffff",
@@ -103,7 +104,7 @@ function Eyebrow({ children, accent }: { children: string; accent: string }) {
         display: "flex",
         alignItems: "center",
         gap: 6,
-        color: "rgba(255,255,255,0.58)",
+        color: "rgba(255,255,255,0.6)",
         fontSize: 8,
         lineHeight: 1,
         letterSpacing: "0.14em",
@@ -111,7 +112,15 @@ function Eyebrow({ children, accent }: { children: string; accent: string }) {
         whiteSpace: "nowrap",
       }}
     >
-      <span style={{ width: 5, height: 5, borderRadius: 999, background: accent, boxShadow: `0 0 10px ${accent}` }} />
+      <span
+        style={{
+          width: 5,
+          height: 5,
+          borderRadius: 999,
+          background: accent,
+          boxShadow: `0 0 10px ${accent}`,
+        }}
+      />
       {children}
     </div>
   );
@@ -119,11 +128,24 @@ function Eyebrow({ children, accent }: { children: string; accent: string }) {
 
 function GlobeCardBillboard({ card }: { card: GlobeCard }) {
   const accent = card.accent || "#8BCF3C";
-  const position = latLngToPosition(card.lat, card.lng, card.altitude ?? 0.22);
+  const position = latLngToPosition(card.lat, card.lng, card.altitude ?? 0.3);
 
   return (
-    <Html position={position} center distanceFactor={10} occlude zIndexRange={[30, 1]} style={{ pointerEvents: "none" }}>
-      <div style={{ transform: "translateY(-34px)", transformOrigin: "center bottom" }}>
+    <Html
+      position={position}
+      center
+      distanceFactor={CARD_DISTANCE_FACTOR}
+      occlude
+      zIndexRange={[40, 2]}
+      style={{ pointerEvents: "none" }}
+    >
+      <div
+        style={{
+          transform: "translateY(-18px)",
+          transformOrigin: "center bottom",
+          willChange: "transform, opacity",
+        }}
+      >
         {card.kind === "review" && (
           <div style={cardShell(accent, 166)}>
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
@@ -141,32 +163,65 @@ function GlobeCardBillboard({ card }: { card: GlobeCard }) {
                 }}
               >
                 {card.image ? (
-                  <img src={card.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img
+                    src={card.image}
+                    alt=""
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
                 ) : (
                   <span style={{ color: accent, fontSize: 10, fontWeight: 700 }}>L</span>
                 )}
               </div>
               <div style={{ minWidth: 0 }}>
                 <Eyebrow accent={accent}>{card.eyebrow}</Eyebrow>
-                <div style={{ marginTop: 4, color: accent, fontSize: 10, letterSpacing: "0.08em" }}>★★★★★</div>
+                <div style={{ marginTop: 4, color: accent, fontSize: 10, letterSpacing: "0.08em" }}>
+                  ★★★★★
+                </div>
               </div>
             </div>
-            <div style={{ marginTop: 8, fontSize: 10, fontWeight: 650, lineHeight: 1.3 }}>{card.title}</div>
-            {card.detail && <div style={{ marginTop: 3, color: "rgba(255,255,255,0.58)", fontSize: 8.5 }}>{card.detail}</div>}
+            <div style={{ marginTop: 8, fontSize: 10, fontWeight: 650, lineHeight: 1.3 }}>
+              {card.title}
+            </div>
+            {card.detail && (
+              <div style={{ marginTop: 3, color: "rgba(255,255,255,0.58)", fontSize: 8.5 }}>
+                {card.detail}
+              </div>
+            )}
           </div>
         )}
 
         {card.kind === "agent" && (
           <div style={cardShell(accent, 150)}>
             <Eyebrow accent={accent}>{card.eyebrow}</Eyebrow>
-            <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <div
+              style={{
+                marginTop: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+              }}
+            >
               <div>
                 <div style={{ fontSize: 12, fontWeight: 700 }}>{card.title}</div>
-                {card.detail && <div style={{ marginTop: 3, color: "rgba(255,255,255,0.58)", fontSize: 8.5 }}>{card.detail}</div>}
+                {card.detail && (
+                  <div style={{ marginTop: 3, color: "rgba(255,255,255,0.58)", fontSize: 8.5 }}>
+                    {card.detail}
+                  </div>
+                )}
               </div>
               <div style={{ display: "flex", gap: 2, alignItems: "center", height: 20 }}>
                 {[7, 14, 10, 17, 8].map((height, index) => (
-                  <span key={index} style={{ width: 2, height, borderRadius: 999, background: index % 2 ? "#04A6A1" : "#8BCF3C", opacity: 0.95 }} />
+                  <span
+                    key={index}
+                    style={{
+                      width: 2,
+                      height,
+                      borderRadius: 999,
+                      background: index % 2 ? "#04A6A1" : "#8BCF3C",
+                      opacity: 0.95,
+                    }}
+                  />
                 ))}
               </div>
             </div>
@@ -176,8 +231,14 @@ function GlobeCardBillboard({ card }: { card: GlobeCard }) {
         {card.kind === "metric" && (
           <div style={cardShell(accent, 128)}>
             <Eyebrow accent={accent}>{card.eyebrow}</Eyebrow>
-            <div style={{ marginTop: 7, fontSize: 20, fontWeight: 760, letterSpacing: "-0.04em" }}>{card.title}</div>
-            {card.detail && <div style={{ marginTop: 2, color: "rgba(255,255,255,0.58)", fontSize: 8.5 }}>{card.detail}</div>}
+            <div style={{ marginTop: 7, fontSize: 20, fontWeight: 760, letterSpacing: "-0.04em" }}>
+              {card.title}
+            </div>
+            {card.detail && (
+              <div style={{ marginTop: 2, color: "rgba(255,255,255,0.58)", fontSize: 8.5 }}>
+                {card.detail}
+              </div>
+            )}
           </div>
         )}
 
@@ -202,7 +263,11 @@ function GlobeCardBillboard({ card }: { card: GlobeCard }) {
               <div>
                 <Eyebrow accent={accent}>{card.eyebrow}</Eyebrow>
                 <div style={{ marginTop: 5, fontSize: 11, fontWeight: 700 }}>{card.title}</div>
-                {card.detail && <div style={{ marginTop: 2, color: "rgba(255,255,255,0.56)", fontSize: 8.5 }}>{card.detail}</div>}
+                {card.detail && (
+                  <div style={{ marginTop: 2, color: "rgba(255,255,255,0.56)", fontSize: 8.5 }}>
+                    {card.detail}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -229,8 +294,21 @@ function GlobeCardBillboard({ card }: { card: GlobeCard }) {
               </div>
               <div style={{ minWidth: 0 }}>
                 <Eyebrow accent={accent}>{card.eyebrow}</Eyebrow>
-                <div style={{ marginTop: 5, fontSize: 10.5, fontWeight: 700, whiteSpace: "nowrap" }}>{card.title}</div>
-                {card.detail && <div style={{ marginTop: 2, color: "rgba(255,255,255,0.56)", fontSize: 8.2, whiteSpace: "nowrap" }}>{card.detail}</div>}
+                <div style={{ marginTop: 5, fontSize: 10.5, fontWeight: 700, whiteSpace: "nowrap" }}>
+                  {card.title}
+                </div>
+                {card.detail && (
+                  <div
+                    style={{
+                      marginTop: 2,
+                      color: "rgba(255,255,255,0.56)",
+                      fontSize: 8.2,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {card.detail}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -240,7 +318,15 @@ function GlobeCardBillboard({ card }: { card: GlobeCard }) {
   );
 }
 
-export function Globe({ globeConfig, data, cards = [] }: { globeConfig: GlobeConfig; data: Position[]; cards?: GlobeCard[] }) {
+export function Globe({
+  globeConfig,
+  data,
+  cards = [],
+}: {
+  globeConfig: GlobeConfig;
+  data: Position[];
+  cards?: GlobeCard[];
+}) {
   const globeRef = useRef<ThreeGlobe | null>(null);
   const [worldData, setWorldData] = useState<WorldData | null>(null);
 
@@ -286,14 +372,35 @@ export function Globe({ globeConfig, data, cards = [] }: { globeConfig: GlobeCon
     globeMaterial.emissive = new Color(globeConfig.emissive || defaultProps.emissive);
     globeMaterial.emissiveIntensity = globeConfig.emissiveIntensity || defaultProps.emissiveIntensity;
     globeMaterial.shininess = globeConfig.shininess || defaultProps.shininess;
-  }, [globeConfig.globeColor, globeConfig.emissive, globeConfig.emissiveIntensity, globeConfig.shininess, defaultProps.emissive, defaultProps.emissiveIntensity, defaultProps.globeColor, defaultProps.shininess]);
+  }, [
+    globeConfig.globeColor,
+    globeConfig.emissive,
+    globeConfig.emissiveIntensity,
+    globeConfig.shininess,
+    defaultProps.emissive,
+    defaultProps.emissiveIntensity,
+    defaultProps.globeColor,
+    defaultProps.shininess,
+  ]);
 
   useEffect(() => {
     if (!globeRef.current || !worldData) return;
 
     const points = data.flatMap((arc) => [
-      { size: defaultProps.pointSize, order: arc.order, color: arc.color, lat: arc.startLat, lng: arc.startLng },
-      { size: defaultProps.pointSize, order: arc.order, color: arc.color, lat: arc.endLat, lng: arc.endLng },
+      {
+        size: defaultProps.pointSize,
+        order: arc.order,
+        color: arc.color,
+        lat: arc.startLat,
+        lng: arc.startLng,
+      },
+      {
+        size: defaultProps.pointSize,
+        order: arc.order,
+        color: arc.color,
+        lat: arc.endLat,
+        lng: arc.endLng,
+      },
     ]);
 
     const seen = new Set<string>();
@@ -315,15 +422,15 @@ export function Globe({ globeConfig, data, cards = [] }: { globeConfig: GlobeCon
 
     globeRef.current
       .arcsData(data)
-      .arcStartLat((d) => (d as Position).startLat * 1)
-      .arcStartLng((d) => (d as Position).startLng * 1)
-      .arcEndLat((d) => (d as Position).endLat * 1)
-      .arcEndLng((d) => (d as Position).endLng * 1)
+      .arcStartLat((d) => (d as Position).startLat)
+      .arcStartLng((d) => (d as Position).startLng)
+      .arcEndLat((d) => (d as Position).endLat)
+      .arcEndLng((d) => (d as Position).endLng)
       .arcColor((d) => (d as Position).color)
-      .arcAltitude((d) => (d as Position).arcAlt * 1)
+      .arcAltitude((d) => (d as Position).arcAlt)
       .arcStroke(() => [0.32, 0.28, 0.3][Math.round(Math.random() * 2)])
       .arcDashLength(defaultProps.arcLength)
-      .arcDashInitialGap((d) => (d as Position).order * 1)
+      .arcDashInitialGap((d) => (d as Position).order)
       .arcDashGap(15)
       .arcDashAnimateTime(() => defaultProps.arcTime);
 
@@ -331,7 +438,7 @@ export function Globe({ globeConfig, data, cards = [] }: { globeConfig: GlobeCon
       .pointsData(uniquePoints)
       .pointColor((d) => (d as { color: string }).color)
       .pointsMerge(true)
-      .pointAltitude(0.0)
+      .pointAltitude(0)
       .pointRadius(0.9);
 
     globeRef.current
@@ -351,12 +458,24 @@ export function Globe({ globeConfig, data, cards = [] }: { globeConfig: GlobeCon
         Math.floor((data.length * 4) / 5),
       );
       globeRef.current.ringsData(
-        uniquePoints.filter((_d, i) => newNumbersOfRings.includes(i)),
+        uniquePoints.filter((_d, index) => newNumbersOfRings.includes(index)),
       );
     }, 2000);
 
     return () => window.clearInterval(interval);
-  }, [data, worldData, defaultProps.arcLength, defaultProps.arcTime, defaultProps.atmosphereAltitude, defaultProps.atmosphereColor, defaultProps.maxRings, defaultProps.pointSize, defaultProps.polygonColor, defaultProps.rings, defaultProps.showAtmosphere]);
+  }, [
+    data,
+    worldData,
+    defaultProps.arcLength,
+    defaultProps.arcTime,
+    defaultProps.atmosphereAltitude,
+    defaultProps.atmosphereColor,
+    defaultProps.maxRings,
+    defaultProps.pointSize,
+    defaultProps.polygonColor,
+    defaultProps.rings,
+    defaultProps.showAtmosphere,
+  ]);
 
   return (
     <>
@@ -380,13 +499,24 @@ export function World(props: { globeConfig: GlobeConfig; data: Position[]; cards
   const { globeConfig, data, cards = [] } = props;
   const scene = new Scene();
   scene.fog = new Fog(0xffffff, 400, 2000);
+
   return (
     <Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 1800)}>
       <WebGLRendererConfig />
       <ambientLight color={globeConfig.ambientLight} intensity={0.6} />
-      <directionalLight color={globeConfig.directionalLeftLight} position={new Vector3(-400, 100, 400)} />
-      <directionalLight color={globeConfig.directionalTopLight} position={new Vector3(-200, 500, 200)} />
-      <pointLight color={globeConfig.pointLight} position={new Vector3(-200, 500, 200)} intensity={0.8} />
+      <directionalLight
+        color={globeConfig.directionalLeftLight}
+        position={new Vector3(-400, 100, 400)}
+      />
+      <directionalLight
+        color={globeConfig.directionalTopLight}
+        position={new Vector3(-200, 500, 200)}
+      />
+      <pointLight
+        color={globeConfig.pointLight}
+        position={new Vector3(-200, 500, 200)}
+        intensity={0.8}
+      />
       <Globe globeConfig={globeConfig} data={data} cards={cards} />
       <OrbitControls
         enablePan={false}
@@ -407,7 +537,8 @@ export function hexToRgb(hex: string) {
   const expanded = hex.replace(shorthandRegex, (_m, r, g, b) => r + r + g + g + b + b);
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(expanded);
   return result
-    ? (alpha: number) => `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+    ? (alpha: number) =>
+        `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
     : () => "rgba(255,255,255,1)";
 }
 
@@ -415,7 +546,7 @@ export function genRandomNumbers(min: number, max: number, count: number) {
   const arr: number[] = [];
   while (arr.length < count) {
     const r = Math.floor(Math.random() * (max - min)) + min;
-    if (arr.indexOf(r) === -1) arr.push(r);
+    if (!arr.includes(r)) arr.push(r);
   }
   return arr;
 }
