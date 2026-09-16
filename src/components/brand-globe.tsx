@@ -1,4 +1,4 @@
-import { World, type Position } from "@/components/ui/globe";
+import { World, type GlobeCard, type Position } from "@/components/ui/globe";
 
 const globeConfig = {
   pointSize: 5,
@@ -79,6 +79,66 @@ const sampleArcs: Position[] = arcValues.map(
   }),
 );
 
+const floatingCards: GlobeCard[] = [
+  {
+    id: "review-london",
+    kind: "review",
+    lat: 51.5072,
+    lng: -0.1276,
+    altitude: 0.24,
+    eyebrow: "Client Review",
+    title: "Project feedback",
+    detail: "Clear communication · Smooth handoff",
+    image: "/logicsify-mark.webp",
+    accent: "#8BCF3C",
+  },
+  {
+    id: "agent-singapore",
+    kind: "agent",
+    lat: 1.3521,
+    lng: 103.8198,
+    altitude: 0.23,
+    eyebrow: "AI Agent",
+    title: "Online",
+    detail: "Voice · Chat · Follow-up",
+    accent: "#04A6A1",
+  },
+  {
+    id: "metric-new-york",
+    kind: "metric",
+    lat: 40.7128,
+    lng: -74.006,
+    altitude: 0.24,
+    eyebrow: "Live Metric",
+    title: "24/7",
+    detail: "AI availability",
+    accent: "#8BCF3C",
+  },
+  {
+    id: "location-karachi",
+    kind: "location",
+    lat: 24.8607,
+    lng: 67.0011,
+    altitude: 0.25,
+    eyebrow: "Location",
+    title: "Karachi",
+    detail: "Pakistan · Serving globally",
+    accent: "#04A6A1",
+  },
+  {
+    id: "team-dubai",
+    kind: "team",
+    lat: 25.2048,
+    lng: 55.2708,
+    altitude: 0.25,
+    eyebrow: "Team",
+    title: "M. Sheeraz",
+    detail: "Partner & Technology Lead",
+    initials: "MS",
+    accent: "#8BCF3C",
+  },
+];
+
 export function BrandGlobe() {
   return (
     <div className="relative mx-auto flex h-[24rem] w-full max-w-[30rem] items-center justify-center overflow-visible sm:h-[30rem] sm:max-w-[36rem] md:h-[48rem] md:w-[175%] md:max-w-none lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]">
@@ -86,7 +146,7 @@ export function BrandGlobe() {
         className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]"
         style={{ filter: "drop-shadow(0 0 34px rgba(139, 207, 60, 0.14))" }}
       >
-        <World data={sampleArcs} globeConfig={globeConfig} />
+        <World data={sampleArcs} globeConfig={globeConfig} cards={floatingCards} />
       </div>
     </div>
   );
