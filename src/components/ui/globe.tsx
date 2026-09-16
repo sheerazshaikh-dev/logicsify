@@ -147,11 +147,13 @@ export function Globe({ globeConfig, data }: { globeConfig: GlobeConfig; data: P
       .pointColor((d) => (d as { color: string }).color)
       .pointsMerge(true)
       .pointAltitude(0.0)
-      .pointRadius(2);
+      .pointRadius(2.8);
 
     globeRef.current
       .ringsData([])
-      .ringColor((d) => (t: number) => hexToRgb((d as { color: string }).color)(1 - t))
+      .ringColor((d) => (t: number) =>
+        hexToRgb((d as { color: string }).color)(Math.max(0, 0.95 - t * 0.9)),
+      )
       .ringMaxRadius(defaultProps.maxRings)
       .ringPropagationSpeed(RING_PROPAGATION_SPEED)
       .ringRepeatPeriod((defaultProps.arcTime * defaultProps.arcLength) / defaultProps.rings);
