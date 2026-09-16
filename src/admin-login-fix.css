@@ -1,0 +1,16 @@
+/* Keep the admin login split-screen styling independent from public CMS theme colors. */
+.logicsify-admin > .grid-noise {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .logicsify-admin > section:first-of-type {
+    background-color: #050505 !important;
+    background-image:
+      radial-gradient(circle at 18% 16%, rgba(4, 166, 161, 0.18), transparent 42%),
+      radial-gradient(circle at 82% 88%, rgba(139, 207, 60, 0.12), transparent 48%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) !important;
+    background-size: auto, auto, 44px 44px, 44px 44px;
+  }
+}
