@@ -1,13 +1,12 @@
-/* Homepage hero: full viewport with the hero content vertically centered.
-   The hero keeps overflow clipping so the oversized globe stays cropped by the section. */
+/* Homepage hero layout.
+   Mobile grows naturally with content and shows the full globe.
+   Tablet/desktop keeps the full-viewport centered composition and clipped oversized globe. */
 [data-cms-section-id="home-hero"] > section {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  align-items: center;
+  height: auto;
+  min-height: 0 !important;
+  padding-top: 7.5rem !important;
+  padding-bottom: 4.5rem !important;
+  align-items: stretch;
   overflow: hidden;
 }
 
@@ -16,7 +15,7 @@
   align-items: center;
 }
 
-/* Keep all copy and CTAs above the oversized globe. */
+/* Keep all copy and CTAs above the globe. */
 [data-cms-section-id="home-hero"] > section > .container-page > div:first-child {
   position: relative;
   z-index: 20;
@@ -27,4 +26,30 @@
   position: relative;
   z-index: 1;
   pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  [data-cms-section-id="home-hero"] > section > .container-page {
+    gap: 2rem;
+  }
+
+  [data-cms-section-id="home-hero"] > section > .container-page > div:nth-child(2) {
+    width: 100%;
+  }
+
+  [data-cms-section-id="home-hero"] > section > .container-page + div {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  [data-cms-section-id="home-hero"] > section {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    align-items: center;
+  }
 }
