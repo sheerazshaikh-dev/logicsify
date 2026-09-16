@@ -21,6 +21,11 @@
   z-index: 20;
 }
 
+/* Remove the decorative icon from the AI / CRM / Platforms / Operations pill. */
+[data-cms-section-id="home-hero"] > section > .container-page > div:first-child > div:first-child > svg {
+  display: none;
+}
+
 /* The globe is decorative in the hero, so it must never intercept CTA clicks. */
 [data-cms-section-id="home-hero"] > section > .container-page > div:nth-child(2) {
   position: relative;
