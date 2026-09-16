@@ -316,8 +316,8 @@ export default function InteractiveLightCables({
     let dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
 
     const resize = (width?: number, height?: number) => {
-      cssWidth = Math.max(1, width ?? canvas.clientWidth || 1);
-      cssHeight = Math.max(1, height ?? canvas.clientHeight || 1);
+      cssWidth = Math.max(1, width ?? canvas.clientWidth);
+      cssHeight = Math.max(1, height ?? canvas.clientHeight);
       dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       const nextWidth = Math.max(1, Math.round(cssWidth * dpr));
       const nextHeight = Math.max(1, Math.round(cssHeight * dpr));
