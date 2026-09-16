@@ -1,0 +1,17 @@
+/* Homepage hero: full viewport with the hero content vertically centered.
+   The hero keeps overflow clipping so the oversized globe stays cropped by the section. */
+[data-cms-section-id="home-hero"] > section {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  align-items: center;
+  overflow: hidden;
+}
+
+[data-cms-section-id="home-hero"] > section > .container-page {
+  width: 100%;
+  align-items: center;
+}
