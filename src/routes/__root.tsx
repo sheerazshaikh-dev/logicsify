@@ -12,6 +12,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { RuntimeIntegrations } from "@/components/runtime-integrations";
 import { RuntimeSiteSettings } from "@/components/runtime-site-settings";
 import { DeferredToaster } from "@/components/deferred-toaster";
+import { TopProgressBar } from "@/components/top-progress-bar";
 
 function NotFoundComponent() {
   useEffect(() => {
@@ -176,6 +177,7 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
+      <TopProgressBar />
       <RuntimeSiteSettings />
       <RuntimeIntegrations />
       <Outlet />
