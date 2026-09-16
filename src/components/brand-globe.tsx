@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { World, type GlobeCard, type Position } from "@/components/ui/globe";
 
 const globeConfig = {
@@ -140,13 +141,42 @@ const floatingCards: GlobeCard[] = [
 ];
 
 export function BrandGlobe() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [nearViewport, setNearViewport] = useState(true);
+  const [pageVisible, setPageVisible] = useState(true);
+
+  useEffect(() => {
+    const node = wrapperRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setNearViewport(entry.isIntersecting),
+      { rootMargin: "320px 0px", threshold: 0.01 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const syncVisibility = () => setPageVisible(!document.hidden);
+    syncVisibility();
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () => document.removeEventListener("visibilitychange", syncVisibility);
+  }, []);
+
+  const renderGlobe = nearViewport && pageVisible;
+
   return (
-    <div className="relative mx-auto flex h-[24rem] w-full max-w-[30rem] items-center justify-center overflow-visible sm:h-[30rem] sm:max-w-[36rem] md:h-[48rem] md:w-[175%] md:max-w-none lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]">
+    <div
+      ref={wrapperRef}
+      className="relative mx-auto flex h-[24rem] w-full max-w-[30rem] items-center justify-center overflow-visible sm:h-[30rem] sm:max-w-[36rem] md:h-[48rem] md:w-[175%] md:max-w-none lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]"
+    >
       <div
         className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]"
         style={{ filter: "drop-shadow(0 0 34px rgba(139, 207, 60, 0.14))" }}
       >
-        <World data={sampleArcs} globeConfig={globeConfig} cards={floatingCards} />
+        {renderGlobe ? <World data={sampleArcs} globeConfig={globeConfig} cards={floatingCards} /> : null}
       </div>
     </div>
   );
