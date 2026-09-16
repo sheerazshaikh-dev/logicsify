@@ -2,15 +2,15 @@ import { World, type Position } from "@/components/ui/globe";
 
 const globeConfig = {
   pointSize: 4,
-  globeColor: "#062056",
+  globeColor: "#000000",
   showAtmosphere: true,
   atmosphereColor: "#FFFFFF",
   atmosphereAltitude: 0.1,
-  emissive: "#062056",
+  emissive: "#000000",
   emissiveIntensity: 0.1,
   shininess: 0.9,
   polygonColor: "rgba(255,255,255,0.7)",
-  ambientLight: "#38bdf8",
+  ambientLight: "#ffffff",
   directionalLeftLight: "#ffffff",
   directionalTopLight: "#ffffff",
   pointLight: "#ffffff",
@@ -23,7 +23,7 @@ const globeConfig = {
   autoRotateSpeed: 0.5,
 };
 
-const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
+const colors = ["#04A6A1", "#8BCF3C"];
 const arcValues = [
   [1, -19.885592, -43.951191, -22.9068, -43.1729, 0.1],
   [1, 28.6139, 77.209, 3.139, 101.6869, 0.2],
@@ -68,21 +68,21 @@ const arcValues = [
 ] as const;
 
 const sampleArcs: Position[] = arcValues.map(
-  ([order, startLat, startLng, endLat, endLng, arcAlt]) => ({
+  ([order, startLat, startLng, endLat, endLng, arcAlt], index) => ({
     order,
     startLat,
     startLng,
     endLat,
     endLng,
     arcAlt,
-    color: colors[Math.floor(Math.random() * (colors.length - 1))],
+    color: colors[index % colors.length],
   }),
 );
 
 export function BrandGlobe() {
   return (
-    <div className="relative mx-auto h-[30rem] w-full max-w-[650px] overflow-hidden">
-      <div className="absolute w-full -bottom-20 h-full z-10">
+    <div className="relative mx-auto h-[36rem] w-[118%] max-w-[760px] -ml-[9%] overflow-hidden md:h-[40rem] lg:h-[42rem] lg:w-[138%] lg:max-w-none lg:-ml-[20%]">
+      <div className="absolute -bottom-14 z-10 h-full w-full">
         <World data={sampleArcs} globeConfig={globeConfig} />
       </div>
     </div>
