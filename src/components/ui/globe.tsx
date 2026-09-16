@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, extend, useThree, type ThreeElement } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { Color, Fog, PerspectiveCamera, Scene, Vector3 } from "three";
@@ -17,6 +17,10 @@ const RING_PROPAGATION_SPEED = 3;
 const aspect = 1.2;
 const cameraZ = 300;
 const CARD_DISTANCE_FACTOR = 180;
+const MOBILE_CARD_DISTANCE_FACTOR = 138;
+const LEFT_LIGHT_POSITION = new Vector3(-400, 100, 400);
+const TOP_LIGHT_POSITION = new Vector3(-200, 500, 200);
+const POINT_LIGHT_POSITION = new Vector3(-200, 500, 200);
 
 export type Position = {
   order: number;
@@ -70,6 +74,25 @@ export type GlobeConfig = {
 type WorldData = {
   features: unknown[];
 };
+
+let worldDataCache: WorldData | null = null;
+let worldDataPromise: Promise<WorldData> | null = null;
+
+function loadWorldData() {
+  if (worldDataCache) return Promise.resolve(worldDataCache);
+  if (!worldDataPromise) {
+    worldDataPromise = fetch(WORLD_DATA_URL)
+      .then((response) => response.json() as Promise<WorldData>)
+      .then((json) => {
+        worldDataCache = json;
+        return json;
+      })
+      .finally(() => {
+        worldDataPromise = null;
+      });
+  }
+  return worldDataPromise;
+}
 
 function latLngToPosition(lat: number, lng: number, altitude = 0.3): [number, number, number] {
   const radius = 100 * (1 + altitude);
@@ -127,6 +150,8 @@ function Eyebrow({ children, accent }: { children: string; accent: string }) {
 }
 
 function GlobeCardBillboard({ card }: { card: GlobeCard }) {
+  const { size } = useThree();
+  const compact = size.width < 768;
   const accent = card.accent || "#8BCF3C";
   const position = latLngToPosition(card.lat, card.lng, card.altitude ?? 0.3);
 
@@ -134,14 +159,14 @@ function GlobeCardBillboard({ card }: { card: GlobeCard }) {
     <Html
       position={position}
       center
-      distanceFactor={CARD_DISTANCE_FACTOR}
+      distanceFactor={compact ? MOBILE_CARD_DISTANCE_FACTOR : CARD_DISTANCE_FACTOR}
       occlude
       zIndexRange={[40, 2]}
       style={{ pointerEvents: "none" }}
     >
       <div
         style={{
-          transform: "translateY(-18px)",
+          transform: `translateY(${compact ? -10 : -18}px) scale(${compact ? 0.78 : 1})`,
           transformOrigin: "center bottom",
           willChange: "transform, opacity",
         }}
@@ -328,7 +353,7 @@ export function Globe({
   cards?: GlobeCard[];
 }) {
   const globeRef = useRef<ThreeGlobe | null>(null);
-  const [worldData, setWorldData] = useState<WorldData | null>(null);
+  const [worldData, setWorldData] = useState<WorldData | null>(worldDataCache);
 
   const defaultProps = {
     pointSize: 1,
@@ -348,13 +373,18 @@ export function Globe({
   };
 
   useEffect(() => {
+    if (worldDataCache) {
+      setWorldData(worldDataCache);
+      return;
+    }
+
     let active = true;
-    fetch(WORLD_DATA_URL)
-      .then((response) => response.json())
-      .then((json: WorldData) => {
+    loadWorldData()
+      .then((json) => {
         if (active) setWorldData(json);
       })
       .catch(() => undefined);
+
     return () => {
       active = false;
     };
@@ -487,36 +517,37 @@ export function Globe({
 
 export function WebGLRendererConfig() {
   const { gl, size } = useThree();
+
   useEffect(() => {
-    gl.setPixelRatio(window.devicePixelRatio);
-    gl.setSize(size.width, size.height);
+    const maxDpr = size.width < 768 ? 1.2 : 1.5;
+    gl.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
     gl.setClearColor(0xffaaff, 0);
-  }, [gl, size]);
+  }, [gl, size.width]);
+
   return null;
 }
 
 export function World(props: { globeConfig: GlobeConfig; data: Position[]; cards?: GlobeCard[] }) {
   const { globeConfig, data, cards = [] } = props;
-  const scene = new Scene();
-  scene.fog = new Fog(0xffffff, 400, 2000);
+  const scene = useMemo(() => {
+    const nextScene = new Scene();
+    nextScene.fog = new Fog(0xffffff, 400, 2000);
+    return nextScene;
+  }, []);
+  const camera = useMemo(() => new PerspectiveCamera(50, aspect, 180, 1800), []);
 
   return (
-    <Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 1800)}>
+    <Canvas
+      scene={scene}
+      camera={camera}
+      dpr={[1, 1.5]}
+      gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+    >
       <WebGLRendererConfig />
       <ambientLight color={globeConfig.ambientLight} intensity={0.6} />
-      <directionalLight
-        color={globeConfig.directionalLeftLight}
-        position={new Vector3(-400, 100, 400)}
-      />
-      <directionalLight
-        color={globeConfig.directionalTopLight}
-        position={new Vector3(-200, 500, 200)}
-      />
-      <pointLight
-        color={globeConfig.pointLight}
-        position={new Vector3(-200, 500, 200)}
-        intensity={0.8}
-      />
+      <directionalLight color={globeConfig.directionalLeftLight} position={LEFT_LIGHT_POSITION} />
+      <directionalLight color={globeConfig.directionalTopLight} position={TOP_LIGHT_POSITION} />
+      <pointLight color={globeConfig.pointLight} position={POINT_LIGHT_POSITION} intensity={0.8} />
       <Globe globeConfig={globeConfig} data={data} cards={cards} />
       <OrbitControls
         enablePan={false}
