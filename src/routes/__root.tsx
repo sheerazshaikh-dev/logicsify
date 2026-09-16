@@ -14,7 +14,6 @@ import { RuntimeSiteSettings } from "@/components/runtime-site-settings";
 import { DeferredToaster } from "@/components/deferred-toaster";
 import { TopProgressBar } from "@/components/top-progress-bar";
 import { HomeHeroLightCables } from "@/components/home-hero-light-cables";
-import { DarkSectionCursor } from "@/components/dark-section-cursor";
 
 function NotFoundComponent() {
   useEffect(() => {
@@ -184,7 +183,6 @@ function RootComponent() {
       <RuntimeIntegrations />
       <Outlet />
       <HomeHeroLightCables />
-      <DarkSectionCursor />
       <DeferredToaster />
     </>
   );
