@@ -24,10 +24,6 @@ const globeConfig = {
   autoRotateSpeed: 0.5,
 };
 
-const INTERNAL_RENDER_SCALE = 0.74;
-const INTERNAL_RENDER_INSET = ((1 - INTERNAL_RENDER_SCALE) / 2) * 100;
-const INTERNAL_RENDER_ZOOM = 1 / INTERNAL_RENDER_SCALE;
-
 const colors = ["#04A6A1", "#8BCF3C"];
 const arcValues = [
   [1, -19.885592, -43.951191, -22.9068, -43.1729, 0.1],
@@ -176,20 +172,11 @@ export function BrandGlobe() {
       ref={wrapperRef}
       className="relative mx-auto flex h-[24rem] w-full max-w-[30rem] items-center justify-center overflow-visible sm:h-[30rem] sm:max-w-[36rem] md:h-[48rem] md:w-[175%] md:max-w-none lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]"
     >
-      <div className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]">
-        <div
-          className="absolute"
-          style={{
-            left: `${INTERNAL_RENDER_INSET}%`,
-            top: `${INTERNAL_RENDER_INSET}%`,
-            width: `${INTERNAL_RENDER_SCALE * 100}%`,
-            height: `${INTERNAL_RENDER_SCALE * 100}%`,
-            transform: `scale(${INTERNAL_RENDER_ZOOM})`,
-            transformOrigin: "center",
-          }}
-        >
-          {renderGlobe ? <World data={sampleArcs} globeConfig={globeConfig} cards={floatingCards} /> : null}
-        </div>
+      <div
+        className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]"
+        style={{ filter: "drop-shadow(0 0 34px rgba(139, 207, 60, 0.14))" }}
+      >
+        {renderGlobe ? <World data={sampleArcs} globeConfig={globeConfig} cards={floatingCards} /> : null}
       </div>
     </div>
   );
