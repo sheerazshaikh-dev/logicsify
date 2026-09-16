@@ -1,7 +1,7 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import LightCables from "@/components/light-cables";
+import InteractiveLightCables from "@/components/interactive-light-cables";
 
 export function HomeHeroLightCables() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -24,13 +24,11 @@ export function HomeHeroLightCables() {
       if (hero) {
         hero.classList.add("isolate");
         const content = hero.querySelector(":scope > .container-page") as HTMLElement | null;
-        if (content) {
-          content.style.zIndex = "2";
-        }
+        if (content) content.style.zIndex = "2";
+
         const scrollHint = hero.querySelector(":scope > .absolute.bottom-6") as HTMLElement | null;
-        if (scrollHint) {
-          scrollHint.style.zIndex = "2";
-        }
+        if (scrollHint) scrollHint.style.zIndex = "2";
+
         setTarget(hero);
         return;
       }
@@ -47,14 +45,15 @@ export function HomeHeroLightCables() {
 
   return createPortal(
     <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden="true">
-      <LightCables
+      <InteractiveLightCables
         style={{ width: "100%", height: "100%", opacity: 0.78 }}
+        direction="ltr"
         background="#000000"
         baseColor="#000000"
         accentColor="#04A6A1"
         highlight="#8BCF3C"
         positionX={-11}
-        positionY={-21}
+        positionY={-4}
         bundle={{
           bend: 0,
           count: 48,
