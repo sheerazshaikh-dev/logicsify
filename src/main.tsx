@@ -4,6 +4,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { getRouter } from "./router";
 import "./styles.css";
 import "./admin-login-fix.css";
+import "./home-hero-layout.css";
 
 const router = getRouter();
 
