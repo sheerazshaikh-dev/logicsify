@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Bot,
+  BriefcaseBusiness,
   CloudCog,
   Code2,
   CreditCard,
@@ -21,6 +23,7 @@ import { PageHero } from "@/components/page-hero";
 import { CTASection } from "@/components/cta-section";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
 import { coreServiceDefinitions, coreServices, otherServices } from "@/lib/site-data";
+import { getCmsContentList, type CmsContentItem } from "@/lib/logicsify-api";
 
 export const Route = createFileRoute("/services/")({
   component: ServicesOverview,
@@ -57,6 +60,20 @@ const otherIcons: Record<string, typeof Smartphone> = {
 };
 
 function ServicesOverview() {
+  const [caseStudies, setCaseStudies] = useState<CmsContentItem[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getCmsContentList("case_study")
+      .then((items) => {
+        if (active) setCaseStudies(items.slice(0, 3));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <SiteLayout>
       <PageHero
@@ -169,6 +186,7 @@ function ServicesOverview() {
 
       <Process />
       <SystemsWeIntegrate />
+      {caseStudies.length ? <SelectedWork items={caseStudies} /> : null}
       <CTASection />
     </SiteLayout>
   );
@@ -263,6 +281,49 @@ function Process() {
               <h3 className="mt-5 text-xl font-semibold">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-ink-soft">{body}</p>
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SelectedWork({ items }: { items: CmsContentItem[] }) {
+  return (
+    <section className="bg-cream py-24 md:py-32">
+      <div className="container-page">
+        <div className="mb-12 max-w-3xl">
+          <p className="eyebrow mb-4">Selected work</p>
+          <h2 className="fluid-h2">Systems applied to real business problems.</h2>
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          {items.map((item) => (
+            <Link
+              key={item.slug}
+              to="/work/$slug"
+              params={{ slug: item.slug }}
+              className="group overflow-hidden rounded-2xl border border-black/10 bg-white"
+            >
+              {item.featured_image ? (
+                <img
+                  src={item.featured_image}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-[16/9] w-full object-cover"
+                />
+              ) : (
+                <div className="grid aspect-[16/9] place-items-center bg-ink">
+                  <BriefcaseBusiness className="h-10 w-10 text-white/20" />
+                </div>
+              )}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm text-ink-soft">{item.excerpt}</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold">
+                  View project <ArrowRight className="h-4 w-4" />
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
