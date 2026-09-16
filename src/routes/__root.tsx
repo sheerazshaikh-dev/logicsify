@@ -13,6 +13,7 @@ import { RuntimeIntegrations } from "@/components/runtime-integrations";
 import { RuntimeSiteSettings } from "@/components/runtime-site-settings";
 import { DeferredToaster } from "@/components/deferred-toaster";
 import { TopProgressBar } from "@/components/top-progress-bar";
+import { HomeHeroLightCables } from "@/components/home-hero-light-cables";
 
 function NotFoundComponent() {
   useEffect(() => {
@@ -181,6 +182,7 @@ function RootComponent() {
       <RuntimeSiteSettings />
       <RuntimeIntegrations />
       <Outlet />
+      <HomeHeroLightCables />
       <DeferredToaster />
     </>
   );
