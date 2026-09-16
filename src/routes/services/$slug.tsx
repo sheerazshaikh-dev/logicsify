@@ -1,6 +1,9 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { ServicePageTemplate, type ServicePageData } from "@/components/service-page-template";
+import { RelatedContentSections } from "@/components/related-content-sections";
+import { getRelatedContent, type RelatedContentResponse } from "@/lib/logicsify-api";
 import { serviceData } from "@/lib/service-data";
 import { allServices, getParentCoreService, legacyServiceRedirects } from "@/lib/site-data";
 
@@ -144,11 +147,37 @@ function genericServiceData(slug: string, name: string, intro: string): ServiceP
   };
 }
 
+function DynamicRelatedContent({ slug }: { slug: string }) {
+  const [related, setRelated] = useState<RelatedContentResponse | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getRelatedContent("service", slug)
+      .then((value) => {
+        if (active) setRelated(value);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (!related) return null;
+  return (
+    <RelatedContentSections
+      data={related}
+      showServices={false}
+      title="Related work, insights, proof and resources"
+    />
+  );
+}
+
 function ServicePage() {
   const { data } = Route.useLoaderData();
   return (
     <SiteLayout>
       <ServicePageTemplate data={data} />
+      <DynamicRelatedContent slug={data.slug} />
     </SiteLayout>
   );
 }
