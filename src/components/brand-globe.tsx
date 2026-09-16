@@ -81,8 +81,8 @@ const sampleArcs: Position[] = arcValues.map(
 
 export function BrandGlobe() {
   return (
-    <div className="relative mx-auto flex h-[42rem] w-[150%] max-w-none items-center justify-center overflow-visible md:h-[48rem] md:w-[175%] lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]">
-      <div className="absolute -right-[12%] -bottom-[20%] z-10 h-[132%] w-[132%] md:-right-[16%] md:-bottom-[28%] md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]">
+    <div className="relative mx-auto flex h-[24rem] w-full max-w-[30rem] items-center justify-center overflow-visible sm:h-[30rem] sm:max-w-[36rem] md:h-[48rem] md:w-[175%] md:max-w-none lg:h-[58rem] lg:w-[235%] lg:-ml-[8%] xl:h-[62rem] xl:w-[250%] xl:-ml-[4%]">
+      <div className="absolute inset-0 z-10 md:-right-[16%] md:-bottom-[28%] md:left-auto md:top-auto md:h-[140%] md:w-[140%] lg:-right-[18%] lg:-bottom-[36%] lg:h-[148%] lg:w-[148%] xl:-right-[10%] xl:-bottom-[50%] xl:h-[154%] xl:w-[154%]">
         <World data={sampleArcs} globeConfig={globeConfig} />
       </div>
     </div>
