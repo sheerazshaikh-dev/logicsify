@@ -25,6 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
+import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
 import "@/white-label.css";
 
 export const Route = createFileRoute("/services/white-label-development")({
@@ -224,10 +225,11 @@ function WhiteLabelDevelopmentPage() {
 function WhiteLabelHero() {
   return (
     <section className="wl-hero relative overflow-hidden bg-black pb-20 pt-32 text-white md:pb-28 md:pt-40">
-      <div className="wl-grid absolute inset-0 opacity-60" aria-hidden="true" />
+      <BackgroundBeamsWithCollision className="z-0" />
+      <div className="wl-grid absolute inset-0 z-[1] opacity-45" aria-hidden="true" />
       <div className="wl-aurora wl-aurora-one" aria-hidden="true" />
       <div className="wl-aurora wl-aurora-two" aria-hidden="true" />
-      <div className="container-page relative grid items-center gap-14 lg:grid-cols-12">
+      <div className="container-page relative z-10 grid items-center gap-14 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-4 py-2 text-xs font-semibold uppercase tracking-[.18em] text-white/75 backdrop-blur">
             <Sparkles className="h-3.5 w-3.5 text-brand-gold" />
