@@ -575,7 +575,7 @@ function VisualStory() {
         </div>
         <div className="mt-12 grid gap-5 lg:grid-cols-12">
           <VisualImage
-            src="/white-label/agency-delivery-control-room.avif"
+            src="/white-label/agency-delivery-control-room.webp"
             alt="White-label agency delivery team monitoring project milestones, QA checks, analytics, and launch readiness"
             className="min-h-[470px] lg:col-span-7"
             eyebrow="Delivery operations"
@@ -583,14 +583,14 @@ function VisualStory() {
           />
           <div className="grid gap-5 lg:col-span-5">
             <VisualImage
-              src="/white-label/client-facing-presentation.avif"
+              src="/white-label/client-facing-presentation.webp"
               alt="Professional client presentation showing a polished digital product experience across devices"
               className="min-h-[225px]"
               eyebrow="Client-facing experience"
               title="Your brand on the presentation"
             />
             <VisualImage
-              src="/white-label/specialist-delivery-pod.avif"
+              src="/white-label/specialist-delivery-pod.webp"
               alt="Specialist engineering team collaborating across product, automation, CRM, and software workflows"
               className="min-h-[225px]"
               eyebrow="Behind the scenes"
