@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
+import { LayoutTextFlip } from "@/components/ui/layout-text-flip";
 import "@/white-label.css";
 
 export const Route = createFileRoute("/services/white-label-development")({
@@ -239,10 +240,19 @@ function WhiteLabelHero() {
             Your brand.
             <span className="block text-gradient">Our delivery engine.</span>
           </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-white/68 md:text-xl">
+          <div className="mt-7">
+            <LayoutTextFlip
+              text="We deliver"
+              words={["Websites", "AI Automation", "CRM Systems", "SaaS Products", "Client Portals"]}
+              duration={2400}
+              textClassName="text-white/72"
+              wordClassName="border-white/12 bg-gradient-brand text-white shadow-[0_12px_36px_rgba(4,166,161,.18)]"
+            />
+          </div>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-white/68 md:text-xl">
             White-label development services for agencies and consultants that want to sell more
-            without building a larger internal technical team. We deliver websites, SaaS, AI
-            automation, CRM systems, portals, and custom software behind your brand.
+            without building a larger internal technical team. You keep the client relationship;
+            we provide the technical delivery capacity behind your brand.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link to="/contact" className="btn-primary">
@@ -477,6 +487,15 @@ function Capabilities() {
         <div className="mx-auto max-w-3xl text-center">
           <p className="eyebrow mb-4">What we can deliver behind your brand</p>
           <h2 className="fluid-h2">One technical partner. Multiple service lines.</h2>
+          <div className="mt-6 flex justify-center">
+            <LayoutTextFlip
+              text="One partner for"
+              words={["Web Development", "AI & Automation", "CRM & Revenue", "Product Engineering"]}
+              duration={2800}
+              textClassName="text-ink/70"
+              wordClassName="border-black/10 bg-black text-white shadow-[0_12px_30px_rgba(0,0,0,.10)]"
+            />
+          </div>
           <p className="mt-5 text-lg leading-8 text-ink-soft">
             Instead of maintaining separate vendors for development, AI, CRM, automation, and
             integrations, you can coordinate delivery through one technical layer.
