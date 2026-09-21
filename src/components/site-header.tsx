@@ -771,6 +771,7 @@ function buildFallbackNavigation(): NavItem[] {
         ["Dashboards & Admin Panels", "/services/custom-dashboards-admin-panels"],
       ]),
       group("Other Services", 4, [
+        ["White Label Development", "/services/white-label-development", "Behind-the-scenes development, AI automation, CRM, SaaS, and delivery capacity for agencies."],
         ["Mobile App Development", "/services/mobile-app-development"],
         ["UI/UX Design", "/services/ui-ux-design"],
         ["SEO & Digital Marketing", "/services/seo-digital-marketing"],
@@ -865,6 +866,7 @@ function buildFallbackNavigation(): NavItem[] {
     fallbackLink(nextId--, "Home", "/"),
     about,
     services,
+    fallbackLink(nextId--, "White Label", "/services/white-label-development"),
     resources,
     fallbackLink(nextId--, "Testimonials", "/testimonials"),
     fallbackLink(nextId--, "Contact", "/contact"),

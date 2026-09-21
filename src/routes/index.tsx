@@ -335,22 +335,72 @@ function Introduction() {
 
 /* ---------- CORE SERVICES ---------- */
 function HomeServices() {
-  const [services, setServices] = useState<CmsContentItem[]>([]);
-  useEffect(() => {
-    let active = true;
-    getCmsContentList("service")
-      .then((result) => active && setServices(result))
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, []);
-  const cmsBySlug = new Map(services.map((item) => [item.slug, item]));
+  const cmsBySlug = new Map<string, CmsContentItem>();
   return (
     <>
+      <WhiteLabelHomeFeature />
       <CoreServicesSection cmsBySlug={cmsBySlug} />
       <OtherServicesSection cmsBySlug={cmsBySlug} />
     </>
+  );
+}
+
+function WhiteLabelHomeFeature() {
+  return (
+    <section className="relative overflow-hidden bg-white py-20 md:py-28">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_84%_18%,rgba(139,207,60,.14),transparent_28%),radial-gradient(circle_at_18%_86%,rgba(4,166,161,.10),transparent_30%)]" />
+      <div className="container-page relative">
+        <div className="grid overflow-hidden rounded-[2rem] border border-black/10 bg-ink shadow-[var(--shadow-card)] lg:grid-cols-[1.05fr_.95fr]">
+          <div className="relative p-8 text-white md:p-12 lg:p-14">
+            <div className="absolute inset-0 grid-noise opacity-50" />
+            <div className="relative">
+              <div className="inline-flex items-center rounded-full border border-white/15 bg-white/[.06] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-white/65">
+                Flagship service · White label delivery
+              </div>
+              <h2 className="mt-7 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+                Win more work without building a bigger internal delivery team.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 md:text-lg">
+                We work behind agencies and consultants as a white-label technology partner for websites, SaaS products, AI automation, CRM systems, portals, and custom development.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/services/white-label-development" className="btn-primary">
+                  Explore White Label Service <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link to="/contact" className="btn-ghost-dark">
+                  Discuss a Partnership
+                </Link>
+              </div>
+            </div>
+          </div>
+          <div className="relative min-h-[360px] border-t border-white/10 bg-white/[.035] p-7 lg:border-l lg:border-t-0">
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.04)_1px,transparent_1px)] bg-[size:32px_32px]" />
+            <div className="relative flex h-full items-center justify-center">
+              <div className="w-full max-w-md">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[.06] p-5 text-white">
+                    <p className="text-xs uppercase tracking-[.16em] text-white/40">Front stage</p>
+                    <p className="mt-2 font-semibold">Your agency</p>
+                    <p className="mt-1 text-xs leading-5 text-white/55">Owns the relationship, strategy, and brand.</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-brand-gold" />
+                  <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/10 p-5 text-white">
+                    <p className="text-xs uppercase tracking-[.16em] text-white/40">Back stage</p>
+                    <p className="mt-2 font-semibold">Logicsify delivery</p>
+                    <p className="mt-1 text-xs leading-5 text-white/55">Builds, tests, documents, and supports delivery.</p>
+                  </div>
+                </div>
+                <div className="mx-auto my-3 h-10 w-px bg-gradient-to-b from-brand-gold to-brand-red" />
+                <div className="mx-auto max-w-xs rounded-2xl border border-white/10 bg-black/30 p-4 text-center text-white">
+                  <p className="text-xs uppercase tracking-[.16em] text-white/40">Client experience</p>
+                  <p className="mt-2 font-semibold">One seamless agency delivery</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -118,6 +118,7 @@ export function getParentCoreService(slug: string) {
 }
 
 export const otherServices: ServiceItem[] = [
+  { slug: "white-label-development", name: "White Label Development & Delivery", short: "Invisible delivery capacity for agencies and consultants: websites, SaaS, AI automation, CRM, portals, and product engineering delivered behind your brand.", route: "/services/white-label-development", tier: "other" },
   { slug: "mobile-app-development", name: "Mobile App Development", short: "Customer and internal mobile applications built around clear workflows.", route: "/services/mobile-app-development", tier: "other" },
   { slug: "ui-ux-design", name: "UI/UX Design", short: "Research, user flows, prototypes, and consistent interface systems.", route: "/services/ui-ux-design", tier: "other" },
   { slug: "seo-digital-marketing", name: "SEO & Digital Marketing", short: "Search, paid media, social, content, and conversion programs tied to measurable demand.", route: "/services/seo-digital-marketing", tier: "other" },

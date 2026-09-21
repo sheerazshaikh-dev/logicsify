@@ -8,6 +8,7 @@ const CORE_PATHS = [
   "/about",
   "/team",
   "/services",
+  "/services/white-label-development",
   "/work",
   "/portfolio",
   "/company-profile",
@@ -57,9 +58,10 @@ export default async function handler(request, response) {
   const liveXml = await fetchLiveSitemap();
   if (liveXml) {
     response.setHeader("X-Logicsify-Sitemap-Source", "backend-xml");
+    const mergedXml = ensureStaticCorePaths(liveXml);
     return request.method === "HEAD"
       ? response.status(200).end()
-      : response.status(200).send(liveXml);
+      : response.status(200).send(mergedXml);
   }
 
   // If the backend XML endpoint is ever intercepted by Imunify/ModSecurity or
@@ -123,6 +125,17 @@ function isValidSitemap(body, contentType) {
     normalized.startsWith("<?xml") ||
     normalized.startsWith("<urlset")
   );
+}
+
+function ensureStaticCorePaths(xml) {
+  const required = ["/services/white-label-development"];
+  let output = xml;
+  const rows = required
+    .filter((path) => !output.includes(`<loc>${ORIGIN}${path}</loc>`))
+    .map((path) => `  <url><loc>${ORIGIN}${path}</loc><changefreq>weekly</changefreq></url>`);
+
+  if (!rows.length) return output;
+  return output.replace("</urlset>", `${rows.join("\\n")}\\n</urlset>`);
 }
 
 async function buildFallbackSitemap() {
