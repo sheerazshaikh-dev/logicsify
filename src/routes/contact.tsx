@@ -18,6 +18,13 @@ import { SiteLayout } from "@/components/site-layout";
 import { SocialProfileLinks } from "@/components/social-profile-links";
 import { StrategyCallCalendar } from "@/components/strategy-call-calendar";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   getContactEmails,
   getLocationAddresses,
   getLocationPhones,
@@ -66,6 +73,7 @@ const schema = z.object({
 });
 
 const services = [
+  "White Label Development & Delivery",
   "AI Automation & Voice Agents",
   "CRM & Revenue Operations",
   "Custom Websites, Portals & CMS",
@@ -555,26 +563,43 @@ function SelectField({
   options: string[];
   error?: string;
 }) {
+  const [value, setValue] = useState("");
+
   return (
     <div>
       <label className="mb-2 block text-xs uppercase tracking-widest text-white/60" htmlFor={name}>
         {label}
       </label>
-      <select
-        id={name}
-        name={name}
-        defaultValue=""
-        className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/30"
-      >
-        <option value="" disabled>
-          Select one
-        </option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      <input type="hidden" name={name} value={value} />
+      <Select value={value} onValueChange={setValue}>
+        <SelectTrigger
+          id={name}
+          aria-invalid={Boolean(error)}
+          className={
+            "h-auto w-full rounded-xl border bg-white/5 px-4 py-3 text-left text-white shadow-none " +
+            (error
+              ? "border-red-400/70 focus:ring-red-400/25"
+              : "border-white/15 focus:border-brand-red focus:ring-brand-red/30")
+          }
+        >
+          <SelectValue placeholder="Select one" />
+        </SelectTrigger>
+        <SelectContent
+          position="popper"
+          sideOffset={6}
+          className="z-[120] max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-[#101314] text-white shadow-2xl"
+        >
+          {options.map((option) => (
+            <SelectItem
+              key={option}
+              value={option}
+              className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-white/85 outline-none focus:bg-white/10 focus:text-white data-[state=checked]:bg-white/10"
+            >
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {error ? <p className="mt-1 text-xs text-red-400">{error}</p> : null}
     </div>
   );
