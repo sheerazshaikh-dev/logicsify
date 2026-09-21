@@ -6,6 +6,7 @@ import {
   Bot,
   Boxes,
   Check,
+  ChevronRight,
   Code2,
   EyeOff,
   Gauge,
