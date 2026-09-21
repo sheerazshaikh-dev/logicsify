@@ -108,6 +108,10 @@ export const Route = createRootRoute({
       },
       { name: "author", content: "Logicsify" },
       {
+        name: "robots",
+        content: "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
+      },
+      {
         property: "og:title",
         content: "Logicsify | Web Development, AI Automation & Digital Growth",
       },
@@ -117,12 +121,45 @@ export const Route = createRootRoute({
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Logicsify" },
+      {
+        property: "og:image",
+        content: "https://logicsify.com/logicsify-logo-dark.png",
+      },
+      {
+        property: "og:image:alt",
+        content: "Logicsify — AI automation, CRM, software and digital delivery",
+      },
       { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "twitter:title",
+        content: "Logicsify | AI Automation, CRM & Custom Business Platforms",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "AI automation, CRM, websites, SaaS, portals and connected business systems built by Logicsify.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://logicsify.com/logicsify-logo-dark.png",
+      },
       { name: "theme-color", content: "#000000" },
     ],
     links: [
       { rel: "icon", href: "/f2048ae62fb525b2c29c3e51e755cc17.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/f2048ae62fb525b2c29c3e51e755cc17.png" },
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        href: "/rss.xml",
+        title: "Logicsify Insights RSS",
+      },
+      {
+        rel: "alternate",
+        type: "text/plain",
+        href: "/llms.txt",
+        title: "Logicsify AI-readable site summary",
+      },
     ],
     scripts: [
       {
@@ -135,14 +172,49 @@ export const Route = createRootRoute({
               "@id": "https://logicsify.com/#organization",
               name: "Logicsify",
               url: "https://logicsify.com/",
-              logo: "https://logicsify.com/3b4a0a2a1d78df66b5bb7dac579e144c.png",
-              email: "connect@logicsify.com",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://logicsify.com/logicsify-logo-dark.png",
+              },
+              image: "https://logicsify.com/logicsify-logo-dark.png",
+              email: "hello@logicsify.com",
+              telephone: "+923333718191",
+              description:
+                "Logicsify is a technology and digital delivery company providing AI automation, CRM, websites, SaaS products, portals, custom software, white-label development, cybersecurity, and digital growth services.",
+              sameAs: [
+                "https://www.linkedin.com/company/logicsify",
+                "https://www.instagram.com/logicsify/",
+              ],
+              areaServed: [
+                { "@type": "Country", name: "Pakistan" },
+                { "@type": "Country", name: "Saudi Arabia" },
+                { "@type": "Country", name: "Portugal" },
+              ],
+              knowsAbout: [
+                "AI automation",
+                "AI voice agents",
+                "CRM and revenue operations",
+                "Custom software development",
+                "Website and portal development",
+                "SaaS product development",
+                "White-label development",
+                "Mobile app development",
+                "Cybersecurity",
+                "SEO and digital marketing",
+              ],
               contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  contactType: "general inquiries",
+                  email: "hello@logicsify.com",
+                  telephone: "+923333718191",
+                  availableLanguage: ["English", "Urdu"],
+                },
                 {
                   "@type": "ContactPoint",
                   contactType: "sales",
                   email: "sales@logicsify.com",
-                  telephone: "+966544415405",
+                  telephone: "+923333718191",
                 },
                 {
                   "@type": "ContactPoint",
@@ -151,17 +223,41 @@ export const Route = createRootRoute({
                 },
               ],
               location: [
-                { "@type": "Place", name: "Karachi, Pakistan" },
-                { "@type": "Place", name: "Jeddah, Saudi Arabia" },
-                { "@type": "Place", name: "Leiria / Nazaré, Portugal" },
+                {
+                  "@type": "Place",
+                  name: "Karachi, Pakistan",
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: "Karachi",
+                    addressCountry: "PK",
+                  },
+                },
+                {
+                  "@type": "Place",
+                  name: "Jeddah, Saudi Arabia",
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: "Jeddah",
+                    addressCountry: "SA",
+                  },
+                },
+                {
+                  "@type": "Place",
+                  name: "Leiria / Nazaré, Portugal",
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: "Leiria / Nazaré",
+                    addressCountry: "PT",
+                  },
+                },
               ],
-              description: "Technology, marketing, and automation—logically built for growth.",
             },
             {
               "@type": "WebSite",
               "@id": "https://logicsify.com/#website",
               name: "Logicsify",
               url: "https://logicsify.com/",
+              inLanguage: "en",
               publisher: { "@id": "https://logicsify.com/#organization" },
             },
           ],
