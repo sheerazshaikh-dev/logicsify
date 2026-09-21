@@ -12,6 +12,12 @@
 
 .wl-hero {
   isolation: isolate;
+  height: auto;
+  min-height: 0;
+}
+
+.wl-hero > .container-page {
+  width: 100%;
 }
 
 .wl-aurora {
@@ -393,6 +399,20 @@
   10% { opacity: 1; }
   90% { opacity: 1; }
   to { transform: translateX(760%); opacity: 0; }
+}
+
+
+@media (min-width: 1024px) {
+  .wl-hero {
+    display: flex;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: center;
+    padding-top: 4.5rem !important;
+    padding-bottom: 4.5rem !important;
+  }
 }
 
 @media (max-width: 1023px) {
