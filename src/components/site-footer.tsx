@@ -20,6 +20,7 @@ const columns: Array<{ title: string; links: Array<[string, string]> }> = [
   {
     title: "Core Services",
     links: [
+      ["White Label Development", "/services/white-label-development"],
       ["AI Automation & Voice Agents", "/services/ai-automation-voice-agents"],
       ["CRM & Revenue Operations", "/services/crm-revenue-operations"],
       ["Custom Websites, Portals & CMS", "/services/custom-websites-portals-cms"],

@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   Smartphone,
   Workflow,
+  Handshake,
+  ShieldCheck as WhiteLabelShield,
 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
@@ -48,6 +50,7 @@ export const Route = createFileRoute("/services/")({
 });
 
 const otherIcons: Record<string, typeof Smartphone> = {
+  "white-label-development": Handshake,
   "mobile-app-development": Smartphone,
   "ui-ux-design": Palette,
   "seo-digital-marketing": Megaphone,
@@ -88,6 +91,8 @@ function ServicesOverview() {
         primaryCta={{ label: "Discuss Your Project", to: "/contact" }}
         secondaryCta={{ label: "View Our Work", to: "/work" }}
       />
+
+      <WhiteLabelSpotlight />
 
       <section className="py-24 md:py-32">
         <div className="container-page">
@@ -160,7 +165,7 @@ function ServicesOverview() {
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {otherServices.map((service) => {
+            {otherServices.filter((service) => service.slug !== "white-label-development").map((service) => {
               const Icon = otherIcons[service.slug] || Code2;
               return (
                 <Link
@@ -189,6 +194,63 @@ function ServicesOverview() {
       {caseStudies.length ? <SelectedWork items={caseStudies} /> : null}
       <CTASection />
     </SiteLayout>
+  );
+}
+
+
+function WhiteLabelSpotlight() {
+  return (
+    <section className="relative overflow-hidden border-b border-black/5 bg-white py-16 md:py-20">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_20%,rgba(139,207,60,.16),transparent_34%),radial-gradient(circle_at_12%_85%,rgba(4,166,161,.12),transparent_30%)]" />
+      <div className="container-page relative">
+        <Link
+          to="/services/white-label-development"
+          className="group grid overflow-hidden rounded-[2rem] border border-black/10 bg-ink text-white shadow-[var(--shadow-card)] lg:grid-cols-[1.1fr_.9fr]"
+        >
+          <div className="relative p-8 md:p-12 lg:p-14">
+            <div className="absolute inset-0 grid-noise opacity-40" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-white/70">
+                <Handshake className="h-3.5 w-3.5 text-brand-gold" />
+                Flagship service
+              </div>
+              <h2 className="mt-7 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
+                Your brand in front. <span className="text-gradient">Our delivery engine behind it.</span>
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 md:text-lg">
+                White-label development for agencies and consultants that need reliable delivery capacity across websites, SaaS, AI automation, CRM, portals, and custom software.
+              </p>
+              <span className="mt-8 inline-flex items-center gap-2 font-semibold">
+                Explore white-label delivery
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </span>
+            </div>
+          </div>
+          <div className="relative min-h-[280px] border-t border-white/10 bg-white/[.035] p-8 lg:border-l lg:border-t-0">
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.04)_1px,transparent_1px)] bg-[size:32px_32px]" />
+            <div className="relative grid h-full place-items-center">
+              <div className="w-full max-w-sm rounded-3xl border border-white/12 bg-black/35 p-5 backdrop-blur">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-[.18em] text-white/45">White-label delivery</span>
+                  <WhiteLabelShield className="h-4 w-4 text-brand-gold" />
+                </div>
+                <div className="mt-5 grid grid-cols-3 gap-3 text-center text-xs">
+                  {["Your agency", "Logicsify", "Your client"].map((label, index) => (
+                    <div key={label} className="rounded-xl border border-white/10 bg-white/[.05] p-3">
+                      <span className="block text-[10px] text-white/35">0{index + 1}</span>
+                      <span className="mt-1 block font-semibold text-white/80">{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full w-2/3 rounded-full bg-gradient-brand transition-all duration-700 group-hover:w-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </div>
+    </section>
   );
 }
 
