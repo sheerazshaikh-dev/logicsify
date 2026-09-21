@@ -566,35 +566,35 @@ function VisualStory() {
     <section className="bg-[#f7f8f8] py-24 md:py-32">
       <div className="container-page">
         <div className="max-w-3xl">
-          <p className="eyebrow mb-4">Visual story assets</p>
-          <h2 className="fluid-h2">Designed to feel like a real delivery partnership.</h2>
+          <p className="eyebrow mb-4">White-label delivery in practice</p>
+          <h2 className="fluid-h2">A delivery partnership that feels complete from every angle.</h2>
           <p className="mt-5 text-lg leading-8 text-ink-soft">
-            These placeholders are intentionally reserved for the custom imagery we will create next.
-            They are sized and positioned so the final visuals can drop in without redesigning the page.
+            From the internal delivery room to the client presentation and specialist engineering
+            pod, the workflow is designed to stay polished, coordinated, and invisible behind your brand.
           </p>
         </div>
         <div className="mt-12 grid gap-5 lg:grid-cols-12">
-          <VisualPlaceholder
+          <VisualImage
+            src="/white-label/agency-delivery-control-room.avif"
+            alt="White-label agency delivery team monitoring project milestones, QA checks, analytics, and launch readiness"
             className="min-h-[470px] lg:col-span-7"
-            eyebrow="Hero supporting visual"
+            eyebrow="Delivery operations"
             title="Agency delivery control room"
-            description="Planned image: branded project dashboard with milestones, messages, QA checks, and delivery status."
-            ratio="1600 × 1100"
           />
           <div className="grid gap-5 lg:col-span-5">
-            <VisualPlaceholder
+            <VisualImage
+              src="/white-label/client-facing-presentation.avif"
+              alt="Professional client presentation showing a polished digital product experience across devices"
               className="min-h-[225px]"
               eyebrow="Client-facing experience"
               title="Your brand on the presentation"
-              description="Planned image: polished client presentation or demo screen carrying the agency's brand."
-              ratio="1400 × 900"
             />
-            <VisualPlaceholder
+            <VisualImage
+              src="/white-label/specialist-delivery-pod.avif"
+              alt="Specialist engineering team collaborating across product, automation, CRM, and software workflows"
               className="min-h-[225px]"
               eyebrow="Behind the scenes"
               title="Specialist delivery pod"
-              description="Planned image: product, automation, CRM, and engineering workflow visual without stock-photo styling."
-              ratio="1400 × 900"
             />
           </div>
         </div>
@@ -603,22 +603,44 @@ function VisualStory() {
   );
 }
 
-function VisualPlaceholder({ className, eyebrow, title, description, ratio }: { className?: string; eyebrow: string; title: string; description: string; ratio: string }) {
+function VisualImage({
+  src,
+  alt,
+  className,
+  eyebrow,
+  title,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  eyebrow: string;
+  title: string;
+}) {
   return (
-    <div data-white-label-image-placeholder className={"wl-placeholder relative overflow-hidden rounded-[2rem] border border-dashed border-black/18 bg-white p-7 " + (className || "")}>
-      <div className="wl-placeholder-grid absolute inset-0" aria-hidden="true" />
-      <div className="relative flex h-full flex-col justify-end">
-        <div className="mb-auto flex items-center justify-between">
-          <span className="rounded-full border border-black/8 bg-white/80 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.16em] text-black/45 backdrop-blur">
-            Image placeholder
-          </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[.16em] text-black/30">{ratio}</span>
-        </div>
-        <p className="eyebrow mb-2">{eyebrow}</p>
-        <h3 className="text-2xl font-semibold">{title}</h3>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-ink-soft">{description}</p>
-      </div>
-    </div>
+    <figure
+      className={
+        "group relative overflow-hidden rounded-[2rem] bg-black shadow-[0_24px_70px_rgba(0,0,0,.12)] " +
+        (className || "")
+      }
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.025]"
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/5 to-transparent"
+        aria-hidden="true"
+      />
+      <figcaption className="absolute inset-x-0 bottom-0 p-6 md:p-7">
+        <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-white/55">
+          {eyebrow}
+        </p>
+        <h3 className="mt-2 text-xl font-semibold text-white md:text-2xl">{title}</h3>
+      </figcaption>
+    </figure>
   );
 }
 
