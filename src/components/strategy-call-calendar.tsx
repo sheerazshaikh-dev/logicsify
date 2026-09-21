@@ -1,8 +1,10 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { CalendarDays, Check, Clock, Loader2 } from "lucide-react";
+import { SiteSelect } from "@/components/site-select";
 import { getAvailability, submitBooking, type AvailabilitySlot } from "@/lib/logicsify-api";
 
 const serviceOptions = [
+  "White Label Development & Delivery",
   "Website Design & Development",
   "Web Application",
   "SaaS Development",
@@ -28,6 +30,7 @@ export function StrategyCallCalendar({ compact = false }: { compact?: boolean })
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [selectedTime, setSelectedTime] = useState("");
+  const [service, setService] = useState("");
   const [timezone, setTimezone] = useState("Asia/Karachi");
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [state, setState] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -81,7 +84,7 @@ export function StrategyCallCalendar({ compact = false }: { compact?: boolean })
         email: values.email,
         phone: values.phone,
         company: values.company,
-        service: values.service,
+        service,
         notes: values.notes,
         honey: values.honey,
         meeting_date: date,
@@ -94,6 +97,7 @@ export function StrategyCallCalendar({ compact = false }: { compact?: boolean })
       setDate("");
       setSelectedTime("");
       setSlots([]);
+      setService("");
     } catch (error) {
       setState("error");
       setMessage(error instanceof Error ? error.message : "Could not submit your booking.");
@@ -198,21 +202,14 @@ export function StrategyCallCalendar({ compact = false }: { compact?: boolean })
             >
               What can we help with?
             </label>
-            <select
+            <SiteSelect
               id="booking-service"
-              name="service"
-              defaultValue=""
-              className="w-full rounded-xl bg-white/5 border border-white/15 px-4 py-3 text-white focus:outline-none focus:border-brand-red focus:ring-2 focus:ring-brand-red/30"
-            >
-              <option value="" className="text-black">
-                Select a service
-              </option>
-              {serviceOptions.map((service) => (
-                <option key={service} className="text-black" value={service}>
-                  {service}
-                </option>
-              ))}
-            </select>
+              value={service}
+              onValueChange={setService}
+              options={serviceOptions}
+              placeholder="Select a service"
+              tone="dark"
+            />
           </div>
           <div>
             <label
