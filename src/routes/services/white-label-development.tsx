@@ -36,7 +36,7 @@ export const Route = createFileRoute("/services/white-label-development")({
       {
         name: "description",
         content:
-          "White-label web development, SaaS, AI automation, CRM, portals, and custom software delivery for agencies and consultants that want to scale without expanding internal delivery teams.",
+          "White-label web, SaaS, AI automation, CRM, portal, and software development for agencies and consultants that need reliable delivery capacity.",
       },
       {
         name: "robots",
@@ -53,6 +53,8 @@ export const Route = createFileRoute("/services/white-label-development")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://logicsify.com/services/white-label-development" },
+      { property: "og:image", content: "https://logicsify.com/white-label/client-facing-presentation.webp" },
+      { property: "og:image:alt", content: "White-label delivery presentation and digital product planning" },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
@@ -63,11 +65,48 @@ export const Route = createFileRoute("/services/white-label-development")({
         content:
           "Behind-the-scenes technical delivery for agencies and consultants across web, SaaS, AI, CRM, portals, and custom software.",
       },
+      { name: "twitter:image", content: "https://logicsify.com/white-label/client-facing-presentation.webp" },
     ],
     links: [
       {
         rel: "canonical",
         href: "https://logicsify.com/services/white-label-development",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Service",
+              "@id": "https://logicsify.com/services/white-label-development#service",
+              name: "White Label Development & Delivery",
+              serviceType: "White-label software development and technical delivery",
+              description:
+                "White-label web, SaaS, AI automation, CRM, portal, and custom software development for agencies and consultants.",
+              url: "https://logicsify.com/services/white-label-development",
+              provider: { "@id": "https://logicsify.com/#organization" },
+              areaServed: "Worldwide",
+              audience: {
+                "@type": "Audience",
+                audienceType: "Agencies, consultants, studios, and service firms",
+              },
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: faqItems.map(([question, answer]) => ({
+                "@type": "Question",
+                name: question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: answer,
+                },
+              })),
+            },
+          ],
+        }),
       },
     ],
   }),
