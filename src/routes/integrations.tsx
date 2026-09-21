@@ -9,7 +9,7 @@ export const Route = createFileRoute("/integrations")({
   component: IntegrationsPage,
   head: () => ({
     meta: [
-      { title: "Supported Integrations | CRM, AI, Payments & Automation | Logicsify" },
+      { title: "CRM, AI, Payments & Automation Integrations | Logicsify" },
       {
         name: "description",
         content:
