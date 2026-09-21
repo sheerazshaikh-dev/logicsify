@@ -17,13 +17,7 @@ import { PageHero } from "@/components/page-hero";
 import { SiteLayout } from "@/components/site-layout";
 import { SocialProfileLinks } from "@/components/social-profile-links";
 import { StrategyCallCalendar } from "@/components/strategy-call-calendar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SiteSelect } from "@/components/site-select";
 import {
   getContactEmails,
   getLocationAddresses,
@@ -571,35 +565,15 @@ function SelectField({
         {label}
       </label>
       <input type="hidden" name={name} value={value} />
-      <Select value={value} onValueChange={setValue}>
-        <SelectTrigger
-          id={name}
-          aria-invalid={Boolean(error)}
-          className={
-            "h-auto w-full rounded-xl border bg-white/5 px-4 py-3 text-left text-white shadow-none " +
-            (error
-              ? "border-red-400/70 focus:ring-red-400/25"
-              : "border-white/15 focus:border-brand-red focus:ring-brand-red/30")
-          }
-        >
-          <SelectValue placeholder="Select one" />
-        </SelectTrigger>
-        <SelectContent
-          position="popper"
-          sideOffset={6}
-          className="z-[120] max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-[#101314] text-white shadow-2xl"
-        >
-          {options.map((option) => (
-            <SelectItem
-              key={option}
-              value={option}
-              className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-white/85 outline-none focus:bg-white/10 focus:text-white data-[state=checked]:bg-white/10"
-            >
-              {option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SiteSelect
+        id={name}
+        value={value}
+        onValueChange={setValue}
+        options={options}
+        placeholder="Select one"
+        tone="dark"
+        ariaInvalid={Boolean(error)}
+      />
       {error ? <p className="mt-1 text-xs text-red-400">{error}</p> : null}
     </div>
   );

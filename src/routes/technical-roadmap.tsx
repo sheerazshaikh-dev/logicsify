@@ -4,6 +4,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { SiteLayout } from "@/components/site-layout";
 import { PageHero } from "@/components/page-hero";
 import { SystemsWeIntegrate } from "@/components/systems-we-integrate";
+import { SiteSelect } from "@/components/site-select";
 import { submitContact } from "@/lib/logicsify-api";
 import { getRoadmapSource, trackEvent } from "@/lib/analytics";
 
@@ -47,6 +48,10 @@ function TechnicalRoadmapPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
+    if (!form.service || !form.budget) {
+      setError("Please select a service and estimated budget.");
+      return;
+    }
     if (!form.consent) {
       setError("Please confirm that Logicsify may contact you about this request.");
       return;
@@ -113,9 +118,9 @@ function TechnicalRoadmapPage() {
                   <Field label="Company"><input value={form.company} onChange={(e) => update("company", e.target.value)} className="form-input" autoComplete="organization" /></Field>
                   <Field label="Website"><input type="url" value={form.website} onChange={(e) => update("website", e.target.value)} className="form-input" placeholder="https://" /></Field>
                   <Field label="Business type" required><input required value={form.businessType} onChange={(e) => update("businessType", e.target.value)} className="form-input" placeholder="SaaS, home services, agency…" /></Field>
-                  <Field label="Service required" required><select required value={form.service} onChange={(e) => update("service", e.target.value)} className="form-input"><option value="">Select</option>{["Marketing website","E-commerce website","Custom web application","SaaS MVP","Mobile application","AI automation","Voice AI agent","CRM implementation","Custom CMS","SEO and marketing","Cybersecurity","Technical discovery"].map((item) => <option key={item}>{item}</option>)}</select></Field>
-                  <Field label="Estimated budget" required><select required value={form.budget} onChange={(e) => update("budget", e.target.value)} className="form-input"><option value="">Select</option><option>Under $5,000</option><option>$5,000–$15,000</option><option>$15,000–$35,000</option><option>$35,000–$75,000</option><option>$75,000+</option><option>Not defined</option></select></Field>
-                  <Field label="Desired timeline"><select value={form.timeline} onChange={(e) => update("timeline", e.target.value)} className="form-input"><option value="">Select</option><option>As soon as practical</option><option>1–2 months</option><option>3–6 months</option><option>6+ months</option><option>Exploring</option></select></Field>
+                  <Field label="Service required" required><SiteSelect value={form.service} onValueChange={(value) => update("service", value)} options={["White Label Development & Delivery","Marketing website","E-commerce website","Custom web application","SaaS MVP","Mobile application","AI automation","Voice AI agent","CRM implementation","Custom CMS","SEO and marketing","Cybersecurity","Technical discovery"]} placeholder="Select" tone="light" required /></Field>
+                  <Field label="Estimated budget" required><SiteSelect value={form.budget} onValueChange={(value) => update("budget", value)} options={["Under $5,000","$5,000–$15,000","$15,000–$35,000","$35,000–$75,000","$75,000+","Not defined"]} placeholder="Select" tone="light" required /></Field>
+                  <Field label="Desired timeline"><SiteSelect value={form.timeline} onValueChange={(value) => update("timeline", value)} options={["As soon as practical","1–2 months","3–6 months","6+ months","Exploring"]} placeholder="Select" tone="light" /></Field>
                   <Field label="Current systems"><input value={form.currentSystems} onChange={(e) => update("currentSystems", e.target.value)} className="form-input" placeholder="CRM, CMS, payments, analytics…" /></Field>
                 </div>
                 <div className="mt-5 space-y-5">

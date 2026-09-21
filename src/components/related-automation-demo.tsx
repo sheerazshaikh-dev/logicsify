@@ -12,6 +12,7 @@ import {
   Play,
   Workflow,
 } from "lucide-react";
+import { SiteSelect } from "@/components/site-select";
 import { trackEvent } from "@/lib/analytics";
 
 type DemoKind = "lead" | "voice" | "workflow" | "document" | "support";
@@ -128,9 +129,12 @@ function CompactLeadDemo({ serviceSlug }: { serviceSlug: string }) {
       <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
         <label>
           <span className="mb-2 block text-sm font-semibold text-white">Sample monthly volume</span>
-          <select value={volume} onChange={(event) => setVolume(event.target.value)} className="form-input border-white/15 bg-white text-ink">
-            {["Under 50 leads", "50–200 leads", "200–500 leads", "500+ leads"].map((option) => <option key={option}>{option}</option>)}
-          </select>
+          <SiteSelect
+            value={volume}
+            onValueChange={setVolume}
+            options={["Under 50 leads", "50–200 leads", "200–500 leads", "500+ leads"]}
+            tone="dark"
+          />
         </label>
         <button type="button" onClick={run} disabled={running} className="btn-primary min-w-36 justify-center disabled:opacity-60">
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Run sample
@@ -192,9 +196,12 @@ function CompactVoiceDemo({ serviceSlug }: { serviceSlug: string }) {
       <div>
         <label>
           <span className="mb-2 block text-sm font-semibold text-white">Conversation goal</span>
-          <select value={goal} onChange={(event) => setGoal(event.target.value)} className="form-input border-white/15 bg-white text-ink">
-            {Object.keys(scripts).map((option) => <option key={option}>{option}</option>)}
-          </select>
+          <SiteSelect
+            value={goal}
+            onValueChange={setGoal}
+            options={Object.keys(scripts)}
+            tone="dark"
+          />
         </label>
         <button type="button" onClick={run} disabled={running} className="btn-primary mt-4 w-full justify-center disabled:opacity-60">
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <PhoneCall className="h-4 w-4" />} Simulate conversation
@@ -279,9 +286,12 @@ function CompactDocumentDemo({ serviceSlug }: { serviceSlug: string }) {
       <div>
         <label>
           <span className="mb-2 block text-sm font-semibold text-white">Prepared sample type</span>
-          <select value={category} onChange={(event) => setCategory(event.target.value)} className="form-input border-white/15 bg-white text-ink">
-            {Object.keys(results).map((option) => <option key={option}>{option}</option>)}
-          </select>
+          <SiteSelect
+            value={category}
+            onValueChange={setCategory}
+            options={Object.keys(results)}
+            tone="dark"
+          />
         </label>
         <button type="button" onClick={run} disabled={running} className="btn-primary mt-4 w-full justify-center disabled:opacity-60">
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileJson2 className="h-4 w-4" />} Extract sample fields
