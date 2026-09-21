@@ -40,6 +40,139 @@
   animation: wl-drift 15s ease-in-out infinite alternate-reverse;
 }
 
+
+.wl-beams-vignette {
+  background:
+    radial-gradient(circle at 50% 15%, rgba(139, 207, 60, .05), transparent 34%),
+    linear-gradient(90deg, rgba(0, 0, 0, .18), transparent 16%, transparent 84%, rgba(0, 0, 0, .18));
+}
+
+.wl-beam-column {
+  z-index: 0;
+}
+
+.wl-beam-mover {
+  animation: wl-beam-fall var(--beam-duration) linear var(--beam-delay) infinite;
+  will-change: transform, opacity;
+}
+
+.wl-collision-beam {
+  width: var(--beam-width);
+  height: var(--beam-height);
+  opacity: var(--beam-opacity);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(4, 166, 161, .2) 24%,
+    #04A6A1 68%,
+    #8BCF3C 100%
+  );
+  box-shadow:
+    0 0 8px rgba(4, 166, 161, .55),
+    0 0 20px rgba(139, 207, 60, .28);
+}
+
+.wl-collision-impact {
+  width: 2px;
+  height: 2px;
+  transform: translate(-50%, 50%);
+  opacity: 0;
+  animation: wl-impact-cycle var(--beam-duration) linear var(--beam-delay) infinite;
+  will-change: opacity, transform;
+}
+
+.wl-impact-glow {
+  width: 58px;
+  height: 2px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, transparent, #04A6A1, #8BCF3C, transparent);
+  box-shadow:
+    0 0 10px rgba(4, 166, 161, .75),
+    0 0 26px rgba(139, 207, 60, .5);
+  filter: blur(.35px);
+}
+
+.wl-impact-particle {
+  width: 3px;
+  height: 3px;
+  background: linear-gradient(180deg, #8BCF3C, #04A6A1);
+  box-shadow: 0 0 8px rgba(139, 207, 60, .7);
+  animation: wl-impact-particle var(--beam-duration) ease-out calc(var(--beam-delay) + var(--particle-delay)) infinite;
+  will-change: transform, opacity;
+}
+
+.wl-collision-floor {
+  z-index: 0;
+  opacity: .42;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(4, 166, 161, .16) 12%,
+    rgba(139, 207, 60, .5) 50%,
+    rgba(4, 166, 161, .16) 88%,
+    transparent 100%
+  );
+  box-shadow:
+    0 -1px 12px rgba(4, 166, 161, .18),
+    0 0 24px rgba(139, 207, 60, .12);
+}
+
+@keyframes wl-beam-fall {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  91% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, calc(100% + 220px), 0);
+    opacity: .95;
+  }
+}
+
+@keyframes wl-impact-cycle {
+  0%,
+  89% {
+    opacity: 0;
+    transform: translate(-50%, 50%) scale(.7);
+  }
+  94% {
+    opacity: .15;
+  }
+  97% {
+    opacity: 1;
+    transform: translate(-50%, 50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 50%) scale(1.15);
+  }
+}
+
+@keyframes wl-impact-particle {
+  0%,
+  91% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(.5);
+  }
+  94% {
+    opacity: 0;
+  }
+  97% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate3d(var(--particle-x), var(--particle-y), 0) scale(.35);
+  }
+}
+
 .wl-orbit-stage {
   perspective: 1100px;
 }
@@ -269,6 +402,14 @@
 }
 
 @media (max-width: 639px) {
+  .wl-beam-column:nth-of-type(even) {
+    display: none;
+  }
+
+  .wl-impact-glow {
+    width: 42px;
+  }
+
   .wl-orbit-stage {
     min-height: 390px;
   }
@@ -306,8 +447,15 @@
   .wl-flow-arrow,
   .wl-ticker,
   .wl-process-line span,
-  .wl-data-line span {
+  .wl-data-line span,
+  .wl-beam-mover,
+  .wl-collision-impact,
+  .wl-impact-particle {
     animation: none !important;
+  }
+
+  .wl-collision-impact {
+    display: none;
   }
 
   .wl-ticker {
