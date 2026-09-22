@@ -207,6 +207,26 @@
       "destination": "/_seo/services/:slug/index.html"
     },
     {
+      "source": "/work/:slug",
+      "destination": "/api/seo-page?type=case_study&slug=:slug"
+    },
+    {
+      "source": "/portfolio/:slug",
+      "destination": "/api/seo-page?type=portfolio&slug=:slug"
+    },
+    {
+      "source": "/insights/:slug",
+      "destination": "/api/seo-page?type=insight&slug=:slug"
+    },
+    {
+      "source": "/guides/:slug",
+      "destination": "/api/seo-page?type=guide&slug=:slug"
+    },
+    {
+      "source": "/comparisons/:slug",
+      "destination": "/api/seo-page?type=comparison&slug=:slug"
+    },
+    {
       "source": "/((?!api/|admin(?:/|$)|media(?:/|$)|uploads(?:/|$)).*)",
       "destination": "/index.html"
     }
