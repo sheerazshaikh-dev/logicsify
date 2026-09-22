@@ -352,6 +352,7 @@ for (const [slug, title, description, h1] of servicePages) {
       ["Working with existing systems and teams", `${h1} does not always require replacing the current stack. Logicsify can work around existing CRM, CMS, cloud, analytics, design systems, internal APIs, marketing platforms, or engineering processes when those systems still serve the business. Discovery determines what should stay, what should change, and where custom implementation adds the most value.`],
       ["How scope becomes a delivery plan", "Once requirements are understood, the work can be organized into milestones that make progress reviewable. Typical stages include discovery, architecture, design, implementation, integration, QA, launch preparation, deployment, documentation, and handover, with the exact sequence adjusted to the complexity and risk of the project."],
       ["How to evaluate whether the service is a fit", `A good ${h1} engagement should have a clear reason to exist: a customer, operational, product, security, growth, or delivery problem that can be improved through the work. During discovery, Logicsify checks whether the requested solution matches that problem, whether existing systems can support it, and whether a smaller or different intervention would achieve the outcome with less complexity.`],
+      ["Decision context", `The final ${h1} approach should be understandable to the people who will approve, use, operate, and maintain it after launch.`],
     ],
   });
 }
@@ -395,6 +396,14 @@ const seoDepthBoost = {
     ["Roadmaps for agency and white-label work", "Agencies can also use a technical roadmap before presenting a complex solution to an end client. Logicsify can help translate business requirements into a clearer implementation structure while preserving the agency's preferred communication model, client ownership, and white-label delivery boundaries."],
     ["A roadmap is not a promise to overbuild", "Technical planning should simplify the path to the required outcome, not turn every project into a large platform. A roadmap can recommend using an existing tool, limiting an integration, validating one risky assumption first, shipping a smaller phase, or postponing features that do not yet justify their complexity. The value is in making those decisions visible before they become expensive implementation commitments."],
   ],
+};
+
+const seoFinalNotes = {
+  "/about": [["Working across different stages", "Logicsify can support a new build, an existing system that needs improvement, a migration, an integration problem, a delivery-capacity gap, or a white-label engagement. The starting point changes with the context, but the same principle applies: understand the operating problem before deciding what should be designed, automated, integrated, replaced, or built."]],
+  "/contact": [["Before sharing access", "Project discovery can usually begin without production credentials. Access to hosting, CRM, repositories, APIs, analytics, customer data, or other sensitive systems should only be provided through the agreed project process after the people, purpose, permissions, and ownership of that access are clear."]],
+  "/insights": [["Editorial goal", "The editorial goal is to publish material that is specific enough to be useful during an actual decision. That means preferring concrete questions, implementation detail, limitations, examples, and verifiable sources over generic claims. When a topic changes quickly, readers should be able to see when the article was published or updated and where important factual claims came from."]],
+  "/portfolio": [["Discussing a similar project", "When an example is relevant, share which part of it matters to you and what is different in your environment. That gives discovery a concrete reference point while leaving room to choose a more suitable architecture, workflow, integration pattern, interface, or delivery model for the new project."]],
+  "/technical-roadmap": [["Who should be involved", "The most useful roadmap conversations usually include the people who understand the business outcome, the current workflow, the systems involved, and the technical constraints. They do not all need to attend every discussion, but their information should be represented before major scope or architecture decisions are finalized."]],
 };
 
 const seoExpansion = {
@@ -600,6 +609,7 @@ function fallbackMarkup(page) {
     ...(Array.isArray(page.sections) ? page.sections : []),
     ...(seoExpansion[expansionKey] || []),
     ...(seoDepthBoost[expansionKey] || []),
+    ...(seoFinalNotes[expansionKey] || []),
   ];
   const sections = visibleSections
     .map(
