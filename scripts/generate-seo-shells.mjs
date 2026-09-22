@@ -12,7 +12,7 @@ const pages = [
   {
     path: "/",
     key: "home",
-    title: "Logicsify | AI Automation, CRM & Custom Business Platforms",
+    title: "Logicsify | AI Automation, CRM & Business Systems",
     description: "Logicsify builds AI-powered sales, customer service, CRM, website, portal, CMS, and business operations systems.",
     h1: "Build connected systems. Respond faster. Operate smarter.",
     intro: "Logicsify designs and develops connected digital systems for businesses that need fewer manual handoffs, faster customer response, and clearer operational visibility.",
