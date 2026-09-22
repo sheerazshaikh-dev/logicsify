@@ -446,7 +446,7 @@ function buildHtml(template, page) {
   const image = page.image || DEFAULT_IMAGE;
   let html = stripExistingStaticSeo(template);
   const head = `
-    <title>${escapeHtml(page.title)}</title>
+    <title data-seo-prerender="true">${escapeHtml(page.title)}</title>
     <meta name="description" content="${escapeAttr(page.description)}" data-seo-prerender="true" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" data-seo-prerender="true" />
     <link rel="canonical" href="${escapeAttr(pageUrl)}" data-seo-prerender="true" />
