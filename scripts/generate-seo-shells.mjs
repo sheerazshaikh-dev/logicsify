@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, "../dist");
 const templatePath = path.join(distDir, "index.html");
 const ORIGIN = "https://logicsify.com";
-const DEFAULT_IMAGE = `${ORIGIN}/logicsifylogo-dark.png`;
+const DEFAULT_IMAGE = `${ORIGIN}/logicsify-logo-dark.png`;
 
 const pages = [
   {
@@ -93,7 +93,7 @@ const pages = [
     h1: "Logicsify company profile.",
     intro: "A concise overview of Logicsify, our connected technology capabilities, delivery model, selected work, team, locations, and the systems we help clients plan, build, connect, and improve.",
     sections: [
-      ["Technology and automation", "Logicsifyworks across custom software, web platforms, mobile products, CRM, AI automation, integrations, cybersecurity, and digital growth services."],
+      ["Technology and automation", "Logicsify-works across custom software, web platforms, mobile products, CRM, AI automation, integrations, cybersecurity, and digital growth services."],
       ["Delivery model", "We can work as a direct technology partner, specialist implementation partner, white-label delivery partner, or extended technical team depending on project scope and ownership requirements."],
       ["International presence", "The company profile includes public location and contact information for Logicsify operations and representatives across its active markets."],
     ],
@@ -334,7 +334,7 @@ const servicePages = [
 
 for (const [slug, title, description, h1] of servicePages) {
   pages.push({
-    path: `/iservices/${slug}`,
+    path: `/services/${slug}`,
     title,
     description,
     h1,
@@ -375,7 +375,7 @@ function schemaFor(page) {
       "@id": `${ORIGIN}/#organization`,
       name: "Logicsify",
       url: `${ORIGIN}/`,
-      logo: `${ORIGIN}/logicsifylogo-dark.png`,
+      logo: `${ORIGIN}/logicsify-logo-dark.png`,
     },
     {
       "@type": "WebSite",
@@ -403,7 +403,7 @@ function schemaFor(page) {
       "@id": `${pageUrl}#service`,
       name: page.h1,
       description: page.description,
-      url: paeUrl,
+      url: pageUrl,
       provider: { "@id": `${ORIGIN}/#organization` },
       areaServed: "Worldwide",
     });
