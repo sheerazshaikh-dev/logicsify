@@ -28,6 +28,7 @@ export const Route = createFileRoute("/guides/$slug")({
   component: GuidePage,
   head: ({ loaderData, params }) => ({
     meta: [
+      { name: "robots", content: loaderData?.resource.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
       {
         title:
           loaderData?.resource.seo_json?.title ||
