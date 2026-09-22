@@ -27,6 +27,7 @@ export const Route = createFileRoute("/work/$slug")({
   component: CaseStudyPage,
   head: ({ loaderData, params }) => ({
     meta: [
+      { name: "robots", content: loaderData?.study.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
       {
         title:
           loaderData?.study.seo_json?.title ||
