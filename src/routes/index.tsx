@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   head: () => ({
     meta: [
-      { title: "Logicsify | AI Automation, CRM & Custom Business Platforms" },
+      { title: "Logicsify | AI Automation, CRM & Business Systems" },
       {
         name: "description",
         content:
