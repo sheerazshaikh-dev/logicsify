@@ -363,8 +363,9 @@ function escapeAttr(value = "") {
 
 function stripExistingStaticSeo(html) {
   return html
-    .replace(/<title>[\s\S]*?<\/title>/i, "")
-    .replace(/<meta\s+name=["']description["'][^>]*>/i, "");
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
+    .replace(/<meta[^>]+(?:name|property)=["'](?:description|robots|og:[^"']+|twitter:[^"']+)["'][^>]*>/gi, "")
+    .replace(/<link[^>]+rel=["']canonical["'][^>]*>/gi, "");
 }
 
 function schemaFor(page) {
