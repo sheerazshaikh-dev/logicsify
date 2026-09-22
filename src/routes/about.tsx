@@ -49,12 +49,12 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       {
-        title: "About Logicsify | AI Automation, Software & Web Development Company",
+        title: "About Logicsify | AI Automation & Software Development",
       },
       {
         name: "description",
         content:
-          "Learn about Logicsify, a software development and AI automation company providing custom websites, mobile apps, CRM systems, digital marketing, and connected business solutions.",
+          "Learn about Logicsify, an AI automation and software development company building websites, apps, CRM systems, SaaS products, and connected business solutions.",
       },
       { property: "og:title", content: "Who We Are | Logicsify" },
       {

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/project-estimator")({
   component: ProjectEstimatorPage,
   head: () => ({
     meta: [
-      { title: "Project Estimator | Plan Your Website, App or Automation | Logicsify" },
+      { title: "Website, App & Automation Project Estimator | Logicsify" },
       { name: "description", content: "Build a rough project scope for a website, web app, SaaS product, AI automation, CRM system, or digital platform." },
       { property: "og:title", content: "Project Estimator | Plan Your Website, App or Automation | Logicsify" },
       { property: "og:description", content: "Create an initial planning guide with phases, complexity, integrations, and assumptions." },

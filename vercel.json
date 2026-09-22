@@ -33,6 +33,19 @@
       ]
     },
     {
+      "source": "/_seo/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=3600"
+        }
+      ]
+    },
+    {
       "source": "/admin/(.*)",
       "headers": [
         {
@@ -92,6 +105,126 @@
     {
       "source": "/uploads/:path*",
       "destination": "https://backend.logicsify.com/uploads/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "/_seo/home/index.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/_seo/about/index.html"
+    },
+    {
+      "source": "/team",
+      "destination": "/_seo/team/index.html"
+    },
+    {
+      "source": "/services",
+      "destination": "/_seo/services/index.html"
+    },
+    {
+      "source": "/work",
+      "destination": "/_seo/work/index.html"
+    },
+    {
+      "source": "/portfolio",
+      "destination": "/_seo/portfolio/index.html"
+    },
+    {
+      "source": "/company-profile",
+      "destination": "/_seo/company-profile/index.html"
+    },
+    {
+      "source": "/automation-lab",
+      "destination": "/_seo/automation-lab/index.html"
+    },
+    {
+      "source": "/integrations",
+      "destination": "/_seo/integrations/index.html"
+    },
+    {
+      "source": "/guides",
+      "destination": "/_seo/guides/index.html"
+    },
+    {
+      "source": "/project-estimator",
+      "destination": "/_seo/project-estimator/index.html"
+    },
+    {
+      "source": "/comparisons",
+      "destination": "/_seo/comparisons/index.html"
+    },
+    {
+      "source": "/engagement-models",
+      "destination": "/_seo/engagement-models/index.html"
+    },
+    {
+      "source": "/insights",
+      "destination": "/_seo/insights/index.html"
+    },
+    {
+      "source": "/testimonials",
+      "destination": "/_seo/testimonials/index.html"
+    },
+    {
+      "source": "/process",
+      "destination": "/_seo/process/index.html"
+    },
+    {
+      "source": "/technology",
+      "destination": "/_seo/technology/index.html"
+    },
+    {
+      "source": "/careers",
+      "destination": "/_seo/careers/index.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/_seo/contact/index.html"
+    },
+    {
+      "source": "/book-a-call",
+      "destination": "/_seo/book-a-call/index.html"
+    },
+    {
+      "source": "/technical-roadmap",
+      "destination": "/_seo/technical-roadmap/index.html"
+    },
+    {
+      "source": "/resources",
+      "destination": "/_seo/resources/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/_seo/privacy/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/_seo/terms/index.html"
+    },
+    {
+      "source": "/services/:slug",
+      "destination": "/_seo/services/:slug/index.html"
+    },
+    {
+      "source": "/work/:slug",
+      "destination": "/api/seo-page?type=case_study&slug=:slug"
+    },
+    {
+      "source": "/portfolio/:slug",
+      "destination": "/api/seo-page?type=portfolio&slug=:slug"
+    },
+    {
+      "source": "/insights/:slug",
+      "destination": "/api/seo-page?type=insight&slug=:slug"
+    },
+    {
+      "source": "/guides/:slug",
+      "destination": "/api/seo-page?type=resource&slug=:slug"
+    },
+    {
+      "source": "/comparisons/:slug",
+      "destination": "/api/seo-page?type=comparison&slug=:slug"
     },
     {
       "source": "/((?!api/|admin(?:/|$)|media(?:/|$)|uploads(?:/|$)).*)",

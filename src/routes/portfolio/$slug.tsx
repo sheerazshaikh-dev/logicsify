@@ -30,6 +30,7 @@ export const Route = createFileRoute("/portfolio/$slug")({
     const item = loaderData?.item;
     return {
       meta: [
+      { name: "robots", content: item?.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
         { title: item?.seo_json?.title || `${item?.title || "Portfolio Project"} | Logicsify` },
         { name: "description", content: item?.seo_json?.description || item?.excerpt || "" },
         { property: "og:title", content: item?.seo_json?.title || item?.title || "" },
@@ -38,6 +39,26 @@ export const Route = createFileRoute("/portfolio/$slug")({
         ...((item?.seo_json?.og_image || item?.featured_image) ? [{ property: "og:image", content: item?.seo_json?.og_image || item?.featured_image }] : []),
       ],
       links: [{ rel: "canonical", href: item?.seo_json?.canonical || `https://logicsify.com/portfolio/${params.slug}` }],
+      scripts: item
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "CreativeWork",
+                name: item.title,
+                description: item.seo_json?.description || item.excerpt || undefined,
+                url: `https://logicsify.com/portfolio/${params.slug}`,
+                image: item.featured_image || undefined,
+                creator: { "@id": "https://logicsify.com/#organization" },
+                publisher: { "@id": "https://logicsify.com/#organization" },
+                isPartOf: { "@id": "https://logicsify.com/#website" },
+                dateCreated: item.published_at || undefined,
+                dateModified: item.updated_at || item.published_at || undefined,
+              }),
+            },
+          ]
+        : [],
     };
   },
   component: PortfolioDetail,

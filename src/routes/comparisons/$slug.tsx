@@ -48,6 +48,7 @@ export const Route = createFileRoute("/comparisons/$slug")({
   component: ComparisonPage,
   head: ({ loaderData, params }) => ({
     meta: [
+      { name: "robots", content: loaderData?.cms?.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
       {
         title:
           loaderData?.cms?.seo_json?.title ||
@@ -95,6 +96,47 @@ export const Route = createFileRoute("/comparisons/$slug")({
           `https://logicsify.com/comparisons/${params.slug}`,
       },
     ],
+    scripts: loaderData?.cms
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              headline: loaderData.cms.title,
+              description:
+                loaderData.cms.seo_json?.description ||
+                loaderData.cms.excerpt ||
+                loaderData.comparison.summary ||
+                undefined,
+              url: `https://logicsify.com/comparisons/${params.slug}`,
+              image: loaderData.cms.featured_image || undefined,
+              author: { "@id": "https://logicsify.com/#organization" },
+              publisher: { "@id": "https://logicsify.com/#organization" },
+              mainEntityOfPage: `https://logicsify.com/comparisons/${params.slug}`,
+            }),
+          },
+          ...(() => {
+            const questions = faqs(loaderData.cms.content_json?.faqs);
+            return questions.length
+              ? [
+                  {
+                    type: "application/ld+json",
+                    children: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "FAQPage",
+                      mainEntity: questions.map((item) => ({
+                        "@type": "Question",
+                        name: item.question,
+                        acceptedAnswer: { "@type": "Answer", text: item.answer },
+                      })),
+                    }),
+                  },
+                ]
+              : [];
+          })(),
+        ]
+      : [],
   }),
 });
 

@@ -2,6 +2,26 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 
+function breadcrumbJsonLd(items: { label: string; to?: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.label,
+      ...(item.to
+        ? {
+            item:
+              item.to === "/"
+                ? "https://logicsify.com/"
+                : `https://logicsify.com${item.to.startsWith("/") ? item.to : `/${item.to}`}`,
+          }
+        : {}),
+    })),
+  };
+}
+
 export function PageHero({
   eyebrow,
   title,
@@ -21,6 +41,12 @@ export function PageHero({
 }) {
   return (
     <section className="section-dark grid-noise pt-32 md:pt-40 pb-20 md:pb-28 relative">
+      {breadcrumbs?.length ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbs)) }}
+        />
+      ) : null}
       <div className="container-page relative">
         {breadcrumbs && (
           <nav

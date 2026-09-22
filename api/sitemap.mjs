@@ -9,6 +9,19 @@ const CORE_PATHS = [
   "/team",
   "/services",
   "/services/white-label-development",
+  "/services/ai-automation-voice-agents",
+  "/services/crm-revenue-operations",
+  "/services/custom-websites-portals-cms",
+  "/services/mobile-app-development",
+  "/services/ui-ux-design",
+  "/services/seo-digital-marketing",
+  "/services/branding",
+  "/services/ecommerce-development",
+  "/services/cloud-deployment",
+  "/services/website-maintenance",
+  "/services/cybersecurity",
+  "/services/staff-augmentation",
+  "/services/cloud-maintenance",
   "/work",
   "/portfolio",
   "/company-profile",
@@ -37,7 +50,7 @@ const CONTENT_ROUTES = {
   portfolio: (slug) => `/portfolio/${slug}`,
   insight: (slug) => `/insights/${slug}`,
   comparison: (slug) => `/comparisons/${slug}`,
-  guide: (slug) => `/guides/${slug}`,
+  resource: (slug) => `/guides/${slug}`,
 };
 
 export default async function handler(request, response) {
@@ -128,7 +141,7 @@ function isValidSitemap(body, contentType) {
 }
 
 function ensureStaticCorePaths(xml) {
-  const required = ["/services/white-label-development"];
+  const required = CORE_PATHS;
   let output = xml;
   const rows = required
     .filter((path) => !output.includes(`<loc>${ORIGIN}${path}</loc>`))
@@ -155,6 +168,7 @@ async function buildFallbackSitemap() {
   for (const [type, records] of results) {
     const route = CONTENT_ROUTES[type];
     for (const item of records) {
+      if (item?.seo_json?.noindex) continue;
       const slug = String(item?.slug || "").trim().replace(/^\/+|\/+$/g, "");
       if (!slug) continue;
 

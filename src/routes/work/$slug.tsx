@@ -27,6 +27,7 @@ export const Route = createFileRoute("/work/$slug")({
   component: CaseStudyPage,
   head: ({ loaderData, params }) => ({
     meta: [
+      { name: "robots", content: loaderData?.study.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
       {
         title:
           loaderData?.study.seo_json?.title ||
@@ -65,6 +66,27 @@ export const Route = createFileRoute("/work/$slug")({
         href: loaderData?.study.seo_json?.canonical || `https://logicsify.com/work/${params.slug}`,
       },
     ],
+    scripts: loaderData?.study
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              headline: loaderData.study.title,
+              description:
+                loaderData.study.seo_json?.description || loaderData.study.excerpt || undefined,
+              url: `https://logicsify.com/work/${params.slug}`,
+              image: loaderData.study.featured_image || undefined,
+              author: { "@id": "https://logicsify.com/#organization" },
+              publisher: { "@id": "https://logicsify.com/#organization" },
+              mainEntityOfPage: `https://logicsify.com/work/${params.slug}`,
+              datePublished: loaderData.study.published_at || undefined,
+              dateModified: loaderData.study.updated_at || loaderData.study.published_at || undefined,
+            }),
+          },
+        ]
+      : [],
   }),
 });
 

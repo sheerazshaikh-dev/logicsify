@@ -27,6 +27,7 @@ export const Route = createFileRoute("/insights/$slug")({
   component: InsightPage,
   head: ({ loaderData, params }) => ({
     meta: [
+      { name: "robots", content: loaderData?.article.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
       {
         title:
           loaderData?.article.seo_json?.title ||

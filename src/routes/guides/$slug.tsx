@@ -28,6 +28,7 @@ export const Route = createFileRoute("/guides/$slug")({
   component: GuidePage,
   head: ({ loaderData, params }) => ({
     meta: [
+      { name: "robots", content: loaderData?.resource.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
       {
         title:
           loaderData?.resource.seo_json?.title ||
@@ -71,6 +72,23 @@ export const Route = createFileRoute("/guides/$slug")({
           `https://logicsify.com/guides/${params.slug}`,
       },
     ],
+    scripts: loaderData?.resource
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CreativeWork",
+              name: loaderData.resource.title,
+              description: loaderData.resource.excerpt || undefined,
+              url: `https://logicsify.com/guides/${params.slug}`,
+              image: loaderData.resource.featured_image || undefined,
+              publisher: { "@id": "https://logicsify.com/#organization" },
+              isPartOf: { "@id": "https://logicsify.com/#website" },
+            }),
+          },
+        ]
+      : [],
   }),
 });
 

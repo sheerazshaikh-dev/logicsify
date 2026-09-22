@@ -1,3 +1,4 @@
+# Public search and AI-search discovery
 User-agent: *
 Allow: /
 Disallow: /admin/
@@ -6,7 +7,16 @@ Disallow: /api/
 Disallow: /preview/
 Disallow: /internal-preview/
 Disallow: /tmp/
+Disallow: /_seo/
 Disallow: /*?search=
 Disallow: /*?category=
+
+# ChatGPT Search discovery
+User-agent: OAI-SearchBot
+Allow: /
+
+# User-requested ChatGPT browsing
+User-agent: ChatGPT-User
+Allow: /
 
 Sitemap: https://logicsify.com/sitemap.xml
