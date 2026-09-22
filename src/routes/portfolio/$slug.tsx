@@ -30,6 +30,7 @@ export const Route = createFileRoute("/portfolio/$slug")({
     const item = loaderData?.item;
     return {
       meta: [
+      { name: "robots", content: item?.seo_json?.noindex ? "noindex,nofollow,noarchive" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" },
         { title: item?.seo_json?.title || `${item?.title || "Portfolio Project"} | Logicsify` },
         { name: "description", content: item?.seo_json?.description || item?.excerpt || "" },
         { property: "og:title", content: item?.seo_json?.title || item?.title || "" },
