@@ -6,7 +6,7 @@ const TYPE_CONFIG = {
   insight: { segment: "insights", schema: "BlogPosting", label: "Insight" },
   case_study: { segment: "work", schema: "Article", label: "Case Study" },
   portfolio: { segment: "portfolio", schema: "CreativeWork", label: "Portfolio Project" },
-  guide: { segment: "guides", schema: "Article", label: "Guide" },
+  resource: { segment: "guides", schema: "CreativeWork", label: "Guide" },
   comparison: { segment: "comparisons", schema: "Article", label: "Comparison" },
 };
 
@@ -253,7 +253,7 @@ function detailFacts(type, content) {
     pushFact(rows, "Cost considerations", content.cost_considerations);
     pushFact(rows, "Setup time", content.setup_time);
     pushFact(rows, "Flexibility", content.flexibility);
-  } else if (type === "guide") {
+  } else if (type === "resource") {
     pushFact(rows, "Guide summary", content.summary || content.introduction);
     pushList(rows, "Topics covered", content.topics || content.sections_list);
   } else if (type === "insight") {
