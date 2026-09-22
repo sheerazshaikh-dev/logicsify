@@ -50,7 +50,7 @@ const CONTENT_ROUTES = {
   portfolio: (slug) => `/portfolio/${slug}`,
   insight: (slug) => `/insights/${slug}`,
   comparison: (slug) => `/comparisons/${slug}`,
-  guide: (slug) => `/guides/${slug}`,
+  resource: (slug) => `/guides/${slug}`,
 };
 
 export default async function handler(request, response) {
