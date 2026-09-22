@@ -37,7 +37,7 @@ const pages = [
   },
   {
     path: "/services",
-    title: "AI Automation, CRM & Custom Business Platforms | Logicsify",
+    title: "AI Automation, CRM & Business Platforms | Logicsify",
     description: "Logicsify builds AI-powered sales, customer service, CRM, website, portal, CMS, payment, and business operations systems.",
     h1: "Connected digital services built around the way your business actually works.",
     intro: "Explore Logicsify services across AI automation, CRM, software, websites, portals, mobile applications, cybersecurity, design, marketing, and ongoing technical delivery.",
@@ -172,7 +172,7 @@ const pages = [
   },
   {
     path: "/insights",
-    title: "Insights | AI, Software, Automation & Marketing | Logicsify",
+    title: "AI & Software Insights | Logicsify",
     description: "Read practical Logicsify insights about AI automation, software development, SaaS, CRM systems, digital marketing, and business technology.",
     h1: "Practical insights about connected technology and digital operations.",
     intro: "Logicsify Insights publishes explainers, implementation guidance, industry updates, and decision support across AI automation, software, SaaS, CRM, websites, cybersecurity, and digital growth.",
