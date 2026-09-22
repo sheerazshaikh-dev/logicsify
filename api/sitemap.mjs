@@ -9,6 +9,19 @@ const CORE_PATHS = [
   "/team",
   "/services",
   "/services/white-label-development",
+  "/services/ai-automation-voice-agents",
+  "/services/crm-revenue-operations",
+  "/services/custom-websites-portals-cms",
+  "/services/mobile-app-development",
+  "/services/ui-ux-design",
+  "/services/seo-digital-marketing",
+  "/services/branding",
+  "/services/ecommerce-development",
+  "/services/cloud-deployment",
+  "/services/website-maintenance",
+  "/services/cybersecurity",
+  "/services/staff-augmentation",
+  "/services/cloud-maintenance",
   "/work",
   "/portfolio",
   "/company-profile",
@@ -128,7 +141,7 @@ function isValidSitemap(body, contentType) {
 }
 
 function ensureStaticCorePaths(xml) {
-  const required = ["/services/white-label-development"];
+  const required = CORE_PATHS;
   let output = xml;
   const rows = required
     .filter((path) => !output.includes(`<loc>${ORIGIN}${path}</loc>`))
