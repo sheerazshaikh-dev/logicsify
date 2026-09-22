@@ -140,12 +140,14 @@ function buildHtml(template, item, config, slug) {
     meta("property", "og:type", config.schema === "BlogPosting" || config.schema === "Article" ? "article" : "website"),
     meta("property", "og:url", canonical),
     meta("property", "og:site_name", "Logicsify"),
+    meta("property", "og:locale", "en_US"),
     meta("property", "og:image", image),
     meta("property", "og:image:alt", h1),
     meta("name", "twitter:card", "summary_large_image"),
     meta("name", "twitter:title", title),
     meta("name", "twitter:description", description),
     meta("name", "twitter:image", image),
+    meta("name", "twitter:image:alt", h1),
     `<script type="application/ld+json" data-seo-server="true">${escapeScriptJson(schema)}</script>`,
     fallbackStyle(),
   ].join("\n    ");
@@ -163,7 +165,29 @@ function typeKey(config) {
 }
 
 function makeSchema({ config, canonical, title, description, image, h1, published, modified, authorName, faqs }) {
+  const segmentUrl = `${SITE_ORIGIN}/${config.segment}`;
   const graph = [
+    {
+      "@type": "WebPage",
+      "@id": `${canonical}#webpage`,
+      url: canonical,
+      name: title,
+      description,
+      isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
+      about: { "@id": `${SITE_ORIGIN}/#organization` },
+      primaryImageOfPage: { "@type": "ImageObject", url: image },
+      breadcrumb: { "@id": `${canonical}#breadcrumb` },
+      inLanguage: "en",
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${canonical}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
+        { "@type": "ListItem", position: 2, name: config.label === "Insight" ? "Insights" : config.label === "Case Study" ? "Case Studies" : config.label === "Portfolio Project" ? "Portfolio" : config.label === "Guide" ? "Guides" : "Comparisons", item: segmentUrl },
+        { "@type": "ListItem", position: 3, name: h1, item: canonical },
+      ],
+    },
     {
       "@type": config.schema,
       "@id": `${canonical}#content`,

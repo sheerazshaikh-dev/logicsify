@@ -344,6 +344,9 @@ for (const [slug, title, description, h1] of servicePages) {
       ["What the service covers", `${description} Scope is aligned to the systems, users, constraints, integrations, ownership, and measurable outcome required for the engagement.`],
       ["How Logicsify approaches delivery", "Work begins with requirements and operating context, then moves through architecture, implementation, review, testing, documentation, launch, and handover according to the agreed scope."],
       ["Connected delivery", "This service can be delivered independently or combined with adjacent Logicsify capabilities when the project spans multiple systems, teams, channels, or technical disciplines."],
+      ["Requirements, ownership and risk", `For ${h1}, discovery identifies users, current workflows, data, access, integrations, technical constraints, responsibilities, approval paths, security considerations, and the business result that should improve. Making those assumptions explicit before implementation reduces avoidable rework and gives the project a clearer acceptance path.`],
+      ["Testing, launch and handover", "Delivery planning covers normal user paths, expected failure conditions, integration validation, responsive or device checks where relevant, release preparation, documentation, source-code or account ownership, and the support model required after launch. The exact handover depends on what the client wants to own internally."],
+      ["When this service should be combined with other capabilities", `${h1} may sit inside a wider system rather than operate independently. When the outcome also depends on CRM, automation, portals, mobile apps, APIs, analytics, security, cloud operations, content, or digital growth, those dependencies can be planned as one connected delivery scope instead of separate disconnected projects.`],
     ],
   });
 }
@@ -387,7 +390,54 @@ const seoExpansion = {
     ["Sources, authorship and updates", "Where an article depends on external facts, product changes, statistics, platform documentation, or industry developments, source links can be included so readers can verify the underlying information. Published and updated dates, named authors, reading time, featured-image descriptions, and related resources provide additional context for both readers and search systems."],
     ["Answer-first structure", "For specific questions, the most useful answer should appear early, followed by the reasoning, examples, tradeoffs, risks, and implementation detail needed to make the answer actionable. This structure also makes it easier for search engines and AI retrieval systems to identify the passage that directly addresses a user's question."],
     ["Connected to proof and services", "Educational content is linked to relevant services, case studies, portfolio work, comparisons, guides, and planning tools. That allows a reader to move from an explanation to project evidence, a decision framework, or an implementation path without turning every article into a sales page."],
+  ],,
+  "/contact": [
+    ["What to include in a project inquiry", "A useful project inquiry explains the business problem, the users involved, current systems, the service or capability required, relevant integrations, expected timeline, available budget range, and any constraints that may affect delivery. Sharing this context helps Logicsify respond with a more useful next step instead of repeating basic discovery questions."],
+    ["When to use the contact form", "The contact form is appropriate for new software, website, portal, CRM, AI automation, mobile, cybersecurity, digital marketing, white-label, and integration projects. It can also be used when an existing system needs improvement, replacement, migration, support, or a technical review before a larger implementation decision is made."],
+    ["Strategy calls and technical roadmaps", "If the project is still being defined, a strategy call or technical roadmap can be a better starting point than a detailed specification. The purpose is to clarify goals, users, systems, dependencies, risks, ownership, integration requirements, and a practical sequence of work before implementation commitments are made."],
+    ["White-label and agency inquiries", "Agencies, consultants, and studios can use the same contact route for white-label delivery. Useful context includes the type of end client, the scope you want Logicsify to handle, whether the engagement should remain fully behind the scenes, expected communication rules, timeline, review process, repository or deployment ownership, and whether ongoing capacity may be required after launch."],
+    ["Response and next steps", "After an inquiry is reviewed, the next step may be a clarification, a strategy call, a technical roadmap, a discovery phase, or a scoped proposal depending on the information already available. Complex projects normally require enough discovery to define assumptions, responsibilities, integrations, risks, milestones, acceptance criteria, and handover expectations before a final implementation scope is confirmed."],
   ],
+  "/portfolio": [
+    ["How to read the portfolio", "Portfolio entries are intended to show the type of product, interface, system, automation, CRM, website, portal, or technical work delivered in a specific project context. Where information can be shared publicly, entries may include the client or brand, project type, services delivered, technologies used, project highlights, screenshots, implementation notes, and a link to the live experience."],
+    ["Portfolio versus case studies", "Portfolio pages are visual and project-oriented, while case studies go deeper into the original business problem, objectives, implementation decisions, systems integrated, process, measurable outcomes, and client feedback. Reviewing both formats provides a clearer picture of design quality, engineering capability, delivery context, and the operating problem behind the final interface."],
+    ["Technology and integration context", "A polished interface is only one part of a production system. Many Logicsify projects also involve authentication, user roles, admin tooling, APIs, payments, CRM, calendars, communication services, automation, analytics, deployment, monitoring, data handling, or other integrations. Portfolio details identify these connections where they are relevant and can be disclosed."],
+    ["Using project examples during evaluation", "Prospective clients can use portfolio examples to identify patterns that resemble their own needs, then follow the related service links to understand how similar work is scoped and delivered. A project does not need to match an example exactly; the goal is to provide concrete evidence of the types of systems, interfaces, and implementation work Logicsify can support."],
+    ["Ownership and long-term maintainability", "Where required by the engagement, projects are planned around source-code access, repository ownership, deployment access, documentation, administrator control, and a clear path for future changes. These details matter because a technically successful project should remain operable after launch rather than creating unnecessary dependency on the original delivery team."],
+  ],
+  "/technical-roadmap": [
+    ["What a technical roadmap is", "A technical roadmap is a structured planning step used to turn a business problem or product idea into a clearer implementation path. It can identify users, workflows, existing systems, data, integrations, constraints, risks, dependencies, architecture decisions, milestones, ownership, testing needs, and the order in which work should happen before a full build is approved."],
+    ["What information improves the roadmap", "Useful inputs include the current process, who uses it, what is manual today, where data lives, which platforms must remain, expected integrations, required permissions, reporting needs, compliance or security constraints, launch timing, budget expectations, and the business metric the new system is intended to improve."],
+    ["When a roadmap is most useful", "Roadmaps are especially useful for custom software, SaaS products, CRM implementations, AI automation, voice agents, client portals, complex websites, migrations, integrations, and projects that cross several teams or systems. They are also useful when requirements are incomplete and the business needs to understand the likely phases before committing to a larger implementation."],
+    ["What happens after the roadmap", "Depending on the project, the output can lead to a fixed-scope proposal, phased implementation plan, proof of concept, design phase, architecture decision, integration plan, or a decision not to build yet. The goal is not to force every inquiry into development, but to reduce uncertainty and make the next technical decision easier to justify."],
+    ["Roadmap versus estimate", "A project estimator organizes high-level scope and complexity, while a technical roadmap goes further into how the system should work, what it must connect to, what assumptions need validation, and where implementation risk sits. For simple projects the estimate may be enough; for connected or custom systems, roadmap-level discovery usually produces a more reliable scope."],
+  ],
+  "/project-estimator": [
+    ["What the project estimator provides", "The Logicsify Project Estimator helps organize a first-pass project scope across websites, web applications, SaaS products, mobile applications, CRM systems, AI automation, voice agents, custom CMS platforms, cybersecurity, and related digital systems. It is a planning aid rather than a binding quotation."],
+    ["How to get a more useful estimate", "Select the closest project type, identify the major capabilities required, include important integrations, and note business constraints that can change complexity. Authentication, multiple user roles, payments, third-party APIs, data migration, real-time features, AI workflows, custom admin interfaces, security requirements, and mobile support can all materially affect implementation effort."],
+    ["Why discovery still matters", "A checklist cannot capture every dependency in a custom system. Final scope still depends on users, workflows, existing tools, data quality, supported APIs, permissions, edge cases, content, deployment, ownership, testing, launch responsibilities, and acceptance criteria. Discovery is where those assumptions are validated before they become expensive changes during development."],
+    ["From estimate to delivery plan", "After a rough estimate is created, the next useful step may be a strategy call, technical roadmap, design phase, proof of concept, or detailed project proposal. The appropriate path depends on how complete the requirements are and whether the project is primarily interface work, system integration, product engineering, automation, migration, or a combination of several disciplines."],
+  ],
+  "/automation-lab": [
+    ["Why the demos are controlled", "Automation Lab examples are intentionally separated from live client systems. They demonstrate workflow logic, decision points, data structure, routing, and user experience without placing outbound calls, modifying production CRM records, or storing uploaded business documents. This makes the examples safer to explore while keeping the focus on how a production workflow could be designed."],
+    ["From demo to production", "A production automation requires more than the visible flow shown in a demo. Real implementations need authentication, permissions, data validation, supported APIs, retries, exception handling, logs, monitoring, human escalation, rate limits, ownership, privacy decisions, reporting, and a clear process for failures. Those requirements are defined during discovery and technical planning."],
+    ["What the lab can help evaluate", "The demos can help teams discuss lead qualification, AI-assisted customer conversations, appointment booking, CRM triggers, internal workflow routing, document extraction, structured data, support automation, and other repetitive processes. The purpose is to make an abstract automation idea easier to review before deciding whether a full implementation is justified."],
+  ],
+  "/book-a-call": [
+    ["What to prepare before the call", "A useful strategy call starts with the problem you are trying to solve, who experiences it, the systems already involved, what is manual or unreliable today, the outcome you want to improve, and any timeline or ownership constraints. You do not need a complete technical specification before booking."],
+    ["What the call is for", "The call is intended to determine whether the request is clear enough for a proposal, needs a technical roadmap or discovery step, should be split into phases, or would benefit from a different implementation approach. It is also an opportunity to discuss delivery model, integration constraints, source-code ownership, communication, and the practical next step."],
+    ["Projects commonly discussed", "Typical conversations include AI automation, CRM and revenue operations, websites, portals, SaaS products, custom software, mobile applications, integrations, cybersecurity, technical maintenance, digital marketing systems, and white-label delivery for agencies or consultants."],
+  ],
+  "/testimonials": [
+    ["Why testimonials are connected to project context", "A testimonial is more useful when the reader can understand what work was actually delivered. Logicsify links published feedback to case studies or portfolio projects where possible so visitors can review the client perspective alongside the project type, implementation context, screenshots, services, technology, and outcomes that can be shared publicly."],
+    ["How to evaluate client feedback", "Useful feedback can provide context about communication, responsiveness, problem solving, implementation quality, collaboration, delivery process, or the practical effect of the finished work. It should not replace technical evaluation, but it can add another perspective when reviewing a potential delivery partner."],
+    ["Written and video formats", "Written testimonials make specific statements easy to scan, while video testimonials can provide tone and additional context directly from the client. Both formats are separated on the page when available, and related project links help visitors move from the feedback to the work behind it."],
+  ],
+  "/integrations": [
+    ["APIs, webhooks and middleware", "An integration may use a native connector, a direct API, webhooks, middleware, scheduled synchronization, event-driven processing, or a combination of methods. The correct approach depends on the capabilities each platform exposes, authentication model, rate limits, data ownership, timing requirements, failure behavior, and the level of control needed by the business."],
+    ["Data mapping and system ownership", "Before systems are connected, it is important to define which application is authoritative for each record or field, how duplicates are handled, which events create or update data, and what happens when the same information is edited in more than one place. Clear ownership prevents integrations from creating inconsistent records or silent conflicts."],
+    ["Monitoring and exception handling", "Reliable integrations require more than a successful first test. Production workflows should have logs, retries, alerts, validation, idempotency where needed, error queues or review states, and a named owner for exceptions. These controls help the team understand whether data actually moved and what to do when an external service fails."],
+  ]
 };
 
 function escapeHtml(value = "") {
@@ -412,13 +462,45 @@ function stripExistingStaticSeo(html) {
 
 function schemaFor(page) {
   const pageUrl = `${ORIGIN}${page.path === "/" ? "/" : page.path}`;
+  const image = page.image || DEFAULT_IMAGE;
+  const crumbs = page.path === "/"
+    ? [{ name: "Home", url: `${ORIGIN}/` }]
+    : [
+        { name: "Home", url: `${ORIGIN}/` },
+        ...(page.path.startsWith("/services/")
+          ? [{ name: "Services", url: `${ORIGIN}/services` }]
+          : []),
+        { name: page.h1, url: pageUrl },
+      ];
   const graph = [
     {
-      "@type": "Organization",
+      "@type": ["Organization", "ProfessionalService"],
       "@id": `${ORIGIN}/#organization`,
       name: "Logicsify",
       url: `${ORIGIN}/`,
-      logo: `${ORIGIN}/logicsify-logo-dark.png`,
+      logo: {
+        "@type": "ImageObject",
+        url: `${ORIGIN}/logicsify-logo-dark.png`,
+      },
+      image: `${ORIGIN}/logicsify-logo-dark.png`,
+      email: "hello@logicsify.com",
+      telephone: "+923333718191",
+      sameAs: [
+        "https://www.linkedin.com/company/logicsify",
+        "https://www.instagram.com/logicsify/",
+      ],
+      knowsAbout: [
+        "AI automation",
+        "AI voice agents",
+        "CRM and revenue operations",
+        "Custom software development",
+        "Website and portal development",
+        "SaaS product development",
+        "White-label development",
+        "Mobile app development",
+        "Cybersecurity",
+        "SEO and digital marketing",
+      ],
     },
     {
       "@type": "WebSite",
@@ -436,7 +518,19 @@ function schemaFor(page) {
       description: page.description,
       isPartOf: { "@id": `${ORIGIN}/#website` },
       about: { "@id": `${ORIGIN}/#organization` },
+      primaryImageOfPage: { "@type": "ImageObject", url: image },
+      breadcrumb: { "@id": `${pageUrl}#breadcrumb` },
       inLanguage: "en",
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${pageUrl}#breadcrumb`,
+      itemListElement: crumbs.map((crumb, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: crumb.name,
+        item: crumb.url,
+      })),
     },
   ];
 
@@ -503,11 +597,14 @@ function buildHtml(template, page) {
     <meta property="og:type" content="website" data-seo-prerender="true" />
     <meta property="og:url" content="${escapeAttr(pageUrl)}" data-seo-prerender="true" />
     <meta property="og:site_name" content="Logicsify" data-seo-prerender="true" />
+    <meta property="og:locale" content="en_US" data-seo-prerender="true" />
     <meta property="og:image" content="${escapeAttr(image)}" data-seo-prerender="true" />
+    <meta property="og:image:alt" content="${escapeAttr(page.h1)}" data-seo-prerender="true" />
     <meta name="twitter:card" content="summary_large_image" data-seo-prerender="true" />
     <meta name="twitter:title" content="${escapeAttr(page.title)}" data-seo-prerender="true" />
     <meta name="twitter:description" content="${escapeAttr(page.description)}" data-seo-prerender="true" />
     <meta name="twitter:image" content="${escapeAttr(image)}" data-seo-prerender="true" />
+    <meta name="twitter:image:alt" content="${escapeAttr(page.h1)}" data-seo-prerender="true" />
     <script type="application/ld+json" data-seo-prerender="true">${schemaFor(page)}</script>
     <style data-seo-prerender="true">
       [data-seo-fallback]{min-height:100vh;background:#050706;color:#fff;font-family:Sora,Inter,system-ui,sans-serif}

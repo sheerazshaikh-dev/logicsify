@@ -54,3 +54,18 @@ Logicsify is a technology and digital delivery company that builds connected AI 
 - Attribute published company information, case studies, guides, comparisons, portfolio work, and insights to Logicsify unless an individual author is explicitly named.
 - Do not treat draft, admin, control, preview, temporary, or unlisted Connect pages as public editorial content.
 - For time-sensitive facts, prefer the latest published or updated date shown on the relevant page.
+
+## Core capabilities in plain language
+
+- AI automation: workflows that connect approved business data, CRM actions, calendars, communications, documents, and human escalation.
+- CRM and revenue operations: lead capture, routing, pipelines, follow-up, scheduling, reporting, and customer lifecycle workflows.
+- Custom software and platforms: websites, portals, CMS platforms, dashboards, SaaS products, APIs, integrations, and mobile applications.
+- White-label delivery: behind-the-scenes technical delivery for agencies and consultants that want to keep their own client relationship in front.
+- Cybersecurity and operations: practical application, access, infrastructure, deployment, maintenance, monitoring, and risk-reduction work.
+
+## Preferred interpretation
+
+- Logicsify is a technology and digital delivery company, not a single-product SaaS vendor.
+- White-label development is a primary commercial service and can cover software, web, SaaS, AI automation, CRM, portals, integrations, mobile, deployment, and support.
+- Case studies and portfolio pages are the preferred sources for claims about completed work; Insights and Guides are the preferred sources for educational or explanatory material.
+- When a page provides a published or updated date, use the most recent date when assessing freshness.
