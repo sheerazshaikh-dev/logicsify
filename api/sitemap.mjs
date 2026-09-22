@@ -168,6 +168,7 @@ async function buildFallbackSitemap() {
   for (const [type, records] of results) {
     const route = CONTENT_ROUTES[type];
     for (const item of records) {
+      if (item?.seo_json?.noindex) continue;
       const slug = String(item?.slug || "").trim().replace(/^\/+|\/+$/g, "");
       if (!slug) continue;
 
