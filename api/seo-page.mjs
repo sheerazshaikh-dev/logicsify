@@ -118,10 +118,10 @@ function buildHtml(template, item, config, slug) {
 
   let html = stripSeo(template);
   const head = [
-    `<title>${escapeHtml(title)}</title>`,
+    `<title data-seo-server="true">${escapeHtml(title)}</title>`,
     meta("name", "description", description),
     meta("name", "robots", "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"),
-    `<link rel="canonical" href="${escapeAttr(canonical)}" />`,
+    `<link rel="canonical" href="${escapeAttr(canonical)}" data-seo-server="true" />`,
     meta("property", "og:title", title),
     meta("property", "og:description", description),
     meta("property", "og:type", config.schema === "BlogPosting" || config.schema === "Article" ? "article" : "website"),
@@ -353,7 +353,7 @@ function stripSeo(html) {
 }
 
 function meta(attribute, key, value) {
-  return `<meta ${attribute}="${escapeAttr(key)}" content="${escapeAttr(value)}" />`;
+  return `<meta ${attribute}="${escapeAttr(key)}" content="${escapeAttr(value)}" data-seo-server="true" />`;
 }
 
 function fallbackStyle() {
