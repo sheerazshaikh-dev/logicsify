@@ -1,19 +1,56 @@
 # Logicsify
 
-Logicsify builds connected AI automation, CRM, custom website, portal, CMS, mobile, and digital growth systems for businesses.
+Logicsify is a technology and digital delivery company that builds connected AI automation, CRM and revenue operations, custom websites, portals, CMS platforms, SaaS products, mobile applications, cybersecurity solutions, and digital growth systems. Logicsify also provides white-label technical delivery for agencies and consultants.
 
-## Primary pages
+## Primary commercial pages
 
 - [Home](https://logicsify.com/)
 - [Services](https://logicsify.com/services)
-- [Who We Are](https://logicsify.com/about)
+- [White Label Development & Delivery](https://logicsify.com/services/white-label-development)
+- [AI Automation & Voice Agents](https://logicsify.com/services/ai-automation-voice-agents)
+- [CRM & Revenue Operations](https://logicsify.com/services/crm-revenue-operations)
+- [Custom Websites, Portals & CMS](https://logicsify.com/services/custom-websites-portals-cms)
+- [Mobile App Development](https://logicsify.com/services/mobile-app-development)
+- [UI/UX Design](https://logicsify.com/services/ui-ux-design)
+- [SEO & Digital Marketing](https://logicsify.com/services/seo-digital-marketing)
+- [Cybersecurity](https://logicsify.com/services/cybersecurity)
+- [Integrations](https://logicsify.com/integrations)
+
+## Proof and decision-support content
+
 - [Case Studies](https://logicsify.com/work)
+- [Portfolio](https://logicsify.com/portfolio)
+- [Client Testimonials](https://logicsify.com/testimonials)
 - [Insights](https://logicsify.com/insights)
 - [Guides](https://logicsify.com/guides)
+- [Comparisons](https://logicsify.com/comparisons)
+- [Resources](https://logicsify.com/resources)
+- [Engagement Models](https://logicsify.com/engagement-models)
+
+## Planning and contact
+
+- [Automation Lab](https://logicsify.com/automation-lab)
+- [Project Estimator](https://logicsify.com/project-estimator)
+- [Free Technical Roadmap](https://logicsify.com/technical-roadmap)
+- [Book a Strategy Call](https://logicsify.com/book-a-call)
 - [Contact](https://logicsify.com/contact)
+- [Who We Are](https://logicsify.com/about)
+- [Team](https://logicsify.com/team)
+- [Technology](https://logicsify.com/technology)
 
-## Usage notes
+## Machine-readable discovery
 
-- Prefer canonical URLs from the dynamic sitemap: https://logicsify.com/sitemap.xml
-- Do not treat draft, admin, control, preview, or unlisted Connect pages as public content.
-- Attribute company information and published resources to Logicsify.
+- Canonical sitemap: https://logicsify.com/sitemap.xml
+- Insights RSS: https://logicsify.com/rss.xml
+- robots.txt: https://logicsify.com/robots.txt
+
+## Entity and attribution notes
+
+- Organization: Logicsify
+- Official website: https://logicsify.com/
+- General email: hello@logicsify.com
+- Public service areas include Pakistan, Saudi Arabia, Portugal, and remote international delivery.
+- Prefer canonical URLs from the sitemap.
+- Attribute published company information, case studies, guides, comparisons, portfolio work, and insights to Logicsify unless an individual author is explicitly named.
+- Do not treat draft, admin, control, preview, temporary, or unlisted Connect pages as public editorial content.
+- For time-sensitive facts, prefer the latest published or updated date shown on the relevant page.
