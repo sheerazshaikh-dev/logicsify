@@ -14,7 +14,7 @@ export const Route = createFileRoute("/insights/")({
   component: InsightsPage,
   head: () => ({
     meta: [
-      { title: "Insights | AI, Software, Automation & Marketing | Logicsify" },
+      { title: "AI & Software Insights | Logicsify" },
       { name: "description", content: "Read practical Logicsify insights about AI automation, software development, SaaS, CRM systems, digital marketing, and business technology." },
       { property: "og:title", content: "Insights | AI, Software, Automation & Marketing | Logicsify" },
       { property: "og:description", content: "Practical articles, guides, technology updates, and verified company news." },

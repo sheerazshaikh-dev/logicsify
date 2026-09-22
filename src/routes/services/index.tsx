@@ -31,7 +31,7 @@ export const Route = createFileRoute("/services/")({
   component: ServicesOverview,
   head: () => ({
     meta: [
-      { title: "AI Automation, CRM & Custom Business Platforms | Logicsify" },
+      { title: "AI Automation, CRM & Business Platforms | Logicsify" },
       {
         name: "description",
         content:

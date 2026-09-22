@@ -217,7 +217,7 @@ function fallbackMarkup({ config, h1, description, bodyText, sections, extra, ca
 
   return `<div data-seo-fallback="true">
     <header class="seo-fallback-header">
-      <a href="/" aria-label="Logicsify home">Logicsify</a>
+      <a href="/" aria-label="Logicsify home"><img src="/logicsify-logo-light.png" alt="Logicsify" width="180" height="51" /></a>
       <nav aria-label="Primary">
         <a href="/services">Services</a>
         <a href="/services/white-label-development">White Label</a>
@@ -373,7 +373,8 @@ function fallbackStyle() {
   return `<style data-seo-server="true">
     [data-seo-fallback]{min-height:100vh;background:#050706;color:#fff;font-family:Sora,Inter,system-ui,sans-serif}
     .seo-fallback-header{max-width:1360px;margin:auto;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.08)}
-    .seo-fallback-header>a{font-size:22px;font-weight:700;color:#fff;text-decoration:none}
+    .seo-fallback-header>a{display:inline-flex;align-items:center;color:#fff;text-decoration:none}
+    .seo-fallback-header>a img{display:block;width:180px;height:auto}
     .seo-fallback-header nav{display:flex;gap:20px;flex-wrap:wrap}
     .seo-fallback-header nav a,.seo-fallback-links a{color:#9fe06d;text-decoration:none}
     .seo-fallback-main{max-width:1180px;margin:auto;padding:72px 32px 96px}

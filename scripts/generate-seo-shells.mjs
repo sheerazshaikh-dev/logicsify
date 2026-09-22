@@ -37,7 +37,7 @@ const pages = [
   },
   {
     path: "/services",
-    title: "AI Automation, CRM & Custom Business Platforms | Logicsify",
+    title: "AI Automation, CRM & Business Platforms | Logicsify",
     description: "Logicsify builds AI-powered sales, customer service, CRM, website, portal, CMS, payment, and business operations systems.",
     h1: "Connected digital services built around the way your business actually works.",
     intro: "Explore Logicsify services across AI automation, CRM, software, websites, portals, mobile applications, cybersecurity, design, marketing, and ongoing technical delivery.",
@@ -172,7 +172,7 @@ const pages = [
   },
   {
     path: "/insights",
-    title: "Insights | AI, Software, Automation & Marketing | Logicsify",
+    title: "AI & Software Insights | Logicsify",
     description: "Read practical Logicsify insights about AI automation, software development, SaaS, CRM systems, digital marketing, and business technology.",
     h1: "Practical insights about connected technology and digital operations.",
     intro: "Logicsify Insights publishes explainers, implementation guidance, industry updates, and decision support across AI automation, software, SaaS, CRM, websites, cybersecurity, and digital growth.",
@@ -348,6 +348,45 @@ for (const [slug, title, description, h1] of servicePages) {
   });
 }
 
+
+const seoExpansion = {
+  home: [
+    ["Connected delivery instead of isolated tools", "Logicsify plans technology around complete operating workflows. A typical engagement may connect a website or campaign to lead capture, CRM, qualification, scheduling, follow-up, reporting, customer support, and internal handoff. This reduces the number of manual transfers between teams and makes ownership clearer when a lead, customer request, document, payment, or operational task moves from one system to another."],
+    ["AI systems with business controls", "AI is most useful when it is connected to approved data, explicit business rules, clear escalation paths, and measurable outcomes. We design AI agents and automations with human review where needed, defined permissions, fallback behavior, logging, and integration with CRM, calendars, communications, documents, and internal systems rather than treating AI as an isolated chatbot."],
+    ["Software and product engineering", "For businesses that need more than a marketing site, Logicsify delivers custom web applications, SaaS products, client portals, dashboards, admin systems, mobile applications, APIs, integrations, authentication, role-based access, payments, analytics, and deployment workflows. Architecture and handover are planned so the product can continue to evolve after the initial release."],
+    ["Agency and white-label partnerships", "Agencies, consultants, design studios, marketing firms, and specialist service providers can extend their delivery capability through Logicsify without exposing a separate vendor experience to their clients. White-label work can be structured project by project, as overflow capacity, as a specialist implementation layer, or as recurring technical delivery with agreed communication, ownership, access, and handoff rules."],
+    ["How projects start", "Projects usually begin with the problem, users, current systems, constraints, data, integrations, risk, ownership, timeline, and the outcome the business wants to improve. From there we can define a technical roadmap, delivery phases, architecture, responsibilities, milestones, testing approach, launch plan, documentation, and support model before implementation moves too far."],
+  ],
+  "/services": [
+    ["AI automation and customer operations", "AI automation can support lead qualification, inbound and outbound communication, appointment booking, customer support, document handling, internal notifications, workflow routing, and approved business actions. The implementation is designed around real operating rules, CRM data, calendars, communications, permissions, escalation paths, and reporting so the automation fits the business process instead of creating another disconnected layer."],
+    ["CRM and revenue systems", "CRM work can include pipeline design, lead routing, contact and opportunity structure, calendars, follow-up, sales automation, reporting, integrations, migration, permissions, and custom interfaces. The goal is to make the customer journey easier to operate from capture through qualification, follow-up, booking, sale, onboarding, and ongoing service."],
+    ["Websites, portals, CMS and SaaS", "Logicsify builds custom websites, portals, CMS platforms, dashboards, SaaS products, e-commerce experiences, and custom web applications. Projects can include authentication, user roles, admin tooling, payments, APIs, integrations, analytics, structured content, performance engineering, search optimization, and deployment ownership depending on the product and business requirements."],
+    ["Mobile, design and product experience", "Mobile application and UI/UX work covers user journeys, information architecture, wireframes, interfaces, responsive systems, prototypes, implementation-ready design, connected backend services, notifications, analytics, device capabilities, and release preparation. Design decisions are tied to the task the user needs to complete rather than visual novelty alone."],
+    ["Cybersecurity and technical operations", "Security and operations work can cover application and website hardening, authentication and access review, secrets handling, dependency risk, API exposure, cloud configuration, deployment workflows, backups, monitoring, incident readiness, maintenance, and practical remediation. The exact controls depend on the system, data, access model, and risk profile."],
+    ["Growth and ongoing support", "SEO, digital marketing, branding, e-commerce optimization, maintenance, cloud operations, and recurring development support can be combined with technical delivery when the project needs more than a one-time build. Engagements are scoped around measurable responsibilities, access, reporting, and the operating cadence required after launch."],
+  ],
+  "/services/white-label-development": [
+    ["Why agencies use white-label development", "White-label delivery gives an agency access to additional engineering, automation, CRM, product, integration, and technical operations capability without permanently hiring every specialist required for every client opportunity. It is useful when an agency wins work outside its current stack, reaches internal capacity, needs a specialist capability quickly, or wants to offer broader solutions while preserving one consistent client relationship."],
+    ["How communication can be structured", "The working model can range from fully behind-the-scenes delivery to selective technical participation in discovery, architecture, demos, implementation reviews, and handoff calls. The agency decides how Logicsify is introduced, which channels are used, who communicates with the client, how escalation works, and what information is shared at each stage."],
+    ["Engineering and implementation scope", "White-label work can include websites, portals, CMS platforms, SaaS products, dashboards, mobile applications, APIs, e-commerce, AI agents, workflow automation, CRM implementation, payments, authentication, user roles, integrations, deployment, monitoring, QA, documentation, and ongoing support. Scope is defined around the client requirement rather than a fixed package."],
+    ["Ownership, repositories and access", "Source-code ownership, repository access, credentials, hosting, domains, third-party accounts, documentation, deployment ownership, handover, and support responsibilities should be agreed before launch. This creates a clear boundary between the agency, Logicsify, and the end client and reduces confusion when a project moves from build into operation."],
+    ["Quality assurance and handoff", "Delivery includes reviewable milestones, testing of normal and failure paths, integration validation, responsive and browser checks where relevant, release preparation, documentation, and an agreed handoff process. The agency can review work before it is presented to the end client so the final experience remains consistent with its own delivery standards."],
+    ["Starting with one project", "Agencies do not need to commit to a large retained model immediately. A single project can establish how scoping, communication, review, QA, delivery, and handoff work in practice. If the partnership fits, the same operating model can then expand into recurring capacity, overflow support, or a specialist delivery pod for future opportunities."],
+  ],
+  "/about": [
+    ["A multidisciplinary delivery model", "Connected projects often cross multiple disciplines at once. A CRM implementation may require forms, websites, automation, integrations, reporting, permissions, data migration, and user training. A SaaS product may require product strategy, interface design, engineering, billing, authentication, deployment, analytics, and ongoing iteration. Logicsify brings those disciplines together around one operating problem instead of treating each as an unrelated vendor task."],
+    ["Business ownership and technical ownership", "Good delivery depends on more than writing code. We define who owns requirements, approvals, data, credentials, content, integrations, testing, launch decisions, documentation, and support. This makes project boundaries visible and helps the client understand what must be supplied internally and what Logicsify is responsible for delivering."],
+    ["Designed for long-term ownership", "Where the engagement requires it, projects are structured around source-code handover, repository access, documentation, admin ownership, deployment access, maintainability, and a clear path for future changes. The objective is to avoid creating unnecessary technical dependency simply because Logicsify delivered the initial implementation."],
+    ["Working with agencies and internal teams", "Logicsify can lead a full implementation, deliver a defined technical scope, work alongside an internal team, or operate as a white-label partner behind an agency or consultant. The engagement structure depends on the client's existing capability, desired ownership model, project risk, communication requirements, and the amount of recurring delivery capacity required."],
+  ],
+  "/insights": [
+    ["Implementation-focused publishing", "Logicsify Insights is intended to answer practical questions that appear during real software, AI, CRM, website, automation, cybersecurity, and digital growth projects. Articles should explain the decision, constraints, tradeoffs, implementation considerations, and situations in which a different approach may be more appropriate instead of relying on generic trend summaries."],
+    ["Sources, authorship and updates", "Where an article depends on external facts, product changes, statistics, platform documentation, or industry developments, source links can be included so readers can verify the underlying information. Published and updated dates, named authors, reading time, featured-image descriptions, and related resources provide additional context for both readers and search systems."],
+    ["Answer-first structure", "For specific questions, the most useful answer should appear early, followed by the reasoning, examples, tradeoffs, risks, and implementation detail needed to make the answer actionable. This structure also makes it easier for search engines and AI retrieval systems to identify the passage that directly addresses a user's question."],
+    ["Connected to proof and services", "Educational content is linked to relevant services, case studies, portfolio work, comparisons, guides, and planning tools. That allows a reader to move from an explanation to project evidence, a decision framework, or an implementation path without turning every article into a sales page."],
+  ],
+};
+
 function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -414,7 +453,12 @@ function schemaFor(page) {
 }
 
 function fallbackMarkup(page) {
-  const sections = page.sections
+  const expansionKey = page.key || page.path;
+  const visibleSections = [
+    ...(Array.isArray(page.sections) ? page.sections : []),
+    ...(seoExpansion[expansionKey] || []),
+  ];
+  const sections = visibleSections
     .map(
       ([heading, body]) =>
         `<section><h2>${escapeHtml(heading)}</h2><p>${escapeHtml(body)}</p></section>`,
@@ -423,7 +467,7 @@ function fallbackMarkup(page) {
 
   return `<div data-seo-fallback="true">
     <header class="seo-fallback-header">
-      <a href="/" aria-label="Logicsify home">Logicsify</a>
+      <a href="/" aria-label="Logicsify home"><img src="/logicsify-logo-light.png" alt="Logicsify" width="180" height="51" /></a>
       <nav aria-label="Primary">
         <a href="/services">Services</a>
         <a href="/services/white-label-development">White Label</a>
@@ -465,7 +509,8 @@ function buildHtml(template, page) {
     <style data-seo-prerender="true">
       [data-seo-fallback]{min-height:100vh;background:#050706;color:#fff;font-family:Sora,Inter,system-ui,sans-serif}
       .seo-fallback-header{max-width:1360px;margin:auto; padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.08)}
-      .seo-fallback-header>a{font-size:22px;font-weight:700;color:#fff;text-decoration:none}
+      .seo-fallback-header>a{display:inline-flex;align-items:center;color:#fff;text-decoration:none}
+      .seo-fallback-header>a img{display:block;width:180px;height:auto}
       .seo-fallback-header nav{display:flex;gap:20px;flex-wrap:wrap}
       .seo-fallback-header nav a,.seo-fallback-links a{color:#9fe06d;text-decoration:none}
       .seo-fallback-main{max-width:1180px;margin:auto; padding:72px 32px 96px}
@@ -498,4 +543,9 @@ for (const page of pages) {
   count += 1;
 }
 
-console.log(`Generated ${count} crawler-visible SEO HTML shells.`);
+const homePage = pages.find((page) => page.path === "/");
+if (homePage) {
+  await writeFile(templatePath, buildHtml(template, homePage));
+}
+
+console.log(`Generated ${count} crawler-visible SEO HTML shells plus the crawlable homepage.`);
