@@ -39,6 +39,12 @@ export const Route = createFileRoute("/services/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
         { property: "og:url", content: canonical },
+        { property: "og:image", content: "https://logicsify.com/logicsify-logo-dark.png" },
+        { property: "og:image:alt", content: `${name} — Logicsify` },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: "https://logicsify.com/logicsify-logo-dark.png" },
       ],
       links: [{ rel: "canonical", href: canonical }],
       scripts: [
@@ -46,11 +52,33 @@ export const Route = createFileRoute("/services/$slug")({
           type: "application/ld+json",
           children: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Service",
-            name,
-            description,
-            provider: { "@id": "https://logicsify.com/#organization" },
-            url: canonical,
+            "@graph": [
+              {
+                "@type": "Service",
+                "@id": `${canonical}#service`,
+                name,
+                description,
+                provider: { "@id": "https://logicsify.com/#organization" },
+                url: canonical,
+                areaServed: "Worldwide",
+              },
+              ...(data?.faqs?.length
+                ? [
+                    {
+                      "@type": "FAQPage",
+                      "@id": `${canonical}#faq`,
+                      mainEntity: data.faqs.map((item) => ({
+                        "@type": "Question",
+                        name: item.q,
+                        acceptedAnswer: {
+                          "@type": "Answer",
+                          text: item.a,
+                        },
+                      })),
+                    },
+                  ]
+                : []),
+            ],
           }),
         },
       ],
