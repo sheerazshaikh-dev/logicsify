@@ -21,14 +21,18 @@ export default async function handler(request, response) {
   const config = TYPE_CONFIG[type];
   if (!config || !slug) return response.status(404).end("Not Found");
 
-  const [item, template] = await Promise.all([
+  const [contentResult, template] = await Promise.all([
     fetchContent(type, slug),
     fetchAppTemplate(request),
   ]);
 
-  if (!item || !template) return response.status(item ? 503 : 404).end(item ? "Temporarily unavailable" : "Not Found");
+  if (contentResult.status === 404) return response.status(404).end("Not Found");
+  if (!contentResult.item || !template) {
+    response.setHeader("Retry-After", "60");
+    return response.status(503).end("Temporarily unavailable");
+  }
 
-  const html = buildHtml(template, item, config, slug);
+  const html = buildHtml(template, contentResult.item, config, slug);
   response.setHeader("Content-Type", "text/html; charset=utf-8");
   response.setHeader("X-Content-Type-Options", "nosniff");
   response.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
@@ -49,13 +53,15 @@ async function fetchContent(type, slug) {
         signal: AbortSignal.timeout(6000),
       },
     );
-    if (!result.ok) return null;
+    if (result.status === 404) return { status: 404, item: null };
+    if (!result.ok) return { status: 503, item: null };
     const contentType = String(result.headers.get("content-type") || "").toLowerCase();
-    if (!contentType.includes("json")) return null;
+    if (!contentType.includes("json")) return { status: 503, item: null };
     const payload = await result.json();
-    return payload?.success && payload?.data ? payload.data : null;
+    if (!payload?.success || !payload?.data) return { status: 404, item: null };
+    return { status: 200, item: payload.data };
   } catch {
-    return null;
+    return { status: 503, item: null };
   }
 }
 
