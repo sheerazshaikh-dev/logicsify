@@ -220,7 +220,7 @@
     },
     {
       "source": "/guides/:slug",
-      "destination": "/api/seo-page?type=guide&slug=:slug"
+      "destination": "/api/seo-page?type=resource&slug=:slug"
     },
     {
       "source": "/comparisons/:slug",
