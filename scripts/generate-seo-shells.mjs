@@ -347,10 +347,48 @@ for (const [slug, title, description, h1] of servicePages) {
       ["Requirements, ownership and risk", `For ${h1}, discovery identifies users, current workflows, data, access, integrations, technical constraints, responsibilities, approval paths, security considerations, and the business result that should improve. Making those assumptions explicit before implementation reduces avoidable rework and gives the project a clearer acceptance path.`],
       ["Testing, launch and handover", "Delivery planning covers normal user paths, expected failure conditions, integration validation, responsive or device checks where relevant, release preparation, documentation, source-code or account ownership, and the support model required after launch. The exact handover depends on what the client wants to own internally."],
       ["When this service should be combined with other capabilities", `${h1} may sit inside a wider system rather than operate independently. When the outcome also depends on CRM, automation, portals, mobile apps, APIs, analytics, security, cloud operations, content, or digital growth, those dependencies can be planned as one connected delivery scope instead of separate disconnected projects.`],
+      ["Questions to resolve before implementation", `A useful ${h1} scope should answer who the users are, what process exists today, what data or content is involved, which systems must connect, who owns approvals, what access is required, what failure conditions matter, and what result will be measured after launch. These questions help separate essential functionality from assumptions that can wait.`],
+      ["Operational readiness after launch", "A production system needs named ownership after the initial release. Depending on the service, that may include content management, user administration, monitoring, backups, incident handling, API or platform changes, analytics review, security updates, support requests, or a recurring improvement backlog. The handover model is defined around what the client wants to manage internally."],
+      ["Working with existing systems and teams", `${h1} does not always require replacing the current stack. Logicsify can work around existing CRM, CMS, cloud, analytics, design systems, internal APIs, marketing platforms, or engineering processes when those systems still serve the business. Discovery determines what should stay, what should change, and where custom implementation adds the most value.`],
+      ["How scope becomes a delivery plan", "Once requirements are understood, the work can be organized into milestones that make progress reviewable. Typical stages include discovery, architecture, design, implementation, integration, QA, launch preparation, deployment, documentation, and handover, with the exact sequence adjusted to the complexity and risk of the project."],
     ],
   });
 }
 
+
+const seoDepthBoost = {
+  home: [
+    ["Choosing the right starting point", "Not every business needs a new platform immediately. A useful first step is to identify where work is repeatedly delayed, copied between tools, manually reconciled, or dependent on one person knowing how everything fits together. From there, the right solution may be a workflow improvement, CRM change, automation, integration, website rebuild, portal, custom application, or a phased combination of several capabilities."],
+  ],
+  "/services": [
+    ["How to choose the right service", "The best starting service depends on the operating problem rather than the technology label. A slow response problem may involve lead capture, CRM, routing, calendars, follow-up, and AI. A customer portal may also require authentication, payments, support workflows, integrations, and reporting. Logicsify scopes services around the full workflow so related dependencies are visible before implementation begins."],
+  ],
+  "/services/white-label-development": [
+    ["What makes a white-label partnership sustainable", "The strongest white-label relationships define communication, review, quality expectations, client-facing boundaries, escalation, source-code ownership, credentials, deployment, documentation, and post-launch support before pressure builds around a deadline. This gives the agency predictable delivery capacity while allowing Logicsify to work efficiently behind the agreed brand and operating model."],
+  ],
+  "/about": [
+    ["What clients can expect", "Clients can expect direct discussion of scope, assumptions, dependencies, responsibilities, technical constraints, and tradeoffs. The objective is to make the work understandable enough that business and technical stakeholders know what is being built, why it is being built, what must be supplied by each side, and what conditions define a successful launch."],
+    ["How capability is combined", "A single project may need product strategy, UX, software engineering, automation, CRM, APIs, infrastructure, security, analytics, content, or growth support. Logicsify combines only the disciplines that are relevant to the outcome, which allows a project to remain coordinated without forcing every engagement into the same fixed package."],
+    ["Where proof lives", "Case studies, portfolio work, testimonials, insights, guides, comparisons, and service pages provide different types of evidence. Case studies explain problems and outcomes, portfolio entries show delivered work, testimonials add client perspective, and educational resources explain the reasoning, tradeoffs, and implementation patterns behind common technology decisions."],
+  ],
+  "/insights": [
+    ["Topics covered", "The publication covers AI agents, automation, CRM, revenue operations, software architecture, SaaS, websites, portals, mobile applications, integrations, cybersecurity, deployment, digital marketing, analytics, and related implementation decisions. Coverage is intended to stay close to practical business and technical questions rather than generic commentary."],
+    ["How readers can use an article", "Readers can use an article to understand a concept, prepare for discovery, compare implementation approaches, identify questions to ask a vendor or internal team, or decide whether a problem is ready for technical investment. Related links connect the explanation to services, proof of work, guides, comparisons, and planning tools when a deeper next step is useful."],
+    ["Freshness and verification", "Time-sensitive articles should identify publication or update dates and link to primary or authoritative sources when external facts are involved. This helps readers distinguish durable implementation guidance from information that may change as platforms, APIs, pricing, regulations, or product capabilities evolve."],
+  ],
+  "/contact": [
+    ["Choosing the right contact path", "Use a project inquiry when you already have a defined need, book a strategy call when discussion is the fastest way to clarify it, and use the technical roadmap when the project crosses several systems or still contains significant uncertainty. Existing clients can use the published support channels for operational questions related to active work."],
+    ["Information security when contacting Logicsify", "Initial inquiries should avoid sending passwords, private API keys, production credentials, confidential customer records, or other secrets. Sensitive technical access can be handled later through the appropriate project process once the engagement, ownership, and access requirements are clear."],
+  ],
+  "/portfolio": [
+    ["What portfolio examples do not imply", "A portfolio entry demonstrates a type of delivered work, but it does not mean every new project should reuse the same architecture, technology stack, design pattern, timeline, or commercial model. New work is scoped around current requirements, supported integrations, user needs, security considerations, ownership expectations, and the client's operating environment."],
+    ["From inspiration to a new scope", "If a portfolio project resembles what you need, the useful next step is to identify which parts are relevant: the interface, workflow, automation, portal model, dashboard, integration pattern, CMS, mobile experience, or deployment approach. Those reference points can then be translated into a new project scope without assuming the underlying requirements are identical."],
+  ],
+  "/technical-roadmap": [
+    ["What a roadmap should make clearer", "A useful roadmap should reduce ambiguity around the intended users, workflow, architecture, integrations, data ownership, technical constraints, phases, risks, responsibilities, validation steps, and launch path. It should also identify decisions that still need evidence before implementation can be estimated with confidence."],
+    ["Roadmaps for agency and white-label work", "Agencies can also use a technical roadmap before presenting a complex solution to an end client. Logicsify can help translate business requirements into a clearer implementation structure while preserving the agency's preferred communication model, client ownership, and white-label delivery boundaries."],
+  ],
+};
 
 const seoExpansion = {
   home: [
@@ -554,6 +592,7 @@ function fallbackMarkup(page) {
   const visibleSections = [
     ...(Array.isArray(page.sections) ? page.sections : []),
     ...(seoExpansion[expansionKey] || []),
+    ...(seoDepthBoost[expansionKey] || []),
   ];
   const sections = visibleSections
     .map(
