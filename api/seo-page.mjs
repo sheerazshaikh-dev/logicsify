@@ -103,6 +103,7 @@ function buildHtml(template, item, config, slug) {
   const sections = normalizeSections(content.sections).slice(0, 8);
   const extra = detailFacts(typeKey(config), content);
   const faqs = normalizeFaqs(content.faqs);
+  const noindex = Boolean(seo.noindex);
   const schema = makeSchema({
     config,
     canonical,
@@ -120,7 +121,13 @@ function buildHtml(template, item, config, slug) {
   const head = [
     `<title data-seo-server="true">${escapeHtml(title)}</title>`,
     meta("name", "description", description),
-    meta("name", "robots", "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"),
+    meta(
+      "name",
+      "robots",
+      noindex
+        ? "noindex,nofollow,noarchive"
+        : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
+    ),
     `<link rel="canonical" href="${escapeAttr(canonical)}" data-seo-server="true" />`,
     meta("property", "og:title", title),
     meta("property", "og:description", description),
