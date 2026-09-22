@@ -363,7 +363,7 @@ function escapeAttr(value = "") {
 
 function stripExistingStaticSeo(html) {
   return html
-    .replace(/<title>[\s\S]*?<\\/title>/i, "")
+    .replace(/<title>[\s\S]*?<\/title>/i, "")
     .replace(/<meta\s+name=["']description["'][^>]*>/i, "");
 }
 
