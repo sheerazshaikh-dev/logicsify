@@ -132,7 +132,7 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
-        content: "Logicsify | AI Automation, CRM & Custom Business Platforms",
+        content: "Logicsify | AI Automation, CRM & Business Systems",
       },
       {
         name: "twitter:description",
